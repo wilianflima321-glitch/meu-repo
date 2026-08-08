@@ -21,6 +21,10 @@ import {
   runForgeCommitCiGate,
 } from '@/lib/production/forge-commit-ci-gate'
 import type { PreviewOrchestrationResult } from '@/lib/production/preview-orchestrator'
+import {
+  assertUiPatchPassesDesignTokenQa,
+  isUiDesignTokenPath,
+} from '@/lib/design-system/DesignTokenSync'
 
 const log = createComponentLogger('agent-apply-validation-gate')
 
@@ -41,6 +45,7 @@ export type FileValidationGateStatus =
   | 'denied_rust_fail'
   | 'denied_disjoint'
   | 'denied_commit_ci'
+  | 'denied_design_token'
   | 'skipped_non_ts'
 
 export type FileValidationStatusEntry = {
@@ -63,6 +68,7 @@ export type ApplyValidationGateResult = {
     | 'MULTI_FILE_VALIDATION_DENIED'
     | 'PATH_DISJOINT_FAIL'
     | 'FORGE_COMMIT_CI_FAIL'
+    | 'DESIGN_TOKEN_SYNC_FAIL'
   compilerLog: string
   fileValidation: FileValidationStatusEntry[]
   /** Always false — gate pass ≠ Cursor Composer parity. */
@@ -257,6 +263,22 @@ export async function runGovernedApplyValidationGate(input: {
       continue
     }
 
+    // L.10 — DesignTokenSync QA on UI surfaces (fail-closed residual hex)
+    if (isUiDesignTokenPath(path)) {
+      const tokenQa = assertUiPatchPassesDesignTokenQa(file.content)
+      if (!tokenQa.ok) {
+        fileValidation.push({
+          path,
+          status: 'denied_design_token',
+          code: 'DESIGN_TOKEN_SYNC_FAIL',
+          detail: tokenQa.message,
+          taskId: file.taskId,
+        })
+        compilerChunks.push(`${path}: ${tokenQa.message}`)
+        continue
+      }
+    }
+
     fileValidation.push({
       path,
       status: 'pass',
@@ -314,6 +336,7 @@ export async function runGovernedApplyValidationGate(input: {
     (entry) =>
       entry.status === 'denied_ast' ||
       entry.status === 'denied_lazy' ||
+      entry.status === 'denied_design_token' ||
       entry.status === 'denied_rust_gate_unavailable' ||
       entry.status === 'denied_rust_fail',
   )
@@ -321,11 +344,13 @@ export async function runGovernedApplyValidationGate(input: {
     const code =
       hardDeny.status === 'denied_lazy'
         ? 'LAZY_INSPECTOR_REJECT'
-        : hardDeny.status === 'denied_rust_gate_unavailable'
-          ? 'RUST_GATE_SANDBOX_UNAVAILABLE'
-          : hardDeny.status === 'denied_rust_fail'
-            ? 'RUST_GATE_FAIL'
-            : 'AST_SYNTAX_FAIL'
+        : hardDeny.status === 'denied_design_token'
+          ? 'DESIGN_TOKEN_SYNC_FAIL'
+          : hardDeny.status === 'denied_rust_gate_unavailable'
+            ? 'RUST_GATE_SANDBOX_UNAVAILABLE'
+            : hardDeny.status === 'denied_rust_fail'
+              ? 'RUST_GATE_FAIL'
+              : 'AST_SYNTAX_FAIL'
     log.warn('apply_gate_pre_l5_deny', { code, path: hardDeny.path })
     return {
       ok: false,

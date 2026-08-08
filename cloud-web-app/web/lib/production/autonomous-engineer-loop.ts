@@ -39,6 +39,7 @@ import {
   beginUiMutationTransaction,
   commitUiMutationTransaction,
   abortUiMutationTransaction,
+  mutateUiTransaction,
   type UiMutationStore,
 } from '@/lib/production/ui-mutation-transaction'
 import type { FusionScopeStore } from '@/lib/production/creative-fusion-transaction'
@@ -212,6 +213,21 @@ export async function runAutonomousEngineerLoop(
     })
     uiMutationTxId = uiTx.id
     try {
+      // Phase 5 Hardening: Apply async design token sync to prevent event loop starvation
+      let normalizedTsx = mission.supremePatch
+      if (normalizedTsx) {
+        const { normalizeAgentUiPatchAsync } = await import('../../lib/design-system/DesignTokenSync')
+        normalizedTsx = await normalizeAgentUiPatchAsync(normalizedTsx)
+      }
+
+      await mutateUiTransaction({
+        txId: uiTx.id,
+        store: input.uiStore,
+        next: {
+          tsx: normalizedTsx,
+        },
+      })
+
       await commitUiMutationTransaction({
         txId: uiTx.id,
         store: input.uiStore,

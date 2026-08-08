@@ -12,6 +12,7 @@
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
+  readDevContainerManifestFromDisk,
   resolveDevContainerTemplate,
   type SupportedDevContainerTemplate,
 } from '@/lib/production/devcontainer-manifest'
@@ -46,6 +47,11 @@ export type ForgeCommitCiGateInput = {
   /** L.2 template id for scaffold commit path. */
   templateId?: SupportedDevContainerTemplate
   requireDevContainer?: boolean
+  /**
+   * When set with requireDevContainer, also verifies `.aethel/devcontainer.json`
+   * exists on disk and Zod-parses (L.2 on-disk authority).
+   */
+  projectRootPath?: string
   /** Agent sandbox readiness for commit paths that need Forge. */
   sandboxAvailable?: boolean
   requireSandbox?: boolean
@@ -81,18 +87,36 @@ export async function runForgeCommitCiGate(
   const blockedReasons: string[] = []
   let compilerLog = ''
 
-  // L.2 — DevContainer template registry
+  // L.2 — DevContainer template registry (+ optional on-disk authority)
   if (input.requireDevContainer || input.templateId) {
     if (!input.templateId) {
       pushFail(checks, blockedReasons, 'L2_DEVCONTAINER', 'DevContainer template id required but missing')
     } else {
       try {
         const template = resolveDevContainerTemplate(input.templateId)
-        checks.push({
-          id: 'L2_DEVCONTAINER',
-          status: 'pass',
-          message: `Template ${template.id} resolved (${template.manifest.name})`,
-        })
+        if (input.projectRootPath) {
+          const onDisk = await readDevContainerManifestFromDisk(input.projectRootPath)
+          if (!onDisk.ok) {
+            pushFail(
+              checks,
+              blockedReasons,
+              'L2_DEVCONTAINER',
+              `Template ${template.id} resolved but on-disk ${onDisk.message}`,
+            )
+          } else {
+            checks.push({
+              id: 'L2_DEVCONTAINER',
+              status: 'pass',
+              message: `Template ${template.id} + on-disk .aethel/devcontainer.json (${onDisk.manifest.name})`,
+            })
+          }
+        } else {
+          checks.push({
+            id: 'L2_DEVCONTAINER',
+            status: 'pass',
+            message: `Template ${template.id} resolved (${template.manifest.name})`,
+          })
+        }
       } catch (err) {
         pushFail(
           checks,

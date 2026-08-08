@@ -1,4 +1,9 @@
-import { resolveDevContainerTemplate, type SupportedDevContainerTemplate } from './devcontainer-manifest'
+import {
+  persistDevContainerManifestToDisk,
+  resolveDevContainerTemplate,
+  type PersistDevContainerResult,
+  type SupportedDevContainerTemplate,
+} from './devcontainer-manifest'
 import {
   createForgeSandboxSession,
   execInForgeSandbox,
@@ -31,6 +36,8 @@ export interface ScaffoldEngineResult {
   preview?: PreviewOrchestrationResult
   /** L.2/L.9 commit/CI gate — present on both success and blocked paths. */
   commitGate?: ForgeCommitCiGateResult
+  /** L.2 on-disk `.aethel/devcontainer.json` persist receipt. */
+  devContainerPersist?: PersistDevContainerResult
 }
 
 /**
@@ -45,6 +52,21 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
   try {
     // 1. Resolve the template (L.2)
     const templateDef = resolveDevContainerTemplate(input.templateId)
+
+    // 1b. Persist canonical `.aethel/devcontainer.json` fail-closed (L.2 on-disk authority)
+    const persist = await persistDevContainerManifestToDisk({
+      projectRootPath: input.projectRootPath,
+      templateId: input.templateId,
+      manifest: templateDef.manifest,
+    })
+    if (!persist.ok) {
+      log.error('scaffold_devcontainer_persist_failed', { code: persist.code, message: persist.message })
+      return {
+        ok: false,
+        message: `L.2 DevContainer persist failed: ${persist.message}`,
+        devContainerPersist: persist,
+      }
+    }
 
     // 2. Determine best provider (same logic as L.8, or just let L.8 decide later, but we need the sandbox now)
     const preferred = input.preferredStrategy ?? 'local-dev-server'
@@ -70,7 +92,11 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
 
     if (!sessionResult.ok) {
       log.error('scaffold_sandbox_provision_failed', { error: sessionResult.message })
-      return { ok: false, message: `Failed to provision sandbox for scaffolding: ${sessionResult.message}` }
+      return {
+        ok: false,
+        message: `Failed to provision sandbox for scaffolding: ${sessionResult.message}`,
+        devContainerPersist: persist,
+      }
     }
 
     const session = sessionResult.session
@@ -80,7 +106,11 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
     
     if (!scaffoldResult.ok) {
       log.error('scaffold_commands_failed', { error: scaffoldResult.error })
-      return { ok: false, message: `Scaffolding failed: ${scaffoldResult.error}` }
+      return {
+        ok: false,
+        message: `Scaffolding failed: ${scaffoldResult.error}`,
+        devContainerPersist: persist,
+      }
     }
 
     // 5. Hand off to L.8 (PreviewOrchestrator) reusing the same session!
@@ -100,6 +130,7 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
     const commitGate = await runForgeCommitCiGate({
       templateId: input.templateId,
       requireDevContainer: true,
+      projectRootPath: input.projectRootPath,
       preview: previewResult,
       requirePreview: preferred !== 'inline',
       sandboxAvailable: true,
@@ -115,6 +146,7 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
           'Scaffold completed but L.2/L.8/L.9 commit gate failed.',
         preview: previewResult,
         commitGate,
+        devContainerPersist: persist,
       }
     }
 
@@ -122,6 +154,7 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
       ok: true,
       preview: previewResult,
       commitGate,
+      devContainerPersist: persist,
     }
 
   } catch (error) {

@@ -1,5 +1,10 @@
 // @aethel-heavy-async-boundary IDE/Monaco LSP configuration; never import from route shells.
-export const DEFAULT_LSP_WS_URL = 'ws://localhost:3001/lsp';
+import { resolveUniversalLspEndpoint } from '@/lib/lsp/universal-lsp-endpoint'
+
+/** Resolved from L.13 UniversalLspFarm relay (env override or localhost WS placeholder). */
+export const DEFAULT_LSP_WS_URL = resolveUniversalLspEndpoint().wsUrl
+/** HTTP JSON-RPC relay used by web IDE when WS farm is not live. */
+export const DEFAULT_LSP_HTTP_RELAY_PATH = resolveUniversalLspEndpoint().requestPath
 export const DEFAULT_LSP_ROOT_URI = 'file:///workspace';
 export const DEFAULT_LSP_WORKSPACE_FOLDERS = [{ uri: DEFAULT_LSP_ROOT_URI, name: 'workspace' }];
 export const LSP_REQUEST_TIMEOUT_MS = 10_000;

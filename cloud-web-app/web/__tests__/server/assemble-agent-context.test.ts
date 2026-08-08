@@ -12,25 +12,25 @@ const cartographyMocks = vi.hoisted(() => ({
   readRepositoryCartographyManifestFromSettings: vi.fn(),
 }))
 
-const searchMocks = vi.hoisted(() => ({
-  searchSemanticCodebase: vi.fn(),
+const ragMocks = vi.hoisted(() => ({
+  queryRepoGraphRAG: vi.fn(),
+}))
+
+const workspaceMocks = vi.hoisted(() => ({
+  getScopedWorkspaceRoot: vi.fn(),
 }))
 
 vi.mock('@/lib/db', () => ({ prisma: prismaMocks.prisma }))
 vi.mock('@/lib/production/repository-cartography', () => cartographyMocks)
-vi.mock('@/lib/server/semantic-code-search', () => searchMocks)
+vi.mock('@/lib/server/repo-graph-rag/repo-graph-rag', () => ragMocks)
+vi.mock('@/lib/server/workspace-scope', () => workspaceMocks)
 
 import { assembleAgentContext } from '@/lib/server/agent-context/assemble-agent-context'
 
-function searchResult(filePath: string) {
+function graphResult(filePath: string) {
   return {
-    id: filePath,
     filePath,
-    score: 0.81,
-    excerpt: `// ${filePath}\nexport const x = 1`,
-    startLine: 1,
-    endLine: 2,
-    language: 'typescript',
+    content: `// ${filePath}\nexport const x = 1`
   }
 }
 
@@ -38,11 +38,12 @@ beforeEach(() => {
   vi.clearAllMocks()
   prismaMocks.prisma.project.findFirst.mockResolvedValue({ settings: {} })
   cartographyMocks.readRepositoryCartographyManifestFromSettings.mockReturnValue(null)
-  searchMocks.searchSemanticCodebase.mockResolvedValue({
-    readiness: { status: 'ready' },
-    results: [],
-    stats: {},
+  ragMocks.queryRepoGraphRAG.mockResolvedValue({
+    query: 'test',
+    neighborhoodFiles: [],
+    semanticHits: [],
   })
+  workspaceMocks.getScopedWorkspaceRoot.mockResolvedValue('/fake/root')
 })
 
 describe('assembleAgentContext', () => {
@@ -52,14 +53,14 @@ describe('assembleAgentContext', () => {
     expect(result.semanticReady).toBe(false)
   })
 
-  it('combines mustReadFirst cartography with semantic results', async () => {
+  it('combines mustReadFirst cartography with AST semantic results', async () => {
     cartographyMocks.readRepositoryCartographyManifestFromSettings.mockReturnValue({
       contextPlan: { mustReadFirst: ['/src/app.ts', '.aethelrules'] },
     })
-    searchMocks.searchSemanticCodebase.mockResolvedValue({
-      readiness: { status: 'ready' },
-      results: [searchResult('/src/combat/Boss.ts')],
-      stats: {},
+    ragMocks.queryRepoGraphRAG.mockResolvedValue({
+      query: 'boss fight',
+      neighborhoodFiles: [graphResult('/src/combat/Boss.ts')],
+      semanticHits: [{ filePath: '/src/combat/Boss.ts', score: 0.9, excerpt: 'a' }],
     })
 
     const result = await assembleAgentContext({ userId: 'u1', projectId: 'p1', query: 'boss fight' })
@@ -67,7 +68,7 @@ describe('assembleAgentContext', () => {
     expect(result.mustReadFirst).toEqual(['/src/app.ts', '.aethelrules'])
     expect(result.retrievedFiles).toEqual(['/src/combat/Boss.ts'])
     expect(result.text).toContain('Repository map')
-    expect(result.text).toContain('/src/combat/Boss.ts:1-2')
+    expect(result.text).toContain('/src/combat/Boss.ts')
     expect(result.semanticReady).toBe(true)
   })
 
@@ -80,7 +81,7 @@ describe('assembleAgentContext', () => {
     cartographyMocks.readRepositoryCartographyManifestFromSettings.mockReturnValue({
       contextPlan: { mustReadFirst: ['/src/only.ts'] },
     })
-    searchMocks.searchSemanticCodebase.mockRejectedValue(new Error('vector db down'))
+    ragMocks.queryRepoGraphRAG.mockRejectedValue(new Error('vector db down'))
 
     const result = await assembleAgentContext({ userId: 'u1', projectId: 'p1', query: 'x' })
     expect(result.mustReadFirst).toEqual(['/src/only.ts'])

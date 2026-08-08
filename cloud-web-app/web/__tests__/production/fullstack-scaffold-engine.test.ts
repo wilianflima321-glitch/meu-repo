@@ -30,7 +30,21 @@ describe('FullStackScaffoldEngine (L.9)', () => {
     vi.mocked(devcontainerManifest.resolveDevContainerTemplate).mockReturnValue({
       id: 'nextjs-14',
       description: 'Test template',
-      manifest: { name: 'next', forwardPorts: [3000] }
+      manifest: { name: 'next', image: 'node:20', forwardPorts: [3000] }
+    })
+
+    vi.mocked(devcontainerManifest.persistDevContainerManifestToDisk).mockResolvedValue({
+      ok: true,
+      absolutePath: '/test/path/.aethel/devcontainer.json',
+      relativePath: '.aethel/devcontainer.json',
+      manifest: { name: 'next', image: 'node:20', forwardPorts: [3000] },
+    })
+
+    vi.mocked(devcontainerManifest.readDevContainerManifestFromDisk).mockResolvedValue({
+      ok: true,
+      absolutePath: '/test/path/.aethel/devcontainer.json',
+      relativePath: '.aethel/devcontainer.json',
+      manifest: { name: 'next', image: 'node:20', forwardPorts: [3000] },
     })
 
     vi.mocked(sandboxExecutor.resolveForgeSandboxAvailability).mockResolvedValue({
@@ -86,6 +100,13 @@ describe('FullStackScaffoldEngine (L.9)', () => {
     expect(result.preview?.url).toBe('https://3000-test-session-123.e2b.dev')
     expect(result.commitGate?.ok).toBe(true)
     expect(result.commitGate?.marketingAllowed).toBe(false)
+    expect(result.devContainerPersist?.ok).toBe(true)
+    expect(devcontainerManifest.persistDevContainerManifestToDisk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectRootPath: '/test/path',
+        templateId: 'nextjs-14',
+      }),
+    )
 
     // Verify session creation called
     expect(sandboxExecutor.createForgeSandboxSession).toHaveBeenCalledWith(expect.objectContaining({

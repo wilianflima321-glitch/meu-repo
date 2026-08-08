@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import {
+  AETHEL_DEVCONTAINER_RELATIVE_PATH,
   parseDevContainerManifest,
+  persistDevContainerManifestToDisk,
+  readDevContainerManifestFromDisk,
   resolveDevContainerTemplate,
   DevContainerManifestSchema,
   type SupportedDevContainerTemplate
@@ -89,6 +95,47 @@ describe('L.2 - DevContainerManifest (Onda L)', () => {
       const viteTemplate = resolveDevContainerTemplate('vite-react')
       expect(viteTemplate.manifest.forwardPorts).toContain(5173)
       expect(viteTemplate.defaultPort).toBe(5173)
+    })
+  })
+
+  describe('on-disk .aethel/devcontainer.json persist (L.2)', () => {
+    let tmpRoot: string | undefined
+
+    afterEach(async () => {
+      if (tmpRoot) {
+        await fs.rm(tmpRoot, { recursive: true, force: true })
+        tmpRoot = undefined
+      }
+    })
+
+    it('writes canonical path, re-reads Zod-valid manifest, and fails closed on missing root', async () => {
+      tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'aethel-l2-devcontainer-'))
+
+      const written = await persistDevContainerManifestToDisk({
+        projectRootPath: tmpRoot,
+        templateId: 'nextjs-14',
+      })
+      expect(written.ok).toBe(true)
+      if (!written.ok) return
+
+      expect(written.relativePath).toBe(AETHEL_DEVCONTAINER_RELATIVE_PATH)
+      const raw = await fs.readFile(written.absolutePath, 'utf8')
+      expect(JSON.parse(raw).name).toBe('Next.js 14')
+
+      const readBack = await readDevContainerManifestFromDisk(tmpRoot)
+      expect(readBack.ok).toBe(true)
+      if (readBack.ok) {
+        expect(readBack.manifest.forwardPorts).toContain(3000)
+      }
+
+      const missingRoot = await persistDevContainerManifestToDisk({
+        projectRootPath: path.join(tmpRoot, 'does-not-exist'),
+        templateId: 'vite-react',
+      })
+      expect(missingRoot.ok).toBe(false)
+      if (!missingRoot.ok) {
+        expect(missingRoot.code).toBe('ROOT_INVALID')
+      }
     })
   })
 })

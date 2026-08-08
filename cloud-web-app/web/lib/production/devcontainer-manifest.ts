@@ -5,12 +5,20 @@
  * Provides the schema and template registry for provisioning sandbox environments
  * (Node, Python, Rust, Next, Vite) inside ForgeSandboxExecutor (L.1).
  * This bridges the gap between raw VM provision (L.1) and FullStackScaffoldEngine (L.9).
+ *
+ * Canonical on-disk path: `.aethel/devcontainer.json` (fail-closed persist + re-read verify).
  */
 
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import { z } from 'zod'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { confinePathToProjectRoot } from '@/lib/production/forge-sandbox-path-guard'
 
 const log = createComponentLogger('devcontainer-manifest')
+
+/** Canonical relative path for L.2 project workspace authority. */
+export const AETHEL_DEVCONTAINER_RELATIVE_PATH = '.aethel/devcontainer.json'
 
 export const DevContainerFeatureSchema = z.record(z.string(), z.record(z.string(), z.any()))
 
@@ -139,5 +147,145 @@ export function parseDevContainerManifest(rawJson: string): DevContainerManifest
   } catch (error) {
     log.error('devcontainer_manifest_parse_failed', { error })
     throw error
+  }
+}
+
+export type PersistDevContainerResult =
+  | {
+      ok: true
+      absolutePath: string
+      relativePath: typeof AETHEL_DEVCONTAINER_RELATIVE_PATH
+      manifest: DevContainerManifest
+    }
+  | {
+      ok: false
+      code: 'ROOT_INVALID' | 'PATH_ESCAPE' | 'WRITE_FAILED' | 'VERIFY_FAILED'
+      message: string
+    }
+
+/**
+ * Persist a validated DevContainer manifest to `.aethel/devcontainer.json`
+ * under the project workspace. Fail-closed: path confinement + write + re-read Zod verify.
+ */
+export async function persistDevContainerManifestToDisk(input: {
+  projectRootPath: string
+  templateId?: SupportedDevContainerTemplate
+  manifest?: DevContainerManifest
+}): Promise<PersistDevContainerResult> {
+  let manifest: DevContainerManifest
+  try {
+    if (input.manifest) {
+      manifest = DevContainerManifestSchema.parse(input.manifest)
+    } else if (input.templateId) {
+      manifest = resolveDevContainerTemplate(input.templateId).manifest
+    } else {
+      return {
+        ok: false,
+        code: 'WRITE_FAILED',
+        message: 'persistDevContainerManifestToDisk requires templateId or manifest',
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: 'WRITE_FAILED',
+      message: error instanceof Error ? error.message : String(error),
+    }
+  }
+
+  const confined = confinePathToProjectRoot(input.projectRootPath, AETHEL_DEVCONTAINER_RELATIVE_PATH)
+  if (!confined.ok) {
+    return {
+      ok: false,
+      code: confined.reason === 'root_not_found' ? 'ROOT_INVALID' : 'PATH_ESCAPE',
+      message: confined.message,
+    }
+  }
+
+  const absolutePath = confined.resolved
+  const dir = path.dirname(absolutePath)
+
+  try {
+    await fs.mkdir(dir, { recursive: true })
+    const payload = `${JSON.stringify(manifest, null, 2)}\n`
+    await fs.writeFile(absolutePath, payload, 'utf8')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    log.error('devcontainer_persist_write_failed', { absolutePath, error: message })
+    return { ok: false, code: 'WRITE_FAILED', message: `Failed to write ${AETHEL_DEVCONTAINER_RELATIVE_PATH}: ${message}` }
+  }
+
+  const verified = await readDevContainerManifestFromDisk(input.projectRootPath)
+  if (!verified.ok) {
+    return {
+      ok: false,
+      code: 'VERIFY_FAILED',
+      message: verified.message,
+    }
+  }
+
+  log.info('devcontainer_persisted', {
+    absolutePath,
+    name: verified.manifest.name,
+    templateId: input.templateId,
+  })
+
+  return {
+    ok: true,
+    absolutePath,
+    relativePath: AETHEL_DEVCONTAINER_RELATIVE_PATH,
+    manifest: verified.manifest,
+  }
+}
+
+export type ReadDevContainerResult =
+  | {
+      ok: true
+      absolutePath: string
+      relativePath: typeof AETHEL_DEVCONTAINER_RELATIVE_PATH
+      manifest: DevContainerManifest
+    }
+  | {
+      ok: false
+      code: 'ROOT_INVALID' | 'PATH_ESCAPE' | 'NOT_FOUND' | 'PARSE_FAILED'
+      message: string
+    }
+
+/** Read + Zod-validate `.aethel/devcontainer.json` from a project root (fail-closed). */
+export async function readDevContainerManifestFromDisk(
+  projectRootPath: string,
+): Promise<ReadDevContainerResult> {
+  const confined = confinePathToProjectRoot(projectRootPath, AETHEL_DEVCONTAINER_RELATIVE_PATH)
+  if (!confined.ok) {
+    return {
+      ok: false,
+      code: confined.reason === 'root_not_found' ? 'ROOT_INVALID' : 'PATH_ESCAPE',
+      message: confined.message,
+    }
+  }
+
+  try {
+    const raw = await fs.readFile(confined.resolved, 'utf8')
+    const manifest = parseDevContainerManifest(raw)
+    return {
+      ok: true,
+      absolutePath: confined.resolved,
+      relativePath: AETHEL_DEVCONTAINER_RELATIVE_PATH,
+      manifest,
+    }
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException
+    if (err?.code === 'ENOENT') {
+      return {
+        ok: false,
+        code: 'NOT_FOUND',
+        message: `${AETHEL_DEVCONTAINER_RELATIVE_PATH} not found under project root`,
+      }
+    }
+    return {
+      ok: false,
+      code: 'PARSE_FAILED',
+      message: error instanceof Error ? error.message : String(error),
+    }
   }
 }
