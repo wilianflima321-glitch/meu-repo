@@ -174,12 +174,17 @@ export interface ITimelineService {
   /** Bind an empty non-demo shell when unbound (no fabricated tracks). */
   ensureBound?(options?: { durationSec?: number }): IDETimelineSnapshot
   /** Add a Timeline3D authoring lane (position/rotation/…). Demo binds blocked. */
-  addTrack?(laneId: string): Promise<IDETimelineAuthorResult>
+  addTrack?(
+    laneId: string,
+    options?: { targetNodeId?: string },
+  ): Promise<IDETimelineAuthorResult>
   /** Add/upsert a keyframe on a lane at time (seconds). Creates the lane if missing. */
   addKeyframe?(input: {
     track: string
     time: number
     value?: number
+    /** Bind lane/clip to a live scene node (`scene:<id>` + metadata.targetNodeId). */
+    targetNodeId?: string
   }): Promise<IDETimelineAuthorResult>
   removeKeyframe?(keyframeId: string): Promise<IDETimelineAuthorResult>
   removeTrack?(laneId: string): Promise<IDETimelineAuthorResult>

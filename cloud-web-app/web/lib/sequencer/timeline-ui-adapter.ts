@@ -75,7 +75,12 @@ export function sequencerTimelineToTimeline3DView(timeline: SequencerTimeline): 
         }
       }
       // Clip-only markers (no curves) surface as event keyframes — still real authored content.
-      if ((!clip.curves || clip.curves.length === 0) && track.kind === 'marker') {
+      // Skip bind-only placeholders (node bind without a user event cue).
+      if (
+        (!clip.curves || clip.curves.length === 0) &&
+        track.kind === 'marker' &&
+        clip.metadata?.bindOnly !== true
+      ) {
         trackIds.add('event')
         const eventId =
           clip.metadata?.authored === true || clip.metadata?.timelineLane === 'event'

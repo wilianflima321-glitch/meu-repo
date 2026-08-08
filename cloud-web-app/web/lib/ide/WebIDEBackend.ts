@@ -343,20 +343,27 @@ class WebTimelineService implements ITimelineService {
     return { ok: true, snapshot, persist };
   }
 
-  addTrack(laneId: string): Promise<IDETimelineAuthorResult> {
-    return this.commitAuthor((timeline) => addAuthoringLane(timeline, laneId));
+  addTrack(
+    laneId: string,
+    options?: { targetNodeId?: string },
+  ): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor((timeline) =>
+      addAuthoringLane(timeline, laneId, { targetNodeId: options?.targetNodeId }),
+    );
   }
 
   addKeyframe(input: {
     track: string;
     time: number;
     value?: number;
+    targetNodeId?: string;
   }): Promise<IDETimelineAuthorResult> {
     return this.commitAuthor((timeline) =>
       addAuthoringKeyframe(timeline, {
         lane: input.track,
         timeSec: input.time,
         value: input.value,
+        targetNodeId: input.targetNodeId,
       }),
     );
   }

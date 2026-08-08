@@ -151,36 +151,78 @@ function findLaneTrack(
   )
 }
 
+export type TimelineAuthorBindOptions = {
+  /** Scene node id to bind (stored as metadata.targetNodeId + sourceRef `scene:<id>`). */
+  targetNodeId?: string
+}
+
+function sceneSourceRef(trackId: string, targetNodeId?: string): string {
+  const id = targetNodeId?.trim()
+  return id ? `scene:${id}` : `authored://${trackId}`
+}
+
+function withTargetNodeMetadata(
+  metadata: Record<string, string | number | boolean> | undefined,
+  targetNodeId?: string,
+): Record<string, string | number | boolean> | undefined {
+  const id = targetNodeId?.trim()
+  if (!id) return metadata
+  return { ...(metadata ?? {}), targetNodeId: id, authored: true }
+}
+
+function stampTargetNodeOnTrack(track: SequencerTrack, targetNodeId?: string): SequencerTrack {
+  const id = targetNodeId?.trim()
+  if (!id || track.clips.length === 0) return track
+  const clips = track.clips.map((clip) =>
+    createSequencerClip({
+      ...clip,
+      sourceRef: sceneSourceRef(track.id, id),
+      metadata: withTargetNodeMetadata(clip.metadata, id),
+    }),
+  )
+  return { ...track, clips }
+}
+
 function ensureCurveClip(
   track: SequencerTrack,
   def: LaneDef,
   durationMs: number,
+  targetNodeId?: string,
 ): SequencerTrack {
   if (def.property == null) return track
   const existing = track.clips[0]
   if (existing) {
     const curves = existing.curves ?? []
     const hasProp = curves.some((c) => c.property === def.property)
-    if (hasProp) return track
-    const curve: SequencerCurve = {
-      id: newId('curve'),
-      property: def.property,
-      keyframes: [],
-    }
-    const clip = createSequencerClip({
+    const stamped = createSequencerClip({
       ...existing,
       endMs: Math.max(existing.endMs, durationMs),
-      curves: [...curves, curve],
+      sourceRef: sceneSourceRef(track.id, targetNodeId ?? (typeof existing.metadata?.targetNodeId === 'string' ? existing.metadata.targetNodeId : undefined)),
+      metadata: withTargetNodeMetadata(
+        existing.metadata,
+        targetNodeId ?? (typeof existing.metadata?.targetNodeId === 'string' ? existing.metadata.targetNodeId : undefined),
+      ),
+      curves: hasProp
+        ? curves
+        : [
+            ...curves,
+            {
+              id: newId('curve'),
+              property: def.property,
+              keyframes: [],
+            },
+          ],
     })
-    return { ...track, clips: [clip, ...track.clips.slice(1)] }
+    return { ...track, clips: [stamped, ...track.clips.slice(1)] }
   }
   const clip = createSequencerClip({
     id: newId('clip'),
     trackId: track.id,
     label: def.label,
-    sourceRef: `authored://${track.id}`,
+    sourceRef: sceneSourceRef(track.id, targetNodeId),
     startMs: 0,
     endMs: durationMs,
+    metadata: withTargetNodeMetadata({ timelineLane: def.property ?? def.label, authored: true }, targetNodeId),
     curves: [
       {
         id: newId('curve'),
@@ -195,6 +237,7 @@ function ensureCurveClip(
 export function addAuthoringLane(
   timeline: SequencerTimeline,
   laneInput: string,
+  options?: TimelineAuthorBindOptions,
 ): TimelineAuthorResult {
   if (!isAuthorableTimelineLane(laneInput)) {
     return { ok: false, reason: 'unknown_lane', message: `Unknown timeline lane "${laneInput}".` }
@@ -211,7 +254,24 @@ export function addAuthoringLane(
     clips: [],
   })
   if (def.property != null) {
-    track = ensureCurveClip(track, def, timeline.durationMs)
+    track = ensureCurveClip(track, def, timeline.durationMs, options?.targetNodeId)
+  } else if (options?.targetNodeId?.trim()) {
+    // Marker lanes bind via a zero-length placeholder clip so scrub mapping can resolve the node.
+    const nodeId = options.targetNodeId.trim()
+    track = {
+      ...track,
+      clips: [
+        createSequencerClip({
+          id: newId('bind'),
+          trackId,
+          label: `${def.label} bind`,
+          sourceRef: sceneSourceRef(trackId, nodeId),
+          startMs: 0,
+          endMs: 0,
+          metadata: withTargetNodeMetadata({ timelineLane: 'event', authored: true, bindOnly: true }, nodeId),
+        }),
+      ],
+    }
   }
   return { ok: true, timeline: upsertSequencerTrack(timeline, track) }
 }
@@ -235,7 +295,13 @@ function upsertCurveKeyframe(
 
 export function addAuthoringKeyframe(
   timeline: SequencerTimeline,
-  input: { lane: string; timeSec: number; value?: number; keyframeId?: string },
+  input: {
+    lane: string
+    timeSec: number
+    value?: number
+    keyframeId?: string
+    targetNodeId?: string
+  },
 ): TimelineAuthorResult {
   if (!isAuthorableTimelineLane(input.lane)) {
     return { ok: false, reason: 'unknown_lane', message: `Unknown timeline lane "${input.lane}".` }
@@ -244,7 +310,7 @@ export function addAuthoringKeyframe(
   let working = timeline
   let track = findLaneTrack(working, input.lane)
   if (!track) {
-    const added = addAuthoringLane(working, input.lane)
+    const added = addAuthoringLane(working, input.lane, { targetNodeId: input.targetNodeId })
     if (!added.ok) return added
     working = added.timeline
     track = findLaneTrack(working, input.lane)
@@ -258,6 +324,7 @@ export function addAuthoringKeyframe(
 
   const timeMs = Math.max(0, Math.min(working.durationMs, Math.round(input.timeSec * 1000)))
   const value = input.value ?? def.defaultValue
+  const bindId = input.targetNodeId?.trim()
 
   if (def.property == null) {
     const clipId = input.keyframeId ?? newId('evt')
@@ -265,20 +332,22 @@ export function addAuthoringKeyframe(
       id: clipId,
       trackId: track.id,
       label: `Event @ ${(timeMs / 1000).toFixed(2)}s`,
-      sourceRef: `authored://event/${clipId}`,
+      sourceRef: sceneSourceRef(`event/${clipId}`, bindId),
       startMs: timeMs,
       endMs: timeMs,
-      metadata: { timelineLane: 'event', authored: true },
+      metadata: withTargetNodeMetadata({ timelineLane: 'event', authored: true }, bindId),
     })
-    const withoutDup = track.clips.filter((c) => c.startMs !== timeMs)
+    const withoutDup = track.clips.filter(
+      (c) => c.startMs !== timeMs && c.metadata?.bindOnly !== true,
+    )
     const nextTrack: SequencerTrack = {
       ...track,
       clips: [...withoutDup, clip].sort((a, b) => a.startMs - b.startMs),
     }
-    return { ok: true, timeline: upsertSequencerTrack(working, nextTrack) }
+    return { ok: true, timeline: upsertSequencerTrack(working, stampTargetNodeOnTrack(nextTrack, bindId)) }
   }
 
-  track = ensureCurveClip(track, def, working.durationMs)
+  track = ensureCurveClip(track, def, working.durationMs, bindId)
   const clip = track.clips[0]
   if (!clip) {
     return { ok: false, reason: 'not_found', message: 'Authoring clip missing after ensure.' }
@@ -288,7 +357,15 @@ export function addAuthoringKeyframe(
       ? upsertCurveKeyframe(curve, timeMs, value, input.keyframeId)
       : curve,
   )
-  const nextClip = createSequencerClip({ ...clip, curves })
+  const nextClip = createSequencerClip({
+    ...clip,
+    curves,
+    sourceRef: sceneSourceRef(track.id, bindId ?? (typeof clip.metadata?.targetNodeId === 'string' ? clip.metadata.targetNodeId : undefined)),
+    metadata: withTargetNodeMetadata(
+      clip.metadata,
+      bindId ?? (typeof clip.metadata?.targetNodeId === 'string' ? clip.metadata.targetNodeId : undefined),
+    ),
+  })
   const nextTrack: SequencerTrack = { ...track, clips: [nextClip, ...track.clips.slice(1)] }
   return { ok: true, timeline: upsertSequencerTrack(working, nextTrack) }
 }

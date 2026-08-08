@@ -8,7 +8,7 @@
 // file). Relative paths are used instead of a new tsconfig alias because no
 // existing web import proves an `@aethel/ide-ui` alias actually resolves
 // through Next's webpack config today.
-import { useSyncExternalStore } from 'react';
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
 import { Boxes, Film, SlidersHorizontal, Terminal as TerminalIcon } from 'lucide-react';
 import { Outliner3D } from '../../../packages/ide-ui/Outliner3D';
 import type { SceneNode } from '../../../packages/ide-ui/Outliner3D';
@@ -19,6 +19,11 @@ import { useIDEBackend } from '@/lib/ide/useIDEBackend';
 import type { IDESceneNode, IDETimelineSnapshot } from '../../../packages/ide-ui/backend/types';
 import { DockPanel } from '../../../packages/ide-ui/docking';
 import { ConsoleIntegration } from '../../../packages/ide-ui/ConsoleIntegration';
+import { getProjectTimelineBinding } from '@/lib/sequencer/project-timeline-store';
+import { applyTimelineScrubToScene } from '@/lib/sequencer/timeline-scene-viewport-wire';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('CanvasViewportSurface');
 
 const EMPTY_TIMELINE_SNAPSHOT: IDETimelineSnapshot = {
   bound: false,
@@ -65,13 +70,51 @@ export default function CanvasViewportSurface({
   renderMode: 'draft' | 'cinematic';
   projectId?: string;
 }) {
-  const { backend, nodes, selectedIds } = useIDEBackend(renderMode, projectId ?? '');
+  const resolvedProjectId = projectId ?? '';
+  const { backend, nodes, selectedIds } = useIDEBackend(renderMode, resolvedProjectId);
   const selectedNode = nodes.find((node) => selectedIds.includes(node.id)) ?? null;
   const timeline = useSyncExternalStore(
     (onStoreChange) => backend.timeline.subscribe(onStoreChange),
     () => backend.timeline.getSnapshot(),
     () => EMPTY_TIMELINE_SNAPSHOT,
   );
+  const [playheadSec, setPlayheadSec] = useState(0);
+  const prevPlayheadRef = useRef(0);
+
+  const scrubLiveScene = useCallback(
+    (timeSec: number) => {
+      setPlayheadSec(timeSec);
+      const binding = getProjectTimelineBinding(resolvedProjectId);
+      if (!binding || !timeline.bound) {
+        prevPlayheadRef.current = timeSec;
+        return;
+      }
+      // Demo/fixture binds must not mutate the real viewport scene graph.
+      if (binding.isDemo || timeline.isDemo) {
+        prevPlayheadRef.current = timeSec;
+        return;
+      }
+      const result = applyTimelineScrubToScene({
+        timeline: binding.timeline,
+        timeSec,
+        prevTimeSec: prevPlayheadRef.current,
+        scene: backend.scene,
+        isDemo: false,
+      });
+      prevPlayheadRef.current = timeSec;
+      if (result.skippedMissingNode > 0 || result.missingSceneNodes.length > 0) {
+        log.debug('timeline_scrub_fail_closed', {
+          skippedMissingNode: result.skippedMissingNode,
+          missingSceneNodes: result.missingSceneNodes,
+          heldMaterial: result.heldMaterial,
+          heldEvent: result.heldEvent,
+        });
+      }
+    },
+    [backend.scene, resolvedProjectId, timeline.bound, timeline.isDemo],
+  );
+
+  const bindNodeId = selectedNode?.id;
 
   return (
     <ViewportWorkbenchShell
@@ -119,6 +162,8 @@ export default function CanvasViewportSurface({
           <DockPanel id="timeline" title="Timeline" icon={Film} defaultRegion="bottomBar">
             <Timeline3D
               duration={timeline.duration > 0 ? timeline.duration : 10}
+              currentTime={playheadSec}
+              onTimeChange={scrubLiveScene}
               demoMode={timeline.isDemo}
               keyframes={timeline.keyframes}
               tracks={timeline.trackIds}
@@ -128,16 +173,22 @@ export default function CanvasViewportSurface({
                   : {
                       availableLanes: backend.timeline.listAvailableTracks?.() ?? [],
                       onAddTrack: (laneId) => {
-                        void backend.timeline.addTrack?.(laneId)
+                        void backend.timeline.addTrack?.(laneId, {
+                          targetNodeId: bindNodeId,
+                        });
                       },
                       onAddKeyframe: (laneId, timeSec) => {
-                        void backend.timeline.addKeyframe?.({ track: laneId, time: timeSec })
+                        void backend.timeline.addKeyframe?.({
+                          track: laneId,
+                          time: timeSec,
+                          targetNodeId: bindNodeId,
+                        });
                       },
                       onRemoveKeyframe: (keyframeId) => {
-                        void backend.timeline.removeKeyframe?.(keyframeId)
+                        void backend.timeline.removeKeyframe?.(keyframeId);
                       },
                       onRemoveTrack: (laneId) => {
-                        void backend.timeline.removeTrack?.(laneId)
+                        void backend.timeline.removeTrack?.(laneId);
                       },
                     }
               }
