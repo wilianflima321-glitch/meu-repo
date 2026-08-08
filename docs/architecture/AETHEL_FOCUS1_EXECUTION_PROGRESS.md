@@ -49,6 +49,7 @@
 | 2026-08-08 l13-tauri-farm | L.13 Tauri `lsp_farm.rs` first-light (spawn + IPC probe) | **PARTIAL** deepen; commit `e114b3133`; `cargo check`+`clippy -D warnings` green; Monaco hover acceptance still OPEN; Hub checkout HELD |
 | 2026-08-08 l4-sandbox-pty | L.4 sandbox PTY first-light (node-pty in Forge duplex) | **PARTIAL** deepen; `ptyApplied:true` when live IPty; pipe fallback; tests **12/12**; E2B remote PTY still HELD; Hub checkout HELD |
 | 2026-08-08 timeline-authoring | Timeline3D clip/keyframe authoring UI → ITimelineService / store / persist | **PARTIAL** deepen (authoring core); commit `c3bad4554`; tests **27/27**; Hub checkout HELD |
+| 2026-08-08 timeline-channel-move | Timeline3D keyframe drag-move + visibility.opacity channel; material/event HELD with contract reasons | **PARTIAL** deepen; tests **19/19**; Hub checkout HELD |
 | 2026-08-08 timeline-scrub-apply | Timeline3D scrub/play → live scene node apply (position/rotation/scale/visibility) | **PARTIAL** deepen (scrub apply core); commit `0ebb9d359`; material/event **HELD**; Hub checkout HELD |
 
 ---
@@ -1053,38 +1054,36 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ---
 
-## Remaining OPEN ranked (next sessions — 2026-08-08 post L.10/L.12/L.9 UX/L.13/L.4-PTY)
+## Remaining OPEN ranked (next sessions — 2026-08-08 post timeline-channel + L.10/L.12/L.13/L.8/CW4/R18)
 
-Ruthless honesty after L.10 green, L.12 100% soak, L.9 UX, L.13 farm+Monaco+Python matrix, L.4 sandbox PTY first-light. **P2b Anti-MOCK BLOCKER/HIGH/MEDIUM = 0 OPEN.** Do not invent new MD files — execute from this table + Master Map §0b.
+Ruthless honesty after L.10 green, L.12 100% soak, L.9 UX, L.13 farm+Monaco+Python matrix, L.4 sandbox PTY, L.8 Vite HMR first-light, **CW4 DONE**, **R18 DONE**, Law XV Instant Play bake **DONE**, Timeline scrub apply + keyframe move + visibility channel. **P2b Anti-MOCK BLOCKER/HIGH/MEDIUM = 0 OPEN.** Do not invent new MD files — execute from this table + Master Map §0b.
 
 | Pri | ID | Item | Why next | Honest status |
 |-----|-----|------|----------|---------------|
 | **P0** | R1 | **H.1+ Treasury / `hubCheckoutAudited`** | Hub Buy/Coins still fail-closed by design — wedge monetize blocked | **HELD** — schema stubs only; no mint/burn/Backpack |
-| **P0** | R2 | **Law XV bake evidence for web-static Instant Play** | Instant Play chain ships, but web-static package stays HELD without bake receipt/lightmap | **DONE** (2026-08-08) — cook + Instant Play + listing fail-closed; pass-through with real receipt+bytes |
-| **P0** | R3 | **CW4 dual-write → exception-only + multi-tab LWW** | Persistence spine charter closed | **DONE** (2026-08-08) — LWW + exception-only allowlist (2 secret + 7 domain) + expired one-way legacy mirror; open chrome debt **0** |
-| **P0** | R4 | **L.8 multi-file HMR authoring loop** | Blocks honest Universal IDE / v0-class claim | **PARTIAL** — local Vite HMR first-light (`hmr:true` when `/@vite/client` or protocol WS live); reload fallback honesty kept; **E2B remote HMR HELD** |
-| **P0** | R5 | **Web `qa:hardcoded-colors` outside ide-ui** | Full gate **green** (185→0); email/domain SoT exclusions documented | **DONE-core** (2026-08-08 l10-hardcoded-green); CW5 Figma empire still OPEN |
+| **P0** | R4 | **L.8 E2B remote HMR / live soak** | Blocks honest Universal IDE / v0-class claim | **PARTIAL** — local Vite HMR first-light (`hmr:true` when `/@vite/client` or protocol WS); **E2B remote HMR HELD** |
 | **P1** | R6 | **L.13 live Monaco desktop acceptance + Python binary soak** | Tauri farm + didChange/diagnostics/hover/definition/completion + L.C matrix **wired**; live Python HELD without binary | **PARTIAL** — matrix DONE-core; host acceptance still OPEN (`AETHEL_LSP_PYTHON`) |
 | **P1** | R7 | **L.4 E2B remote PTY / docker TTY** | Local sandbox node-pty first-light DONE when module loads | **PARTIAL** — `ptyApplied:true` on live IPty; E2B remote PTY API **HELD** (unwired) |
 | **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | USDZ browser preview only | **PARTIAL** USDZ; stage HELD |
-| **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Auto-attach browser WebM/PNG DONE-core | **DONE-core**; cinematic **HELD** |
 | **P1** | R10 | **L.9 live create-next-app / L-ACC-04 soak** | Wizard+client UX core DONE | **PARTIAL** — interactive UX DONE; live scaffold soak still open |
 | **P1** | R11 | **J.4 sqlite-vec + BYOK embeddings** | BYOK+CostGuard path + JS cosine PARTIAL; native sqlite-vec still HELD | **PARTIAL** (native HELD) |
 | **P1** | R12 | **CW1 15-panel bench + CW5 Storybook/Figma government** | Truth matrix + tokens PARTIAL | **PARTIAL** |
 | **P1** | R13 | **CW3 unified RHI / WebGPU viewport / desktop present-in-product** | Secondary-winit probe ≠ product WebView present | **PARTIAL** |
+| **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Auto-attach browser WebM/PNG DONE-core | **DONE-core**; cinematic **HELD** |
 | **P2** | R14 | **Onda G nuclear (Nanite/Lumen/Entropy)** | Founder ADIADO until platform exit | **DEFERRED** (~15% scaffold) |
 | **P2** | R15 | **J.11 ACP / J.12 OrchestratorProd** | Founder STOP; WT scaffolds ≠ ship | **STOPPED** |
 | **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | G.2 + H.1+ gates | **HELD** |
-| **P2** | R17 | **MaterialX / OpenVDB production + Outliner/Properties LoC&gt;500 split** | Draft/hygiene; IDE deepen | **HELD / OPEN** |
-| **P2** | R18 | **Prisma `demoPlayUrl` column + anon playtime→auth** | Instant Play chain SHIPPED; listing/auth deepen | **DONE** (2026-08-08) — migrate deploy when `DATABASE_URL` available |
+| **P2** | R17 | **MaterialX / OpenVDB production + Outliner/Properties LoC>500 split** | Draft/hygiene; IDE deepen | **HELD / OPEN** |
 
-**Top 10 for next executor (copy-paste):** R1 H.1+ → R4 L.8 E2B remote HMR / live soak → R6 L.13 live acceptance → R10 L.9 live create-next-app soak → R7 L.4 E2B remote PTY → R8 J.7 OpenUSD → R11 J.4 native sqlite-vec soak (BYOK path PARTIAL) → R12 CW1/CW5 → R16 Hub Coins/Agones (still HELD) → R3 CW4 **DONE**.
+**Recently closed (keep for ledger; not next-executor work):** R2 Law XV bake Instant Play **DONE**; R3 CW4 exception-only+LWW **DONE**; R5 `qa:hardcoded-colors` **DONE-core**; R18 Prisma `demoPlayUrl` + anon→auth playtime **DONE** (migrate deploy needs `DATABASE_URL`).
+
+**Top 10 for next executor (copy-paste):** R1 H.1+ → R4 L.8 E2B remote HMR / live soak → R6 L.13 live acceptance → R10 L.9 live create-next-app soak → R7 L.4 E2B remote PTY → R8 J.7 OpenUSD → R11 J.4 native sqlite-vec soak (BYOK path PARTIAL) → R12 CW1/CW5 → R13 CW3 RHI → R16 Hub Coins/Agones (still HELD). Hub checkout **HELD**.
 
 ### DONE-but-PARTIAL (self-critique — do not market as full DONE)
 
 | Ledger label | Practice reality | Remaining for true DONE |
 |--------------|------------------|-------------------------|
-| **J.7** “AI-v1-e DONE” / USD integrator | **USDZ PARTIAL** only | OpenUSD/Hydra; USDA/USDC loaders; Meshy→USD cook |
+| **J.7** "AI-v1-e DONE" / USD integrator | **USDZ PARTIAL** only | OpenUSD/Hydra; USDA/USDC loaders; Meshy→USD cook |
 | **J.9** DONE-core + auto-attach | Browser WebM/PNG path real; headless = PNG/patch-hash | Cinematic #63 engine capture; CI WebM |
 | **L.5** DONE (TS+lint+Rust via L.1) | Rust runs in `local-isolated`; network kernel isolation HELD | e2b/firecracker soak; OS firewall isolation |
 | **L.7** DONE-core | MagicWand→FusionTx + L.8 autoProvision | v0 multi-file generate+HMR IDE loop |
@@ -1094,18 +1093,19 @@ Ruthless honesty after L.10 green, L.12 100% soak, L.9 UX, L.13 farm+Monaco+Pyth
 | **L.1** local-isolated DONE | Real sandbox; e2b env-gated; firecracker HELD | Kernel-level network isolation |
 | **Instant Play chain SHIPPED** | Packer→registry→html→host + Law XV bake + R18 Prisma honesty columns + anon→auth playtime handoff | Hub checkout / H.1+ still HELD |
 | **RTv1-b** | Instant Play + I.2 + Law XV bake live | H.1+ / checkout still block full train |
+| **CW4** DONE | LWW + exception-only allowlist + expired legacy mirror; open chrome debt 0 | Keep allowlist discipline; no new raw localStorage chrome |
 | **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | `composerSurpassClaim` = posture; tree-sitter web wire false; J.11/J.12 STOPPED |
-| **Timeline persist + authoring + scrub apply PARTIAL** | `cinematics/main.timeline.json` + Add Track/Keyframe + live position/rotation/scale/visibility scrub apply | Curve editor; material/event apply **HELD**; clip trim/move; SequencerIdePanel local demo path |
+| **Timeline persist + authoring + scrub apply PARTIAL** | `cinematics/main.timeline.json` + Add Track/Keyframe + live pos/rot/scale/visibility scrub + **keyframe drag-move** + **visibility.opacity channel UI** | Material/event apply **HELD** (no `ISceneService` material mutator / event cue bus); multi-channel curve editor; clip trim handles; SequencerIdePanel local demo path |
 | **FusionTx handoff DONE** | `aethel.fusion-tx-handoff.v1` arms client store | Undo without shared Y.Doc still PARTIAL |
 | **AI-native / Universal IDE marketing** | Explicitly **not** certified | Needs J.12 (or Founder alt) + L.8 HMR + L.13 desktop |
 
 ---
-
 ## Changelog
 
 | Date | Change |
 |------|--------|
-| 2026-08-08 timeline-scrub-apply | **Timeline3D scrub→viewport live apply PARTIAL.** `timeline-scene-apply.ts` samples authored lanes at playhead; `timeline-scene-viewport-wire.ts` pushes to `ISceneService` (`updateTransform` / `setVisible`). Node bind via `scene:<id>` + `metadata.targetNodeId` (selection on Add Track/Keyframe). **Applies:** position/rotation/scale/visibility. **HELD:** material + event (no scene mutator). Demo binds blocked from mutating real scene; missing node id fail-closed. `CanvasViewportSurface` wires controlled playhead + scrub. Tests: sequencer scene-apply+authoring+wire **28/28** (targeted). Hub checkout HELD. No Onda G. |
+| 2026-08-08 timeline-channel-move | **Timeline3D keyframe drag-move + visibility.opacity channel UI PARTIAL; material/event still HELD.** `moveAuthoringKeyframe` / `setAuthoringKeyframeValue` → `ITimelineService.moveKeyframe`/`setKeyframeValue` (persist:false during drag). UI: drag keyframe on canvas; channel slider/input for visibility.opacity. **Material HELD:** `IDESceneNode.color?` DTO only — no `ISceneService` setColor/updateMaterial. **Event HELD:** no IDE event-cue bus / gameplay dispatch on scene service (held[] report only). Tests: timeline-authoring+scene-apply **19/19**. Hub checkout HELD. No Onda G. |
+| 2026-08-08 timeline-scrub-apply | **Timeline3D scrub→viewport live apply PARTIAL.** Commit: `0ebb9d359`. `timeline-scene-apply.ts` samples authored lanes at playhead; `timeline-scene-viewport-wire.ts` pushes to `ISceneService` (`updateTransform` / `setVisible`). Node bind via `scene:<id>` + `metadata.targetNodeId` (selection on Add Track/Keyframe). **Applies:** position/rotation/scale/visibility. **HELD:** material + event (no scene mutator). Demo binds blocked from mutating real scene; missing node id fail-closed. `CanvasViewportSurface` wires controlled playhead + scrub. Tests: sequencer scene-apply+authoring+wire **28/28** (targeted). Hub checkout HELD. No Onda G. |
 | 2026-08-08 r11-j4-byok | **R11 / J.4 deepen — BYOK embed + CostGuard + sqlite-vec honesty PARTIAL.** Commit: `6c6298bd4`. `embed-provider` BYOK OpenAI `text-embedding-3-small`@384 (header key only — never `OPENAI_API_KEY` platform pay); `embed-gate` CostGuard Trava I fail-closed; free tier without BYOK → local-hash only; `sqlite-vec-probe` **HELD** (package absent / loadExtension uncertified) → JS cosine fallback; `buildVectorIndexReadiness` PARTIAL + no `trueSemanticRecall` theater; `/api/ai/context/search` wires readiness + vectorSearch quality labels. Tests: `j4-vector-index-byok-sqlite-vec` **9/9**, A2 **4/4**, L.12 **3/3**. Native vec0 soak still **HELD**. Hub checkout HELD. No Onda G. No J.12. |
 | 2026-08-08 r18-demo-playurl | **R18 DONE — Prisma `PublishedGame.demoPlayUrl` + anon Arcade playtime→auth handoff.** Commit: `2e2013236`. Schema + migration `20260808160000_published_game_demo_play_url` (`demoPlayUrl`, `noWebDemo`, `demoBundleBytes`, `compressionMandatePassed`); publish upserts DB from listing evidence (fail-closed); Arcade/feed merge DB+disk via `mergePublishedGameListingHonesty`. Guest F.2 spool: 401 leaves unsynced; `handoffAnonymousPlaytimeAfterAuth` + `saveToken` / Arcade mount flush into authenticated `PlayerGameStats` (Bearer+cookie). `prisma generate` OK; **`migrate deploy` needs `DATABASE_URL`** (not available in this env). Tests: rtv1-operational-loop **19/19**. Lint clean. Hub checkout HELD. No Onda G. |
 | 2026-08-08 l8-vite-hmr | **P0 R4 deepen — L.8 true Vite HMR first-light PARTIAL.** Commit: `eb00bdcd4`. `detectViteHmrClient` probes `/@vite/client` (+ optional token); `HMRBridge` Vite `vite-hmr` protocol (requires `connected`) + Next webpack-hmr; IDE `usePreviewRuntimeHmrBridge` marks connected when Vite client present **or** WS live; governed apply defaults `preferHmr` → `{hmr:true,reload:false,mode:'hmr'}` + best-effort `invalidateModules`, else honest iframe force-reload (`hmr:false`). Never claim HMR on reload-only. **E2B remote HMR documented HELD** (separate from local Vite; needs live key + reachable host). Tests: **25/25** (detect 4 + bridge 3 + hot-update 6 + orchestrator 12). Lint clean on touched. Hub checkout HELD. No Onda G. No J.12. |
