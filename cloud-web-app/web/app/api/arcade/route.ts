@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { apiInternalError } from '@/lib/api-errors'
+import {
+  readPublishListingEvidenceBatch,
+  resolveHubDemoListingLabel,
+} from '@/lib/hub/publish-listing-authority'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const routeLogger = createComponentLogger('api/arcade/route')
@@ -17,6 +21,8 @@ export type ArcadeListItem = {
   plays: number
   authorName: string
   publishedAt: string | null
+  noWebDemo: boolean
+  listingLabel: 'web_demo' | 'desktop_exclusive' | 'build_pending'
 }
 
 // Public Arcade listing. Only public games are returned; the listing degrades
@@ -65,17 +71,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ games: [], available: false })
     }
 
-    let games: ArcadeListItem[] = rows.map((row) => ({
-      slug: row.slug,
-      title: row.title,
-      description: row.description,
-      thumbnailUrl: row.thumbnailUrl,
-      tags: row.tags,
-      status: row.status,
-      plays: row.plays,
-      authorName: row.author?.name ?? 'Aethel creator',
-      publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
-    }))
+    const listingByGame = await readPublishListingEvidenceBatch(rows.map((row) => row.slug))
+    let games: ArcadeListItem[] = rows.map((row) => {
+      const listing = listingByGame.get(row.slug) ?? null
+      const noWebDemo = listing?.noWebDemo === true
+      const demoPlayUrl = listing?.demoPlayUrl ?? null
+      const listingLabel = resolveHubDemoListingLabel({
+        noWebDemo,
+        demoPlayUrl,
+        playable: row.status === 'playable' && Boolean(demoPlayUrl),
+      })
+      return {
+        slug: row.slug,
+        title: row.title,
+        description: row.description,
+        thumbnailUrl: row.thumbnailUrl,
+        tags: row.tags,
+        status: row.status,
+        plays: row.plays,
+        authorName: row.author?.name ?? 'Aethel creator',
+        publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
+        noWebDemo,
+        listingLabel,
+      }
+    })
 
     if (search) {
       games = games.filter((game) =>

@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Gamepad2, Play } from 'lucide-react'
+import { ArrowLeft, Clock, Gamepad2, Monitor, Play } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import MaturityBadge from '@/components/ui/MaturityBadge'
 import { HubHonestyBadge } from '@/components/hub/HubHonestyBadge'
 import { ShowcaseHonestyPanels } from '@/components/hub/ShowcaseHonestyPanels'
 import { CANONICAL_FOCUS } from '@/lib/canonical-spacing'
+import { useArcadePlaytimeSession } from '@/lib/liveops/useArcadePlaytimeSession'
 import type { ArcadeGameDetail } from '../arcade.types'
 
 type LoadState = 'loading' | 'ready' | 'notfound' | 'error'
@@ -21,6 +22,15 @@ export default function ArcadeDetailPage() {
   const [game, setGame] = useState<ArcadeGameDetail | null>(null)
   const [state, setState] = useState<LoadState>('loading')
   const [playing, setPlaying] = useState(false)
+
+  const playUrl = game?.demoPlayUrl ?? game?.playUrl ?? null
+  const sessionActive = Boolean(playing && game?.playable && playUrl && game?.slug)
+
+  // F.2 — real playtime telemetry while Arcade Instant Play is active.
+  useArcadePlaytimeSession({
+    gameId: game?.slug,
+    active: sessionActive,
+  })
 
   useEffect(() => {
     if (!slug) return
@@ -100,9 +110,9 @@ export default function ArcadeDetailPage() {
           <>
             <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] shadow-[var(--aethel-shadow-lg)]">
               <div className="relative aspect-[16/9] w-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]">
-                {playing && game.playable && game.playUrl ? (
+                {playing && game.playable && playUrl ? (
                   <iframe
-                    src={game.playUrl}
+                    src={playUrl}
                     title={game.title}
                     className="h-full w-full border-0"
                     allow="autoplay; fullscreen; gamepad; xr-spatial-tracking"
@@ -115,7 +125,7 @@ export default function ArcadeDetailPage() {
                       <img src={game.thumbnailUrl} alt={game.title} className="absolute inset-0 h-full w-full object-cover opacity-40" />
                     ) : null}
                     <div className="relative">
-                      {game.playable ? (
+                      {game.playable && playUrl ? (
                         <button
                           type="button"
                           onClick={startPlaying}
@@ -123,6 +133,10 @@ export default function ArcadeDetailPage() {
                         >
                           <Play className="h-4 w-4" /> Play now
                         </button>
+                      ) : game.noWebDemo || game.listingLabel === 'desktop_exclusive' ? (
+                        <div className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-info-light)]">
+                          <Monitor className="h-4 w-4" /> Desktop Exclusive — no web demo
+                        </div>
                       ) : (
                         <div className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-warning-light)]">
                           <Clock className="h-4 w-4" /> Build pending — not yet playable
@@ -143,7 +157,7 @@ export default function ArcadeDetailPage() {
                   by {game.authorName} · {game.plays} plays
                 </p>
               </div>
-              {game.playable && !playing ? (
+              {game.playable && playUrl && !playing ? (
                 <button
                   type="button"
                   onClick={startPlaying}
@@ -171,7 +185,13 @@ export default function ArcadeDetailPage() {
               </div>
             ) : null}
 
-            {!game.playable ? (
+            {game.noWebDemo || game.listingLabel === 'desktop_exclusive' ? (
+              <p className="mt-6 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] px-4 py-3 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
+                <span className="font-semibold text-[var(--aethel-info-light)]">Desktop Exclusive</span>
+                {' '}No Instant Play web demo is listed for this title. Hub discovery Instant Play stays
+                closed — download/desktop path only (no fake browser play CTA).
+              </p>
+            ) : !game.playable ? (
               <p className="mt-6 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] px-4 py-3 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
                 <span className="font-semibold text-[var(--aethel-warning-light)]">[HELD]</span>
                 {' '}This game is published but its browser build is not ready yet. No fake Install —
@@ -179,7 +199,12 @@ export default function ArcadeDetailPage() {
               </p>
             ) : null}
 
-            <ShowcaseHonestyPanels playable={game.playable} tags={game.tags} gameId={game.slug} />
+            <ShowcaseHonestyPanels
+              playable={game.playable}
+              tags={game.tags}
+              gameId={game.slug}
+              noWebDemo={game.noWebDemo === true}
+            />
           </>
         ) : null}
       </main>

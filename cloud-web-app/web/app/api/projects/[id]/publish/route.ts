@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { prisma } from '@/lib/db'
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors'
+import { stampPublishListingEvidence } from '@/lib/hub/publish-listing-authority'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const routeLogger = createComponentLogger('api/projects/[id]/publish/route')
@@ -13,6 +14,8 @@ type PublishBody = {
   description?: unknown
   tags?: unknown
   visibility?: unknown
+  /** Creator opt-in: no browser demo → Hub Desktop Exclusive (no fake Instant Play). */
+  noWebDemo?: unknown
 }
 
 function slugifyBase(value: string): string {
@@ -75,6 +78,7 @@ export async function POST(
         : project.description ?? null
     const visibility = normalizeVisibility(body?.visibility)
     const tags = normalizeTags(body?.tags)
+    const noWebDemo = body?.noWebDemo === true
 
     // Tie the listing to the real web export pipeline: if a completed web
     // export with a download URL exists, the game is immediately playable;
@@ -82,9 +86,9 @@ export async function POST(
     const webExport = await prisma.exportJob.findFirst({
       where: { projectId, platform: 'web', status: 'completed' },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, downloadUrl: true },
+      select: { id: true, downloadUrl: true, fileSize: true, options: true },
     })
-    const playable = Boolean(webExport?.downloadUrl)
+    const playable = Boolean(webExport?.downloadUrl) && !noWebDemo
 
     const existing = await prisma.publishedGame.findUnique({
       where: { projectId },
@@ -100,7 +104,7 @@ export async function POST(
         tags,
         visibility,
         exportJobId: webExport?.id ?? null,
-        playUrl: webExport?.downloadUrl ?? null,
+        playUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
         status: playable ? 'playable' : 'pending',
         publishedAt: new Date(),
       },
@@ -113,13 +117,38 @@ export async function POST(
         tags,
         visibility,
         exportJobId: webExport?.id ?? null,
-        playUrl: webExport?.downloadUrl ?? null,
+        playUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
         status: playable ? 'playable' : 'pending',
         publishedAt: new Date(),
       },
     })
 
-    routeLogger.info('arcade.publish', { projectId, slug: game.slug, status: game.status })
+    const exportOptions =
+      webExport?.options && typeof webExport.options === 'object' && !Array.isArray(webExport.options)
+        ? (webExport.options as Record<string, unknown>)
+        : {}
+    const listingEvidence = await stampPublishListingEvidence({
+      gameId: game.slug,
+      webExportDownloadUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
+      webExportFileSizeBytes: webExport?.fileSize ?? null,
+      explicitCompressionMandatePassed: exportOptions.compressionMandatePassed === true,
+      cookPackByteLength:
+        typeof exportOptions.cookPackByteLength === 'number'
+          ? exportOptions.cookPackByteLength
+          : typeof exportOptions.demoBundleBytes === 'number'
+            ? exportOptions.demoBundleBytes
+            : null,
+      noWebDemo,
+      evidenceRef: webExport?.id ? `exportJob:${webExport.id}` : null,
+    })
+
+    routeLogger.info('arcade.publish', {
+      projectId,
+      slug: game.slug,
+      status: game.status,
+      compressionMandatePassed: listingEvidence.compressionMandatePassed,
+      noWebDemo: listingEvidence.noWebDemo,
+    })
 
     return NextResponse.json({
       success: true,
@@ -129,11 +158,26 @@ export async function POST(
         visibility: game.visibility,
         playUrl: game.playUrl,
         playable,
+        demoPlayUrl: listingEvidence.demoPlayUrl,
+        noWebDemo: listingEvidence.noWebDemo,
+        compressionMandatePassed: listingEvidence.compressionMandatePassed,
+        demoBundleBytes: listingEvidence.demoBundleBytes,
+      },
+      listingEvidence: {
+        compressionMandatePassed: listingEvidence.compressionMandatePassed,
+        demoPlayUrl: listingEvidence.demoPlayUrl,
+        demoBundleBytes: listingEvidence.demoBundleBytes,
+        noWebDemo: listingEvidence.noWebDemo,
+        reason: listingEvidence.reason,
       },
       // Honest guidance when the web build is not ready yet.
-      hint: playable
-        ? undefined
-        : 'Published. Run a Web export to make this game playable in the browser.',
+      hint: listingEvidence.noWebDemo
+        ? 'Published as Desktop Exclusive — no Instant Play demo until a web export exists.'
+        : playable
+          ? listingEvidence.compressionMandatePassed
+            ? undefined
+            : 'Published and playable. Discovery ranking stays closed until measured Compression Mandate evidence (≤150MB) is stamped on the web export.'
+          : 'Published. Run a Web export to make this game playable in the browser.',
     })
   } catch (error) {
     const mapped = apiErrorToResponse(error)

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { apiInternalError } from '@/lib/api-errors'
+import {
+  readPublishListingEvidence,
+  resolveHubDemoListingLabel,
+} from '@/lib/hub/publish-listing-authority'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const routeLogger = createComponentLogger('api/arcade/[slug]/route')
@@ -36,6 +40,18 @@ export async function GET(
       return NextResponse.json({ error: 'Game not found' }, { status: 404 })
     }
 
+    const listing = await readPublishListingEvidence(game.slug)
+    const demoPlayUrl = listing?.demoPlayUrl ?? null
+    const playUrl = demoPlayUrl ?? game.playUrl
+    const noWebDemo = listing?.noWebDemo === true
+    const playable = !noWebDemo && game.status === 'playable' && Boolean(playUrl)
+    const listingLabel = resolveHubDemoListingLabel({
+      noWebDemo,
+      demoPlayUrl,
+      playUrl,
+      playable,
+    })
+
     return NextResponse.json({
       game: {
         slug: game.slug,
@@ -44,8 +60,12 @@ export async function GET(
         thumbnailUrl: game.thumbnailUrl,
         tags: game.tags,
         status: game.status,
-        playUrl: game.playUrl,
-        playable: game.status === 'playable' && Boolean(game.playUrl),
+        playUrl,
+        demoPlayUrl,
+        playable,
+        noWebDemo,
+        listingLabel,
+        compressionMandatePassed: listing?.compressionMandatePassed === true,
         plays: game.plays,
         authorName: game.author?.name ?? 'Aethel creator',
         publishedAt: game.publishedAt ? game.publishedAt.toISOString() : null,

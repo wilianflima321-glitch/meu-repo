@@ -33,6 +33,8 @@ type ShowcaseHonestyPanelsProps = {
   tags: string[]
   /** Arcade slug — also F.2 / I.2 gameId */
   gameId?: string
+  /** Hub XIV — no web demo → Desktop Exclusive (honest, not Instant Play). */
+  noWebDemo?: boolean
 }
 
 function HeldPanel({
@@ -52,7 +54,12 @@ function HeldPanel({
   )
 }
 
-export function ShowcaseHonestyPanels({ playable, tags, gameId }: ShowcaseHonestyPanelsProps) {
+export function ShowcaseHonestyPanels({
+  playable,
+  tags,
+  gameId,
+  noWebDemo = false,
+}: ShowcaseHonestyPanelsProps) {
   // Fail-closed defaults until hub-honesty probe returns (matches server report).
   const [report, setReport] = useState<HubHonestyReport>(() =>
     evaluateHubHonesty({ arcadeCatalogAvailable: true, hasPublishedGames: true }),
@@ -107,7 +114,11 @@ export function ShowcaseHonestyPanels({ playable, tags, gameId }: ShowcaseHonest
           Engine transparency
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {playable ? (
+          {noWebDemo ? (
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-[10px] font-semibold text-[var(--aethel-info-light)]">
+              Desktop Exclusive
+            </span>
+          ) : playable ? (
             <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-[10px] font-semibold text-[var(--aethel-success-light)]">
               Web playable
             </span>

@@ -1,9 +1,24 @@
 import Link from 'next/link'
-import { Gamepad2, Play, Clock, Loader2 } from 'lucide-react'
+import { Gamepad2, Play, Clock, Loader2, Monitor } from 'lucide-react'
 import { CANONICAL_FOCUS } from '@/lib/canonical-spacing'
 import type { ArcadeGame } from './arcade.types'
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({
+  status,
+  noWebDemo,
+  listingLabel,
+}: {
+  status: string
+  noWebDemo?: boolean
+  listingLabel?: ArcadeGame['listingLabel']
+}) {
+  if (noWebDemo || listingLabel === 'desktop_exclusive') {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-info-light)]">
+        <Monitor className="h-3 w-3" /> Desktop Exclusive
+      </span>
+    )
+  }
   if (status === 'playable') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-success-light)]">
@@ -45,7 +60,11 @@ export function ArcadeCard({ game }: { game: ArcadeGame }) {
           </div>
         )}
         <div className="absolute left-3 top-3">
-          <StatusBadge status={game.status} />
+          <StatusBadge
+            status={game.status}
+            noWebDemo={game.noWebDemo}
+            listingLabel={game.listingLabel}
+          />
         </div>
       </div>
 

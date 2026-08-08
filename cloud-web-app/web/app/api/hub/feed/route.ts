@@ -14,6 +14,10 @@ import {
   probeImpressionLedgerWritable,
   recordFeedLaunchImpressions,
 } from '@/lib/hub/impression-ledger-authority'
+import {
+  readPublishListingEvidenceBatch,
+  type PublishListingEvidence,
+} from '@/lib/hub/publish-listing-authority'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/hub/feed/route')
@@ -24,7 +28,8 @@ const CAPABILITY = 'HUB_DISCOVERY_FEED'
 
 /**
  * Map Arcade PublishedGame rows → discovery candidates.
- * Compression Mandate is not on PublishedGame yet — fail-closed until publish stamps evidence.
+ * Compression Mandate comes from stamped publish listing evidence only —
+ * missing / false stays fail-closed (never hardcoded true).
  * AI moderation status is resolved from discovery-moderation authority when path is live.
  */
 function toCandidate(
@@ -38,8 +43,11 @@ function toCandidate(
     publishedAt: Date | null
     playUrl: string | null
   },
+  listing: PublishListingEvidence | null,
   aiModerationStatus: DiscoveryCandidate['aiModerationStatus'] = null,
 ): DiscoveryCandidate {
+  const demoPlayUrl = listing?.demoPlayUrl ?? null
+  const playUrl = demoPlayUrl ?? row.playUrl
   return {
     gameId: row.slug,
     title: row.title,
@@ -48,10 +56,10 @@ function toCandidate(
     visibility: row.visibility,
     plays: row.plays,
     publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
-    playUrl: row.playUrl,
-    // Fail-closed until cook/demo Compression Mandate receipt exists on listing.
-    compressionMandatePassed: false,
-    demoBundleBytes: null,
+    playUrl,
+    // Fail-closed unless publish stamped measured Compression Mandate evidence.
+    compressionMandatePassed: listing?.compressionMandatePassed === true,
+    demoBundleBytes: listing?.demoBundleBytes ?? null,
     aiModerationStatus,
   }
 }
@@ -142,9 +150,16 @@ export async function GET(req: NextRequest) {
         )
       }
 
-      candidates = rows.map((row) =>
-        toCandidate(row, moderationStatuses.get(row.slug) ?? (aiModerationReady ? 'pending' : null)),
-      )
+      const listingByGame = await readPublishListingEvidenceBatch(rows.map((row) => row.slug))
+      candidates = rows
+        .filter((row) => listingByGame.get(row.slug)?.noWebDemo !== true)
+        .map((row) =>
+          toCandidate(
+            row,
+            listingByGame.get(row.slug) ?? null,
+            moderationStatuses.get(row.slug) ?? (aiModerationReady ? 'pending' : null),
+          ),
+        )
     } catch (dbError) {
       catalogAvailable = false
       log.warn('hub.feed.catalog_unavailable', {
@@ -193,9 +208,7 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-      mock: false,
-      capability: CAPABILITY,
-      capabilityStatus: 'IMPLEMENTED',
+      ...feed,
       catalogAvailable,
       probe: {
         ready: probe.ready,
@@ -211,7 +224,6 @@ export async function GET(req: NextRequest) {
             viewerAttributed: Boolean(viewerKey),
           }
         : null,
-      ...feed,
     })
   } catch (error) {
     log.error('hub.feed.failed', error)
