@@ -5,13 +5,45 @@
  * not a cook/export zip download URL. The web-static cook today emits a
  * measured zip + AethelPack only — browser host + runtime-main bundle for
  * Instant Play remain HELD. Never invent a playable demoPlayUrl from zip.
+ *
+ * Unhold requires ALL of `DEMO_WEB_SLICE_UNHOLD_BLOCKERS` (see below). Do not
+ * reuse build-queue `addWebTemplate` theater HTML as Instant Play readiness.
  */
 
 import type { PublishTarget } from '@/lib/production/publish-pipeline-orchestrator'
 
+/**
+ * Exact missing steps that keep Instant Play HELD (investigation 2026-08-08).
+ * Unhold only when cook emits + hosts a real bootable slice — never placeholder.html.
+ */
+export const DEMO_WEB_SLICE_UNHOLD_BLOCKERS = [
+  {
+    id: 'browser-packer',
+    summary:
+      'No cook stage bundles packages/engine/runtime-main.ts + transpiled generated/scripts into browser-loadable JS (esbuild not a web dep; no Instant Play packer module).',
+  },
+  {
+    id: 'game-scripts-registry',
+    summary:
+      'Transpile emits per-script .ts files only — never the generated/game-scripts registry + GeneratedGameManifest constructors runtime-main expects at bundle/boot time.',
+  },
+  {
+    id: 'html-emitter',
+    summary:
+      'Cook never writes Instant Play index.html that mounts #aethel-root and calls bootAethelRuntime (build-queue addWebTemplate is a separate theater stub — forbidden for ready).',
+  },
+  {
+    id: 'html-host',
+    summary:
+      'Cook uploads application/zip only; no text/html (+ JS) object with a stable iframeable URL (signed zip download intentionally rejected by isInstantPlayHtmlUrl).',
+  },
+] as const
+
+export type DemoWebSliceUnholdBlockerId = (typeof DEMO_WEB_SLICE_UNHOLD_BLOCKERS)[number]['id']
+
 /** Honest Instant Play HTML host + runtime-main browser bundle are not wired yet. */
 export const DEMO_WEB_SLICE_HOST_HELD_REASON =
-  'demo_web_slice_held — Instant Play needs hosted HTML slice that boots runtime-main; web-static cook emits measured zip only (no iframe target). Placeholder index.html theater forbidden (Zero-MVP).'
+  'demo_web_slice_held — Instant Play needs hosted HTML slice that boots runtime-main; web-static cook emits measured zip only (no iframe target). Missing: browser-packer + game-scripts-registry + html-emitter + html-host. Placeholder index.html theater forbidden (Zero-MVP).'
 
 export type DemoWebSliceShipStatus = 'IMPLEMENTED' | 'HELD'
 

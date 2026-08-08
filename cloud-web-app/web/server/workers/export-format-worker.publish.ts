@@ -23,6 +23,7 @@ import { ensureZstdEncoder } from '@/lib/immunity/aethel-pack-compress';
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement';
 import {
   DEMO_WEB_SLICE_HOST_HELD_REASON,
+  DEMO_WEB_SLICE_UNHOLD_BLOCKERS,
   evaluateDemoWebSliceStage,
   type DemoWebSliceStageResult,
 } from '@/lib/production/demo-web-slice';
@@ -353,6 +354,7 @@ export async function runPublishPackagingStage(
 
   // XIV.3 — Instant Play HTML host + runtime-main browser bundle are not wired.
   // Never emit placeholder index.html claiming playable (Zero-MVP). Cook zip stays measured.
+  // Unhold blockers (all required): browser-packer, game-scripts-registry, html-emitter, html-host.
   const demoWebSlice = evaluateDemoWebSliceStage({
     target: plan.target,
     demoWebSliceReady: false,
@@ -365,6 +367,7 @@ export async function runPublishPackagingStage(
       reason: demoWebSlice.reason || DEMO_WEB_SLICE_HOST_HELD_REASON,
       shipStatus: demoWebSlice.shipStatus,
       allowed: demoWebSlice.allowed,
+      unholdBlockers: DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => b.id),
     });
     zip.addFile(
       'demo-web-slice.json',
@@ -377,6 +380,11 @@ export async function runPublishPackagingStage(
             demoPlayUrl: null,
             reason: demoWebSlice.reason,
             placeholderHtmlForbidden: true,
+            unholdBlockers: DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => ({
+              id: b.id,
+              summary: b.summary,
+            })),
+            runtimeEntrypoint: 'packages/engine/runtime-main.ts',
           },
           null,
           2,

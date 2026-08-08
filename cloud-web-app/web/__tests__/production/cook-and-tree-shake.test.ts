@@ -6,7 +6,11 @@ import {
   FORBIDDEN_RUNTIME_PACKAGES,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator'
-import { evaluateDemoWebSliceStage } from '@/lib/production/demo-web-slice'
+import {
+  DEMO_WEB_SLICE_HOST_HELD_REASON,
+  DEMO_WEB_SLICE_UNHOLD_BLOCKERS,
+  evaluateDemoWebSliceStage,
+} from '@/lib/production/demo-web-slice'
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement'
 import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/production/visual-script-transpile-stage'
 import { computeParallelGroups } from '@/lib/production/studio-local-cook-queue'
@@ -71,6 +75,13 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
     expect(held.allowed).toBe(false)
     expect(held.shipStatus).toBe('HELD')
     expect(held.demoPlayUrl).toBeNull()
+    expect(held.reason).toBe(DEMO_WEB_SLICE_HOST_HELD_REASON)
+    expect(DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => b.id)).toEqual([
+      'browser-packer',
+      'game-scripts-registry',
+      'html-emitter',
+      'html-host',
+    ])
 
     const ready = evaluateDemoWebSliceStage({
       target: 'web-static',
