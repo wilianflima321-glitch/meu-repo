@@ -41,6 +41,7 @@ import {
   getAgentsOpsPrefs,
   setAgentsOpsPrefs,
 } from '../../web/lib/storage/ui-persistence-spine'
+import { ensureProjectFusionYjsStore } from '../../web/lib/production/fusion-scope-registry'
 
 export default function AIChatPanelPro({
   messages = [],
@@ -174,6 +175,13 @@ export default function AIChatPanelPro({
     const candidate = [...messages].reverse().find((message) => message.fusionUndoHint)
     return candidate?.fusionUndoHint ?? null
   }, [messages])
+
+  // Trava II: bind a real Yjs fusion scope for this project so Undo banner / Ctrl+Z
+  // never invent a throwaway in-memory Map (P2f #3).
+  useEffect(() => {
+    if (!projectId) return
+    ensureProjectFusionYjsStore(projectId)
+  }, [projectId])
 
   const nexusAgents = useMemo(() => {
     if (!latestNexus?.cells?.length) return null
@@ -341,6 +349,7 @@ export default function AIChatPanelPro({
           <FusionTransactionUndoBanner
             transactionId={latestFusionUndo.transactionId}
             message={latestFusionUndo.message}
+            projectId={projectId}
           />
         )}
 

@@ -34,9 +34,34 @@ export interface CreativeFusionTransactionRecord {
   afterPayload?: string
 }
 
+export interface FusionRevertPoint {
+  projectId: string
+  scope: FusionYDocScope
+  beforePayload: string
+  transactionId: string
+}
+
+export type FusionSnapshotApplyMode = 'mutation' | 'restore'
+
 export interface FusionScopeStore {
   getSnapshot(projectId: string, scope: FusionYDocScope): string
-  applySnapshot(projectId: string, scope: FusionYDocScope, payload: string): void
+  /**
+   * `restore` mode must not feed Y.UndoManager (abort / post-commit revert).
+   * Default is `mutation` (tracked when the store has an UndoManager).
+   */
+  applySnapshot(
+    projectId: string,
+    scope: FusionYDocScope,
+    payload: string,
+    mode?: FusionSnapshotApplyMode,
+  ): void
+  /**
+   * Optional Trava II post-commit undo: remember beforePayload so Ctrl+Z can
+   * restore after the open-tx map entry is deleted on commit.
+   */
+  captureRevertPoint?(point: FusionRevertPoint): void
+  /** Restore last captured revert point for scope; false when none. */
+  revertLastCommit?(projectId: string, scope: FusionYDocScope): boolean
 }
 
 /** In-memory scope store for tests and bridge unit paths */
@@ -44,14 +69,29 @@ export function createMemoryFusionScopeStore(): FusionScopeStore & {
   data: Map<string, string>
 } {
   const data = new Map<string, string>()
+  const revertStack = new Map<string, FusionRevertPoint[]>()
   const key = (projectId: string, scope: FusionYDocScope) => `${projectId}::${scope}`
   return {
     data,
     getSnapshot(projectId, scope) {
       return data.get(key(projectId, scope)) ?? JSON.stringify({ projectId, scope, entities: [] })
     },
-    applySnapshot(projectId, scope, payload) {
+    applySnapshot(projectId, scope, payload, _mode) {
       data.set(key(projectId, scope), payload)
+    },
+    captureRevertPoint(point) {
+      const k = key(point.projectId, point.scope)
+      const stack = revertStack.get(k) ?? []
+      stack.push(point)
+      revertStack.set(k, stack)
+    },
+    revertLastCommit(projectId, scope) {
+      const k = key(projectId, scope)
+      const stack = revertStack.get(k)
+      const point = stack?.pop()
+      if (!point) return false
+      data.set(k, point.beforePayload)
+      return true
     },
   }
 }
@@ -120,6 +160,13 @@ export async function commitCreativeFusionTransaction(
   tx.snapshotHashAfter = snapshotHashAfter
   tx.afterPayload = afterPayload
   tx.updatedAt = new Date().toISOString()
+  // Post-commit Ctrl+Z: openTx entry is about to vanish — capture revert point on the store.
+  store.captureRevertPoint?.({
+    projectId: tx.projectId,
+    scope: tx.yDocScope,
+    beforePayload: tx.beforePayload,
+    transactionId: tx.id,
+  })
   openTx.delete(transactionId)
   log.info('fusion_tx_commit', {
     id: transactionId,
@@ -137,7 +184,7 @@ export async function abortCreativeFusionTransaction(
   if (!tx || tx.status !== 'open') {
     throw new Error(`CreativeFusionTransaction ${transactionId} is not open`)
   }
-  store.applySnapshot(tx.projectId, tx.yDocScope, tx.beforePayload)
+  store.applySnapshot(tx.projectId, tx.yDocScope, tx.beforePayload, 'restore')
   tx.status = 'aborted'
   tx.updatedAt = new Date().toISOString()
   tx.snapshotHashAfter = tx.snapshotHashBefore

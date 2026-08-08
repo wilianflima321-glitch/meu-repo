@@ -158,13 +158,16 @@ describe('AI-v1-e J.6 VideoToMechanic scaffold', () => {
     expect(bt.scaffold.scaffoldId).toBe(result.scaffold.scaffoldId)
     expect(bt.autoPhysics).toBe(false)
 
-    // Ctrl+Z path: abort would restore — committed tx already closed; undo falls through
+    // Ctrl+Z path: post-commit revert restores beforePayload on the same store (P2f #3)
     const undo = await fusionUndo({
       projectId: 'proj-j6',
       yDocScope: 'behavior-tree',
       store,
     })
-    expect(undo.ok === false || undo.action === 'yjs_undo' || undo.action === 'aborted').toBe(true)
+    expect(undo.ok).toBe(true)
+    if (undo.ok) expect(undo.action).toBe('reverted_committed')
+    const afterUndo = JSON.parse(store.getSnapshot('proj-j6', 'behavior-tree'))
+    expect(afterUndo.scaffold).toBeUndefined()
   })
 
   it('rejects video→GTA marketing and exposes honesty copy', async () => {

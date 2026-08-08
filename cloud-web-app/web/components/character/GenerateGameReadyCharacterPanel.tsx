@@ -15,7 +15,7 @@ import { selectGameReadyCharacterRoute } from '@/lib/native-gen/native-gen-ide-r
 import { NATIVE_ONNX_READY } from '@/lib/native-gen/onnx-job-protocol'
 import { NativeGenPathHonestyBadge } from '@/components/character/NativeGenPathHonestyBadge'
 import { createMemoryCostGuardLedger } from '@/lib/production/creative-cost-guard'
-import { createMemoryFusionScopeStore } from '@/lib/production/creative-fusion-transaction'
+import { ensureProjectFusionYjsStore } from '@/lib/production/fusion-scope-registry'
 import { buildMinimalObjFixture } from '@/lib/mesh-quality/clay-provider-adapters'
 
 export default function GenerateGameReadyCharacterPanel() {
@@ -39,7 +39,7 @@ export default function GenerateGameReadyCharacterPanel() {
     try {
       const costGuardAdapter = createMemoryCostGuardLedger()
       costGuardAdapter.enableByok('studio-author')
-      const fusionStore = createMemoryFusionScopeStore()
+      const fusionStore = ensureProjectFusionYjsStore('studio-local')
       const result = await generateGameReadyCharacter({
         projectId: 'studio-local',
         userId: 'studio-author',

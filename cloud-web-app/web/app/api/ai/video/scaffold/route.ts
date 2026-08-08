@@ -12,7 +12,7 @@ import {
 } from '@/lib/server/ai-core-rate-limit'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { createCreativeWalletCostGuardAdapter } from '@/lib/production/creative-cost-guard-creative-wallet-adapter'
-import { createMemoryFusionScopeStore } from '@/lib/production/creative-fusion-transaction'
+import { ensureProjectFusionYjsStore } from '@/lib/production/fusion-scope-registry'
 import {
   buildClipsFromVideoJob,
   runVideoToMechanicOperator,
@@ -86,7 +86,8 @@ export async function POST(req: NextRequest) {
       hasByok,
       modality: 'video-to-scaffold',
     })
-    const store = createMemoryFusionScopeStore()
+    // Trava II: Yjs-backed store (not a throwaway Map) so in-process abort/revert is real.
+    const store = ensureProjectFusionYjsStore(projectId)
 
     const result = await runVideoToMechanicOperator({
       projectId,

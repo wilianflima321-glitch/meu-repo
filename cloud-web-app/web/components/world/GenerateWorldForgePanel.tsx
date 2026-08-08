@@ -15,7 +15,7 @@ import { selectWorldForgeRoute } from '@/lib/world-forge/world-forge-ide-route'
 import { LORA_CLAY_READY } from '@/lib/world-forge/lora-clay-registry'
 import { NATIVE_ONNX_READY } from '@/lib/native-gen/onnx-job-protocol'
 import { WorldForgePathHonestyBadge } from '@/components/world/WorldForgePathHonestyBadge'
-import { createMemoryFusionScopeStore } from '@/lib/production/creative-fusion-transaction'
+import { ensureProjectFusionYjsStore } from '@/lib/production/fusion-scope-registry'
 
 export default function GenerateWorldForgePanel() {
   const [prompt, setPrompt] = useState('rugged highland meadows with pine ridges')
@@ -42,7 +42,7 @@ export default function GenerateWorldForgePanel() {
         : 'Math PCG world (LoRA HELD — Zero-UI)…',
     )
     try {
-      const fusionStore = createMemoryFusionScopeStore()
+      const fusionStore = ensureProjectFusionYjsStore('studio-local')
       const result = await generateWorldForge({
         projectId: 'studio-local',
         userId: 'studio-author',

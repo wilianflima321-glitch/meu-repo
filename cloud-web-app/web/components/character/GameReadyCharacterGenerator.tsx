@@ -16,7 +16,7 @@ import {
 } from '@/lib/studio/game-ready-character-orchestrator'
 import { NATIVE_ONNX_READY } from '@/lib/native-gen/onnx-job-protocol'
 import { createMemoryCostGuardLedger } from '@/lib/production/creative-cost-guard'
-import { createMemoryFusionScopeStore } from '@/lib/production/creative-fusion-transaction'
+import { ensureProjectFusionYjsStore } from '@/lib/production/fusion-scope-registry'
 
 export default function GameReadyCharacterGenerator() {
   const [prompt, setPrompt] = useState('stylized fantasy knight character')
@@ -54,7 +54,7 @@ export default function GameReadyCharacterGenerator() {
       }
 
       const adapter = createMemoryCostGuardLedger()
-      const fusionStore = createMemoryFusionScopeStore()
+      const fusionStore = ensureProjectFusionYjsStore(projectId)
       const result = await runGameReadyCharacterGeneration({
         projectId,
         userId: 'studio-user',
