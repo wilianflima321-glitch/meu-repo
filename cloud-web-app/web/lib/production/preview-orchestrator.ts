@@ -1,22 +1,27 @@
 import { setTimeout as delay } from 'node:timers/promises'
-import { readFile } from 'node:fs/promises'
 import {
   resolveForgeSandboxAvailability,
   createForgeSandboxSession,
   execInForgeSandbox,
-  getForgeSandboxExecContext,
   getForgeSandboxSession,
   resolveForgeSandboxE2BPreviewUrl,
+  bindForgeSandboxPreviewSurface,
   teardownForgeSandboxSession,
-  verifyFilesInForgeSandbox,
-  writeFilesToForgeSandbox,
   type ForgeSandboxSession,
 } from './forge-sandbox-executor'
-import { confinePathToProjectRoot } from './forge-sandbox-path-guard'
 import type { DevContainerManifest } from './devcontainer-manifest'
 import type { CostGuardLedgerAdapter } from './creative-cost-guard'
 import { probeRuntimeUrl } from '@/lib/server/preview-runtime'
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  detectE2BRemoteHmr,
+  describeE2BRemoteHmrHonesty,
+  type E2BRemoteHmrHonesty,
+  type E2BRemoteHmrReason,
+} from './e2b-remote-hmr'
+
+export type { PreviewHotUpdateInput, PreviewHotUpdateMode, PreviewHotUpdateResult } from './preview-session-hot-update'
+export { syncAndRefreshPreviewSession } from './preview-session-hot-update'
 
 export type PreviewStrategy = 'inline' | 'local-dev-server' | 'e2b'
 
@@ -43,6 +48,10 @@ export interface PreviewOrchestrationResult {
   message?: string
   ready?: boolean
   latencyMs?: number
+  /** E2B only — true when remote Vite/Next HMR surface was probed and confirmed. */
+  remoteHmrReady?: boolean
+  remoteHmrReason?: E2BRemoteHmrReason
+  remoteHmrHonesty?: E2BRemoteHmrHonesty
 }
 
 const DEFAULT_DEV_PORT = 3000
@@ -82,6 +91,7 @@ async function waitUntilReachable(
  * - `inline` never claims a remote runtime URL.
  * - `local-dev-server` / `e2b` only return ok:true with a probe-reachable URL.
  * - E2B URLs come from the live sandbox `getHost` — never fabricated from session ids.
+ * - E2B remote HMR: probed after ready; missing key/host → concrete reason, never HMR theater.
  */
 export async function orchestratePreviewSession(
   input: PreviewOrchestrationInput,
@@ -118,10 +128,21 @@ export async function orchestratePreviewSession(
 
     if (preferred === 'e2b') {
       if (!e2bStatus.available) {
+        const reason: E2BRemoteHmrReason =
+          e2bStatus.reason === 'e2b_api_key_missing'
+            ? 'e2b_api_key_missing'
+            : 'preview_host_unresolved'
         return {
           ok: false,
           strategy: 'e2b',
           message: `E2B preview unavailable: ${e2bStatus.message}`,
+          remoteHmrReady: false,
+          remoteHmrReason: reason,
+          remoteHmrHonesty: describeE2BRemoteHmrHonesty({
+            remoteHmrConfirmed: false,
+            reason,
+            message: e2bStatus.message,
+          }),
         }
       }
       provider = 'e2b'
@@ -185,6 +206,13 @@ export async function orchestratePreviewSession(
         strategy: 'e2b',
         sandboxSessionId: session.sessionId,
         sandboxId: session.sessionId,
+        remoteHmrReady: false,
+        remoteHmrReason: 'preview_host_unresolved',
+        remoteHmrHonesty: describeE2BRemoteHmrHonesty({
+          remoteHmrConfirmed: false,
+          reason: 'preview_host_unresolved',
+          message: 'E2B sandbox has no resolvable preview host (getHost).',
+        }),
         message:
           'E2B sandbox has no resolvable preview host (getHost). Refusing fabricated preview URL.',
       }
@@ -209,7 +237,35 @@ export async function orchestratePreviewSession(
       url,
       ready: false,
       message: `Preview URL started but never became reachable within ${readyWaitMs}ms: ${url}`,
+      ...(provider === 'e2b'
+        ? {
+            remoteHmrReady: false,
+            remoteHmrReason: 'hmr_surface_unreachable' as const,
+            remoteHmrHonesty: describeE2BRemoteHmrHonesty({
+              remoteHmrConfirmed: false,
+              reason: 'hmr_surface_unreachable',
+              message: `Preview host unreachable: ${url}`,
+            }),
+          }
+        : {}),
     }
+  }
+
+  bindForgeSandboxPreviewSurface(session.sessionId, { port, url })
+
+  let remoteHmrReady: boolean | undefined
+  let remoteHmrReason: E2BRemoteHmrReason | undefined
+  let remoteHmrHonesty: E2BRemoteHmrHonesty | undefined
+  let message: string | undefined
+
+  if (provider === 'e2b') {
+    const remote = await detectE2BRemoteHmr({ sessionId: session.sessionId, port })
+    remoteHmrReady = remote.remoteHmrConfirmed
+    remoteHmrReason = remote.reason
+    remoteHmrHonesty = describeE2BRemoteHmrHonesty(remote)
+    message = remote.remoteHmrConfirmed
+      ? `E2B preview ready with remote ${remote.engine} HMR at ${url}.`
+      : `E2B preview ready at ${url}; remote HMR not confirmed (${remote.reason}) — reload path until surface is reachable.`
   }
 
   log.info('preview_orchestrator_ready', {
@@ -217,6 +273,8 @@ export async function orchestratePreviewSession(
     url,
     sandboxSessionId: session.sessionId,
     latencyMs: readiness.latencyMs,
+    remoteHmrReady,
+    remoteHmrReason,
   })
 
   return {
@@ -227,6 +285,10 @@ export async function orchestratePreviewSession(
     sandboxId: session.sessionId,
     ready: true,
     latencyMs: readiness.latencyMs,
+    remoteHmrReady,
+    remoteHmrReason,
+    remoteHmrHonesty,
+    message,
   }
 }
 
@@ -248,255 +310,4 @@ export async function teardownPreviewSession(
   await teardownForgeSandboxSession(sandboxSessionId, actualMinutes)
   log.info('preview_orchestrator_teardown', { sandboxSessionId })
   return { ok: true }
-}
-
-export type PreviewHotUpdateMode = 'hmr' | 'reload' | 'denied'
-
-/**
- * Honesty flags for L.8 multi-file preview refresh.
- * - `hmr: true` only when the client reports a live Vite `/@vite/client` or protocol WS bridge
- *   AND preferHmr is not false — never when only iframe reload ran.
- * - Otherwise sync + full iframe reload (`hmr: false`, `reload: true`).
- * - E2B remote HMR remains separately HELD without a live E2B key / reachable Vite host.
- */
-export interface PreviewHotUpdateResult {
-  ok: boolean
-  sandboxSessionId?: string
-  sandboxId?: string
-  strategy?: PreviewStrategy
-  filesSynced: number
-  /** True only when relying on a confirmed client HMR websocket — never invented. */
-  hmr: boolean
-  /** True when the preview iframe must full-reload to show applied files. */
-  reload: boolean
-  /** Live session reused — no reprovision. */
-  reusedSession: boolean
-  mode: PreviewHotUpdateMode
-  message?: string
-  provider?: string
-}
-
-export interface PreviewHotUpdateInput {
-  sandboxSessionId: string
-  /** Explicit contents to write into the live sandbox (preferred for e2b). */
-  files?: Array<{ path: string; content: string }>
-  /** Paths already written by governed apply — verified (local) or re-read+pushed (e2b). */
-  paths?: string[]
-  /** Client reports HMR websocket connected — server never invents this. */
-  clientHmrConnected?: boolean
-  /** When true AND clientHmrConnected, claim hmr and skip forced reload. Default: reload. */
-  preferHmr?: boolean
-}
-
-/**
- * L.8 — after governed multi-file apply, sync into the live preview session and
- * signal an honest refresh mode (HMR only when client bridge is confirmed).
- * Fail-closed when no live session exists (does not auto-reprovision).
- */
-export async function syncAndRefreshPreviewSession(
-  input: PreviewHotUpdateInput,
-): Promise<PreviewHotUpdateResult> {
-  const sessionId = input.sandboxSessionId?.trim()
-  if (!sessionId) {
-    return {
-      ok: false,
-      filesSynced: 0,
-      hmr: false,
-      reload: false,
-      reusedSession: false,
-      mode: 'denied',
-      message: 'sandboxSessionId is required for preview hot-update (fail-closed; no session).',
-    }
-  }
-
-  const session = getForgeSandboxSession(sessionId)
-  if (!session || session.teardownAt) {
-    return {
-      ok: false,
-      sandboxSessionId: sessionId,
-      sandboxId: sessionId,
-      filesSynced: 0,
-      hmr: false,
-      reload: false,
-      reusedSession: false,
-      mode: 'denied',
-      message: `No live preview session ${sessionId} — provision first; refusing silent full reprovision.`,
-    }
-  }
-
-  const strategy: PreviewStrategy = session.provider === 'e2b' ? 'e2b' : 'local-dev-server'
-  const files = Array.isArray(input.files) ? input.files : []
-  const paths = Array.isArray(input.paths)
-    ? input.paths.map((p) => p.trim()).filter(Boolean)
-    : []
-
-  let filesSynced = 0
-
-  if (files.length > 0) {
-    const write = await writeFilesToForgeSandbox({ sessionId, files })
-    if (!write.ok) {
-      return {
-        ok: false,
-        sandboxSessionId: sessionId,
-        sandboxId: sessionId,
-        strategy,
-        filesSynced: write.filesWritten,
-        hmr: false,
-        reload: false,
-        reusedSession: true,
-        mode: 'denied',
-        provider: session.provider,
-        message: write.message,
-      }
-    }
-    filesSynced = write.filesWritten
-  } else if (paths.length > 0) {
-    if (session.provider === 'e2b') {
-      // Re-read host project files and push into the live E2B handle.
-      const ctx = getForgeSandboxExecContext(sessionId)
-      if (!ctx) {
-        return {
-          ok: false,
-          sandboxSessionId: sessionId,
-          sandboxId: sessionId,
-          strategy,
-          filesSynced: 0,
-          hmr: false,
-          reload: false,
-          reusedSession: false,
-          mode: 'denied',
-          provider: session.provider,
-          message: `Session ${sessionId} lost exec context during hot-update.`,
-        }
-      }
-      const payload: Array<{ path: string; content: string }> = []
-      for (const rel of paths) {
-        const guard = confinePathToProjectRoot(ctx.projectRootPath, rel)
-        if (!guard.ok) {
-          return {
-            ok: false,
-            sandboxSessionId: sessionId,
-            sandboxId: sessionId,
-            strategy,
-            filesSynced: 0,
-            hmr: false,
-            reload: false,
-            reusedSession: true,
-            mode: 'denied',
-            provider: session.provider,
-            message: guard.message,
-          }
-        }
-        try {
-          payload.push({ path: rel, content: await readFile(guard.resolved, 'utf8') })
-        } catch {
-          return {
-            ok: false,
-            sandboxSessionId: sessionId,
-            sandboxId: sessionId,
-            strategy,
-            filesSynced: 0,
-            hmr: false,
-            reload: false,
-            reusedSession: true,
-            mode: 'denied',
-            provider: session.provider,
-            message: `Cannot read applied path for E2B sync: ${rel}`,
-          }
-        }
-      }
-      const write = await writeFilesToForgeSandbox({ sessionId, files: payload })
-      if (!write.ok) {
-        return {
-          ok: false,
-          sandboxSessionId: sessionId,
-          sandboxId: sessionId,
-          strategy,
-          filesSynced: write.filesWritten,
-          hmr: false,
-          reload: false,
-          reusedSession: true,
-          mode: 'denied',
-          provider: session.provider,
-          message: write.message,
-        }
-      }
-      filesSynced = write.filesWritten
-    } else {
-      const verify = await verifyFilesInForgeSandbox({ sessionId, paths })
-      if (!verify.ok) {
-        return {
-          ok: false,
-          sandboxSessionId: sessionId,
-          sandboxId: sessionId,
-          strategy,
-          filesSynced: verify.filesWritten,
-          hmr: false,
-          reload: false,
-          reusedSession: true,
-          mode: 'denied',
-          provider: session.provider,
-          message: verify.message,
-        }
-      }
-      filesSynced = verify.filesWritten
-    }
-  } else {
-    return {
-      ok: false,
-      sandboxSessionId: sessionId,
-      sandboxId: sessionId,
-      strategy,
-      filesSynced: 0,
-      hmr: false,
-      reload: false,
-      reusedSession: true,
-      mode: 'denied',
-      provider: session.provider,
-      message: 'Hot-update requires files[] or paths[] after governed apply.',
-    }
-  }
-
-  // preferHmr defaults true at the API edge when omitted; explicit false forces reload.
-  const preferHmr = input.preferHmr !== false
-  const canClaimHmr = Boolean(preferHmr && input.clientHmrConnected)
-  const result: PreviewHotUpdateResult = canClaimHmr
-    ? {
-        ok: true,
-        sandboxSessionId: sessionId,
-        sandboxId: sessionId,
-        strategy,
-        filesSynced,
-        hmr: true,
-        reload: false,
-        reusedSession: true,
-        mode: 'hmr',
-        provider: session.provider,
-        message:
-          `Synced ${filesSynced} file(s) into live ${strategy} session; Vite/Next HMR bridge connected — module invalidate/reload (no full iframe reload).`,
-      }
-    : {
-        ok: true,
-        sandboxSessionId: sessionId,
-        sandboxId: sessionId,
-        strategy,
-        filesSynced,
-        hmr: false,
-        reload: true,
-        reusedSession: true,
-        mode: 'reload',
-        provider: session.provider,
-        message:
-          `Synced ${filesSynced} file(s) into live ${strategy} session; full preview reload required (HMR not confirmed).`,
-      }
-
-  log.info('preview_orchestrator_hot_update', {
-    sandboxSessionId: sessionId,
-    filesSynced,
-    hmr: result.hmr,
-    reload: result.reload,
-    mode: result.mode,
-    strategy,
-  })
-  return result
 }

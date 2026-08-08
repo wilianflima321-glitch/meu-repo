@@ -102,6 +102,9 @@ export async function POST(request: NextRequest) {
           filesSynced: result.filesSynced,
           strategy: result.strategy,
           provider: result.provider,
+          remoteHmrConfirmed: result.remoteHmrConfirmed,
+          remoteHmrReason: result.remoteHmrReason,
+          remoteHmrHonesty: result.remoteHmrHonesty,
         },
       })
     }
@@ -122,6 +125,9 @@ export async function POST(request: NextRequest) {
         sandboxId: result.sandboxId,
         strategy: result.strategy,
         provider: result.provider,
+        remoteHmrConfirmed: result.remoteHmrConfirmed,
+        remoteHmrReason: result.remoteHmrReason,
+        remoteHmrHonesty: result.remoteHmrHonesty,
         metadata: {
           sandboxSessionId: result.sandboxSessionId,
           sandboxId: result.sandboxId,
@@ -132,6 +138,9 @@ export async function POST(request: NextRequest) {
           filesSynced: result.filesSynced,
           strategy: result.strategy,
           provider: result.provider,
+          remoteHmrConfirmed: result.remoteHmrConfirmed,
+          remoteHmrReason: result.remoteHmrReason,
+          remoteHmrHonesty: result.remoteHmrHonesty,
         },
       },
       {
@@ -140,6 +149,7 @@ export async function POST(request: NextRequest) {
           'x-aethel-capability-status': 'PARTIAL',
           'x-aethel-preview-hmr': result.hmr ? 'true' : 'false',
           'x-aethel-preview-reload': result.reload ? 'true' : 'false',
+          'x-aethel-preview-remote-hmr': result.remoteHmrConfirmed ? 'true' : 'false',
         },
       },
     )

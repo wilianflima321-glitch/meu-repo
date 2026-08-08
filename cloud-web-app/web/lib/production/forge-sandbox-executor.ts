@@ -31,6 +31,7 @@ import {
   reserveCreativeCost,
   settleCreativeCost,
   cancelCreativeCost,
+  createMemoryCostGuardLedger,
   type CostGuardLedgerAdapter,
   type CostGuardBlockReason,
 } from '@/lib/production/creative-cost-guard'
@@ -84,6 +85,9 @@ interface ForgeSandboxRuntimeState {
   localBackgroundProcesses?: ChildProcess[]
   /** L.4 sandbox PTY (node-pty) / other non-ChildProcess kill hooks. */
   localKillables?: Array<() => void>
+  /** L.8 — bound preview surface after orchestrator start (port + resolved URL). */
+  previewPort?: number
+  previewUrl?: string
 }
 
 const RUNTIME_SESSIONS = new Map<string, ForgeSandboxRuntimeState>()
@@ -763,6 +767,64 @@ export function resolveForgeSandboxE2BPreviewUrl(
   } catch {
     return null
   }
+}
+
+export type ForgeSandboxPreviewSurface = {
+  port: number
+  url: string
+}
+
+/** L.8 — bind the probe-reachable preview URL/port onto a live session for later HMR detect. */
+export function bindForgeSandboxPreviewSurface(
+  sessionId: string,
+  surface: ForgeSandboxPreviewSurface,
+): boolean {
+  const state = RUNTIME_SESSIONS.get(sessionId)
+  if (!state || state.session.teardownAt) return false
+  const port = Number(surface.port)
+  const url = String(surface.url || '').trim()
+  if (!Number.isFinite(port) || port <= 0 || !url) return false
+  RUNTIME_SESSIONS.set(sessionId, {
+    ...state,
+    previewPort: Math.floor(port),
+    previewUrl: url,
+  })
+  return true
+}
+
+export function getForgeSandboxPreviewSurface(
+  sessionId: string,
+): ForgeSandboxPreviewSurface | null {
+  const state = RUNTIME_SESSIONS.get(sessionId)
+  if (!state || state.session.teardownAt) return null
+  if (typeof state.previewPort === 'number' && state.previewUrl) {
+    return { port: state.previewPort, url: state.previewUrl }
+  }
+  return null
+}
+
+/**
+ * Test helper — inject a live session (optionally with mock E2B handle + preview surface).
+ * Never used by production code paths.
+ */
+export function __injectForgeSandboxSessionForTests(input: {
+  session: ForgeSandboxSession
+  projectRootPath?: string
+  e2bHandle?: E2BSandboxLike
+  previewPort?: number
+  previewUrl?: string
+  costAdapter?: CostGuardLedgerAdapter
+}): void {
+  RUNTIME_SESSIONS.set(input.session.sessionId, {
+    session: input.session,
+    projectRootPath: input.projectRootPath || '/mock',
+    commandAllowlist: ['npm'],
+    costAdapter: input.costAdapter || createMemoryCostGuardLedger(),
+    estimatedMinutes: 1,
+    e2bHandle: input.e2bHandle,
+    previewPort: input.previewPort,
+    previewUrl: input.previewUrl,
+  })
 }
 
 export type ForgeSandboxWriteFile = {
