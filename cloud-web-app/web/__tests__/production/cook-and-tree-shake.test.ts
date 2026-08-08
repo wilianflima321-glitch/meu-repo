@@ -51,6 +51,23 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
     const blocked = evaluateBakedLightingPublishGate({ target: 'web-static' })
     expect(blocked.allowed).toBe(false)
     expect(blocked.shipStatus).toBe('HELD')
+    expect(blocked.reason).toMatch(/bake receipt|lightmap/i)
+
+    // Receipt alone or bytes alone are insufficient — both required, never invented.
+    expect(
+      evaluateBakedLightingPublishGate({
+        target: 'web-static',
+        bakeReceiptRef: 'bake:project-1:v1',
+        lightmapBytes: 0,
+      }).allowed,
+    ).toBe(false)
+    expect(
+      evaluateBakedLightingPublishGate({
+        target: 'web-static',
+        bakeReceiptRef: '   ',
+        lightmapBytes: 4096,
+      }).allowed,
+    ).toBe(false)
 
     const ok = evaluateBakedLightingPublishGate({
       target: 'web-static',
@@ -58,6 +75,7 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
       lightmapBytes: 4096,
     })
     expect(ok.allowed).toBe(true)
+    expect(ok.shipStatus).toBe('IMPLEMENTED')
 
     const empty = buildMeasuredExportBundleEvidence({ artifactByteLength: null })
     expect(empty.ok).toBe(false)
@@ -69,6 +87,7 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
     if (measured.ok) {
       expect(measured.evidence.fileSize).toBe(2048)
       expect(measured.evidence.cookPackByteLength).toBe(512)
+      expect(measured.evidence.compressionMandatePassed).toBe(true)
     }
   })
 

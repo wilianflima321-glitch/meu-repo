@@ -1,9 +1,13 @@
 /**
  * Instant Play — orchestrates packer → registry → emitter → host.
- * Marks ready only when HTML is hosted and the packed JS boots runtime-main.
+ * Marks ready only when Law XV bake evidence is present AND HTML is hosted
+ * with packed JS that boots runtime-main. Never invents bake artifacts.
  */
 
-import type { PublishPipelinePlan } from '@/lib/production/publish-pipeline-orchestrator'
+import {
+  evaluateBakedLightingPublishGate,
+  type PublishPipelinePlan,
+} from '@/lib/production/publish-pipeline-orchestrator'
 import type { TranspileStageResult } from '@/lib/production/visual-script-transpile-stage'
 import {
   DEMO_WEB_SLICE_STAGE_CATALOG,
@@ -36,6 +40,10 @@ export interface BuildInstantPlaySliceInput {
   transpile: TranspileStageResult
   publicBaseUrl?: string
   engineRoot?: string
+  /** Law XV — non-empty bake receipt ref (never invented by Instant Play). */
+  bakeReceiptRef?: string | null
+  /** Law XV — measured lightmap byte length (>0 required). */
+  lightmapBytes?: number | null
 }
 
 export interface BuildInstantPlaySliceResult {
@@ -88,7 +96,8 @@ function heldResult(
 }
 
 /**
- * Run Instant Play stages in order. Never stamps ready on partial success.
+ * Run Instant Play stages in order. Never stamps ready on partial success
+ * or without Law XV bake receipt + lightmap bytes.
  */
 export async function buildInstantPlaySlice(
   input: BuildInstantPlaySliceInput,
@@ -109,6 +118,24 @@ export async function buildInstantPlaySlice(
       files: [],
       hostedDemoPlayUrl: null,
     }
+  }
+
+  const bakeGate = evaluateBakedLightingPublishGate({
+    target: 'web-static',
+    bakeReceiptRef: input.bakeReceiptRef,
+    lightmapBytes: input.lightmapBytes,
+  })
+  if (!bakeGate.allowed) {
+    log.warn('instant_play_bake_held', {
+      jobId: input.jobId,
+      projectId: input.projectId,
+      reason: bakeGate.reason,
+    })
+    return heldResult(
+      [],
+      [],
+      `${bakeGate.reason} Instant Play refused without inventing bake artifacts.`,
+    )
   }
 
   const completed = new Set<DemoWebSliceUnholdBlockerId>()

@@ -492,7 +492,7 @@ repo uses fail-closed + honest `[HELD]` panels per Zero-MVP.
 |------|----------------|--------------|-----------------------------------------------------|
 | **H.0** RevenueLane 30/70 vs 12% IAP | **DONE** | `lib/marketplace/payouts-lanes.ts`; `checkout/route.ts` + `billing/webhook/route.ts` use `RevenueLane.UNIVERSAL_STORE`; tests in `block6g-commerce-spine.test.ts` | — (historical `PLATFORM_TAKE_RATE=0.12` conflict resolved — constant now points at IAP lane) |
 | **RTv1-a** Hub I.5/I.6 (F2P tabs, Showcase, taxonomy) | **DONE** | `lib/hub/taxonomy.ts`, `components/hub/HubF2PTabs.tsx`, `app/arcade/page.tsx`, `ShowcaseHonestyPanels.tsx`, `GET /api/runtime/hub-honesty` | Free Cosmetics tab **HELD** (`cosmeticsHeld: true`); New & Rising depends on I.1 probe |
-| **RTv1-b** F.2 telemetria + I.1 discovery | **PARTIAL → Instant Play + I.2 verified gate SHIPPED** (2026-08-08); eligible cook can stamp ready | F.2 + listing authority + measured cook bytes + Instant Play chain + **I.2 `resolveViewerReviewEligibility` → PlayerGameStats ≥7200s** (XIV.2) | Instant Play unhold path live. **I.2 gate live:** authenticated F.2 playtime ≥2h (or EA 30m) required for verified POST; unauth/under-threshold fail-closed. **Still open:** anonymous Arcade playtime local until auth; Law XV bake for web-static; Hub checkout HELD |
+| **RTv1-b** F.2 telemetria + I.1 discovery | **PARTIAL → Instant Play + I.2 + Law XV bake gate SHIPPED** (2026-08-08); eligible cook can stamp ready | F.2 + listing authority + measured cook bytes + Instant Play chain + Law XV bake receipt/lightmap + **I.2 `resolveViewerReviewEligibility` → PlayerGameStats ≥7200s** (XIV.2) | Instant Play unhold path live when bake+bytes+slice succeed. **I.2 gate live:** authenticated F.2 playtime ≥2h (or EA 30m) required for verified POST; unauth/under-threshold fail-closed. **Still open:** anonymous Arcade playtime local until auth; Hub checkout HELD |
 | **RTv1-c** H.1+ Treasury + Hub checkout/Coins | **PARTIAL** | H.0 math DONE; H.1+ schema stubs: `AethelCoinLedgerEntry` in `schema.prisma` (schema-only), `treasury-capability.ts`, `GET /api/runtime/treasury-honesty` | Coins mint/burn, Backpack, TreasurySpendRouter, in-app payout — all **HELD**; `hubCheckoutAudited` always false in prod (`hub-honesty/route.ts:50`) |
 
 #### Wedge #1 loop honesty (criar → publicar → vitrine → monetizar)
@@ -500,7 +500,7 @@ repo uses fail-closed + honest `[HELD]` panels per Zero-MVP.
 | Pilar | State | Evidence | Gap |
 |-------|-------|----------|-----|
 | **Criar** (Studio DX) | Parallel track (Onda J/L — see P1b) | — | Not RTv1-blocked |
-| **Publicar Web** | **PARTIAL** | `PublishedGame.playUrl` + disk `publish-listing-authority`; ExportJob/`webexp_*` measured bytes; cook **Instant Play chain** (packer/registry/html/host) stamps `demoWebSliceReady` + `/api/hub/instant-play/.../index.html` only on full success | Instant Play **unholdable** when Law XV bake + Compression Mandate + slice stages succeed; Prisma `PublishedGame.demoPlayUrl` column still absent (disk listing evidence carries it); web-static package HELD without bake receipt/lightmap (Law XV) |
+| **Publicar Web** | **PARTIAL** | `PublishedGame.playUrl` + disk `publish-listing-authority`; ExportJob/`webexp_*` measured bytes; cook **Instant Play chain** + Law XV bake gate stamps `demoWebSliceReady` + `/api/hub/instant-play/.../index.html` only on bake+slice success | Instant Play completes when real bake receipt+lightmap bytes + Compression Mandate (≤150MB) + slice stages succeed; Prisma `PublishedGame.demoPlayUrl` column still absent (disk listing evidence carries it); missing bake fail-closes (no invented artifacts) |
 | **Vitrine Indie (Hub)** | **PARTIAL** | RTv1-a UI/taxonomy DONE; feed/publish/playtime + **I.2 verified gate** live | Discovery ranks only when listing evidence has measured ≤150MB compression. Desktop Exclusive when `noWebDemo`. Verified reviews unlock only after authenticated F.2 ≥7200s (anonymous playtime never counts). |
 | **Monetizar Hub** | **HELD by design** | `evaluateHubCheckoutGate()` → `HUB_CHECKOUT_HELD`; Showcase panels honest | Until full H audit: no Hub Buy/Coins CTAs |
 | **Monetizar IDE (fiat)** | **REAL** | `POST /api/marketplace/checkout` Stripe Connect 30/70; `/marketplace/creator/earnings` with Coins `[HELD]` disclosure | In-app Request Payout **HELD** (Stripe Express redirect only) — **not** blocked by H.0 |
@@ -519,12 +519,12 @@ chain + I.2 verified playtime gate landed 2026-08-08** — Arcade emits F.2 play
 export/cook workers stamp real `fileSize` + options without inventing PASS; Instant Play `demoPlayUrl` fail-closes
 on zip-only and stamps ready only when packer→registry→html-emitter→html-host host a bootable slice; verified
 reviews require authenticated `PlayerGameStats.playtimeSeconds ≥ 7200` (EA 1800 when opted in) — never invent hours.
-Remaining for full RTv1-b/c: Founder Treasury audit (`hubCheckoutAudited`) for Hub Coins/checkout; web-static still
-needs Law XV bake evidence; anonymous Arcade playtime stays local until auth (honest). IDE fiat marketplace already
-operates with honest Coins `[HELD]` disclosure — do not conflate with Hub commerce strip.
+Remaining for full RTv1-b/c: Founder Treasury audit (`hubCheckoutAudited`) for Hub Coins/checkout; anonymous Arcade
+playtime stays local until auth (honest). Law XV bake is wired fail-closed on cook + Instant Play + listing.
+IDE fiat marketplace already operates with honest Coins `[HELD]` disclosure — do not conflate with Hub commerce strip.
 
-**Next RTv1 items:** I.1 eligible catalog with real Instant Play URLs from successful cooks → H.1+ Coins/Treasury
-audit (`hubCheckoutAudited`, RTv1-c). Never mark ready from zip or `addWebTemplate` theater.
+**Next RTv1 items:** I.1 eligible catalog with real Instant Play URLs from cooks that carry bake+bytes+slice → H.1+
+Coins/Treasury audit (`hubCheckoutAudited`, RTv1-c). Never mark ready from zip, missing bake, or `addWebTemplate` theater.
 
 ### P2 — End-to-end audit synthesis (2026-08-08)
 
@@ -1041,7 +1041,7 @@ Ruthless honesty after today’s platform pass. **P2b Anti-MOCK BLOCKER/HIGH/MED
 | Pri | ID | Item | Why next | Honest status |
 |-----|-----|------|----------|---------------|
 | **P0** | R1 | **H.1+ Treasury / `hubCheckoutAudited`** | Hub Buy/Coins still fail-closed by design — wedge monetize blocked | **HELD** — schema stubs only; no mint/burn/Backpack |
-| **P0** | R2 | **Law XV bake evidence for web-static Instant Play** | Instant Play chain ships, but web-static package stays HELD without bake receipt/lightmap | **OPEN** — cook path fail-closed correctly |
+| **P0** | R2 | **Law XV bake evidence for web-static Instant Play** | Instant Play chain ships, but web-static package stays HELD without bake receipt/lightmap | **DONE** (2026-08-08) — cook + Instant Play + listing fail-closed; pass-through with real receipt+bytes |
 | **P0** | R3 | **CW4 dual-write → exception-only + multi-tab LWW** | Persistence spine still PARTIAL; data-loss risk on dual-write debt | **PARTIAL** — dock spine + pagehide flush; LWW/lock production OPEN |
 | **P0** | R4 | **L.8 multi-file HMR authoring loop** | Blocks honest Universal IDE / v0-class claim | **PARTIAL** — provision/teardown wired; HMR + E2B live key HELD |
 | **P0** | R5 | **Web `qa:hardcoded-colors` outside ide-ui** | ide-ui **0**; full web gate still red — CW5/L.10 not DONE | **OPEN** debt (ide-ui cleared) |
@@ -1058,7 +1058,7 @@ Ruthless honesty after today’s platform pass. **P2b Anti-MOCK BLOCKER/HIGH/MED
 | **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | G.2 + H.1+ gates | **HELD** |
 | **P2** | R17 | **MaterialX / OpenVDB production + Outliner/Properties LoC&gt;500 split** | Draft/hygiene; IDE deepen | **HELD / OPEN** |
 
-**Top 10 for next executor (copy-paste):** R1 H.1+ → R2 Law XV bake → R3 CW4 LWW → R4 L.8 HMR → R5 web color debt → R6 L.13 Tauri → R7 L.4 PTY → R8 J.7 OpenUSD → R9 J.9 cinematic → R10 L.12/L.9 deepen.
+**Top 10 for next executor (copy-paste):** R1 H.1+ → R3 CW4 LWW → R4 L.8 HMR → R5 web color debt → R6 L.13 Tauri → R7 L.4 PTY → R8 J.7 OpenUSD → R9 J.9 cinematic → R10 L.12/L.9 deepen → Prisma `demoPlayUrl` column.
 
 ### DONE-but-PARTIAL (self-critique — do not market as full DONE)
 
@@ -1070,8 +1070,8 @@ Ruthless honesty after today’s platform pass. **P2b Anti-MOCK BLOCKER/HIGH/MED
 | **L.7** DONE-core | MagicWand→FusionTx + L.8 autoProvision | v0 multi-file generate+HMR IDE loop |
 | **L.8 / L.4 / L.9 / L.10 / L.12 / L.13** | Real cores; often still labeled PARTIAL correctly | HMR / PTY / scaffold UX / web colors / RAG soak / Tauri LSP |
 | **L.1** local-isolated DONE | Real sandbox; e2b env-gated; firecracker HELD | Kernel-level network isolation |
-| **Instant Play chain SHIPPED** | Packer→registry→html→host unhold path live | Law XV bake on web-static; Prisma `demoPlayUrl` column; anon playtime→auth |
-| **RTv1-b** | Instant Play + I.2 gate live | H.1+ / bake / checkout still block full train |
+| **Instant Play chain SHIPPED** | Packer→registry→html→host + Law XV bake gate live | Prisma `demoPlayUrl` column; anon playtime→auth; Hub checkout HELD |
+| **RTv1-b** | Instant Play + I.2 + Law XV bake live | H.1+ / checkout still block full train |
 | **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | `composerSurpassClaim` = posture; tree-sitter web wire false; J.11/J.12 STOPPED |
 | **Timeline persist DONE** | `cinematics/main.timeline.json` | Clip/keyframe authoring UI (SequencerIdePanel local demos) |
 | **FusionTx handoff DONE** | `aethel.fusion-tx-handoff.v1` arms client store | Undo without shared Y.Doc still PARTIAL |
@@ -1083,6 +1083,7 @@ Ruthless honesty after today’s platform pass. **P2b Anti-MOCK BLOCKER/HIGH/MED
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 rtv1-law-xv-bake | **OPEN #2 DONE — Law XV bake evidence hard-gated on web-static Instant Play.** Evidence shape: non-empty `bakeReceiptRef` + `lightmapBytes > 0` (never invented). Cook already threw via `evaluateBakedLightingPublishGate`; deepened: `buildInstantPlaySlice` refuses `demoWebSliceReady` without bake; `publish-listing-authority` clears Instant Play `demoPlayUrl` on missing bake (`law_xv_bake_missing`); publish route forwards ExportJob bake options. Compression Mandate still required for discovery PASS. Tests: Instant Play fail-closed + pass-through; rtv1 listing bake cases; cook gate partials. Gates: `__tests__/production` **646/646**; `npx next lint` clean on touched. Hub checkout HELD. No Onda G. |
 | 2026-08-08 docs-authority-sync | **Documentation authority sync (no new MD files).** Aligned Progress ↔ Master Map §0b/§0c ↔ Index scorecard with 2026-08-08 reality: P2b Anti-MOCK **12/12+18/18+17/17 cleared**; Instant Play + I.2 + L.2/L.4/L.5/L.7/L.8/L.9/L.10 ide-ui0/L.12/L.13 cloud + J.7 USDZ PARTIAL + J.9 auto-attach + FusionTx handoff + Timeline persist. Replaced stale Onda L “7 GAP” summary. Added **Remaining OPEN ranked P0/P1/P2** + **DONE-but-PARTIAL** self-critique. Hub checkout HELD; Onda G deferred; J.11/J.12 STOPPED. |
 | 2026-08-08 l10-timeline-tokens | **L.10 / CW5 — ide-ui hardcoded-color residual cleared (Timeline3D).** Commit: `2ff0e4a08`. Scanner before: **69** ide-ui findings (all `Timeline3D.tsx`); after: **0**. Tokenized Timeline chrome + canvas via `var(--aethel-*)` / `rgba(var(--aethel-*-rgb),…)` / `color-mix`; canvas resolves tokens via `getComputedStyle`. Split LoC: `Timeline3D.styles.ts` + `Timeline3D.canvas.ts` + `Timeline3D.toolbar.tsx` (main `Timeline3D.tsx` **438** &lt;500). Kept `demoMode` / empty-timeline honesty badges; no fake live keyframes. Also tokenized one leftover `WorkbenchPreviewProposalOverlay` gradient/shadow. Full web `qa:hardcoded-colors` still fails (non-ide-ui debt). Hub checkout HELD. No Onda G. |
 | 2026-08-08 l4-duplex | **P2 deepen — L.4 ForgeTerminalBridge duplex PARTIAL (max-real pipes, sandbox PTY HELD).** Commit: `327332021`. (1) `lib/production/forge-sandbox-duplex.ts` — allowlisted child with stdin/stdout/stderr pipes inside L.1 session; resize records cols/rows only (`ptyApplied:false`). (2) Bridge + `POST /api/terminal/forge`: `attach` NDJSON stream (`ready`/`stdout`/`stderr`/`exit`), `stdin`, `resize`, `detach`; `describeForgeTerminalDuplexHonesty()` never claims `pty:true`. (3) IDE: `ForgeTerminalSocket` wired into xterm (`useTerminalSessions`) — `connected` only after live `ready`; fail-closed, no host PTY fallback. Agents still blocked on `/api/terminal/create`. Tests: L.4 **10/10**. Hub checkout HELD. No Onda G. |

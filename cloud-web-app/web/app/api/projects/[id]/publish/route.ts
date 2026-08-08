@@ -117,11 +117,18 @@ export async function POST(
           : typeof exportOptions.demoBundleBytes === 'number'
             ? exportOptions.demoBundleBytes
             : null,
+      bakeReceiptRef:
+        typeof exportOptions.bakeReceiptRef === 'string' ? exportOptions.bakeReceiptRef : null,
+      lightmapBytes:
+        typeof exportOptions.lightmapBytes === 'number' && exportOptions.lightmapBytes > 0
+          ? Math.floor(exportOptions.lightmapBytes)
+          : null,
       noWebDemo,
       evidenceRef: webExport?.id ? `exportJob:${webExport.id}` : null,
     })
 
     // Instant Play iframe URL only — never promote zip downloadUrl into playUrl.
+    // Law XV bake + hosted slice required for demoPlayUrl; Compression Mandate still gates discovery.
     const playable = Boolean(listingEvidence.demoPlayUrl) && !listingEvidence.noWebDemo
 
     const game = await prisma.publishedGame.upsert({
@@ -187,9 +194,11 @@ export async function POST(
           ? listingEvidence.compressionMandatePassed
             ? undefined
             : 'Published with Instant Play URL. Discovery ranking stays closed until measured Compression Mandate evidence (≤150MB) is stamped on the web export.'
-          : listingEvidence.reason.includes('demo_web_slice')
-            ? 'Published. Instant Play HTML demo-web-slice is [HELD] — cook zip alone is not an Arcade iframe target (no placeholder.html theater).'
-            : 'Published. Run a Web export with Instant Play HTML slice to make this game playable in the browser.',
+          : listingEvidence.reason.includes('law_xv_bake')
+            ? 'Published. Instant Play is [HELD] — Law XV bake receipt + lightmap bytes required before web-static Instant Play (no invented bake artifacts).'
+            : listingEvidence.reason.includes('demo_web_slice')
+              ? 'Published. Instant Play HTML demo-web-slice is [HELD] — cook zip alone is not an Arcade iframe target (no placeholder.html theater).'
+              : 'Published. Run a Web export with Instant Play HTML slice to make this game playable in the browser.',
     })
   } catch (error) {
     const mapped = apiErrorToResponse(error)

@@ -19,9 +19,17 @@ import {
   readInstantPlayHostedAsset,
 } from '@/lib/production/instant-play/html-host'
 import { buildInstantPlaySlice } from '@/lib/production/instant-play/build-instant-play-slice'
-import { buildPublishPipelinePlan } from '@/lib/production/publish-pipeline-orchestrator'
+import {
+  buildPublishPipelinePlan,
+  evaluateBakedLightingPublishGate,
+} from '@/lib/production/publish-pipeline-orchestrator'
 import { transpileProjectScripts } from '@/lib/production/visual-script-transpile-stage'
 import type { VisualScript } from '@aethel/visual-scripting/VisualScriptEditor'
+
+const REAL_BAKE_EVIDENCE = {
+  bakeReceiptRef: 'bake:proj_e2e:lightmap-v1',
+  lightmapBytes: 8192,
+} as const
 
 function sampleVisualScript(name: string): VisualScript {
   return {
@@ -222,7 +230,53 @@ describe('Instant Play demo-web-slice stages', () => {
     expect(loaded.body.toString('utf8')).toContain('aethel-root')
   })
 
-  it('end-to-end buildInstantPlaySlice is ready only with HTML+runtime+manifest present', async () => {
+  it('fail-closes Instant Play without Law XV bake receipt/lightmap (no invented bake)', async () => {
+    const blocked = evaluateBakedLightingPublishGate({ target: 'web-static' })
+    expect(blocked.allowed).toBe(false)
+
+    const plan = buildPublishPipelinePlan({
+      projectId: 'proj_no_bake',
+      target: 'web-static',
+      quality: 'studio-local-optimized',
+      requestedByUserId: 'user-1',
+      multiplayer: { enabled: false },
+      monetization: { enabled: false },
+    })
+    const transpile = transpileProjectScripts([
+      {
+        assetId: 'asset-no-bake',
+        assetName: 'NoBake',
+        kind: 'visual-script',
+        graph: sampleVisualScript('NoBake'),
+      },
+    ])
+    const engineRoot = path.resolve(process.cwd(), '../packages/engine')
+    const slice = await buildInstantPlaySlice({
+      jobId: 'job_no_bake',
+      projectId: 'proj_no_bake',
+      plan,
+      transpile,
+      publicBaseUrl: 'https://app.aethel.dev',
+      engineRoot,
+      // Explicitly omit bake — Instant Play must refuse demoWebSliceReady.
+    })
+
+    expect(slice.demoWebSlice.status).not.toBe('ready')
+    expect(slice.demoWebSlice.demoPlayUrl).toBeNull()
+    expect(slice.demoWebSlice.allowed).toBe(false)
+    expect(slice.hostedDemoPlayUrl).toBeNull()
+    expect(slice.completedStages).toEqual([])
+    expect(slice.demoWebSlice.reason).toMatch(/baked-lighting|bake receipt|lightmap/i)
+    expect(slice.demoWebSlice.reason).toMatch(/invent/i)
+  }, 60_000)
+
+  it('end-to-end buildInstantPlaySlice is ready only with bake evidence + HTML+runtime+manifest', async () => {
+    const bakeOk = evaluateBakedLightingPublishGate({
+      target: 'web-static',
+      ...REAL_BAKE_EVIDENCE,
+    })
+    expect(bakeOk.allowed).toBe(true)
+
     const plan = buildPublishPipelinePlan({
       projectId: 'proj_e2e',
       target: 'web-static',
@@ -247,6 +301,7 @@ describe('Instant Play demo-web-slice stages', () => {
       transpile,
       publicBaseUrl: 'https://app.aethel.dev',
       engineRoot,
+      ...REAL_BAKE_EVIDENCE,
     })
 
     expect(slice.remainingBlockers).toEqual([])

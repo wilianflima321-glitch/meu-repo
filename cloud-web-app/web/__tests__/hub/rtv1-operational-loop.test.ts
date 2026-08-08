@@ -39,6 +39,12 @@ import {
   VERIFIED_REVIEW_REQUIRED_SECONDS,
 } from '@/lib/hub/verified-reviews'
 
+/** Law XV bake evidence shape required for Instant Play listing (never invented). */
+const LAW_XV_BAKE = {
+  bakeReceiptRef: 'bake:rtv1:lightmap-v1',
+  lightmapBytes: 4096,
+} as const
+
 describe('RTv1 measured export/cook bundle evidence', () => {
   it('stamps measured size into export options for listing authority', () => {
     const measured = buildMeasuredExportBundleEvidence({
@@ -64,6 +70,7 @@ describe('RTv1 measured export/cook bundle evidence', () => {
       webExportFileSizeBytes: measured.evidence.fileSize,
       cookPackByteLength: measured.evidence.cookPackByteLength,
       explicitCompressionMandatePassed: options.compressionMandatePassed === true,
+      ...LAW_XV_BAKE,
     })
     expect(listing.compressionMandatePassed).toBe(true)
     expect(listing.demoPlayUrl).toBe('https://cdn.example/demo/index.html')
@@ -92,9 +99,12 @@ describe('RTv1 measured export/cook bundle evidence', () => {
       demoWebSliceReady: true,
       webExportFileSizeBytes: oversize.evidence.fileSize,
       explicitCompressionMandatePassed: oversize.evidence.compressionMandatePassed,
+      ...LAW_XV_BAKE,
     })
     expect(listing.compressionMandatePassed).toBe(false)
     expect(listing.demoBundleBytes).toBe(DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1)
+    // Bake present → Instant Play URL retained; Compression Mandate still fails oversize.
+    expect(listing.demoPlayUrl).toBe('https://cdn.example/big/index.html')
   })
 })
 
@@ -138,22 +148,35 @@ describe('RTv1 demo-web-slice Instant Play honesty', () => {
     expect(stage.reason).toMatch(/Placeholder index\.html|addWebTemplate/i)
   })
 
-  it('listing: slice present → demoPlayUrl; zip-only → fail-closed Instant Play; noWebDemo honest', () => {
+  it('listing: slice+bake → demoPlayUrl; missing bake / zip-only → fail-closed Instant Play; noWebDemo honest', () => {
     const withSlice = evaluatePublishListingEvidence({
       gameId: 'with-slice',
       instantPlayHtmlUrl: 'https://cdn.example/play/index.html',
       demoWebSliceReady: true,
       webExportFileSizeBytes: 8 * 1024 * 1024,
+      ...LAW_XV_BAKE,
     })
     expect(withSlice.demoPlayUrl).toBe('https://cdn.example/play/index.html')
     expect(withSlice.noWebDemo).toBe(false)
     expect(withSlice.compressionMandatePassed).toBe(true)
+
+    const missingBake = evaluatePublishListingEvidence({
+      gameId: 'slice-no-bake',
+      instantPlayHtmlUrl: 'https://cdn.example/play/index.html',
+      demoWebSliceReady: true,
+      webExportFileSizeBytes: 8 * 1024 * 1024,
+    })
+    expect(missingBake.demoPlayUrl).toBeNull()
+    expect(missingBake.compressionMandatePassed).toBe(false)
+    expect(missingBake.reason).toMatch(/law_xv_bake_missing/)
+    expect(resolveHubDemoListingLabel(missingBake)).toBe('build_pending')
 
     const zipOnly = evaluatePublishListingEvidence({
       gameId: 'zip-only',
       webExportDownloadUrl: 'https://cdn.example/exports/job.zip',
       webExportFileSizeBytes: 8 * 1024 * 1024,
       demoWebSliceReady: false,
+      ...LAW_XV_BAKE,
     })
     expect(zipOnly.demoPlayUrl).toBeNull()
     expect(zipOnly.noWebDemo).toBe(false)
@@ -167,6 +190,7 @@ describe('RTv1 demo-web-slice Instant Play honesty', () => {
       demoWebSliceReady: true,
       webExportFileSizeBytes: 8 * 1024 * 1024,
       noWebDemo: true,
+      ...LAW_XV_BAKE,
     })
     expect(desktop.noWebDemo).toBe(true)
     expect(desktop.demoPlayUrl).toBeNull()
@@ -193,6 +217,7 @@ describe('RTv1 publish listing compression evidence', () => {
       demoWebSliceReady: true,
       webExportFileSizeBytes: null,
       explicitCompressionMandatePassed: true,
+      ...LAW_XV_BAKE,
     })
     expect(evidence.compressionMandatePassed).toBe(false)
     expect(evidence.demoPlayUrl).toBe('https://cdn.example/demo/index.html')
@@ -210,6 +235,7 @@ describe('RTv1 publish listing compression evidence', () => {
       demoWebSliceReady: true,
       webExportFileSizeBytes: 12 * 1024 * 1024,
       evidenceRef: 'exportJob:exp_1',
+      ...LAW_XV_BAKE,
     })
     expect(stamped.compressionMandatePassed).toBe(true)
     expect(stamped.demoPlayUrl).toBe('https://cdn.example/oss/index.html')
@@ -226,6 +252,7 @@ describe('RTv1 publish listing compression evidence', () => {
       instantPlayHtmlUrl: 'https://cdn.example/giant/index.html',
       demoWebSliceReady: true,
       webExportFileSizeBytes: DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1,
+      ...LAW_XV_BAKE,
     })
     expect(evidence.compressionMandatePassed).toBe(false)
     expect(evidence.demoBundleBytes).toBe(DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1)
@@ -238,6 +265,7 @@ describe('RTv1 publish listing compression evidence', () => {
       demoWebSliceReady: true,
       webExportFileSizeBytes: 8 * 1024 * 1024,
       noWebDemo: true,
+      ...LAW_XV_BAKE,
     })
     expect(evidence.noWebDemo).toBe(true)
     expect(evidence.demoPlayUrl).toBeNull()

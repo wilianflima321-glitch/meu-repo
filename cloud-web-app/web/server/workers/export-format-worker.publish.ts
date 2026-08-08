@@ -370,6 +370,8 @@ export async function runPublishPackagingStage(
       plan,
       transpile: transpileResult,
       publicBaseUrl,
+      bakeReceiptRef: stageOptions.bakeReceiptRef,
+      lightmapBytes: stageOptions.lightmapBytes,
     });
     demoWebSlice = slice.demoWebSlice;
     for (const file of slice.files) {

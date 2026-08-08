@@ -13,6 +13,7 @@ import {
   evaluateCompressionMandateGate,
 } from '@/lib/hub/discovery-feed-engine'
 import { resolveDemoPlayUrlFromExportEvidence } from '@/lib/production/demo-web-slice'
+import { evaluateBakedLightingPublishGate } from '@/lib/production/publish-pipeline-orchestrator'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('publish-listing-authority')
@@ -55,6 +56,10 @@ export interface EvaluatePublishListingInput {
   cookPackByteLength?: number | null
   /** Creator declared desktop-only listing (no web demo slice). */
   noWebDemo?: boolean
+  /** Law XV — bake receipt ref from ExportJob.options (never invented). */
+  bakeReceiptRef?: string | null
+  /** Law XV — measured lightmap bytes from ExportJob.options. */
+  lightmapBytes?: number | null
   evidenceRef?: string | null
   nowIso?: string
 }
@@ -132,6 +137,26 @@ export function evaluatePublishListingEvidence(
       evidenceRef,
       stampedAt,
       reason: slice.reason,
+    }
+  }
+
+  // Law XV — Instant Play listing refuses success theater without bake receipt + lightmap bytes.
+  const bakeGate = evaluateBakedLightingPublishGate({
+    target: 'web-static',
+    bakeReceiptRef: input.bakeReceiptRef,
+    lightmapBytes: input.lightmapBytes,
+  })
+  if (!bakeGate.allowed) {
+    return {
+      gameId,
+      compressionMandatePassed: false,
+      demoBundleBytes: measured,
+      demoPlayUrl: null,
+      noWebDemo: false,
+      evidenceRef,
+      stampedAt,
+      reason:
+        'law_xv_bake_missing — Instant Play blocked without bake receipt/lightmap (never invent bake artifacts)',
     }
   }
 
