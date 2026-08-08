@@ -5,9 +5,9 @@
  * AgentShellPolicy (#48): agents NEVER use host PTY / cloud-container PTY / Tauri PTY.
  * Fail-closed when sandbox is unavailable — no host fallback theater.
  *
- * Duplex (deepen): xterm ↔ sandbox stdin/stdout pipes via NDJSON attach stream + stdin POSTs.
- * True sandbox PTY (node-pty / E2B PTY / docker TTY + SIGWINCH) remains HELD — see
- * `describeForgeTerminalDuplexHonesty()`.
+ * Duplex: prefers real sandbox PTY (node-pty inside L.1 confinement) when available;
+ * otherwise stdin/stdout pipes. `ptyApplied:true` only with a live IPty.
+ * E2B remote PTY API remains HELD (unwired).
  *
  * Lane split (binding):
  *  - `human-host-pty` — `/api/terminal/create` + Tauri `terminal_*` for human local shells only
@@ -26,6 +26,7 @@ import {
   closeForgeSandboxDuplex,
   getForgeSandboxDuplex,
   openForgeSandboxDuplex,
+  probeForgeSandboxPtyAvailability,
   resizeForgeSandboxDuplex,
   writeForgeSandboxDuplexStdin,
   type ForgeSandboxDuplexHandle,
@@ -82,10 +83,11 @@ export function describeTerminalLaneSplit(): TerminalLaneSplitDoc {
         'lib/server/forge-terminal-bridge.ts',
         'app/api/terminal/forge',
         'lib/production/forge-sandbox-executor.ts (streamInForgeSandbox)',
-        'lib/production/forge-sandbox-duplex.ts (stdin/stdout pipes)',
+        'lib/production/forge-sandbox-duplex.ts (sandbox PTY or stdin/stdout pipes)',
       ],
       agentAllowed: true,
-      claim: 'Agent shell = Forge sandbox duplex/exec stream only (no host PTY; sandbox PTY HELD)',
+      claim:
+        'Agent shell = Forge sandbox duplex only (sandbox PTY when node-pty available; never human-host PTY)',
     },
     law: 48,
   }
@@ -286,9 +288,9 @@ export type ForgeTerminalDuplexServerEvent =
       lane: 'forge-sandbox'
       duplexId: string
       sessionId: string
-      mode: 'sandbox-exec-duplex'
-      pty: false
-      held: string
+      mode: 'sandbox-pty' | 'sandbox-exec-duplex'
+      pty: boolean
+      held: string | null
       command: string
       args: string[]
       cols: number
@@ -301,8 +303,8 @@ export type ForgeTerminalDuplexServerEvent =
       duplexId: string
       cols: number
       rows: number
-      ptyApplied: false
-      held: string
+      ptyApplied: boolean
+      held: string | null
     }
   | {
       type: 'exit'
@@ -314,24 +316,42 @@ export type ForgeTerminalDuplexServerEvent =
   | { type: 'error'; message: string; duplexId?: string }
 
 export interface ForgeTerminalDuplexHonesty {
-  mode: 'sandbox-exec-duplex'
-  pty: false
-  stdinStdoutPipes: true
-  resizeDeliversSigwinch: false
-  held: string
+  mode: 'sandbox-pty' | 'sandbox-exec-duplex'
+  pty: boolean
+  ptyModuleAvailable: boolean
+  stdinStdoutPipes: boolean
+  resizeDeliversSigwinch: boolean
+  held: string | null
+  e2bRemotePty: 'HELD'
   claim: string
 }
 
-/** Documents max-real duplex vs HELD true sandbox PTY (no fake PTY marketing). */
+/** Documents max-real duplex vs pipe fallback (no fake PTY marketing). */
 export function describeForgeTerminalDuplexHonesty(): ForgeTerminalDuplexHonesty {
+  const probe = probeForgeSandboxPtyAvailability()
+  if (probe.canAttempt) {
+    return {
+      mode: 'sandbox-pty',
+      pty: true,
+      ptyModuleAvailable: true,
+      stdinStdoutPipes: true,
+      resizeDeliversSigwinch: true,
+      held: null,
+      e2bRemotePty: 'HELD',
+      claim:
+        'IDE Forge terminal duplex prefers sandbox node-pty (allowlisted + path-confined); pipe fallback if spawn fails; never human-host PTY; E2B remote PTY HELD',
+    }
+  }
   return {
     mode: 'sandbox-exec-duplex',
     pty: false,
+    ptyModuleAvailable: probe.moduleAvailable,
     stdinStdoutPipes: true,
     resizeDeliversSigwinch: false,
-    held: FORGE_SANDBOX_PTY_HELD_REASON,
+    held: probe.reason || FORGE_SANDBOX_PTY_HELD_REASON,
+    e2bRemotePty: 'HELD',
     claim:
-      'IDE Forge terminal duplex = allowlisted sandbox child stdin/stdout pipes; not host PTY; not sandbox PTY',
+      'IDE Forge terminal duplex = allowlisted sandbox child stdin/stdout pipes; not host PTY; sandbox PTY unavailable on this host',
   }
 }
 
@@ -343,6 +363,7 @@ export interface AttachForgeTerminalDuplexInput {
   cwd?: string
   cols?: number
   rows?: number
+  preferPty?: boolean
 }
 
 export type AttachForgeTerminalDuplexResult =
@@ -397,6 +418,7 @@ export async function attachForgeTerminalDuplex(
     cwd: input.cwd,
     cols: input.cols,
     rows: input.rows,
+    preferPty: input.preferPty,
   })
 
   if (!opened.ok) {
@@ -412,6 +434,8 @@ export async function attachForgeTerminalDuplex(
     duplexId: opened.handle.duplexId,
     sessionId: input.sessionId,
     callerKind: input.callerKind,
+    mode: opened.handle.mode,
+    pty: opened.handle.pty,
   })
 
   return { ok: true, lane: 'forge-sandbox', handle: opened.handle }
@@ -433,8 +457,8 @@ export function resizeForgeTerminalDuplex(
   rows: number,
 ): {
   ok: boolean
-  ptyApplied: false
-  held: string
+  ptyApplied: boolean
+  held: string | null
   cols?: number
   rows?: number
   reason?: string
@@ -450,7 +474,7 @@ export function resizeForgeTerminalDuplex(
   }
   return {
     ok: true,
-    ptyApplied: false,
+    ptyApplied: result.ptyApplied,
     held: result.held,
     cols: result.cols,
     rows: result.rows,
@@ -461,7 +485,7 @@ export function detachForgeTerminalDuplex(duplexId: string): boolean {
   return closeForgeSandboxDuplex(duplexId)
 }
 
-/** Build the initial ready event for an attach stream (never claims pty:true). */
+/** Build the initial ready event for an attach stream (honest pty flag from live handle). */
 export function buildForgeTerminalDuplexReadyEvent(
   handle: ForgeSandboxDuplexHandle,
 ): ForgeTerminalDuplexServerEvent {
@@ -470,8 +494,8 @@ export function buildForgeTerminalDuplexReadyEvent(
     lane: 'forge-sandbox',
     duplexId: handle.duplexId,
     sessionId: handle.sessionId,
-    mode: 'sandbox-exec-duplex',
-    pty: false,
+    mode: handle.mode,
+    pty: handle.pty,
     held: handle.held,
     command: handle.command,
     args: handle.args,

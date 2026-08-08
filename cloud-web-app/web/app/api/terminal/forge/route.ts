@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       lane: 'forge-sandbox' as const,
       cols: resized.cols,
       rows: resized.rows,
-      ptyApplied: false,
+      ptyApplied: resized.ptyApplied,
       held: resized.held,
       duplex: describeForgeTerminalDuplexHonesty(),
     })
@@ -262,8 +262,8 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/x-ndjson; charset=utf-8',
         'Cache-Control': 'no-store',
         'X-Aethel-Terminal-Lane': 'forge-sandbox',
-        'X-Aethel-Terminal-Mode': 'sandbox-exec-duplex',
-        'X-Aethel-Terminal-Pty': 'false',
+        'X-Aethel-Terminal-Mode': handle.mode,
+        'X-Aethel-Terminal-Pty': handle.pty ? 'true' : 'false',
       },
     })
   }

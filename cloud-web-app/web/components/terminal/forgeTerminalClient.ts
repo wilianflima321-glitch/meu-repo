@@ -180,6 +180,8 @@ export class ForgeTerminalSocket {
   private messageQueue: string[] = []
   private cols = 80
   private rows = 24
+  /** Set from live `ready` — never invent pty:true before ready. */
+  lastReady: { mode?: string; pty?: boolean; held?: string | null } | null = null
 
   onData: ((data: string) => void) | null = null
   onConnect: (() => void) | null = null
@@ -270,6 +272,11 @@ export class ForgeTerminalSocket {
     if (event.type === 'ready' && event.duplexId) {
       this.duplexId = event.duplexId
       this.isConnected = true
+      this.lastReady = {
+        mode: event.mode,
+        pty: event.pty === true,
+        held: event.held ?? null,
+      }
       this.onConnect?.()
       while (this.messageQueue.length > 0) {
         const queued = this.messageQueue.shift()

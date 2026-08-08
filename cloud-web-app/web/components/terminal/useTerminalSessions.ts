@@ -62,7 +62,7 @@ export function useTerminalSessions({
       `\x1b[90msession=${session.forgeSessionId || session.id} provider=${session.provider || 'local-isolated'}\x1b[0m`,
     );
     term?.writeln(
-      '\x1b[90mAttaching duplex (stdin/stdout pipes). True sandbox PTY remains HELD.\x1b[0m',
+      '\x1b[90mAttaching sandbox duplex (PTY when node-pty available; else pipes). Never host PTY.\x1b[0m',
     );
 
     const socket = new ForgeTerminalSocket();
@@ -71,8 +71,11 @@ export function useTerminalSessions({
     };
     socket.onConnect = () => {
       setIsConnected(true);
+      const ready = socket.lastReady;
+      const mode = ready?.mode ?? 'sandbox-exec-duplex';
+      const pty = ready?.pty === true;
       terminalRef.current?.writeln(
-        '\x1b[32mForge duplex ready\x1b[0m \x1b[90m(mode=sandbox-exec-duplex, pty=false)\x1b[0m',
+        `\x1b[32mForge duplex ready\x1b[0m \x1b[90m(mode=${mode}, pty=${pty})\x1b[0m`,
       );
       terminalRef.current?.focus();
       fitTerminal(socket);

@@ -30,7 +30,7 @@
 ## Execution order (binding â€” hygiene 2026-07-09 + Consolidation 2026-07-23)
 
 **Focus 1** (AI brain + real files) â†’ **Focus 2** (renderer + terrain) â†’ **Block 6** (billing truth) â†’ then Hub/G marketing.  
-**Active override (2026-07-23 + 2026-08-08 sync):** **Consolidation Wave CW0–CW7** (Master Map §0c) before new exotic kernel letters or new Master-UX hero panels. Progress: CW1–CW5,CW7 **PARTIAL**; **CW6 DONE (2026-08-02) apply-path**; **CW4 PARTIAL** (dual-write/LWW OPEN). CW0 freeze **ACTIVE**. **P2b Anti-MOCK fully cleared** (BLOCKER/HIGH/MEDIUM = 0 OPEN). Onda J: J.7 USDZ **PARTIAL**, J.9 auto-attach **DONE-core**, J.11/J.12 **STOPPED**. Onda L: L.1/L.2/L.5/L.7-core landed; L.4/L.8/L.9/L.10/L.12/L.13 **PARTIAL** (not GAP). Hub checkout **HELD** (H.1+). Onda G **deferred**. Next: Progress §Remaining OPEN. **HELD** vs Cursor / Figma / UE.  
+**Active override (2026-07-23 + 2026-08-08 sync):** **Consolidation Wave CW0–CW7** (Master Map §0c) before new exotic kernel letters or new Master-UX hero panels. Progress: CW1–CW5,CW7 **PARTIAL**; **CW6 DONE (2026-08-02) apply-path**; **CW4 PARTIAL** (exception-only/legacy mirror; LWW DONE). CW0 freeze **ACTIVE**. **P2b Anti-MOCK fully cleared** (BLOCKER/HIGH/MEDIUM = 0 OPEN). Onda J: J.7 USDZ **PARTIAL**, J.9 auto-attach **DONE-core**, J.11/J.12 **STOPPED**. Onda L: L.1/L.2/L.5/L.7-core/L.10-green/L.12-soak landed; L.4 sandbox-PTY first-light / L.8 / L.9 UX / L.13 farm+Monaco+Python = **PARTIAL** (not GAP). Hub checkout **HELD** (H.1+). Onda G **deferred**. Next: Progress §Remaining OPEN. **HELD** vs Cursor / Figma / UE.  
 [`AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md`](AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md) = **vision + acceptance matrix** (Â§0), not ship certificate.  
 Doctrines **#55â€“#64** + **#66** bind. **Anti-Hype Anchor** (Swarm Â§0a) binds all Fusion marketing. **No new planning** unless a new competitor surface appears.  
 **Theoretical documentation closed** (2026-07-09) â€” execution in progress.  
@@ -309,7 +309,7 @@ Parallel to **A.1â€“A.6** and **Bâ†’D**; does **not** block Wedge #1 (
 |--------|-------------------|----------------|------------|-------------|
 | Render nuclear G.3 | UE5 Nanite/Lumen | **100%** | ~15% scaffold | **Deferred** (P2e) until platform J/L/RTv1 exit — not next queue |
 | Studio S1â€“S7 | UE5 editor tools | **100%** | ~5â€“20% | Deepen existing surfaces; no new hero panels (CW0) |
-| AI / IDE J + L | Cursor/v0/Devin | **100%** | ~45–65% platform | **2026-08-08:** P2b cleared; J.7 USDZ PARTIAL; J.9 auto-attach DONE-core; L cores PARTIAL (not GAP). Blockers for AI-native claim: L.8 HMR, L.13 Tauri, J.12 STOPPED |
+| AI / IDE J + L | Cursor/v0/Devin | **100%** | ~50–70% platform | **2026-08-08:** P2b cleared; J.7 USDZ PARTIAL; J.9 auto-attach DONE-core; L.10 green; L.12 soak DONE; L.4 sandbox PTY first-light; L.13 farm+Monaco+Python matrix. Blockers for AI-native claim: L.8 true HMR, L.13 live acceptance, J.12 STOPPED |
 | Platform H + I | Epic/Roblox/Steam | **100%** | ~25–35% ops | **H.0 DONE**; Instant Play + I.2 + Law XV bake SHIPPED; next = **H.1+** `hubCheckoutAudited` |
 | Runtime M + Vanguard K | UE defects + DLSS/XR | **100%** | ~0% product | Post-platform / post-G |
 | Law XV Hardware | Tier gating | **100%** | partial | Bake gate wired on web-static Instant Play (receipt+lightmap); Cap Score / FSR deepen remains |

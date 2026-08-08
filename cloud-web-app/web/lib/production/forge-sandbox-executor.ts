@@ -10,7 +10,8 @@
  *  - 'local-isolated' — REAL today. No external infra required. Real isolation:
  *    command allowlist, filesystem confinement to the project root (symlink-safe),
  *    scrubbed environment (secrets never inherited), timeout + output caps, and
- *    execution via `child_process.execFile` (never a PTY — see forge-sandbox-path-guard
+ *    execution via `child_process.execFile` for one-shots; L.4 duplex may use
+ *    sandbox node-pty (never human-host PTY — see forge-sandbox-path-guard
  *    for the allow/deny primitives). Network policy is honestly PARTIAL: env-level
  *    proxy/registry scrubbing only, NOT a kernel network namespace/firewall block —
  *    see `describeForgeSandboxNetworkHonesty`.
@@ -81,6 +82,8 @@ interface ForgeSandboxRuntimeState {
   estimatedMinutes: number
   e2bHandle?: E2BSandboxLike
   localBackgroundProcesses?: ChildProcess[]
+  /** L.4 sandbox PTY (node-pty) / other non-ChildProcess kill hooks. */
+  localKillables?: Array<() => void>
 }
 
 const RUNTIME_SESSIONS = new Map<string, ForgeSandboxRuntimeState>()
@@ -282,6 +285,7 @@ export function getForgeSandboxExecContext(sessionId: string): {
     summary: string,
   ) => void
   trackChild: (child: ChildProcess) => void
+  trackKillable: (kill: () => void) => void
 } | null {
   const state = RUNTIME_SESSIONS.get(sessionId)
   if (!state || state.session.teardownAt) return null
@@ -298,6 +302,10 @@ export function getForgeSandboxExecContext(sessionId: string): {
     trackChild: (child) => {
       if (!state.localBackgroundProcesses) state.localBackgroundProcesses = []
       state.localBackgroundProcesses.push(child)
+    },
+    trackKillable: (kill) => {
+      if (!state.localKillables) state.localKillables = []
+      state.localKillables.push(kill)
     },
   }
 }
@@ -995,7 +1003,16 @@ export async function teardownForgeSandboxSession(
     LEDGERS.set(sessionId, ledger)
   }
 
-  // Gracefully kill background processes
+  // Gracefully kill background processes + L.4 sandbox PTY killables
+  if (state.localKillables) {
+    for (const kill of state.localKillables) {
+      try {
+        kill()
+      } catch {
+        // ignore already dead processes
+      }
+    }
+  }
   if (state.localBackgroundProcesses) {
     for (const child of state.localBackgroundProcesses) {
       if (!child.killed) {
