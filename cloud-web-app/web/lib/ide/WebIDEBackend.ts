@@ -51,8 +51,10 @@ import {
   addAuthoringLane,
   AUTHORABLE_TIMELINE_LANES,
   listAvailableAuthoringLanes,
+  moveAuthoringKeyframe,
   removeAuthoringKeyframe,
   removeAuthoringLane,
+  setAuthoringKeyframeValue,
   type TimelineAuthorResult,
 } from '@/lib/sequencer/timeline-authoring';
 import { bindingToIDETimelineSnapshot } from '@/lib/sequencer/timeline-ui-adapter';
@@ -316,6 +318,7 @@ class WebTimelineService implements ITimelineService {
 
   private async commitAuthor(
     mutate: (timeline: NonNullable<ReturnType<typeof getProjectTimelineBinding>>['timeline']) => TimelineAuthorResult,
+    options?: { persist?: boolean },
   ): Promise<IDETimelineAuthorResult> {
     const binding = getProjectTimelineBinding(this.projectId);
     if (binding?.isDemo) {
@@ -332,6 +335,9 @@ class WebTimelineService implements ITimelineService {
     }
     updateProjectTimeline(this.projectId, result.timeline, { isDemo: false });
     const snapshot = this.getSnapshot();
+    if (options?.persist === false) {
+      return { ok: true, snapshot };
+    }
     let persist: IDETimelinePersistResult | undefined;
     try {
       persist = await this.persistToProject();
@@ -374,6 +380,28 @@ class WebTimelineService implements ITimelineService {
 
   removeTrack(laneId: string): Promise<IDETimelineAuthorResult> {
     return this.commitAuthor((timeline) => removeAuthoringLane(timeline, laneId));
+  }
+
+  moveKeyframe(
+    keyframeId: string,
+    timeSec: number,
+    options?: { persist?: boolean },
+  ): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor(
+      (timeline) => moveAuthoringKeyframe(timeline, keyframeId, timeSec),
+      options,
+    );
+  }
+
+  setKeyframeValue(
+    keyframeId: string,
+    value: number,
+    options?: { persist?: boolean },
+  ): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor(
+      (timeline) => setAuthoringKeyframeValue(timeline, keyframeId, value),
+      options,
+    );
   }
 }
 

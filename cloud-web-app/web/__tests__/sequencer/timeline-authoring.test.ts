@@ -14,11 +14,14 @@ import {
   AUTHORABLE_TIMELINE_LANES,
   addAuthoringKeyframe,
   addAuthoringLane,
+  authoringLaneProperty,
   createAuthoringTimelineShell,
   listAvailableAuthoringLanes,
   listPresentAuthoringLanes,
+  moveAuthoringKeyframe,
   removeAuthoringKeyframe,
   removeAuthoringLane,
+  setAuthoringKeyframeValue,
 } from '@/lib/sequencer/timeline-authoring'
 import { sequencerTimelineToTimeline3DView } from '@/lib/sequencer/timeline-ui-adapter'
 import { DEFAULT_PROJECT_TIMELINE_PATH } from '@/lib/sequencer/timeline-project-persist'
@@ -95,6 +98,50 @@ describe('timeline-authoring pure mutations', () => {
     if (!removedLane.ok) return
     expect(listPresentAuthoringLanes(removedLane.timeline)).toEqual([])
   })
+
+  it('moveAuthoringKeyframe relocates curve keys and event markers', () => {
+    let tl = createAuthoringTimelineShell('proj-author')
+    const kf = addAuthoringKeyframe(tl, { lane: 'visibility', timeSec: 1, value: 0.8, keyframeId: 'kf-vis' })
+    expect(kf.ok).toBe(true)
+    if (!kf.ok) return
+    tl = kf.timeline
+    const moved = moveAuthoringKeyframe(tl, 'kf-vis', 3.25)
+    expect(moved.ok).toBe(true)
+    if (!moved.ok) return
+    const view = sequencerTimelineToTimeline3DView(moved.timeline)
+    expect(view.keyframes.find((k) => k.id === 'kf-vis')?.time).toBe(3.25)
+
+    const evt = addAuthoringKeyframe(moved.timeline, { lane: 'event', timeSec: 0.5, keyframeId: 'evt-move' })
+    expect(evt.ok).toBe(true)
+    if (!evt.ok) return
+    const evtMoved = moveAuthoringKeyframe(evt.timeline, 'evt-move', 4)
+    expect(evtMoved.ok).toBe(true)
+    if (!evtMoved.ok) return
+    expect(
+      sequencerTimelineToTimeline3DView(evtMoved.timeline).keyframes.find((k) => k.id === 'evt-move')?.time,
+    ).toBe(4)
+  })
+
+  it('setAuthoringKeyframeValue edits visibility.opacity channel (events fail-closed)', () => {
+    expect(authoringLaneProperty('visibility')).toBe('visibility.opacity')
+    let tl = createAuthoringTimelineShell('proj-author')
+    const kf = addAuthoringKeyframe(tl, { lane: 'visibility', timeSec: 1, value: 1, keyframeId: 'kf-op' })
+    expect(kf.ok).toBe(true)
+    if (!kf.ok) return
+    tl = kf.timeline
+    const set = setAuthoringKeyframeValue(tl, 'kf-op', 0.25)
+    expect(set.ok).toBe(true)
+    if (!set.ok) return
+    const view = sequencerTimelineToTimeline3DView(set.timeline)
+    const packed = view.keyframes.find((k) => k.id === 'kf-op')?.value as Record<string, number>
+    expect(packed['visibility.opacity']).toBe(0.25)
+
+    const evt = addAuthoringKeyframe(set.timeline, { lane: 'event', timeSec: 2, keyframeId: 'evt-noval' })
+    expect(evt.ok).toBe(true)
+    if (!evt.ok) return
+    const blocked = setAuthoringKeyframeValue(evt.timeline, 'evt-noval', 1)
+    expect(blocked.ok).toBe(false)
+  })
 })
 
 describe('ITimelineService authoring + persist', () => {
@@ -115,6 +162,25 @@ describe('ITimelineService authoring + persist', () => {
     expect(result.snapshot.trackIds).toEqual(['position'])
     expect(result.snapshot.keyframes).toEqual([])
     expect(getProjectTimeline('proj-live-author')?.tracks[0]?.id).toBe('lane-position')
+  })
+
+  it('moveKeyframe updates store; persist:false skips disk write', async () => {
+    const backend = new WebIDEBackend('draft', 'proj-move-kf')
+    const writes: string[] = []
+    vi.spyOn(backend.files, 'writeFile').mockImplementation(async (path) => {
+      writes.push(path)
+    })
+    await backend.timeline.addKeyframe!({ track: 'visibility', time: 1, value: 1 })
+    const id = backend.timeline.getSnapshot().keyframes[0]?.id
+    expect(id).toBeTruthy()
+    writes.length = 0
+    const live = await backend.timeline.moveKeyframe!(id!, 2.5, { persist: false })
+    expect(live.ok).toBe(true)
+    expect(writes).toHaveLength(0)
+    expect(backend.timeline.getSnapshot().keyframes[0]?.time).toBe(2.5)
+    const committed = await backend.timeline.moveKeyframe!(id!, 3, { persist: true })
+    expect(committed.ok).toBe(true)
+    expect(writes.length).toBeGreaterThan(0)
   })
 
   it('addKeyframe writes store and persists *.timeline.json', async () => {

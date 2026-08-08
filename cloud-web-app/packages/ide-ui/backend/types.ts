@@ -188,6 +188,18 @@ export interface ITimelineService {
   }): Promise<IDETimelineAuthorResult>
   removeKeyframe?(keyframeId: string): Promise<IDETimelineAuthorResult>
   removeTrack?(laneId: string): Promise<IDETimelineAuthorResult>
+  /** Move a curve keyframe or event marker to a new time (seconds). */
+  moveKeyframe?(
+    keyframeId: string,
+    timeSec: number,
+    options?: { persist?: boolean },
+  ): Promise<IDETimelineAuthorResult>
+  /** Set numeric curve-channel value for a keyframe (event markers fail-closed). */
+  setKeyframeValue?(
+    keyframeId: string,
+    value: number,
+    options?: { persist?: boolean },
+  ): Promise<IDETimelineAuthorResult>
   /** Lanes not yet present on the bound document (empty when unbound/demo). */
   listAvailableTracks?(): string[]
 }

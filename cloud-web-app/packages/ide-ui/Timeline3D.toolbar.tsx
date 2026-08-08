@@ -12,6 +12,7 @@ import {
   TimelineAuthoringControls,
   type TimelineAuthoringProps,
 } from './Timeline3D.authoring'
+import type { ReactNode } from 'react'
 import {
   GLASS_SURFACE,
   ICON_HOVER_BG,
@@ -58,6 +59,8 @@ type TimelineToolbarProps = {
   onToggleFpsMenu: () => void
   onSelectFps: (fps: number) => void
   authoring?: TimelineAuthoringProps
+  /** Optional curve-channel inspector (e.g. visibility.opacity). */
+  channelSlot?: ReactNode
 }
 
 export function TimelineHonestyBadges({
@@ -121,6 +124,7 @@ export function TimelineToolbar({
   onToggleFpsMenu,
   onSelectFps,
   authoring,
+  channelSlot,
 }: TimelineToolbarProps) {
   return (
     <div
@@ -213,6 +217,7 @@ export function TimelineToolbar({
         </button>
 
         {authoring && <TimelineAuthoringControls {...authoring} />}
+        {channelSlot}
       </div>
 
       <div className="flex items-center gap-3">

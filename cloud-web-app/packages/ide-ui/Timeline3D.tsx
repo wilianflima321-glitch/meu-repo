@@ -2,26 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { drawTimelineCanvas } from './Timeline3D.canvas'
-import { TimelineEmptyAuthoringHint, orderAvailableLanes } from './Timeline3D.authoring'
+import { orderAvailableLanes } from './Timeline3D.authoring'
+import { resolveChannelValue, TimelineChannelInspector } from './Timeline3D.channel'
+import { attachPointerDrag, clientXToTime, hitTestKeyframe } from './Timeline3D.pointer'
 import { TimelineResizeHandle } from './Timeline3D.resize'
 import { TimelineHonestyBadges, TimelineToolbar } from './Timeline3D.toolbar'
+import { TimelineTrackLabels } from './Timeline3D.tracks'
 import {
   DEFAULT_HEIGHT,
   DEMO_TRACKS,
-  LABEL_WIDTH,
   MIN_HEIGHT,
   MUTED_ICON,
   PANEL_BORDER,
-  PANEL_BORDER_SUBTLE,
   PANEL_SURFACE,
-  RULER_HEIGHT,
   SHADOW_TOOLTIP,
   TEXT_PRIMARY,
-  TRACK_HEIGHT,
   formatTimecode,
   trackBorder,
   trackConfig,
-  trackRgba,
 } from './Timeline3D.styles'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -43,6 +41,13 @@ export type TimelineAuthoringApi = {
   onAddKeyframe: (laneId: string, timeSec: number) => void
   onRemoveKeyframe?: (keyframeId: string) => void
   onRemoveTrack?: (laneId: string) => void
+  /**
+   * Drag / nudge keyframe time (seconds).
+   * `commit:false` = live preview (no disk persist); omit/`true` = persist.
+   */
+  onMoveKeyframe?: (keyframeId: string, timeSec: number, opts?: { commit?: boolean }) => void
+  /** Curve-channel value edit (visibility.opacity first). */
+  onSetKeyframeValue?: (keyframeId: string, value: number) => void
 }
 
 interface TimelineProps {
@@ -256,40 +261,41 @@ export function Timeline3D({
     const rect = wrapperRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
+    const hit = hitTestKeyframe(x, y, rect.width, safeDuration, trackList, keyframes)
 
-    for (let i = trackList.length - 1; i >= 0; i--) {
-      const track = trackList[i]
-      const trackY = RULER_HEIGHT + i * TRACK_HEIGHT
-      const trackKfs = keyframes.filter(k => k.track === track)
-      for (const kf of trackKfs) {
-        const kfX = (kf.time / safeDuration) * rect.width
-        const kfY = trackY + TRACK_HEIGHT / 2
-        if (Math.abs(x - kfX) < 10 && Math.abs(y - kfY) < 10) {
-          setSelectedKfId(kf.id)
-          return
-        }
+    if (hit) {
+      setSelectedKfId(hit.id)
+      setSelectedTrack(hit.track)
+      // Live authoring: drag keyframe in time instead of scrubbing.
+      if (authoringEnabled && authoring?.onMoveKeyframe) {
+        const moveId = hit.id
+        let lastTime = hit.time
+        attachPointerDrag(
+          wrapperRef.current,
+          (evt) => {
+            const r = wrapperRef.current!.getBoundingClientRect()
+            lastTime = clientXToTime(evt.clientX, r.left, r.width, safeDuration)
+            authoring.onMoveKeyframe?.(moveId, lastTime, { commit: false })
+          },
+          () => {
+            authoring.onMoveKeyframe?.(moveId, lastTime, { commit: true })
+          },
+        )
       }
+      return
     }
 
     setSelectedKfId(null)
 
     const updateTime = (evt: { clientX: number }) => {
       const r = wrapperRef.current!.getBoundingClientRect()
-      const nx = Math.max(0, Math.min(evt.clientX - r.left, r.width))
-      const newTime = (nx / r.width) * safeDuration
+      const newTime = clientXToTime(evt.clientX, r.left, r.width, safeDuration)
       timeRef.current = newTime
       onTimeChange(newTime)
       if (!isPlayingRef.current) drawCanvas()
     }
     updateTime(e)
-
-    const onPointerMove = (evt: PointerEvent) => updateTime(evt)
-    const onPointerUp = () => {
-      wrapperRef.current?.removeEventListener('pointermove', onPointerMove)
-      wrapperRef.current?.removeEventListener('pointerup', onPointerUp)
-    }
-    wrapperRef.current.addEventListener('pointermove', onPointerMove)
-    wrapperRef.current.addEventListener('pointerup', onPointerUp)
+    attachPointerDrag(wrapperRef.current, (evt) => updateTime(evt), () => undefined)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -297,26 +303,16 @@ export function Timeline3D({
     const rect = wrapperRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-
-    let found: typeof hoveredKf = null
-    for (let i = trackList.length - 1; i >= 0; i--) {
-      const track = trackList[i]
-      const trackY = RULER_HEIGHT + i * TRACK_HEIGHT
-      const trackKfs = keyframes.filter(k => k.track === track)
-      for (const kf of trackKfs) {
-        const kfX = (kf.time / safeDuration) * rect.width
-        const kfY = trackY + TRACK_HEIGHT / 2
-        if (Math.abs(x - kfX) < 10 && Math.abs(y - kfY) < 10) {
-          found = { x: kfX, y: kfY, kf }
-          break
-        }
-      }
-      if (found) break
-    }
+    const hit = hitTestKeyframe(x, y, rect.width, safeDuration, trackList, keyframes)
+    const found = hit
+      ? { x: (hit.time / safeDuration) * rect.width, y: y, kf: hit as KeyframeData }
+      : null
     if (found?.kf.id !== hoveredKf?.kf.id) setHoveredKf(found)
   }
 
   const selectedCfg = selectedTrack ? trackConfig(selectedTrack) : null
+  const selectedKf = selectedKfId ? keyframes.find((kf) => kf.id === selectedKfId) : undefined
+  const selectedChannel = resolveChannelValue(selectedKf?.value, selectedKf?.track ?? selectedTrack)
 
   useEffect(() => {
     if (!authoringEnabled) return
@@ -380,73 +376,29 @@ export function Timeline3D({
               }
             : undefined
         }
+        channelSlot={
+          authoringEnabled && authoring?.onSetKeyframeValue ? (
+            <TimelineChannelInspector
+              enabled
+              selectedKfId={selectedKfId}
+              selectedTrack={selectedKf?.track ?? selectedTrack}
+              channelValue={selectedChannel.value}
+              channelProperty={selectedChannel.property}
+              onChangeValue={authoring.onSetKeyframeValue}
+            />
+          ) : undefined
+        }
       />
 
       <div className="flex min-h-0 flex-1 overflow-hidden relative">
-        <div
-          className="shrink-0 z-10"
-          style={{
-            width: LABEL_WIDTH,
-            background: PANEL_SURFACE,
-            borderRight: `1px solid ${PANEL_BORDER_SUBTLE}`,
-          }}
-        >
-          <div style={{ height: RULER_HEIGHT, borderBottom: `1px solid ${PANEL_BORDER_SUBTLE}` }} />
-
-          {isEmptyLive && (
-            <div
-              className="flex items-center px-3 text-[11px] text-[var(--aethel-text-tertiary)]"
-              style={{ height: TRACK_HEIGHT * 2 }}
-              data-timeline-empty-tracks="true"
-            >
-              <TimelineEmptyAuthoringHint enabled={authoringEnabled} />
-            </div>
-          )}
-          {trackList.map(track => {
-            const cfg = trackConfig(track)
-            const isSelected = selectedTrack === track
-            const kfCount = keyframes.filter(k => k.track === track).length
-
-            return (
-              <div
-                key={track}
-                className="flex items-center gap-2 px-3 cursor-pointer transition-all duration-100"
-                style={{
-                  height: TRACK_HEIGHT,
-                  background: isSelected ? trackRgba(cfg, 0.08) : 'transparent',
-                  borderBottom: `1px solid ${PANEL_BORDER_SUBTLE}`,
-                  borderLeft: `2px solid ${isSelected ? cfg.color : 'transparent'}`,
-                }}
-                onClick={() => setSelectedTrack(isSelected ? null : track)}
-              >
-                <span
-                  className="shrink-0 rounded-full"
-                  style={{
-                    width: 6,
-                    height: 6,
-                    background: cfg.color,
-                    boxShadow: isSelected ? `0 0 8px ${cfg.glow}` : 'none',
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  className="text-[11px] font-medium flex-1 truncate capitalize"
-                  style={{ color: isSelected ? TEXT_PRIMARY : MUTED_ICON }}
-                >
-                  {cfg.label}
-                </span>
-                {kfCount > 0 && (
-                  <span
-                    className="text-[9px] font-mono rounded px-1"
-                    style={{ color: cfg.color, background: trackRgba(cfg, 0.12) }}
-                  >
-                    {kfCount}
-                  </span>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <TimelineTrackLabels
+          trackList={trackList}
+          keyframes={keyframes}
+          selectedTrack={selectedTrack}
+          isEmptyLive={isEmptyLive}
+          authoringEnabled={authoringEnabled}
+          onSelectTrack={setSelectedTrack}
+        />
 
         <div
           ref={wrapperRef}

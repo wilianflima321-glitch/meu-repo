@@ -190,6 +190,14 @@ export default function CanvasViewportSurface({
                       onRemoveTrack: (laneId) => {
                         void backend.timeline.removeTrack?.(laneId);
                       },
+                      onMoveKeyframe: (keyframeId, timeSec, opts) => {
+                        void backend.timeline.moveKeyframe?.(keyframeId, timeSec, {
+                          persist: opts?.commit !== false,
+                        });
+                      },
+                      onSetKeyframeValue: (keyframeId, value) => {
+                        void backend.timeline.setKeyframeValue?.(keyframeId, value);
+                      },
                     }
               }
             />

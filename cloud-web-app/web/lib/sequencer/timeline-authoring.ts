@@ -422,3 +422,112 @@ export function removeAuthoringLane(
     timeline: { ...timeline, tracks: timeline.tracks.filter((candidate) => candidate.id !== track.id) },
   }
 }
+
+/** Primary curve property for a lane (null for event markers). */
+export function authoringLaneProperty(lane: string): string | null {
+  if (!isAuthorableTimelineLane(lane)) return null
+  return LANE_DEFS[lane].property
+}
+
+/**
+ * Move an authored keyframe (curve) or event marker clip in time.
+ * Fail-closed when missing/locked; clamps into [0, durationMs].
+ */
+export function moveAuthoringKeyframe(
+  timeline: SequencerTimeline,
+  keyframeId: string,
+  timeSec: number,
+): TimelineAuthorResult {
+  const timeMs = Math.max(0, Math.min(timeline.durationMs, Math.round(timeSec * 1000)))
+  let moved = false
+  const tracks = timeline.tracks.map((track) => {
+    if (track.locked) return track
+
+    // Event markers are zero-length clips keyed by clip.id.
+    if (track.kind === 'marker') {
+      const clips = track.clips.map((clip) => {
+        if (clip.id !== keyframeId && `${clip.id}-start` !== keyframeId) return clip
+        if (clip.metadata?.bindOnly === true) return clip
+        moved = true
+        return createSequencerClip({
+          ...clip,
+          startMs: timeMs,
+          endMs: timeMs,
+          label: `Event @ ${(timeMs / 1000).toFixed(2)}s`,
+        })
+      })
+      return { ...track, clips: [...clips].sort((a, b) => a.startMs - b.startMs) }
+    }
+
+    const clips = track.clips.map((clip) => {
+      let clipChanged = false
+      const curves = (clip.curves ?? []).map((curve) => {
+        const idx = curve.keyframes.findIndex((kf) => kf.id === keyframeId)
+        if (idx < 0) return curve
+        // Collision: another key at same time keeps its slot — upsert by time.
+        const nextKeys = curve.keyframes
+          .filter((kf) => kf.id !== keyframeId && kf.timeMs !== timeMs)
+          .concat([
+            {
+              ...curve.keyframes[idx],
+              timeMs,
+            },
+          ])
+        moved = true
+        clipChanged = true
+        return normalizeSequencerCurve({ ...curve, keyframes: nextKeys })
+      })
+      if (!clipChanged) return clip
+      return createSequencerClip({ ...clip, curves })
+    })
+    return { ...track, clips }
+  })
+
+  if (!moved) {
+    return { ok: false, reason: 'not_found', message: `Keyframe "${keyframeId}" not found.` }
+  }
+  return { ok: true, timeline: { ...timeline, tracks } }
+}
+
+/**
+ * Set numeric value on a curve keyframe (channel edit).
+ * Event markers have no value channel — fail-closed.
+ */
+export function setAuthoringKeyframeValue(
+  timeline: SequencerTimeline,
+  keyframeId: string,
+  value: number,
+): TimelineAuthorResult {
+  if (!Number.isFinite(value)) {
+    return { ok: false, reason: 'not_found', message: 'Keyframe value must be a finite number.' }
+  }
+  let updated = false
+  const tracks = timeline.tracks.map((track) => {
+    if (track.locked) return track
+    if (track.kind === 'marker') return track
+    const clips = track.clips.map((clip) => {
+      let clipChanged = false
+      const curves = (clip.curves ?? []).map((curve) => {
+        const idx = curve.keyframes.findIndex((kf) => kf.id === keyframeId)
+        if (idx < 0) return curve
+        updated = true
+        clipChanged = true
+        const keyframes = curve.keyframes.map((kf, i) =>
+          i === idx ? { ...kf, value } : kf,
+        )
+        return normalizeSequencerCurve({ ...curve, keyframes })
+      })
+      if (!clipChanged) return clip
+      return createSequencerClip({ ...clip, curves })
+    })
+    return { ...track, clips }
+  })
+  if (!updated) {
+    return {
+      ok: false,
+      reason: 'not_found',
+      message: `Curve keyframe "${keyframeId}" not found (event markers have no value channel).`,
+    }
+  }
+  return { ok: true, timeline: { ...timeline, tracks } }
+}

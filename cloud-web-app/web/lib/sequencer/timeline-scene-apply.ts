@@ -1,7 +1,12 @@
 /**
  * Timeline3D authored lanes → scene-node sample at playhead (pure).
  * Maps position / rotation / scale / visibility curves to IDESceneNode patches.
- * Material + event lanes are sampled as HELD (no scene graph mutation contract yet).
+ *
+ * Material + event remain HELD (fail-closed):
+ * - Material: `IDESceneNode.color?` is read-only on the DTO; `ISceneService` has
+ *   no `setColor` / `updateMaterial` mutator — inventing intensity→color would be theater.
+ * - Event: no IDE event-cue bus / gameplay dispatch on `ISceneService` — crossing
+ *   markers are reported in `held` only (no fake gameplay fire).
  */
 
 import type { SequencerTimeline, SequencerTrack } from '@/lib/sequencer/core/types'
