@@ -138,3 +138,89 @@ export function resolveWebmCaptureCapability(): {
     message: 'MediaRecorder available for previz WebM capture.',
   }
 }
+
+/**
+ * J.9 cascade: prefer an already-captured WebM/PNG result; else honest patch-hash HELD.
+ * Server/Node paths never invent WebM — they attach patch hashes with status HELD.
+ */
+export function resolveVisualEvidenceCascade(input: {
+  afterPatch?: string
+  label?: string
+  /** Browser capture result when viewport MediaRecorder/canvas ran successfully. */
+  browserCapture?: VisualEvidenceCaptureResult | null
+}): VisualEvidenceCaptureResult {
+  if (input.browserCapture?.status === 'IMPLEMENTED' && input.browserCapture.refs.length > 0) {
+    return input.browserCapture
+  }
+  if (input.afterPatch) {
+    return capturePatchHashEvidence({ after: input.afterPatch, label: input.label })
+  }
+  return {
+    status: 'HELD',
+    kind: 'patch_hash',
+    refs: [],
+    message:
+      'VisualEvidence HELD — no patch candidate and no browser WebM/PNG capture on this surface.',
+    contentHash: hashContent('empty'),
+  }
+}
+
+export async function captureWebmEvidence(input: {
+  canvas: HTMLCanvasElement
+  durationMs?: number
+  fps?: number
+}): Promise<VisualEvidenceCaptureResult> {
+  const capability = resolveWebmCaptureCapability()
+  if (capability.status === 'HELD') {
+    return {
+      status: 'HELD',
+      kind: 'webm',
+      refs: [],
+      message: capability.message,
+      contentHash: hashContent('held-webm'),
+    }
+  }
+
+  const durationMs = input.durationMs ?? 2000
+  const fps = input.fps ?? 30
+  
+  return new Promise((resolve) => {
+    try {
+      const stream = input.canvas.captureStream(fps)
+      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
+      const chunks: Blob[] = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
+      }
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'video/webm' })
+        const dataUrl = await blobToDataUrl(blob)
+        const contentHash = hashContent(dataUrl.slice(0, 1024))
+        resolve({
+          status: 'IMPLEMENTED',
+          kind: 'webm',
+          refs: [`webm:${blob.size}bytes`],
+          message: `Captured ${durationMs}ms WebM video evidence.`,
+          contentHash,
+        })
+      }
+
+      recorder.start()
+      setTimeout(() => {
+        if (recorder.state !== 'inactive') {
+          recorder.stop()
+        }
+      }, durationMs)
+    } catch (error) {
+      resolve({
+        status: 'HELD',
+        kind: 'webm',
+        refs: [],
+        message: error instanceof Error ? error.message : 'MediaRecorder capture failed',
+        contentHash: hashContent('error'),
+      })
+    }
+  })
+}

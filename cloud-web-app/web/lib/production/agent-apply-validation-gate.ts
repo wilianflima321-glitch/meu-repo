@@ -14,6 +14,7 @@ import type { L5VirtualFile } from '@/lib/production/project-l5-typecheck'
 import {
   isRustSourcePath,
   buildRustGateUnavailableDetail,
+  runProjectRustGate
 } from '@/lib/production/rust-gate-unavailable'
 
 const log = createComponentLogger('agent-apply-validation-gate')
@@ -32,6 +33,7 @@ export type FileValidationGateStatus =
   | 'denied_l5'
   | 'denied_lint'
   | 'denied_rust_gate_unavailable'
+  | 'denied_rust_fail'
   | 'denied_disjoint'
   | 'skipped_non_ts'
 
@@ -51,6 +53,7 @@ export type ApplyValidationGateResult = {
     | 'L5_PROJECT_TYPECHECK_FAIL'
     | 'L5_LINT_FAIL'
     | 'RUST_GATE_SANDBOX_UNAVAILABLE'
+    | 'RUST_GATE_FAIL'
     | 'MULTI_FILE_VALIDATION_DENIED'
     | 'PATH_DISJOINT_FAIL'
   compilerLog: string
@@ -159,6 +162,8 @@ export function assertDisjointApplyPaths(paths: readonly string[]): {
 export async function runGovernedApplyValidationGate(input: {
   files: Array<{ filePath: string; content: string; taskId?: string }>
   ambientFiles?: L5VirtualFile[]
+  sandboxSessionId?: string
+  projectRootPath?: string
 }): Promise<ApplyValidationGateResult> {
   const baseHonesty = {
     composerSurpassClaim: false as const,
@@ -196,19 +201,12 @@ export async function runGovernedApplyValidationGate(input: {
 
   const fileValidation: FileValidationStatusEntry[] = []
   const compilerChunks: string[] = []
+  const rustFiles: Array<{ filePath: string; content: string; taskId?: string }> = []
 
   for (const file of input.files) {
     const path = normalizePath(file.filePath)
     if (isRustSourcePath(path)) {
-      const detail = buildRustGateUnavailableDetail(path)
-      fileValidation.push({
-        path,
-        status: 'denied_rust_gate_unavailable',
-        code: detail.code,
-        detail: detail.message,
-        taskId: file.taskId,
-      })
-      compilerChunks.push(`${path}: ${detail.code}`)
+      rustFiles.push(file)
       continue
     }
     if (!isTsLike(path)) {
@@ -253,11 +251,58 @@ export async function runGovernedApplyValidationGate(input: {
     })
   }
 
+  // Handle Rust validation if any .rs files exist
+  if (rustFiles.length > 0) {
+    if (!input.sandboxSessionId || !input.projectRootPath) {
+      for (const file of rustFiles) {
+        const path = normalizePath(file.filePath)
+        const detail = buildRustGateUnavailableDetail(path)
+        fileValidation.push({
+          path,
+          status: 'denied_rust_gate_unavailable',
+          code: detail.code,
+          detail: detail.message,
+          taskId: file.taskId,
+        })
+        compilerChunks.push(`${path}: ${detail.code}`)
+      }
+    } else {
+      const rustGateResult = await runProjectRustGate({
+        sandboxSessionId: input.sandboxSessionId,
+        projectRootPath: input.projectRootPath,
+        files: rustFiles.map(f => ({ filePath: normalizePath(f.filePath), content: f.content }))
+      })
+      
+      if (rustGateResult.verdict === 'FAIL') {
+        for (const file of rustFiles) {
+          const path = normalizePath(file.filePath)
+          fileValidation.push({
+            path,
+            status: 'denied_rust_fail',
+            code: 'RUST_GATE_FAIL',
+            detail: rustGateResult.compilerLog.slice(0, 500),
+            taskId: file.taskId,
+          })
+        }
+        compilerChunks.push(`Rust validation failed:\n${rustGateResult.compilerLog}`)
+      } else {
+        for (const file of rustFiles) {
+          fileValidation.push({
+            path: normalizePath(file.filePath),
+            status: 'pass',
+            taskId: file.taskId,
+          })
+        }
+      }
+    }
+  }
+
   const hardDeny = fileValidation.find(
     (entry) =>
       entry.status === 'denied_ast' ||
       entry.status === 'denied_lazy' ||
-      entry.status === 'denied_rust_gate_unavailable',
+      entry.status === 'denied_rust_gate_unavailable' ||
+      entry.status === 'denied_rust_fail',
   )
   if (hardDeny) {
     const code =
@@ -265,7 +310,9 @@ export async function runGovernedApplyValidationGate(input: {
         ? 'LAZY_INSPECTOR_REJECT'
         : hardDeny.status === 'denied_rust_gate_unavailable'
           ? 'RUST_GATE_SANDBOX_UNAVAILABLE'
-          : 'AST_SYNTAX_FAIL'
+          : hardDeny.status === 'denied_rust_fail'
+            ? 'RUST_GATE_FAIL'
+            : 'AST_SYNTAX_FAIL'
     log.warn('apply_gate_pre_l5_deny', { code, path: hardDeny.path })
     return {
       ok: false,
@@ -281,6 +328,7 @@ export async function runGovernedApplyValidationGate(input: {
     .map((f) => ({ fileName: normalizePath(f.filePath), content: f.content }))
 
   if (tsFiles.length === 0) {
+    // Rust-only batch already validated above (sandbox + cargo). No TS L.5 work left.
     return {
       ok: true,
       compilerLog: '',

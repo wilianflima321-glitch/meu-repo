@@ -3,11 +3,19 @@
 /**
  * AI-v1-c / Block 2A.5 / P2f #3 — Fusion undo hint banner (Trava II visible).
  * Undo uses the project-bound FusionScopeStore — never a fresh empty Map.
+ * Optional fusionHandoffJson arms server→client revert on mount (Trava II).
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { handleFusionUndoShortcut } from '@/lib/production/fusion-undo-bridge'
-import { getBoundFusionScopeStore } from '@/lib/production/fusion-scope-registry'
+import {
+  ensureProjectFusionYjsStore,
+  getBoundFusionScopeStore,
+} from '@/lib/production/fusion-scope-registry'
+import {
+  applyFusionTxClientHandoff,
+  parseFusionTxClientHandoff,
+} from '@/lib/production/fusion-tx-client-handoff'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('FusionTransactionUndoBanner')
@@ -17,6 +25,8 @@ interface FusionTransactionUndoBannerProps {
   message?: string | null
   projectId?: string | null
   yDocScope?: 'scene' | 'visual-script' | 'sound-cue' | 'quest' | 'behavior-tree' | 'manifest'
+  /** Serialized FusionTxClientHandoff from server Apex mission commit. */
+  fusionHandoffJson?: string | null
   onDismiss?: () => void
   onUndone?: () => void
 }
@@ -26,11 +36,36 @@ export function FusionTransactionUndoBanner({
   message,
   projectId,
   yDocScope = 'manifest',
+  fusionHandoffJson,
   onDismiss,
   onUndone,
 }: FusionTransactionUndoBannerProps) {
   const [status, setStatus] = useState<'idle' | 'working' | 'done' | 'unavailable'>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [handoffArmed, setHandoffArmed] = useState(false)
+
+  useEffect(() => {
+    if (!projectId || !fusionHandoffJson || handoffArmed) return
+    try {
+      const handoff = parseFusionTxClientHandoff(fusionHandoffJson)
+      const store = ensureProjectFusionYjsStore(projectId)
+      const applied = applyFusionTxClientHandoff(handoff, store)
+      if (applied.ok) {
+        setHandoffArmed(true)
+        log.info('fusion_banner_handoff_armed', {
+          transactionId: applied.transactionId,
+          projectId,
+        })
+      } else {
+        log.warn('fusion_banner_handoff_arm_fail', { reason: applied.reason, projectId })
+      }
+    } catch (err) {
+      log.warn('fusion_banner_handoff_parse_fail', {
+        err: err instanceof Error ? err.message : String(err),
+        projectId,
+      })
+    }
+  }, [projectId, fusionHandoffJson, handoffArmed])
 
   if (!transactionId) return null
 

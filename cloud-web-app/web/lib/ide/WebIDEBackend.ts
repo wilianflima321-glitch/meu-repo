@@ -21,6 +21,8 @@ import type {
   IDERenderJobStatus,
   IDESceneNode,
   IDESceneNodeTransformPatch,
+  IDETimelineHydrateResult,
+  IDETimelinePersistResult,
   IDETimelineSnapshot,
   IDETransformMode,
   IDETransformSpace,
@@ -36,6 +38,10 @@ import {
   getProjectTimelineBinding,
   subscribeProjectTimeline,
 } from '@/lib/sequencer/project-timeline-store';
+import {
+  hydrateProjectTimelineFromFile,
+  persistProjectTimelineToFile,
+} from '@/lib/sequencer/timeline-project-persist';
 import { bindingToIDETimelineSnapshot } from '@/lib/sequencer/timeline-ui-adapter';
 
 const log = createComponentLogger('WebIDEBackend');
@@ -246,7 +252,10 @@ class WebFileService implements IFileService {
 }
 
 class WebTimelineService implements ITimelineService {
-  constructor(private readonly projectId: string) {}
+  constructor(
+    private readonly projectId: string,
+    private readonly files: IFileService,
+  ) {}
 
   getSnapshot(): IDETimelineSnapshot {
     return bindingToIDETimelineSnapshot(getProjectTimelineBinding(this.projectId));
@@ -254,6 +263,26 @@ class WebTimelineService implements ITimelineService {
 
   subscribe(listener: () => void): () => void {
     return subscribeProjectTimeline(listener);
+  }
+
+  async persistToProject(relativePath?: string): Promise<IDETimelinePersistResult> {
+    return persistProjectTimelineToFile({
+      projectId: this.projectId,
+      io: this.files,
+      relativePath,
+    });
+  }
+
+  async hydrateFromProject(relativePath?: string): Promise<IDETimelineHydrateResult> {
+    const result = await hydrateProjectTimelineFromFile({
+      projectId: this.projectId,
+      io: this.files,
+      relativePath,
+    });
+    if (!result.ok) {
+      return { ok: false, reason: result.reason, message: result.message };
+    }
+    return { ok: true, path: result.path };
   }
 }
 
@@ -267,6 +296,6 @@ export class WebIDEBackend implements IIDEBackend {
   constructor(renderMode: IDERenderMode = 'draft', projectId = '') {
     this.viewport = new WebViewportService(renderMode);
     this.files = new WebFileService(projectId);
-    this.timeline = new WebTimelineService(projectId);
+    this.timeline = new WebTimelineService(projectId, this.files);
   }
 }

@@ -4,7 +4,7 @@
 
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   COMPOSER_SURPASS_CLAIM,
   TREE_SITTER_AST_INDEXER_WEB_WIRED,
@@ -127,6 +127,35 @@ describe('CW6 agent apply validation gate', () => {
     expect(gate.ok).toBe(false)
     expect(gate.code).toBe('RUST_GATE_SANDBOX_UNAVAILABLE')
     expect(gate.fileValidation.some((e) => e.status === 'denied_rust_gate_unavailable')).toBe(true)
+  })
+
+  it('fail-closes when L.1 sandbox cargo gate FAILS (never ok:true on denied_rust_fail)', async () => {
+    const rustGate = await import('@/lib/production/rust-gate-unavailable')
+    const runSpy = vi.spyOn(rustGate, 'runProjectRustGate').mockResolvedValue({
+      verdict: 'FAIL',
+      compilerLog: 'error[E0425]: cannot find value `x`',
+      checks: [{ id: 'cargo-check', status: 'fail', message: 'compilation error' }],
+    })
+
+    try {
+      const gate = await runGovernedApplyValidationGate({
+        files: [
+          {
+            filePath: 'apps/studio-local/src-tauri/src/broken.rs',
+            content: 'pub fn broken() { let _ = x; }\n',
+            taskId: 't_rust_fail',
+          },
+        ],
+        sandboxSessionId: 'sess-rust-fail',
+        projectRootPath: process.cwd(),
+      })
+      expect(gate.ok).toBe(false)
+      expect(gate.code).toBe('RUST_GATE_FAIL')
+      expect(gate.fileValidation.some((e) => e.status === 'denied_rust_fail')).toBe(true)
+      expect(runSpy).toHaveBeenCalled()
+    } finally {
+      runSpy.mockRestore()
+    }
   })
 })
 

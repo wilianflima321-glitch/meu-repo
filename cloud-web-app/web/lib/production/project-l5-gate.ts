@@ -4,12 +4,10 @@
  * apply route, and the Auto-Heal validation function so all three stay in sync.
  *
  * Rust (`.rs`) dual-stack validation (`cargo check` + `cargo clippy` + `cargo test`,
- * Law XI) is deliberately NOT run here: it requires isolated exec (Onda L / L.1
- * ForgeSandboxExecutor), which does not exist yet. Spawning `cargo` on the host from
- * a live agent-apply request would violate AgentShellPolicy (#48 — agents never
- * execute arbitrary host processes outside a sandbox). See
- * `rust-gate-unavailable.ts` for the fail-closed guard that keeps `.rs` AI-apply
- * honest (blocked, not silently unvalidated) until L.1 ships.
+ * Law XI) is NOT run here — it requires L.1 ForgeSandboxExecutor. The apply hot path
+ * (`agent-apply-validation-gate` + `ai-change-apply/executor`) provisions a
+ * `local-isolated` session and calls `runProjectRustGate`. Without a sandbox session,
+ * `.rs` patches fail closed via `RUST_GATE_SANDBOX_UNAVAILABLE` (never silently pass).
  */
 
 import { runProjectL5Typecheck, type L5VirtualFile } from './project-l5-typecheck'

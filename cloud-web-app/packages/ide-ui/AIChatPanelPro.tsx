@@ -350,6 +350,7 @@ export default function AIChatPanelPro({
             transactionId={latestFusionUndo.transactionId}
             message={latestFusionUndo.message}
             projectId={projectId}
+            fusionHandoffJson={latestFusionUndo.fusionHandoffJson}
           />
         )}
 

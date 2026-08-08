@@ -27,6 +27,13 @@ import { persistGovernedTaskEvidence } from './persist-governed-evidence'
 import { mirrorAppliedChangesToCanonicalStore } from './mirror-canonical-store'
 import { runMultiFileApplySwarm } from '@/lib/production/multi-file-apply-swarm'
 import { healDocumentBeforeApply } from '@/lib/production/auto-heal-apply'
+import { createForgeSandboxSession, teardownForgeSandboxSession } from '@/lib/production/forge-sandbox-executor'
+import { createMemoryCostGuardLedger } from '@/lib/production/creative-cost-guard'
+import { isRustSourcePath } from '@/lib/production/rust-gate-unavailable'
+import { createComponentLogger } from '@/lib/observability/logger'
+import * as path from 'path'
+
+const log = createComponentLogger('ai-change-apply-executor')
 
 export async function applyAiChanges(params: {
   request: NextRequest
@@ -171,28 +178,66 @@ export async function applyAiChanges(params: {
     })
   }
 
+  // Provision Sandbox if Rust files are modified
+  let sandboxSessionId: string | undefined
+  let projectRootPath: string | undefined
+  
+  const hasRustFiles = preparedChanges.some(p => isRustSourcePath(p.virtualPath))
+  if (hasRustFiles) {
+    projectRootPath = path.resolve(process.cwd(), '../../') // use monorepo root
+    const costAdapter = createMemoryCostGuardLedger()
+    const sessionResult = await createForgeSandboxSession({
+      userId,
+      projectId,
+      agentMode: 'QA', // L.5 validation
+      projectRootPath,
+      costAdapter,
+      estimatedMinutes: 2, // short validation
+    })
+    
+    if (sessionResult.ok) {
+      sandboxSessionId = sessionResult.session.sessionId
+    } else {
+      // Fail-closed: swarm denies .rs without sandboxSessionId (RUST_GATE_SANDBOX_UNAVAILABLE).
+      log.warn('rust_sandbox_provision_failed', {
+        reason: sessionResult.reason,
+        message: sessionResult.message,
+        projectId,
+      })
+    }
+  }
+
   // CW6 Path B — parallel AST/Lazy prep + batch L.5 overlay (fail-closed receipt).
   const enableAutoHeal = body.enableAutoHeal === true
-  const swarm = await runMultiFileApplySwarm({
-    cells: preparedChanges.map((prepared, index) => ({
-      taskId: `apply_cell_${index}`,
-      path: prepared.virtualPath,
-      content: prepared.nextDocument,
-      role: index === 0 ? 'critical' : 'peripheral',
-    })),
-    enableAutoHeal,
-    maxHealRounds: 3,
-    heal: enableAutoHeal
-      ? async ({ path, content }) => {
-          const healed = await healDocumentBeforeApply({
-            filePath: path,
-            document: content,
-            repairModelId: body.autoHealModelId,
-          })
-          return { content: healed.ok ? healed.document : content }
-        }
-      : undefined,
-  })
+  let swarm
+  try {
+    swarm = await runMultiFileApplySwarm({
+      cells: preparedChanges.map((prepared, index) => ({
+        taskId: `apply_cell_${index}`,
+        path: prepared.virtualPath,
+        content: prepared.nextDocument,
+        role: index === 0 ? 'critical' : 'peripheral',
+      })),
+      enableAutoHeal,
+      maxHealRounds: 3,
+      heal: enableAutoHeal
+        ? async ({ path, content }) => {
+            const healed = await healDocumentBeforeApply({
+              filePath: path,
+              document: content,
+              repairModelId: body.autoHealModelId,
+            })
+            return { content: healed.ok ? healed.document : content }
+          }
+        : undefined,
+      sandboxSessionId,
+      projectRootPath,
+    })
+  } finally {
+    if (sandboxSessionId) {
+      await teardownForgeSandboxSession(sandboxSessionId, 2)
+    }
+  }
 
   if (!swarm.ok) {
     await appendChangeRunLedgerEvent({

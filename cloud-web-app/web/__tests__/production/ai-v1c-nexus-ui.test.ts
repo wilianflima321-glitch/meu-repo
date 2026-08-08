@@ -10,7 +10,11 @@ import {
   resolveTerminalPhase,
 } from '@/lib/production/nexus-mission-phases'
 import { buildNexusMissionUiPayload, nexusCellsToAgentBoard } from '@/lib/production/nexus-mission-ui'
-import { capturePatchHashEvidence, resolveWebmCaptureCapability } from '@/lib/production/visual-evidence-capture'
+import {
+  capturePatchHashEvidence,
+  resolveVisualEvidenceCascade,
+  resolveWebmCaptureCapability,
+} from '@/lib/production/visual-evidence-capture'
 import { buildApexMissionEvidenceLedger, attachVisualEvidence } from '@/lib/production/apex-mission-evidence'
 import { createTaskEvidenceLedger } from '@/lib/production/task-evidence-ledger'
 import { buildLedgerEvidenceArtifact } from '@/components/agents/evidence-artifacts'
@@ -146,5 +150,25 @@ describe('AI-v1-c Nexus + VisualEvidence', () => {
       summary: patch.message,
     })
     expect(ledger.events[0]?.title).toMatch(/HELD/)
+  })
+
+  it('J.9 cascade prefers IMPLEMENTED browser WebM over patch-hash HELD', () => {
+    const cascaded = resolveVisualEvidenceCascade({
+      afterPatch: 'server-patch',
+      label: 'm1',
+      browserCapture: {
+        status: 'IMPLEMENTED',
+        kind: 'webm',
+        refs: ['webm:1200bytes'],
+        message: 'Captured 2000ms WebM video evidence.',
+        contentHash: 'abc',
+      },
+    })
+    expect(cascaded.kind).toBe('webm')
+    expect(cascaded.status).toBe('IMPLEMENTED')
+
+    const nodeOnly = resolveVisualEvidenceCascade({ afterPatch: 'server-patch', label: 'm1' })
+    expect(nodeOnly.kind).toBe('patch_hash')
+    expect(nodeOnly.status).toBe('HELD')
   })
 })

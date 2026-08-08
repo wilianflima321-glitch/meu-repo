@@ -473,6 +473,11 @@ export function useAIChatController({
                   (apexMission.undoHint as { message?: string }).message ||
                     'Ctrl+Z reverts this AI edit atomically.',
                 ),
+                fusionHandoffJson:
+                  typeof (apexMission.undoHint as { fusionHandoffJson?: unknown }).fusionHandoffJson ===
+                  'string'
+                    ? String((apexMission.undoHint as { fusionHandoffJson: string }).fusionHandoffJson)
+                    : undefined,
               }
             : null
         const latencyMs = Math.max(

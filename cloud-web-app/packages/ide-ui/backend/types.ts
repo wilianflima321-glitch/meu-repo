@@ -142,13 +142,26 @@ export interface IDETimelineSnapshot {
   isDemo: boolean
 }
 
+export type IDETimelinePersistResult =
+  | { ok: true; path: string; bytes: number }
+  | { ok: false; reason: string; message: string }
+
+export type IDETimelineHydrateResult =
+  | { ok: true; path: string }
+  | { ok: false; reason: string; message: string }
+
 /**
  * Read access to the project sequence document backing Timeline3D.
  * Concrete backends bridge `aethel.timeline.v1` (lib/sequencer) — not IDESceneNode transforms.
+ * Persist/hydrate write `*.timeline.json` into the project file store (authoring UI may lag).
  */
 export interface ITimelineService {
   getSnapshot(): IDETimelineSnapshot
   subscribe(listener: () => void): () => void
+  /** Persist bound (non-demo) timeline to project `*.timeline.json`. */
+  persistToProject?(relativePath?: string): Promise<IDETimelinePersistResult>
+  /** Hydrate in-memory bind from project `*.timeline.json`. */
+  hydrateFromProject?(relativePath?: string): Promise<IDETimelineHydrateResult>
 }
 
 export interface IIDEBackend {

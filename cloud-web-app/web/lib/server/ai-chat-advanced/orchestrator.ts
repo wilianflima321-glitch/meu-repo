@@ -414,9 +414,15 @@ export async function handleAdvancedChatRequest(params: {
         projectMemoryDigestId: spineIds.projectMemoryDigestId,
       })
 
-      // Trava II — open fusion tx around mission receipt (manifest scope snapshot)
+      // Trava II — open fusion tx around mission receipt (manifest scope snapshot).
+      // Server isolate store ≠ client Yjs — emit portable fusionHandoffJson for Ctrl+Z.
       let fusionMeta:
-        | { fusionTransactionId: string; snapshotHashBefore: string; snapshotHashAfter?: string }
+        | {
+            fusionTransactionId: string
+            snapshotHashBefore: string
+            snapshotHashAfter?: string
+            fusionHandoffJson?: string
+          }
         | undefined
       if (projectId) {
         try {
@@ -442,10 +448,16 @@ export async function handleAdvancedChatRequest(params: {
           )
           if (mission.verdict === 'APPLY') {
             const committed = await commitCreativeFusionTransaction(tx.id, store)
+            const { buildFusionTxClientHandoff, serializeFusionTxClientHandoff } = await import(
+              '@/lib/production/fusion-tx-client-handoff'
+            )
             fusionMeta = {
               fusionTransactionId: tx.id,
               snapshotHashBefore: tx.snapshotHashBefore,
               snapshotHashAfter: committed.snapshotHashAfter,
+              fusionHandoffJson: serializeFusionTxClientHandoff(
+                buildFusionTxClientHandoff(committed.record),
+              ),
             }
           } else {
             const { abortCreativeFusionTransaction } = await import(
@@ -508,6 +520,7 @@ export async function handleAdvancedChatRequest(params: {
                     transactionId: fusionMeta.fusionTransactionId,
                     message:
                       'Ctrl+Z / Cmd+Z reverts this AI edit atomically via CreativeFusionTransaction (Trava II).',
+                    fusionHandoffJson: fusionMeta.fusionHandoffJson,
                   }
                 : undefined,
           },

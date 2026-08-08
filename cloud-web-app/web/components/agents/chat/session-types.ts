@@ -18,7 +18,12 @@ export type ChatMessage = {
   ledgerArtifact?: AIChatLedgerArtifact | null
   /** J.2 Nexus UI payload from Apex MoA */
   nexusMission?: NexusMissionUiPayload | null
-  fusionUndoHint?: { transactionId: string; message: string } | null
+  fusionUndoHint?: {
+    transactionId: string
+    message: string
+    /** Portable server→client FusionTx handoff (Trava II). */
+    fusionHandoffJson?: string
+  } | null
 }
 
 export type ProviderGateState = {

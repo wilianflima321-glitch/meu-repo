@@ -6,9 +6,11 @@
 import { describe, expect, it } from 'vitest'
 import { runProjectL5Lint, validateDocumentWithProjectL5Lint } from '@/lib/production/project-l5-lint'
 import { runProjectL5Gate, gateCheckFailed } from '@/lib/production/project-l5-gate'
+import path from 'path'
 import {
   isRustSourcePath,
   buildRustGateUnavailableDetail,
+  resolveCargoCwdRelativeToRoot,
   RUST_GATE_SANDBOX_UNAVAILABLE,
 } from '@/lib/production/rust-gate-unavailable'
 
@@ -93,18 +95,82 @@ describe('project-l5-gate (typecheck + lint combined)', () => {
   })
 })
 
-describe('rust-gate-unavailable (Law XI honesty — no host cargo exec without L.1)', () => {
+import { vi } from 'vitest'
+import * as forgeSandbox from '@/lib/production/forge-sandbox-executor'
+import { runProjectRustGate } from '@/lib/production/rust-gate-unavailable'
+
+vi.mock('fs/promises', () => ({
+  readFile: vi.fn(),
+  mkdir: vi.fn(),
+  writeFile: vi.fn(),
+  unlink: vi.fn(),
+}))
+
+import * as fs from 'fs/promises'
+
+describe('project-rust-gate (Law XI honesty — Rust sandbox compilation)', () => {
   it('identifies .rs paths regardless of separator style', () => {
     expect(isRustSourcePath('apps/studio-local/src-tauri/src/lib.rs')).toBe(true)
     expect(isRustSourcePath('apps\\studio-local\\src-tauri\\src\\lib.rs')).toBe(true)
     expect(isRustSourcePath('lib/production/foo.ts')).toBe(false)
   })
 
-  it('builds an actionable, honest blocked detail', () => {
+  it('builds an actionable, honest blocked detail when missing sandbox', () => {
     const detail = buildRustGateUnavailableDetail('src/lib.rs')
     expect(detail.code).toBe(RUST_GATE_SANDBOX_UNAVAILABLE)
     expect(detail.message).toMatch(/cargo check/i)
     expect(detail.message).toMatch(/sandbox/i)
-    expect(detail.message).toMatch(/Nothing was written/i)
+    expect(detail.message).toMatch(/sandboxSessionId/i)
+  })
+
+  it('resolves cargo cwd relative to monorepo root when Cargo.toml is nested', () => {
+    // Vitest cwd is cloud-web-app/web — climb to monorepo root for the real crate.
+    const root = path.resolve(process.cwd(), '../..')
+    const rustFile = path.join(root, 'apps/studio-local/src-tauri/src/lib.rs')
+    const cwd = resolveCargoCwdRelativeToRoot(root, rustFile)
+    expect(cwd).toBe('apps/studio-local/src-tauri')
+  })
+
+  it('PASSes when cargo check, clippy, and test succeed in sandbox', async () => {
+    vi.mocked(fs.readFile).mockResolvedValue('original content')
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined as any)
+    vi.mocked(fs.writeFile).mockResolvedValue(undefined)
+    vi.mocked(fs.unlink).mockResolvedValue(undefined)
+    
+    const execSpy = vi.spyOn(forgeSandbox, 'execInForgeSandbox').mockResolvedValue({
+      ok: true, exitCode: 0, stdout: 'ok', stderr: ''
+    } as any)
+
+    const result = await runProjectRustGate({
+      sandboxSessionId: 'sess-123',
+      projectRootPath: '/mock/root',
+      files: [{ filePath: 'src/lib.rs', content: 'new content' }]
+    })
+
+    expect(result.verdict).toBe('PASS')
+    expect(execSpy).toHaveBeenCalledTimes(3) // check, clippy, test
+    expect(fs.writeFile).toHaveBeenCalledWith(expect.stringContaining('lib.rs'), 'original content', 'utf8') // restored
+  })
+
+  it('FAILs and aborts early if cargo check fails', async () => {
+    vi.mocked(fs.readFile).mockResolvedValue('original content')
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined as any)
+    vi.mocked(fs.writeFile).mockResolvedValue(undefined)
+    vi.mocked(fs.unlink).mockResolvedValue(undefined)
+    
+    const execSpy = vi.spyOn(forgeSandbox, 'execInForgeSandbox').mockResolvedValueOnce({
+      ok: true, exitCode: 1, stdout: '', stderr: 'compilation error'
+    } as any)
+
+    const result = await runProjectRustGate({
+      sandboxSessionId: 'sess-123',
+      projectRootPath: '/mock/root',
+      files: [{ filePath: 'src/lib.rs', content: 'new content' }]
+    })
+
+    expect(result.verdict).toBe('FAIL')
+    expect(result.compilerLog).toMatch(/compilation error/)
+    expect(execSpy).toHaveBeenCalledTimes(1) // aborted early
+    expect(fs.writeFile).toHaveBeenCalledWith(expect.stringContaining('lib.rs'), 'original content', 'utf8') // restored even on failure
   })
 })

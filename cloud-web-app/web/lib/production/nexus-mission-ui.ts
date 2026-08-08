@@ -11,7 +11,8 @@ import {
   type NexusMissionUiPayload,
   type NexusPhaseEvent,
 } from '@/lib/production/nexus-mission-phases'
-import { capturePatchHashEvidence } from '@/lib/production/visual-evidence-capture'
+import { resolveVisualEvidenceCascade } from '@/lib/production/visual-evidence-capture'
+import type { VisualEvidenceCaptureResult } from '@/lib/production/visual-evidence-capture'
 
 export function buildNexusMissionUiPayload(
   mission: ApexMissionResult,
@@ -20,6 +21,9 @@ export function buildNexusMissionUiPayload(
     fusionTransactionId?: string
     snapshotHashBefore?: string
     snapshotHashAfter?: string
+    /** Serialized FusionTxClientHandoff for browser Ctrl+Z after server commit. */
+    fusionHandoffJson?: string
+    browserVisualEvidence?: VisualEvidenceCaptureResult | null
   },
 ): NexusMissionUiPayload {
   const terminal = resolveTerminalPhase(mission.verdict)
@@ -44,15 +48,11 @@ export function buildNexusMissionUiPayload(
     }
   })
 
-  const visual = mission.supremePatch
-    ? capturePatchHashEvidence({ after: mission.supremePatch, label: mission.missionId })
-    : {
-        status: 'HELD' as const,
-        kind: 'patch_hash' as const,
-        refs: [],
-        message: 'No patch candidate — visual evidence not attached.',
-        contentHash: '',
-      }
+  const visual = resolveVisualEvidenceCascade({
+    afterPatch: mission.supremePatch,
+    label: mission.missionId,
+    browserCapture: fusion?.browserVisualEvidence,
+  })
 
   return {
     missionId: mission.missionId,
@@ -75,6 +75,7 @@ export function buildNexusMissionUiPayload(
     fusionTransactionId: fusion?.fusionTransactionId,
     snapshotHashBefore: fusion?.snapshotHashBefore,
     snapshotHashAfter: fusion?.snapshotHashAfter,
+    fusionHandoffJson: fusion?.fusionHandoffJson,
     visualEvidence: {
       status: visual.status,
       kind: visual.kind,

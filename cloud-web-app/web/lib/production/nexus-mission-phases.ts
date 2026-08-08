@@ -43,6 +43,8 @@ export interface NexusMissionUiPayload {
   fusionTransactionId?: string
   snapshotHashBefore?: string
   snapshotHashAfter?: string
+  /** Portable Trava II handoff JSON for server→client Ctrl+Z. */
+  fusionHandoffJson?: string
   visualEvidence?: {
     status: 'IMPLEMENTED' | 'HELD'
     kind: 'png_frames' | 'webm' | 'patch_hash'
