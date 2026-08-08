@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { getUserFromRequest } from '@/lib/auth-server'
-import { listVerifiedReviews, submitVerifiedReview } from '@/lib/hub/verified-reviews'
+import {
+  listVerifiedReviews,
+  resolveViewerReviewEligibility,
+  submitVerifiedReview,
+} from '@/lib/hub/verified-reviews'
 import { probeLiveOpsF2Honesty } from '@/lib/liveops/liveops-f2-capability'
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -28,16 +32,21 @@ export async function GET(
   }
 
   const auth = getUserFromRequest(req)
+  const f2 = await probeLiveOpsF2Honesty()
   const list = await listVerifiedReviews(gameId, { viewerUserId: auth?.userId })
+  const viewerEligibility = await resolveViewerReviewEligibility({
+    userId: auth?.userId,
+    gameId,
+    playtimeTelemetryReady: f2.playtimeTelemetryReady,
+    reviewsStoreReady: f2.reviewsStoreReady,
+  })
 
   return NextResponse.json({
-    mock: false,
     capability: CAPABILITY,
     capabilityStatus: 'IMPLEMENTED',
-    requiredPlaytimeSeconds: list.requiredPlaytimeSeconds,
-    earlyAccessOptIn: list.earlyAccessOptIn,
-    sort: list.sort,
     ...list,
+    /** Authenticated F.2 PlayerGameStats vs 2h (or EA 30m) gate — fail-closed when unmet. */
+    viewerEligibility,
   })
 }
 

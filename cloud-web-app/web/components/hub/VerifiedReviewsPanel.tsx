@@ -26,12 +26,23 @@ type ReviewRow = {
   createdAt: string
 }
 
+type ViewerEligibility = {
+  authenticated?: boolean
+  playtimeSeconds?: number
+  requiredSeconds?: number
+  earlyAccessOptIn?: boolean
+  eligible?: boolean
+  code?: string
+  reason?: string
+}
+
 type ReviewsPayload = {
   reviews?: ReviewRow[]
   count?: number
   averageRating?: number | null
   requiredPlaytimeSeconds?: number
   earlyAccessOptIn?: boolean
+  viewerEligibility?: ViewerEligibility
 }
 
 type VerifiedReviewsPanelProps = {
@@ -98,6 +109,9 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
   const [average, setAverage] = useState<number | null>(null)
   const [requiredSeconds, setRequiredSeconds] = useState(7200)
   const [earlyAccessOptIn, setEarlyAccessOptIn] = useState(false)
+  const [viewerPlaytimeSeconds, setViewerPlaytimeSeconds] = useState(0)
+  const [viewerEligible, setViewerEligible] = useState(false)
+  const [viewerAuthenticated, setViewerAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [rating, setRating] = useState(0)
   const [body, setBody] = useState('')
@@ -109,6 +123,7 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
   const load = useCallback(async () => {
     try {
       const res = await fetch(`/api/hub/games/${encodeURIComponent(gameId)}/reviews`, {
+        credentials: 'same-origin',
         headers: { Accept: 'application/json' },
         cache: 'no-store',
       })
@@ -121,6 +136,18 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
         setRequiredSeconds(data.requiredPlaytimeSeconds)
       }
       setEarlyAccessOptIn(data.earlyAccessOptIn === true)
+      const elig = data.viewerEligibility
+      setViewerAuthenticated(elig?.authenticated === true)
+      setViewerEligible(elig?.eligible === true)
+      setViewerPlaytimeSeconds(
+        typeof elig?.playtimeSeconds === 'number' ? elig.playtimeSeconds : 0,
+      )
+      if (typeof elig?.requiredSeconds === 'number') {
+        setRequiredSeconds(elig.requiredSeconds)
+      }
+      if (typeof elig?.earlyAccessOptIn === 'boolean') {
+        setEarlyAccessOptIn(elig.earlyAccessOptIn)
+      }
     } catch (err) {
       log.warn('reviews_load_failed', {
         error: err instanceof Error ? err.message : String(err),
@@ -128,6 +155,9 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
       setReviews([])
       setCount(0)
       setAverage(null)
+      setViewerEligible(false)
+      setViewerAuthenticated(false)
+      setViewerPlaytimeSeconds(0)
     } finally {
       setLoading(false)
     }
@@ -141,6 +171,20 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
   const submit = async () => {
     setError(null)
     setMessage(null)
+    if (!viewerAuthenticated) {
+      setError('Sign in to post a verified review.')
+      return
+    }
+    if (!viewerEligible) {
+      const need = requiredSeconds
+      const have = viewerPlaytimeSeconds
+      setError(
+        earlyAccessOptIn && need < 7200
+          ? `Need ${need}s verified playtime for Early Access reviews (have ${have}s).`
+          : `Need ${need}s verified playtime (have ${have}s). No review until the 2h gate.`,
+      )
+      return
+    }
     if (rating < 1 || rating > 5) {
       setError('Pick a star rating (1–5).')
       return
@@ -149,6 +193,7 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
     try {
       const res = await fetch(`/api/hub/games/${encodeURIComponent(gameId)}/reviews`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ rating, body }),
       })
@@ -159,11 +204,15 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
         playtimeSeconds?: number
       }
       if (!res.ok) {
-        if (res.status === 401) {
+        if (res.status === 401 || data.error === 'AUTH_REQUIRED') {
           setError('Sign in to post a verified review.')
+          setViewerAuthenticated(false)
+          setViewerEligible(false)
         } else if (data.error === 'PLAYTIME_GATE') {
-          const have = data.playtimeSeconds ?? 0
+          const have = data.playtimeSeconds ?? viewerPlaytimeSeconds
           const need = data.requiredPlaytimeSeconds ?? requiredSeconds
+          setViewerPlaytimeSeconds(have)
+          setViewerEligible(false)
           const gateLabel =
             earlyAccessOptIn && need < 7200
               ? `Need ${need}s verified playtime for Early Access reviews (have ${have}s).`
@@ -311,24 +360,36 @@ export function VerifiedReviewsPanel({ gameId }: VerifiedReviewsPanelProps) {
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
           Write a verified review
         </p>
+        <p className="mt-1.5 text-[11px] text-[var(--aethel-text-tertiary)]">
+          {!viewerAuthenticated
+            ? 'Sign in required — anonymous Arcade playtime stays local until auth.'
+            : viewerEligible
+              ? `Eligible · ${Math.floor(viewerPlaytimeSeconds / 60)}m authenticated F.2 playtime`
+              : `Have ${Math.floor(viewerPlaytimeSeconds / 60)}m / need ${Math.floor(requiredSeconds / 60)}m authenticated F.2 playtime`}
+        </p>
         <div className="mt-2">
-          <Stars value={rating} onChange={setRating} interactive />
+          <Stars
+            value={rating}
+            onChange={viewerEligible ? setRating : undefined}
+            interactive={viewerEligible}
+          />
         </div>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={3}
           maxLength={4000}
+          disabled={!viewerEligible}
           placeholder={
             earlyAccessOptIn && requiredSeconds < 7200
               ? `Optional thoughts — after ${Math.floor(requiredSeconds / 60)}m verified (Early Access)`
               : 'Optional thoughts — only after 2h verified playtime'
           }
-          className="mt-3 w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_55%,transparent)]"
+          className="mt-3 w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_55%,transparent)] disabled:opacity-50"
         />
         <button
           type="button"
-          disabled={submitting}
+          disabled={submitting || !viewerEligible}
           onClick={() => void submit()}
           className={`mt-3 inline-flex items-center rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-inverse)] transition hover:brightness-110 disabled:opacity-50 ${CANONICAL_FOCUS}`}
         >

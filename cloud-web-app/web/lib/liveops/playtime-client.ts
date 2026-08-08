@@ -58,6 +58,8 @@ export async function flushPlaytimeSpool(input: {
   try {
     const res = await fetchImpl(endpoint, {
       method: 'POST',
+      // Cookie auth (F.2 durable ingest) — anonymous 401 leaves rows unsynced (Law II).
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         events: playtime.map((r) => ({

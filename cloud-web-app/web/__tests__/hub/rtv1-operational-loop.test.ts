@@ -33,6 +33,11 @@ import {
   enqueueSessionPlaytime,
   flushPlaytimeSpool,
 } from '@/lib/liveops/playtime-client'
+import {
+  resolveViewerReviewEligibility,
+  submitVerifiedReview,
+  VERIFIED_REVIEW_REQUIRED_SECONDS,
+} from '@/lib/hub/verified-reviews'
 
 describe('RTv1 measured export/cook bundle evidence', () => {
   it('stamps measured size into export options for listing authority', () => {
@@ -331,5 +336,122 @@ describe('RTv1 Arcade playtime client emission path', () => {
     expect(result.ok).toBe(false)
     expect(result.marked).toBe(0)
     expect(await spool.peekUnsynced()).toHaveLength(1)
+  })
+})
+
+describe('RTv1 I.2 verified review gate from authenticated F.2 playtime', () => {
+  const prevReviews = process.env.AETHEL_HUB_REVIEWS_ROOT
+  const prevStats = process.env.AETHEL_LIVEOPS_STATS_ROOT
+  let tmpReviews: string
+  let tmpStats: string
+
+  afterEach(async () => {
+    if (prevReviews === undefined) delete process.env.AETHEL_HUB_REVIEWS_ROOT
+    else process.env.AETHEL_HUB_REVIEWS_ROOT = prevReviews
+    if (prevStats === undefined) delete process.env.AETHEL_LIVEOPS_STATS_ROOT
+    else process.env.AETHEL_LIVEOPS_STATS_ROOT = prevStats
+    if (tmpReviews) {
+      await fs.rm(tmpReviews, { recursive: true, force: true }).catch(() => undefined)
+    }
+    if (tmpStats) {
+      await fs.rm(tmpStats, { recursive: true, force: true }).catch(() => undefined)
+    }
+  })
+
+  async function withTmpRoots(): Promise<void> {
+    tmpReviews = await fs.mkdtemp(path.join(os.tmpdir(), 'aethel-rtv1-i2-reviews-'))
+    tmpStats = await fs.mkdtemp(path.join(os.tmpdir(), 'aethel-rtv1-i2-stats-'))
+    process.env.AETHEL_HUB_REVIEWS_ROOT = tmpReviews
+    process.env.AETHEL_LIVEOPS_STATS_ROOT = tmpStats
+  }
+
+  it('fail-closes unauthenticated eligibility and submit (no fake verified)', async () => {
+    await withTmpRoots()
+    const elig = await resolveViewerReviewEligibility({
+      userId: null,
+      gameId: 'neon-dash',
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(elig.authenticated).toBe(false)
+    expect(elig.eligible).toBe(false)
+    expect(elig.code).toBe('AUTH_REQUIRED')
+    expect(elig.requiredSeconds).toBe(VERIFIED_REVIEW_REQUIRED_SECONDS)
+
+    const rejected = await submitVerifiedReview({
+      userId: '',
+      gameId: 'neon-dash',
+      rating: 5,
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(rejected.ok).toBe(false)
+    if (!rejected.ok) {
+      expect(rejected.code).toBe('AUTH_REQUIRED')
+      expect(rejected.status).toBe(401)
+    }
+  })
+
+  it('rejects under 2h authenticated playtime; accepts at ≥7200s from PlayerGameStats', async () => {
+    await withTmpRoots()
+    const { recordSessionPlaytime } = await import('@/lib/liveops/player-playtime-authority')
+
+    await recordSessionPlaytime({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      deltaSeconds: 1800,
+    })
+
+    const under = await resolveViewerReviewEligibility({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(under.authenticated).toBe(true)
+    expect(under.eligible).toBe(false)
+    expect(under.code).toBe('PLAYTIME_GATE')
+    expect(under.playtimeSeconds).toBe(1800)
+    expect(under.requiredSeconds).toBe(VERIFIED_REVIEW_REQUIRED_SECONDS)
+
+    const shortPost = await submitVerifiedReview({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      rating: 1,
+      body: 'bomb attempt',
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(shortPost.ok).toBe(false)
+    if (!shortPost.ok) expect(shortPost.code).toBe('PLAYTIME_GATE')
+
+    await recordSessionPlaytime({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      deltaSeconds: 5400,
+    })
+
+    const ready = await resolveViewerReviewEligibility({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(ready.eligible).toBe(true)
+    expect(ready.playtimeSeconds).toBe(7200)
+
+    const ok = await submitVerifiedReview({
+      userId: 'player-rtv1',
+      gameId: 'neon-dash',
+      rating: 5,
+      body: 'Earned after authenticated 2h',
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(ok.ok).toBe(true)
+    if (ok.ok) {
+      expect(ok.review.verifiedPlaytimeSeconds).toBe(7200)
+      expect(ok.review.isEarlyAccess).toBe(false)
+    }
   })
 })

@@ -75,6 +75,17 @@ export type SubmitVerifiedReviewResult =
       status: number
     }
 
+/** Authenticated F.2 playtime vs I.2 gate — never invents hours. */
+export type ViewerReviewEligibility = {
+  authenticated: boolean
+  playtimeSeconds: number
+  requiredSeconds: number
+  earlyAccessOptIn: boolean
+  eligible: boolean
+  code?: string
+  reason: string
+}
+
 export type CastVerifiedHelpfulVoteInput = {
   userId: string
   gameId: string
@@ -165,6 +176,57 @@ export async function getUserVerifiedReview(
 }
 
 /**
+ * Resolve whether the viewer may post a verified review from durable F.2 PlayerGameStats.
+ * Unauthenticated / under-threshold → fail-closed (no fake verified badge).
+ */
+export async function resolveViewerReviewEligibility(input: {
+  userId?: string | null
+  gameId: string
+  playtimeTelemetryReady: boolean
+  reviewsStoreReady: boolean
+  earlyAccessOptIn?: boolean
+}): Promise<ViewerReviewEligibility> {
+  const gameId = String(input.gameId || '').trim()
+  const userId = String(input.userId || '').trim()
+  const gateSeconds = await resolveReviewGateSeconds(
+    gameId,
+    typeof input.earlyAccessOptIn === 'boolean' ? input.earlyAccessOptIn : undefined,
+  )
+
+  if (!userId) {
+    return {
+      authenticated: false,
+      playtimeSeconds: 0,
+      requiredSeconds: gateSeconds.requiredSeconds,
+      earlyAccessOptIn: gateSeconds.earlyAccessOptIn,
+      eligible: false,
+      code: 'AUTH_REQUIRED',
+      reason:
+        'Sign in required for verified reviews — anonymous Arcade playtime does not unlock the gate',
+    }
+  }
+
+  const stats = gameId ? await getPlayerGameStats(userId, gameId) : null
+  const playtimeSeconds = stats?.playtimeSeconds ?? 0
+  const gate = evaluateVerifiedReviewGate({
+    playtimeTelemetryReady: input.playtimeTelemetryReady,
+    reviewsStoreReady: input.reviewsStoreReady,
+    playtimeSeconds,
+    requiredSeconds: gateSeconds.requiredSeconds,
+  })
+
+  return {
+    authenticated: true,
+    playtimeSeconds,
+    requiredSeconds: gateSeconds.requiredSeconds,
+    earlyAccessOptIn: gateSeconds.earlyAccessOptIn,
+    eligible: gate.allowed,
+    code: gate.code,
+    reason: gate.reason,
+  }
+}
+
+/**
  * Accept a review only when store + F.2 playtime path are ready and threshold met.
  */
 export async function submitVerifiedReview(
@@ -186,7 +248,19 @@ export async function submitVerifiedReview(
       : gateSeconds.requiredSeconds
   const earlyAccessOptIn = gateSeconds.earlyAccessOptIn || input.earlyAccessOptIn === true
 
-  const stats = userId && gameId ? await getPlayerGameStats(userId, gameId) : null
+  if (!userId) {
+    return {
+      ok: false,
+      code: 'AUTH_REQUIRED',
+      reason:
+        'Sign in required for verified reviews — anonymous Arcade playtime does not unlock the gate',
+      playtimeSeconds: 0,
+      requiredSeconds,
+      status: 401,
+    }
+  }
+
+  const stats = gameId ? await getPlayerGameStats(userId, gameId) : null
   const playtimeSeconds = stats?.playtimeSeconds ?? 0
 
   const gate = evaluateVerifiedReviewGate({
