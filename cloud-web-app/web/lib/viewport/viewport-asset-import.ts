@@ -2,6 +2,11 @@ import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
 import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
 import { resolveUsdBrowserFormatSupport } from '@/lib/production/usd-integrator'
+import type { UsdaHierarchyPreviewMeta } from '@/lib/viewport/usda-preview-hierarchy'
+import {
+  parseUsdaHierarchyPreview,
+  toUsdaHierarchyPreviewMeta,
+} from '@/lib/viewport/usda-preview-hierarchy'
 
 export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usda' | 'usdz'
 export type ViewportAssetLicenseStatus = 'needs-review' | 'approved' | 'blocked'
@@ -23,6 +28,11 @@ export type ViewportAssetImportMetadata = {
   animationCount?: number
   /** Honest viewer status — USDA/USD HELD; USDZ live when meshUrl + USDZLoader path. */
   viewerStatus?: 'live' | 'placeholder' | 'held'
+  /**
+   * J.7 deepen — USDA ASCII hierarchy wireframe metadata (not a live mesh stage).
+   * Present only when ASCII prims were measured; never invents OpenUSD claims.
+   */
+  usdaHierarchy?: UsdaHierarchyPreviewMeta
 }
 
 export type ViewportAssetImportFile = {
@@ -35,6 +45,7 @@ export type ViewportAssetImportFile = {
   meshCount?: number
   animationCount?: number
   viewerStatus?: 'live' | 'placeholder' | 'held'
+  usdaHierarchy?: UsdaHierarchyPreviewMeta
 }
 
 export type ViewportAssetImportRecord = {
@@ -201,8 +212,42 @@ export function buildViewportImportedObject({
       ...(typeof file.meshCount === 'number' ? { meshCount: file.meshCount } : {}),
       ...(typeof file.animationCount === 'number' ? { animationCount: file.animationCount } : {}),
       viewerStatus: defaultViewerStatus,
+      ...(file.usdaHierarchy ? { usdaHierarchy: file.usdaHierarchy } : {}),
     },
   }
+}
+
+/** Read UTF-8 text from a dropped File — resilient to incomplete File polyfills. */
+async function readDroppedFileText(file: File): Promise<string> {
+  const maybeText = file as File & { text?: () => Promise<string> }
+  if (typeof maybeText.text === 'function') {
+    const viaText = await maybeText.text()
+    if (viaText.trim()) return viaText
+  }
+  if (typeof file.arrayBuffer === 'function') {
+    const viaBytes = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(await file.arrayBuffer()))
+    if (viaBytes.trim()) return viaBytes
+  }
+  // Last resort: stream reader (browser File extends Blob).
+  const blob = file as Blob
+  if (typeof blob.stream === 'function') {
+    const reader = blob.stream().getReader()
+    const chunks: Uint8Array[] = []
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (value) chunks.push(value)
+    }
+    const total = chunks.reduce((n, c) => n + c.byteLength, 0)
+    const merged = new Uint8Array(total)
+    let offset = 0
+    for (const c of chunks) {
+      merged.set(c, offset)
+      offset += c.byteLength
+    }
+    return new TextDecoder('utf-8', { fatal: false }).decode(merged)
+  }
+  return ''
 }
 
 /**
@@ -224,14 +269,26 @@ export async function buildViewportImportedObjectsFromFiles({
     if (!format) continue
 
     if (format === 'usd' || format === 'usda') {
-      // Fail-closed: no browser loader — intake only, never attach meshUrl or solid proxy.
+      // Fail-closed: no solid meshUrl / OpenUSD stage. ASCII hierarchy wireframe deepen only.
+      let usdaHierarchy: UsdaHierarchyPreviewMeta | undefined
+      let meshCount: number | undefined
+      try {
+        const text = await readDroppedFileText(file)
+        const preview = parseUsdaHierarchyPreview(text)
+        usdaHierarchy = toUsdaHierarchyPreviewMeta(preview)
+        if (usdaHierarchy) meshCount = usdaHierarchy.meshCount
+      } catch {
+        usdaHierarchy = undefined
+      }
       const object = buildViewportImportedObject({
         existingCount,
         file: {
           fileName: file.name,
           sizeBytes: file.size,
           viewerStatus: 'held',
-          hierarchyPreserved: false,
+          hierarchyPreserved: Boolean(usdaHierarchy && usdaHierarchy.primCount > 0),
+          ...(typeof meshCount === 'number' ? { meshCount } : {}),
+          ...(usdaHierarchy ? { usdaHierarchy } : {}),
         },
         importedAt,
         index: imported.length,

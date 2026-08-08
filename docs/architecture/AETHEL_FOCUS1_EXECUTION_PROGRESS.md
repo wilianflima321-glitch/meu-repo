@@ -55,6 +55,9 @@
 | 2026-08-08 timeline-scrub-apply | Timeline3D scrub/play → live scene node apply (position/rotation/scale/visibility) | **PARTIAL** deepen (scrub apply core); commit `0ebb9d359`; material/event **HELD**; Hub checkout HELD |
 | 2026-08-08 timeline-material-color | Timeline material scrub → `ISceneService.setColor` + live R3F `object.color` | **PARTIAL** deepen; material **UNHELD** (pixels via ViewportSceneObjectMesh); event **HELD**; tests **27/27**; Hub checkout HELD |
 | 2026-08-08 timeline-event-cue-bus | Timeline event lane → typed cue bus on scrub cross (editor hooks) | **PARTIAL** deepen; event **PARTIAL** (editor bus; GAS/gameplay bind still OPEN); tests **32/32**; Hub checkout HELD |
+| 2026-08-08 timeline-gas-cue-bridge | Timeline event → in-process GasWorld GameplayCue bind + eventName authoring | **PARTIAL** deepen; desktop GAS IPC **HELD**; tests **4/4** bridge + authoring scrub; Hub checkout HELD |
+| 2026-08-08 j7-usda-hierarchy | J.7 USDA ASCII hierarchy wireframe honesty (not OpenUSD stage) | **PARTIAL** deepen; USDA/USDC still **HELD** for mesh stage; hierarchy boxes live; tests **5/5**; Hub checkout HELD |
+| 2026-08-08 l9-soak-acc04 | L.9 L-ACC-04 fail-closed soak harness (measured p95; never invent) | **PARTIAL** deepen; harness DONE-core; live create-next-app soak still OPEN (`AETHEL_L9_SOAK=1`); tests **5/5** + 1 skipped; Hub checkout HELD |
 | 2026-08-08 desktop-ux-honesty | Desktop Studio Local UX honesty pass — kill Cinema/Aesthetic/Sentinel/Telepathic theater; wire Sentinel+LSP probe; FPS/VRAM fail-closed; egui/PTY honesty | **PARTIAL** deepen; cargo check+clippy -D warnings green (E:\aethel-target-gnu); Hub checkout HELD; Onda G deferred |
 
 ---
@@ -346,7 +349,7 @@ no parallel swarm, per Founder order.
 | J.11 | ACP Unification | **STOPPED (Founder Pacto 2026-07-11ak)** | Working-tree scaffold `agent-control-protocol.ts` may exist — **not shipped** (no Vitest / CostGuard / production dispatch). Pacto remains binding. | Founder must explicitly lift the STOP before any ACP work resumes. |
 | J.12 | OrchestratorProd | **STOPPED (same Pacto)** | Working-tree scaffold `orchestrator-prod.ts` may exist — **not shipped**. Same STOP. | Same — Founder-gated. |
 
-**Onda J summary (updated 2026-08-08 r11-j4-byok):** 7 DONE-core (J.1, J.2, J.5, J.6, J.8-core, J.9-core, J.10-core), 2 PARTIAL (J.4 — BYOK+CostGuard+JS cosine PARTIAL / native sqlite-vec HELD; J.7 — USDZ PARTIAL / OpenUSD stage HELD), 1 superseded-by-design (J.3→L.14), 2 STOPPED by explicit Founder order (J.11, J.12 — **do not resume without Founder sign-off**).
+**Onda J summary (updated 2026-08-08 j-l-debt-close):** 7 DONE-core (J.1, J.2, J.5, J.6, J.8-core, J.9-core, J.10-core), 2 PARTIAL (J.4 — BYOK+CostGuard+JS cosine PARTIAL / native sqlite-vec HELD; J.7 — USDZ PARTIAL + USDA hierarchy wireframe PARTIAL / OpenUSD+USDC stage HELD), 1 superseded-by-design (J.3→L.14), 2 STOPPED by explicit Founder order (J.11, J.12 — **do not resume without Founder sign-off**). Timeline event→in-process GasWorld cue bind PARTIAL (desktop GAS IPC HELD).
 
 #### Onda L (Aethel Forge / Universal IDE) — honest status
 
@@ -669,7 +672,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 **Timeline3D authoring — PARTIAL (2026-08-08):** In-product Add Track / Add Keyframe / Delete via `timeline-authoring.ts` + `ITimelineService.addTrack`/`addKeyframe`/`removeKeyframe`/`removeTrack` → store → `persistToProject`. `CanvasViewportSurface` wires `Timeline3D` `authoring` prop (demo binds read-only). Empty projects stay empty until the user authors — no fabricated lanes.
 
-**Timeline3D scrub→viewport apply — PARTIAL (2026-08-08):** Live (non-demo) playhead scrub/play samples authored lanes and applies to `ISceneService` / `useViewportStore` nodes. Binding: `metadata.targetNodeId` or `sourceRef` `scene:<id>` (stamped from Outliner selection on Add Track/Keyframe). **Applies:** position / rotation / scale / visibility / material color (`setColor`) / **event cues** (`subscribeTimelineEventCues` — edge-trigger on cross; demo never emits). Fail-closed when node id missing or absent from scene; demo binds never mutate real scene. **Remaining gaps:** curve editor / multi-property channels UI, clip trim/move UI, SequencerIdePanel local director demo path, **GAS/gameplay bind from event cues** (editor bus only). Tests: `timeline-scene-apply.test.ts` + `timeline-event-cue-bus.test.ts` + authoring + real-data wire.
+**Timeline3D scrub→viewport apply — PARTIAL (2026-08-08):** Live (non-demo) playhead scrub/play samples authored lanes and applies to `ISceneService` / `useViewportStore` nodes. Binding: `metadata.targetNodeId` or `sourceRef` `scene:<id>` (stamped from Outliner selection on Add Track/Keyframe). **Applies:** position / rotation / scale / visibility / material color (`setColor`) / **event cues** (`subscribeTimelineEventCues` — edge-trigger on cross; demo never emits) / **in-process GasWorld GameplayCue bind** (`timeline-gas-cue-bridge` — desktop 60Hz IPC HELD). Fail-closed when node id missing or absent from scene; demo binds never mutate real scene. **Remaining gaps:** curve editor / multi-property channels UI, clip trim/move UI, SequencerIdePanel local director demo path. Tests: scene-apply + cue-bus + gas-bridge + authoring.
 
 #### P2c — Git-verified work (synthesizer 2026-08-08)
 
@@ -1091,9 +1094,9 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **P0** | R21 | **Desktop shell vs Unreal Editor / native IDE bar** | Studio Local UX was theater-first (Cinema/ProRes/fake FPS/WASM RUNNING) | **PARTIAL** — 2026-08-08 honesty pass closed dead-claim panels; **still OPEN:** product wgpu present-in-WebView, Monaco mount in shell, dock/outliner depth, undock maturity |
 | **P1** | R22 | **Desktop human PTY policy soak + agent refuse evidence** | Law #48 documented; need CI/evidence agents cannot invoke terminal_* | **PARTIAL** — UI human-only badge + pty_commands doc; no IPC agent ACL yet |
 | **P1** | R6 | **L.13 live Monaco desktop + Python binary** | Cursor-class desktop IDE gap | **PARTIAL** — farm/matrix wired; host acceptance OPEN |
-| **P1** | R10 | **L.9 live create-next-app / L-ACC-04 soak** | Scaffold UX ≠ live generate loop | **PARTIAL** — wizard DONE; soak open |
+| **P1** | R10 | **L.9 live create-next-app / L-ACC-04 soak** | Scaffold UX ≠ live generate loop | **PARTIAL** — wizard + fail-closed soak harness DONE-core; live ≥20-run p95 still open (`AETHEL_L9_SOAK=1`) |
 | **P1** | R7 | **L.4 E2B remote PTY / docker TTY** | Terminal parity vs Cursor | **PARTIAL** — local sandbox PTY first-light; remote HELD |
-| **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | Asset interchange vs UE/Pixar | **PARTIAL** USDZ only; stage HELD |
+| **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | Asset interchange vs UE/Pixar | **PARTIAL** USDZ live + USDA hierarchy wireframe honesty; OpenUSD/USDC stage **HELD** |
 | **P1** | R11 | **J.4 native sqlite-vec soak** | Semantic recall depth | **PARTIAL** — BYOK+JS cosine; `vec0` HELD |
 | **P1** | R12 | **CW5 Storybook / Figma token government** | Design-system government | **PARTIAL** — L.10 colors 0; Figma HELD |
 | **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Evidence depth | **DONE-core** browser; cinematic HELD |
@@ -1111,8 +1114,8 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | Competitor | Aethel leads / ties (real) | Aethel loses (block supremacy claim) |
 |---|---|---|
 | **Cursor** | CostGuard + L.5 dual-stack apply; RepoGraphRAG 100% slice; Nexus evidence | Composer UX; live E2B HMR; desktop LSP soak; J.12 STOPPED → **no AI-native / Composer-surpass** |
-| **v0** | PreviewOrchestrator + FusionTx MagicWand; honest `hmr:false` default | Live scaffold+HMR soak → **no Universal IDE / v0-class** |
-| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material | Nanite/Lumen/Chaos/RHI (~15%); Spec heroes MISSING → **no UE parity** |
+| **v0** | PreviewOrchestrator + FusionTx MagicWand; honest `hmr:false` default; L.9 soak harness (no fake p95) | Live scaffold+HMR soak (≥20 measured) → **no Universal IDE / v0-class** |
+| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material + in-process GAS cue bind | Nanite/Lumen/Chaos/RHI (~15%); OpenUSD stage HELD; Spec heroes MISSING → **no UE parity** |
 | **Devin / Copilot** | Sandbox-only agents; ledger receipts; fleet strip | Long-horizon autonomy; advanced streaming chat → **no Devin-class** |
 
 ### Top 15 remaining debts (market supremacy rank)
@@ -1120,10 +1123,10 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 1. **R1** H.1+ human/legal certificate → `hubCheckoutAudited`  
 2. **R4** L.8 live E2B HMR soak  
 3. **R6** L.13 desktop LSP live acceptance (+ Python binary)  
-4. **R10** L.9 live create-next-app soak  
+4. **R10** L.9 live create-next-app soak (≥20 measured; harness ready)  
 5. **R7** L.4 E2B remote PTY  
 6. **R19** Advanced chat streaming + shared-Yjs Fusion undo  
-7. **R8** J.7 OpenUSD stage (beyond USDZ)  
+7. **R8** J.7 OpenUSD/USDC stage (USDZ + USDA hierarchy wireframe landed)  
 8. **R11** J.4 native sqlite-vec  
 9. **R12** CW5 Storybook/Figma government  
 10. **R9** J.9 cinematic #63  
@@ -1139,11 +1142,11 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Ledger label | Practice reality | Remaining for true DONE |
 |--------------|------------------|-------------------------|
-| **J.7** "AI-v1-e DONE" / USD integrator | **USDZ PARTIAL** only | OpenUSD/Hydra; USDA/USDC loaders; Meshy→USD cook |
+| **J.7** "AI-v1-e DONE" / USD integrator | **USDZ PARTIAL** + USDA hierarchy wireframe PARTIAL | OpenUSD/Hydra; USDC crate; solid USDA mesh; Meshy→USD cook |
 | **J.9** DONE-core + auto-attach | Browser WebM/PNG path real; headless = PNG/patch-hash | Cinematic #63 engine capture; CI WebM |
 | **L.5** DONE (TS+lint+Rust via L.1) | Rust runs in `local-isolated`; network kernel isolation HELD | e2b/firecracker soak; OS firewall isolation |
 | **L.7** DONE-core | MagicWand→FusionTx + L.8 autoProvision | v0 multi-file generate+HMR IDE loop |
-| **L.8 / L.4 / L.9 / L.13** | Real cores; labeled PARTIAL correctly | L.8 live E2B soak; L.4 remote PTY; L.9 live soak; L.13 host acceptance (Python binary HELD) |
+| **L.8 / L.4 / L.9 / L.13** | Real cores; labeled PARTIAL correctly | L.8 live E2B soak; L.4 remote PTY; L.9 harness DONE-core (live ≥20-run p95 open); L.13 host acceptance (Python binary HELD) |
 | **L.4** | Sandbox node-pty first-light + pipe fallback | E2B remote PTY / docker TTY still HELD |
 | **L.12** | L-ACC-05 soak **DONE** (100% who-imports/neighborhood on monorepo slice) | Cursor-class full IR; R11 native sqlite-vec HELD; not Universal IDE alone |
 | **L.1** local-isolated DONE | Real sandbox; e2b env-gated; firecracker HELD | Kernel-level network isolation |
@@ -1152,7 +1155,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **H.1+ audit probe SHIPPED** | `evaluateTreasuryAudit` + modules 4–7 + fail-closed Showcase UI | Human/legal certificate; `hubCheckoutAudited` **false** |
 | **CW4** DONE | LWW + exception-only allowlist + expired legacy mirror; open chrome debt 0 | Keep allowlist discipline; no new raw localStorage chrome |
 | **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | Code `COMPOSER_SURPASS_CLAIM=false` (doc previously lied `true`); tree-sitter web wire false; J.11/J.12 STOPPED |
-| **Timeline persist + authoring + scrub PARTIAL** | Persist + Add Track/Keyframe + live pos/rot/scale/visibility/**material color** + **event cue bus** + drag-move + opacity channel | Event = editor bus not GAS; curve editor; clip trim; SequencerIdePanel demo path |
+| **Timeline persist + authoring + scrub PARTIAL** | Persist + Add Track/Keyframe + live pos/rot/scale/visibility/**material color** + **event cue bus** + **in-process GasWorld cue bind** + drag-move + opacity channel | Event→GAS **PARTIAL** (desktop 60Hz IPC HELD); curve editor; clip trim; SequencerIdePanel demo path |
 | **CW1 15-slot hero bench DONE-core** | Executable bench + truth-matrix wire; Spec mock heroes absent | Product depth / Spec-named hero invent forbidden (CW0); not 15/15 ship |
 | **CW3 DONE-core** | Catalog + present-root + `r3f-webgl2` + `marketingAllowed:false` | Unified RHI + WebGPU viewport + desktop present-in-product **HELD** |
 | **FusionTx handoff DONE** | `aethel.fusion-tx-handoff.v1` arms client store | Undo without shared Y.Doc still PARTIAL |
@@ -1163,6 +1166,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 j-l-debt-close | **J/L product debt deepen (3 closures).** (1) **Timeline→GAS:** `timeline-gas-cue-bridge.ts` arms in-process `GameplayCueDispatcher` from event cue bus; `eventName` authoring; CanvasViewportSurface enables for non-demo; desktop GAS IPC stays **HELD**. (2) **J.7 USDA:** `usda-preview-hierarchy.ts` ASCII prim/extent → hierarchy wireframe boxes; drop intake attaches `usdaHierarchy` without meshUrl; shipStatus USDA/USDC remains **HELD** (not OpenUSD theater). (3) **L.9 L-ACC-04:** `l9-scaffold-soak.ts` fail-closed measured p50/p95 (`evidenceStatus:held` with zero samples); instrumented `scaffoldAndPreviewProject`; `proveL9ScaffoldSoakReady` requires ≥20 under-budget successes. Tests: gas-bridge **4/4** + usda **5/5** + soak **5/5** (+1 skipped) + j7/event/scene-apply regression **37/37** targeted (1 skipped). Hub checkout HELD. No J.11/J.12. No Onda G. |
 | 2026-08-08 desktop-ux-honesty | **Desktop Studio Local UX honesty PARTIAL (theater purge).** Audited StudioLocalApp + panels vs UE Editor / native IDE bar. **P0 theater killed:** Cinema Compositor (ProRes/fake FPS/alert export), Telepathic Drone (fake CoVe/PT-BR), Sentinel (hardcoded WASM RUNNING / happiness %), Aesthetic "NPR KERNEL ACTIVE", HardwareProfiler fabricated RTX 3060 Tier-2 VRAM, FpsOverlayBadge default 60 FPS. **Fixes:** fail-closed honesty panels (EN + var(--aethel-*)); Sentinel to live hardware_profiler; new LspFarmStatusPanel (lsp_farm_honesty/probe); default tab to Scene and Tools; Terminal human-only Law #48 badge; egui overlay copy = debug scaffold not telemetry; pty_commands human-lane doc. **Gates:** CARGO_TARGET_DIR=E:\aethel-target-gnu — cargo check + cargo clippy -- -D warnings **green**. **No Onda G** wiring / no pub mod rendering / Hub checkout HELD. Remaining desktop OPEN: R21 present-in-product + Monaco shell mount; R6 live LSP acceptance; R22 agent ACL on terminal_*. |
 | 2026-08-08 docs-honesty-gap | **Docs-only honesty alignment (no new MD; no product code).** Ruthless critique: (overclaim) Master Map CW6 still implied Composer-surpass posture while code `COMPOSER_SURPASS_CLAIM=false`; Master UX §0 Timeline still said scrub OPEN after scrub/material UNHELD; “Universal IDE / AI-native / ready to sell” must stay marketing-forbidden. (underclaim) Instant Play+I.2+Law XV+R18, L.10 green, L.12 100%, H.1+ tech modules, Timeline material/event bus, L.8 remote detect — already shipped as DONE-core/PARTIAL correctly in Progress but under-signaled in Index scorecard narrative. Synced Progress Remaining OPEN + Top-15 + competitor gap; Master Map §0c gap table + 1.4n; Index scorecard; Master UX §0 Timeline/Terminal + competitor table. Hub checkout HELD. Onda G deferred. J.11/J.12 STOPPED. |
 | 2026-08-08 cw3-done-core | Commit: `a81aada3c`. **R13 / CW3 DONE-core — render-path honesty closed; UE RHI residual HELD.** Investigated: catalog + `cw3-present-root-v1` + `evaluateRendererHonesty` + spend-l5 (`r3f-webgl2`, `marketingAllowed:false`) + consolidation `render.path.*` already fail-closed green. **Real gap closed:** `RendererHonestyBadge` marketed `WebGPU Target Active` + `Unified RHI Acquired` on adapter probe and defaulted `webgpuRole` to `exclusive_rhi`; desktop LIVE used non-existent `livePath.desktopPresented`. **Fix:** adapter_probe_only default; desktop LIVE only when `presentRoot.desktopWgpuRole === 'live_present'`; honest adapter-probed copy; AAA marketing blocked line. Tests: CW3+spend-l5+consolidation+3A **33/33**. Pruned R13 from Remaining OPEN. Hub checkout HELD. No Onda G. |

@@ -301,6 +301,14 @@ export function addAuthoringKeyframe(
     value?: number
     keyframeId?: string
     targetNodeId?: string
+    /**
+     * Event-lane GAS / gameplay cue tag (e.g. `Cue.Fire.Burn` or short `Fire.Burn`).
+     * Stored as `metadata.eventName` so scrub → cue bus → GasWorld bind can resolve it.
+     * Ignored on curve lanes.
+     */
+    eventName?: string
+    /** Alias of eventName for callers that use cue vocabulary. */
+    cueName?: string
   },
 ): TimelineAuthorResult {
   if (!isAuthorableTimelineLane(input.lane)) {
@@ -328,14 +336,25 @@ export function addAuthoringKeyframe(
 
   if (def.property == null) {
     const clipId = input.keyframeId ?? newId('evt')
+    const authoredCue =
+      (typeof input.eventName === 'string' && input.eventName.trim()) ||
+      (typeof input.cueName === 'string' && input.cueName.trim()) ||
+      ''
     const clip: SequencerClip = createSequencerClip({
       id: clipId,
       trackId: track.id,
-      label: `Event @ ${(timeMs / 1000).toFixed(2)}s`,
+      label: authoredCue || `Event @ ${(timeMs / 1000).toFixed(2)}s`,
       sourceRef: sceneSourceRef(`event/${clipId}`, bindId),
       startMs: timeMs,
       endMs: timeMs,
-      metadata: withTargetNodeMetadata({ timelineLane: 'event', authored: true }, bindId),
+      metadata: withTargetNodeMetadata(
+        {
+          timelineLane: 'event',
+          authored: true,
+          ...(authoredCue ? { eventName: authoredCue, cueName: authoredCue } : {}),
+        },
+        bindId,
+      ),
     })
     const withoutDup = track.clips.filter(
       (c) => c.startMs !== timeMs && c.metadata?.bindOnly !== true,

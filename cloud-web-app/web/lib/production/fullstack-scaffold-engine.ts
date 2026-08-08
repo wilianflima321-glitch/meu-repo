@@ -17,6 +17,7 @@ import {
   type ForgeCommitCiGateResult,
 } from './forge-commit-ci-gate'
 import type { CostGuardLedgerAdapter } from './creative-cost-guard'
+import { instrumentScaffoldSoakSample } from './l9-scaffold-soak'
 import { createComponentLogger } from '../observability/logger'
 
 const log = createComponentLogger('fullstack-scaffold-engine')
@@ -124,7 +125,8 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
       existingSandboxSessionId: session.sessionId, // CRITICAL: Session reuse
     })
 
-    log.info('scaffold_completed', { durationMs: Date.now() - startedAt, previewOk: previewResult.ok })
+    const completedAt = Date.now()
+    log.info('scaffold_completed', { durationMs: completedAt - startedAt, previewOk: previewResult.ok })
 
     // L.2/L.9 commit/CI gate — blocks success when L.2 template, L.8 preview, or sandbox fail.
     const commitGate = await runForgeCommitCiGate({
@@ -138,6 +140,16 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
     })
 
     if (forgeCommitGateBlocksSuccess(commitGate) || !previewResult.ok || (preferred !== 'inline' && !previewResult.url)) {
+      // L-ACC-04 soak: failures recorded with ok:false — never invent under-budget p95.
+      instrumentScaffoldSoakSample({
+        startedAtMs: startedAt,
+        previewUrlAtMs: completedAt,
+        templateId: input.templateId,
+        provider,
+        ok: false,
+        failureReason:
+          commitGate.blockedReasons[0] || previewResult.message || 'scaffold_commit_gate_failed',
+      })
       return {
         ok: false,
         message:
@@ -149,6 +161,15 @@ export async function scaffoldAndPreviewProject(input: ScaffoldEngineInput): Pro
         devContainerPersist: persist,
       }
     }
+
+    // L-ACC-04 soak: success sample only when preview URL is real.
+    instrumentScaffoldSoakSample({
+      startedAtMs: startedAt,
+      previewUrlAtMs: completedAt,
+      templateId: input.templateId,
+      provider,
+      ok: true,
+    })
 
     return {
       ok: true,

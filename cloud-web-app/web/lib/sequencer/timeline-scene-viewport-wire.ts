@@ -3,7 +3,8 @@
  * Demo/fixture bindings must not mutate the real viewport scene graph
  * and must never emit to the production event-cue bus.
  *
- * Event cues are editor/runtime hooks only — GAS/gameplay bind is separate.
+ * Event cues emit on the editor bus; optional GAS bind via timeline-gas-cue-bridge
+ * (in-process GasWorld — desktop IPC HELD).
  */
 
 import type { ISceneService, IDESceneNode } from '../../../packages/ide-ui/backend/types'

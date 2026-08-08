@@ -200,6 +200,9 @@ export interface ITimelineService {
     value?: number
     /** Bind lane/clip to a live scene node (`scene:<id>` + metadata.targetNodeId). */
     targetNodeId?: string
+    /** Event-lane GAS / gameplay cue tag (`metadata.eventName`). */
+    eventName?: string
+    cueName?: string
   }): Promise<IDETimelineAuthorResult>
   removeKeyframe?(keyframeId: string): Promise<IDETimelineAuthorResult>
   removeTrack?(laneId: string): Promise<IDETimelineAuthorResult>

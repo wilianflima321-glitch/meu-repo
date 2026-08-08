@@ -58,14 +58,16 @@ export const USD_BROWSER_FORMAT_SUPPORT = {
     shipStatus: 'HELD',
     viewerStatus: 'held',
     browserLoader: 'none',
-    claim: 'Standalone USDA ASCII stage has no browser loader — intake recorded; preview HELD.',
+    claim:
+      'Standalone USDA ASCII stage HELD — hierarchy wireframe honesty from ASCII prim/extent scan only; not OpenUSD/Hydra mesh.',
   },
   usd: {
     format: 'usd',
     shipStatus: 'HELD',
     viewerStatus: 'held',
     browserLoader: 'none',
-    claim: 'Generic .usd (USDA or crate) has no browser loader — intake recorded; preview HELD.',
+    claim:
+      'Generic .usd HELD — ASCII hierarchy wireframe when USDA text; binary USDC crate rejected; not OpenUSD stage.',
   },
   usdc: {
     format: 'usdc',

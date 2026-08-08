@@ -25,6 +25,11 @@ import {
   subscribeTimelineEventCues,
   type TimelineEventCue,
 } from '@/lib/sequencer/timeline-event-cue-bus';
+import {
+  disableTimelineGasCueBridge,
+  enableTimelineGasCueBridge,
+  setTimelineGasCueBridgeArmed,
+} from '@/lib/sequencer/timeline-gas-cue-bridge';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('CanvasViewportSurface');
@@ -63,7 +68,7 @@ function NexusCanvasV2({
       {lastEventCue ? (
         <div
           className="absolute bottom-2 left-2 max-w-[min(100%,24rem)] truncate rounded-sm border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-elevated)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)]"
-          title="Timeline event cue (editor hook — not gameplay/GAS)"
+          title="Timeline event cue → in-process GasWorld when bridge armed (desktop GAS IPC HELD)"
         >
           Event cue: {lastEventCue.cueName}
           {lastEventCue.value !== undefined ? ` = ${String(lastEventCue.value)}` : ''}
@@ -117,6 +122,19 @@ export default function CanvasViewportSurface({
       });
     });
   }, []);
+
+  // Timeline → in-process GasWorld GameplayCue bind (PARTIAL). Demo binds stay disarmed.
+  // Desktop 60Hz GAS IPC remains HELD — never claimed here.
+  useEffect(() => {
+    if (timeline.isDemo) {
+      setTimelineGasCueBridgeArmed(false);
+      return;
+    }
+    enableTimelineGasCueBridge({ armed: true });
+    return () => {
+      disableTimelineGasCueBridge();
+    };
+  }, [timeline.isDemo]);
 
   const scrubLiveScene = useCallback(
     (timeSec: number) => {

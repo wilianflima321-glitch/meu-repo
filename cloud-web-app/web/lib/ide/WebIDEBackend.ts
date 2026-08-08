@@ -386,6 +386,9 @@ class WebTimelineService implements ITimelineService {
     time: number;
     value?: number;
     targetNodeId?: string;
+    /** Event-lane GAS cue tag — see timeline-authoring `eventName`. */
+    eventName?: string;
+    cueName?: string;
   }): Promise<IDETimelineAuthorResult> {
     return this.commitAuthor((timeline) =>
       addAuthoringKeyframe(timeline, {
@@ -393,6 +396,8 @@ class WebTimelineService implements ITimelineService {
         timeSec: input.time,
         value: input.value,
         targetNodeId: input.targetNodeId,
+        eventName: input.eventName,
+        cueName: input.cueName,
       }),
     );
   }

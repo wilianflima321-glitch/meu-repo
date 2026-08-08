@@ -2,7 +2,8 @@
  * Timeline3D event-cue bus (editor/runtime hooks only).
  *
  * Edge-triggered cues fire when the playhead crosses an authored event marker.
- * This is NOT gameplay/physics/GAS dispatch — wire abilities separately.
+ * Optional GAS bind: `timeline-gas-cue-bridge.ts` (in-process GasWorld only;
+ * desktop 60Hz IPC remains HELD).
  *
  * Fail-closed:
  * - demoMode must never call emit (production bus stays silent)
