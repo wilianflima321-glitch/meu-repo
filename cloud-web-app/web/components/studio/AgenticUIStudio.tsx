@@ -30,10 +30,13 @@ export function AgenticUIStudio(props: AgenticUIStudioProps) {
     title,
     onAgentMutationRequest,
     governMutationsViaFusionTx,
+    autoProvision,
   } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const previewFrameRef = useRef<HTMLIFrameElement>(null)
   const govern = governMutationsViaFusionTx !== false
+  // L.8: when a project is bound, default to managed provision (fail-closed if unreachable).
+  const effectiveAutoProvision = autoProvision ?? Boolean(projectId)
 
   const { domTree, selectedElementId, hoveredElementId, selectElement, highlightElement } =
     usePreviewDomSync(previewFrameRef)
@@ -210,7 +213,7 @@ export function AgenticUIStudio(props: AgenticUIStudioProps) {
             {fusionGateError}
           </div>
         )}
-        <RuntimePreviewSurface {...props} />
+        <RuntimePreviewSurface {...props} autoProvision={effectiveAutoProvision} />
       </div>
 
       <div className="flex-shrink-0 z-10 relative">

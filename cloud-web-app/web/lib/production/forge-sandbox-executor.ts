@@ -21,7 +21,7 @@
  *    documented here rather than faked.
  */
 
-import { execFile } from 'child_process'
+import { execFile, spawn, type ChildProcess } from 'child_process'
 import { randomUUID } from 'crypto'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
@@ -78,6 +78,7 @@ interface ForgeSandboxRuntimeState {
   costAdapter: CostGuardLedgerAdapter
   estimatedMinutes: number
   e2bHandle?: E2BSandboxLike
+  localBackgroundProcesses?: ChildProcess[]
 }
 
 const RUNTIME_SESSIONS = new Map<string, ForgeSandboxRuntimeState>()
@@ -184,6 +185,80 @@ export interface ForgeSandboxCreateInput {
 export type ForgeSandboxCreateResult =
   | { ok: true; session: ForgeSandboxSession }
   | { ok: false; reason: CostGuardBlockReason | ForgeSandboxAvailabilityReason; message: string }
+
+export interface StreamExecOptions {
+  sessionId: string
+  command: string
+  args?: string[]
+  cwd?: string
+  extraEnv?: Record<string, string>
+  onStdout?: (data: string) => void
+  onStderr?: (data: string) => void
+}
+
+export interface StreamExecResult {
+  ok: boolean
+  exitCode: number | null
+  durationMs: number
+  deniedReason?: string
+  deniedMessage?: string
+}
+
+export async function streamInForgeSandbox(input: StreamExecOptions): Promise<StreamExecResult> {
+  const startedAt = Date.now()
+  const state = RUNTIME_SESSIONS.get(input.sessionId)
+  if (!state) {
+    return {
+      ok: false,
+      exitCode: null,
+      durationMs: Date.now() - startedAt,
+      deniedReason: 'session_not_found',
+      deniedMessage: `Sandbox session ${input.sessionId} is not active`,
+    }
+  }
+
+  const args = input.args ?? []
+  const commandGuard = guardCommandAllowlist(input.command, state.commandAllowlist)
+  if (!commandGuard.ok) {
+    const message = commandGuard.message ?? `Command "${input.command}" not allowed`
+    appendExecEvidence(input.sessionId, 'denied', input.command, args, message)
+    return { ok: false, exitCode: null, durationMs: Date.now() - startedAt, deniedReason: 'command_not_allowlisted', deniedMessage: message }
+  }
+
+  const cwdGuard = confinePathToProjectRoot(state.projectRootPath, input.cwd)
+  if (!cwdGuard.ok) {
+    appendExecEvidence(input.sessionId, 'denied', input.command, args, cwdGuard.message)
+    return { ok: false, exitCode: null, durationMs: Date.now() - startedAt, deniedReason: 'path_escape', deniedMessage: cwdGuard.message }
+  }
+
+  const argsGuard = guardArgsWithinProjectRoot(state.projectRootPath, args)
+  if (!argsGuard.ok) {
+    const message = argsGuard.violations.join('; ')
+    appendExecEvidence(input.sessionId, 'denied', input.command, args, message)
+    return { ok: false, exitCode: null, durationMs: Date.now() - startedAt, deniedReason: 'path_escape', deniedMessage: message }
+  }
+
+  return new Promise((resolve) => {
+    const child = spawn(commandGuard.normalized, args, {
+      cwd: cwdGuard.resolved,
+      env: buildScrubbedEnv(state.session.networkPolicy, input.extraEnv),
+      stdio: ['ignore', 'pipe', 'pipe']
+    })
+
+    if (input.onStdout) child.stdout.on('data', (d) => input.onStdout!(d.toString()))
+    if (input.onStderr) child.stderr.on('data', (d) => input.onStderr!(d.toString()))
+
+    child.on('close', (code) => {
+      appendExecEvidence(input.sessionId, code === 0 ? 'ok' : 'failed', input.command, args, `Streamed execution finished with code ${code}`)
+      resolve({ ok: code === 0, exitCode: code, durationMs: Date.now() - startedAt })
+    })
+
+    child.on('error', (err) => {
+      appendExecEvidence(input.sessionId, 'failed', input.command, args, `Streamed execution errored: ${err.message}`)
+      resolve({ ok: false, exitCode: null, durationMs: Date.now() - startedAt, deniedReason: 'spawn_failed', deniedMessage: err.message })
+    })
+  })
+}
 
 /**
  * Creates a Forge sandbox session: reserves CostGuard minutes (Trava I), seeds the
@@ -300,6 +375,8 @@ export interface ForgeSandboxExecInput {
   maxOutputBytes?: number
   /** Additional env entries the caller explicitly allowlists for this call (never secrets by default). */
   extraEnv?: Record<string, string>
+  /** If true, spawns the process in the background and resolves immediately (useful for dev servers). */
+  background?: boolean
 }
 
 export interface ForgeSandboxExecResult {
@@ -420,6 +497,33 @@ export async function execInForgeSandbox(input: ForgeSandboxExecInput): Promise<
   }
 
   if (state.session.provider === 'local-isolated') {
+    if (input.background) {
+      const bgResult = await spawnLocalIsolatedBackground({
+        command: input.command,
+        args,
+        cwd: cwdGuard.resolved,
+        env: buildScrubbedEnv(state.session.networkPolicy, input.extraEnv),
+      })
+      if (!state.localBackgroundProcesses) state.localBackgroundProcesses = []
+      if (bgResult.child) state.localBackgroundProcesses.push(bgResult.child)
+      
+      appendExecEvidence(
+        input.sessionId,
+        bgResult.ok ? 'ok' : 'failed',
+        input.command,
+        args,
+        `background spawn PID=${bgResult.child?.pid ?? 'unknown'}`
+      )
+      return {
+        ok: bgResult.ok,
+        exitCode: null,
+        stdout: '',
+        stderr: bgResult.error ?? '',
+        truncated: false,
+        durationMs: Date.now() - startedAt,
+      }
+    }
+
     const result = await execLocalIsolated({
       command: input.command,
       args,
@@ -444,8 +548,9 @@ export async function execInForgeSandbox(input: ForgeSandboxExecInput): Promise<
       await state.e2bHandle.commands.run(commandLine, {
         cwd: cwdGuard.resolved,
         timeoutMs: input.timeoutMs ?? DEFAULT_EXEC_TIMEOUT_MS,
+        background: input.background,
       })
-      appendExecEvidence(input.sessionId, 'ok', input.command, args, 'E2B commands.run dispatched')
+      appendExecEvidence(input.sessionId, 'ok', input.command, args, `E2B commands.run dispatched (background=${!!input.background})`)
       return {
         ok: true,
         exitCode: 0,
@@ -521,6 +626,36 @@ function execLocalIsolated(input: {
   })
 }
 
+function spawnLocalIsolatedBackground(input: {
+  command: string
+  args: string[]
+  cwd: string
+  env: Record<string, string>
+}): Promise<{ ok: boolean; child?: ChildProcess; error?: string }> {
+  return new Promise((resolve) => {
+    try {
+      const child = spawn(input.command, input.args, {
+        cwd: input.cwd,
+        env: input.env as NodeJS.ProcessEnv,
+        windowsHide: true,
+        detached: false,
+        stdio: 'ignore', // Background daemons stream output to logs/ledger later if needed
+      })
+
+      child.on('error', (err) => {
+        resolve({ ok: false, error: err.message })
+      })
+
+      // Resolve immediately if it spawns successfully without erroring synchronously
+      if (child.pid !== undefined) {
+        resolve({ ok: true, child })
+      }
+    } catch (err) {
+      resolve({ ok: false, error: err instanceof Error ? err.message : String(err) })
+    }
+  })
+}
+
 function appendExecEvidence(
   sessionId: string,
   status: 'ok' | 'failed' | 'denied',
@@ -553,6 +688,33 @@ export function getForgeSandboxLedger(sessionId: string): TaskEvidenceLedger | u
   return LEDGERS.get(sessionId)
 }
 
+/** Retrieves an active Forge sandbox session without executing commands (used for session reuse by L.8/L.9). */
+export function getForgeSandboxSession(sessionId: string): ForgeSandboxSession | undefined {
+  return RUNTIME_SESSIONS.get(sessionId)?.session
+}
+
+/**
+ * L.8 helper — resolve a real E2B preview host from the live sandbox handle.
+ * Returns null when the session is missing, already torn down, non-E2B, or has no handle.
+ * Never fabricates `*.e2b.dev` URLs from session ids.
+ */
+export function resolveForgeSandboxE2BPreviewUrl(
+  sessionId: string,
+  port: number,
+): string | null {
+  const state = RUNTIME_SESSIONS.get(sessionId)
+  if (!state || state.session.teardownAt) return null
+  if (state.session.provider !== 'e2b' || !state.e2bHandle) return null
+  try {
+    const host = state.e2bHandle.getHost(port)
+    if (typeof host !== 'string' || host.trim().length === 0) return null
+    const normalized = host.trim().replace(/^https?:\/\//i, '')
+    return `https://${normalized}`
+  } catch {
+    return null
+  }
+}
+
 export interface ForgeSandboxTeardownResult {
   session: ForgeSandboxSession
   ledger: TaskEvidenceLedger
@@ -582,6 +744,19 @@ export async function teardownForgeSandboxSession(
       createdAt: teardownAt,
     })
     LEDGERS.set(sessionId, ledger)
+  }
+
+  // Gracefully kill background processes
+  if (state.localBackgroundProcesses) {
+    for (const child of state.localBackgroundProcesses) {
+      if (!child.killed) {
+        try {
+          child.kill('SIGKILL')
+        } catch {
+          // ignore already dead processes
+        }
+      }
+    }
   }
 
   RUNTIME_SESSIONS.set(sessionId, { ...state, session })

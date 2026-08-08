@@ -10,6 +10,7 @@ export interface PreviewRuntimePayload {
   strategy?: unknown;
   runtimeUrl?: unknown;
   sandboxId?: unknown;
+  sandboxSessionId?: unknown;
   message?: unknown;
   error?: unknown;
   metadata?: {
@@ -17,11 +18,27 @@ export interface PreviewRuntimePayload {
     strategy?: unknown;
     mode?: unknown;
     setupEnv?: unknown;
+    sandboxId?: unknown;
+    sandboxSessionId?: unknown;
   } | null;
   discoveryResult?: {
     preferredRuntimeUrl?: unknown;
     candidates?: Array<{ latencyMs?: unknown }>;
   } | null;
+}
+
+/** Prefer explicit sandboxId, then session aliases from L.8 metadata. */
+export function extractPreviewSandboxId(payload: PreviewRuntimePayload): string | null {
+  const candidates = [
+    payload.sandboxId,
+    payload.sandboxSessionId,
+    payload.metadata?.sandboxId,
+    payload.metadata?.sandboxSessionId,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim().length > 0) return value.trim();
+  }
+  return null;
 }
 
 export const INITIAL_PREVIEW_RUNTIME: PreviewRuntimeInfo = {

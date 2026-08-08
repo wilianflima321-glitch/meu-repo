@@ -47,6 +47,8 @@ export type PreviewRuntimeProvisionResponse = {
   runtimeUrl?: string | null;
   strategy?: 'managed' | 'local' | 'browser-side' | string;
   provider?: string | null;
+  sandboxId?: string | null;
+  sandboxSessionId?: string | null;
   error?: string;
   message?: string;
   metadata?: {
@@ -55,6 +57,7 @@ export type PreviewRuntimeProvisionResponse = {
     provider?: string;
     endpoint?: string;
     sandboxId?: string;
+    sandboxSessionId?: string;
     filesCount?: number;
     totalBytes?: number;
     startMode?: string;
@@ -184,6 +187,19 @@ export async function discoverPreviewRuntime(): Promise<string | null> {
   return normalizeRuntimeUrl(payload?.preferredRuntimeUrl ?? null);
 }
 
+function extractProvisionSandboxId(payload: PreviewRuntimeProvisionResponse | null): string | null {
+  const candidates = [
+    payload?.sandboxId,
+    payload?.sandboxSessionId,
+    payload?.metadata?.sandboxId,
+    payload?.metadata?.sandboxSessionId,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim().length > 0) return value.trim();
+  }
+  return null;
+}
+
 export async function provisionPreviewRuntime(projectId: string | null): Promise<{
   runtimeUrl: string | null;
   metadataMode?: string;
@@ -202,11 +218,39 @@ export async function provisionPreviewRuntime(projectId: string | null): Promise
     const reason = payload?.error || payload?.message || `HTTP ${response.status}`;
     throw new Error(reason);
   }
+  const sandboxId = extractProvisionSandboxId(payload);
+  const metadata = payload?.metadata
+    ? {
+        ...payload.metadata,
+        sandboxId: payload.metadata.sandboxId || sandboxId || undefined,
+        sandboxSessionId: payload.metadata.sandboxSessionId || sandboxId || undefined,
+      }
+    : sandboxId
+      ? { sandboxId, sandboxSessionId: sandboxId }
+      : null;
   return {
     runtimeUrl: normalizeRuntimeUrl(payload?.runtimeUrl ?? null),
     metadataMode: payload?.metadata?.mode,
-    metadata: payload?.metadata ?? null,
+    metadata,
   };
+}
+
+/** L.8 — tear down a provisioned preview sandbox session (fail-soft). */
+export async function teardownPreviewRuntime(sandboxId: string | null): Promise<boolean> {
+  if (!sandboxId) return false;
+  try {
+    const response = await fetch('/api/preview/runtime-teardown', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getRuntimeAuthHeaders(),
+      },
+      body: JSON.stringify({ sandboxSessionId: sandboxId, sandboxId }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 export async function syncPreviewRuntime(projectId: string | null, sandboxId: string | null): Promise<{

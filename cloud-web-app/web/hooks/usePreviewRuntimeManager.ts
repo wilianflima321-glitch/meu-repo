@@ -18,6 +18,7 @@ import {
   provisionPreviewRuntime,
   syncPreviewRuntime,
   syncPreviewRuntimeFile,
+  teardownPreviewRuntime,
   type PreviewRuntimeHealthState,
   type PreviewRuntimeReadinessResponse,
 } from '@/lib/preview/runtime-manager'
@@ -520,16 +521,18 @@ export function usePreviewRuntimeManager({
         : 'Use inline preview'
 
   const handleUseInlineFallback = useCallback(() => {
+    const activeSandboxId = previewSandboxId
+    void teardownPreviewRuntime(activeSandboxId)
     setPreviewRuntimeInput('')
     setPreviewRuntimeUrl(null)
     setRuntimeHealth({ status: 'idle' })
     setRuntimeHealthCheckedAt(null)
     setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Inline mode active.')
+    setRuntimeDiscoveryMessage('Inline mode active. Managed preview session torn down when present.')
     persistPreviewRuntimeUrl(null, PREVIEW_RUNTIME_URL_STORAGE_KEY)
     setPreviewSandboxId(null)
     persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)
-  }, [])
+  }, [previewSandboxId])
 
   const forceInlinePreviewFallback =
     Boolean(previewRuntimeUrl) &&

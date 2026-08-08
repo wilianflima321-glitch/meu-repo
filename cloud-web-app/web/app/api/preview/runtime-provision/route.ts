@@ -10,6 +10,8 @@ import {
 } from '@/lib/server/preview-runtime-rate-limit'
 import { getManagedPreviewProviderConfig } from '@/lib/server/preview-provider-config'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
+import { orchestratePreviewSession } from '@/lib/production/preview-orchestrator'
+import { createMemoryCostGuardLedger } from '@/lib/production/creative-cost-guard'
 
 import {
   callManagedProvisionEndpoint,
@@ -207,12 +209,23 @@ export async function POST(request: NextRequest) {
         })
       }
     } else if (provisionEndpoints.length === 0) {
-      const localRuntime = await localFallbackDiscover()
-      if (!localRuntime) {
+      // Use L.8 PreviewOrchestrator for robust local provisioning (zero-MVP daemon support)
+      const costAdapter = createMemoryCostGuardLedger()
+      const orchestratorResult = await orchestratePreviewSession({
+        userId: auth.userId,
+        projectId,
+        projectRootPath: workspaceRoot,
+        preferredStrategy: 'local-dev-server',
+        costAdapter,
+      })
+
+      if (!orchestratorResult.ok || !orchestratorResult.url || !orchestratorResult.ready) {
         return capabilityResponse({
-          error: 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED',
+          error: orchestratorResult.url
+            ? 'RUNTIME_PROVISION_UNHEALTHY'
+            : 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED',
           status: 503,
-          message: 'Backend de provisionamento gerenciado nao configurado.',
+          message: orchestratorResult.message || 'L.8 Orchestrator failed to provision a reachable preview URL.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
@@ -220,10 +233,16 @@ export async function POST(request: NextRequest) {
             strategy: 'local',
             preferredRuntimeUrl: null,
             provider: localProviderId,
+            sandboxSessionId: orchestratorResult.sandboxSessionId ?? null,
+            sandboxId: orchestratorResult.sandboxId ?? orchestratorResult.sandboxSessionId ?? null,
             setupEnv: providerConfig?.setupEnv || ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
           },
         })
       }
+
+      const localRuntime = orchestratorResult.url
+      const sandboxId =
+        orchestratorResult.sandboxId ?? orchestratorResult.sandboxSessionId ?? null
 
       return NextResponse.json(
         {
@@ -233,11 +252,17 @@ export async function POST(request: NextRequest) {
           runtimeUrl: localRuntime,
           strategy: 'local',
           provider: localProviderId,
+          sandboxId,
           metadata: {
             mode: 'local_fallback',
             strategy: 'local',
             provider: localProviderId,
             managed: false,
+            ready: true,
+            latencyMs: orchestratorResult.latencyMs ?? null,
+            sandboxSessionId: sandboxId,
+            // IDE workbench sync path reads metadata.sandboxId
+            sandboxId,
           },
         },
         {

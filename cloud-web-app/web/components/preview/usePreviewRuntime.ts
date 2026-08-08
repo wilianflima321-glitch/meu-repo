@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type PreviewRuntimeInfo } from '@/components/preview/previewRuntime.types';
 import {
   derivePreviewRecommendedAction,
+  extractPreviewSandboxId,
   INITIAL_PREVIEW_RUNTIME,
   type PreviewRuntimePayload,
   resolvePreviewStrategy,
@@ -22,8 +23,22 @@ function getPayloadText(value: unknown): string | null {
 
 export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const [runtime, setRuntime] = useState<PreviewRuntimeInfo>(INITIAL_PREVIEW_RUNTIME);
+  const sandboxIdRef = useRef<string | null>(null);
   const { clearHealthPolling, startHealthPolling } = usePreviewRuntimeHealthMonitor(setRuntime);
   const { clearHmrBridge, connectHMR } = usePreviewRuntimeHmrBridge(setRuntime);
+
+  const teardownSession = useCallback(async (sandboxId: string | null) => {
+    if (!sandboxId) return;
+    try {
+      await fetch('/api/preview/runtime-teardown', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sandboxSessionId: sandboxId, sandboxId }),
+      });
+    } catch {
+      // Best-effort teardown — surface stays fail-closed without claiming remote runtime.
+    }
+  }, []);
 
   const extractRuntimeContext = useCallback((payload: PreviewRuntimePayload) => {
     const metadata = payload?.metadata && typeof payload.metadata === 'object' ? payload.metadata : null;
@@ -86,12 +101,14 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       if (typeof data.runtimeUrl === 'string' && data.runtimeUrl.length > 0) {
         const runtimeUrl = data.runtimeUrl;
         const resolvedStrategy = resolvePreviewStrategy(data);
+        const sandboxId = extractPreviewSandboxId(data);
+        sandboxIdRef.current = sandboxId;
         setRuntime((prev) => ({
           ...prev,
           state: 'warming',
           strategy: resolvedStrategy,
           runtimeUrl,
-          sandboxId: typeof data.sandboxId === 'string' ? data.sandboxId : null,
+          sandboxId,
           provider: runtimeContext.provider,
           startedAt: Date.now(),
           error: null,
@@ -154,6 +171,9 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const switchToInline = useCallback(() => {
     clearHealthPolling();
     clearHmrBridge();
+    const activeSandboxId = sandboxIdRef.current;
+    sandboxIdRef.current = null;
+    void teardownSession(activeSandboxId);
     setRuntime((prev) => ({
       ...prev,
       state: 'degraded',
@@ -169,7 +189,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
         prev.recommendedAction || 'Continue in local preview while the remote runtime stabilizes.',
       setupEnv: prev.setupEnv,
     }));
-  }, [clearHealthPolling, clearHmrBridge]);
+  }, [clearHealthPolling, clearHmrBridge, teardownSession]);
 
   useEffect(() => {
     if (autoProvision && runtime.state === 'idle') {
@@ -184,11 +204,24 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   }, [runtime.state, runtime.runtimeUrl, connectHMR]);
 
   useEffect(() => {
+    const onPageHide = () => {
+      const activeSandboxId = sandboxIdRef.current;
+      if (!activeSandboxId) return;
+      // keepalive survives tab close; auth cookie/header may still apply for same-origin.
+      void fetch('/api/preview/runtime-teardown', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sandboxSessionId: activeSandboxId, sandboxId: activeSandboxId }),
+        keepalive: true,
+      }).catch(() => undefined);
+    };
+    window.addEventListener('pagehide', onPageHide);
     return () => {
+      window.removeEventListener('pagehide', onPageHide);
       clearHmrBridge();
       clearHealthPolling();
     };
   }, [clearHealthPolling, clearHmrBridge]);
 
-  return { runtime, provision, switchToInline };
+  return { runtime, provision, switchToInline, teardownSession };
 }
