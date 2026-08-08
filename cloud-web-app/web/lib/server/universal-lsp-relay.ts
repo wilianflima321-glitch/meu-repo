@@ -10,9 +10,9 @@
  * Honesty (Zero-MVP):
  * - Cloud HTTP relay path is real (`/api/lsp/*` + this registry).
  * - Tauri desktop sidecar (`apps/studio-local/src-tauri/src/lsp_farm.rs`) is **PARTIAL** —
- *   real binary discovery + spawn + initialize + minimal didOpen + hover/definition IPC;
- *   fail-closed when binary missing (never fake diagnostics/hover).
- * - Monaco desktop hover/definition wire is **PARTIAL**; full L.C soak (Python) still OPEN.
+ *   real binary discovery + spawn + initialize + continuous didChange + publishDiagnostics
+ *   + hover/definition/completion IPC; fail-closed when binary missing (never fake LSP).
+ * - Monaco desktop wire is **PARTIAL**; full L.C soak (Python) still OPEN.
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -54,7 +54,7 @@ export type UniversalLspFarmHonesty = {
   cloudRelayCore: true
   /** `partial` = Tauri lsp_farm spawn+IPC shipped; never `live` until L.C soak. */
   tauriSidecarSpawn: 'partial'
-  /** `partial` = Monaco hover/definition IPC wired; full L.C (Python) still OPEN. */
+  /** `partial` = Monaco hover/definition/didChange/diagnostics wired; full L.C (Python) still OPEN. */
   monacoDesktopHoverDefinition: 'partial'
   marketingAllowed: false
   message: string
@@ -105,7 +105,7 @@ export function describeUniversalLspFarmHonesty(): UniversalLspFarmHonesty {
     monacoDesktopHoverDefinition: 'partial',
     marketingAllowed: false,
     message:
-      'L.13 cloud relay + Tauri lsp_farm Monaco hover/definition IPC are real (minimal didOpen; fail-closed without binary); full L.C multi-language soak (Python) remains OPEN; marketing blocked.',
+      'L.13 cloud relay + Tauri lsp_farm Monaco wire are real (continuous didChange + publishDiagnostics markers + hover/definition/completion; fail-closed without binary); full L.C multi-language soak (Python) remains OPEN; marketing blocked.',
   }
 }
 

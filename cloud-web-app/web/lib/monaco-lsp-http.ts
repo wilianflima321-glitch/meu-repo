@@ -9,9 +9,12 @@ import type * as monaco from 'monaco-editor';
 
 import { createComponentLogger, logger } from '@/lib/observability/logger'
 import {
+  attachTauriLspModelSync,
   detectMonacoLspTauriFarmAvailable,
+  tauriLspCompletion,
   tauriLspDefinition,
   tauriLspHover,
+  type TauriLspModelSyncHandle,
 } from '@/lib/lsp/monaco-lsp-tauri-farm'
 import {
   getMarkerSeverity,
@@ -144,34 +147,56 @@ export function createLspCompletionProvider(
     async provideCompletionItems(
       model,
       position,
-      _context,
+      context,
       _token
     ): Promise<monaco.languages.CompletionList | null> {
       const uri = model.uri.toString();
-      await ensureInitialized(language, uri);
+      const lspPosition = toPosition(position);
+      let result: CompletionList | CompletionItem[] | null = null;
 
-      // Send didOpen if needed (simplified - in real app track open documents)
-      await sendLspRequest(language, 'textDocument/didOpen', {
-        textDocument: {
+      if (detectMonacoLspTauriFarmAvailable()) {
+        result = await tauriLspCompletion(
+          language,
           uri,
-          languageId: language,
-          version: model.getVersionId(),
-          text: model.getValue(),
-        },
-      });
-
-      const result = await sendLspRequest<CompletionList | CompletionItem[]>(
-        language,
-        'textDocument/completion',
-        {
-          textDocument: { uri },
-          position: toPosition(position),
-          context: { triggerKind: 1 },
+          model.getValue(),
+          model.getVersionId(),
+          lspPosition,
+          {
+            completionContext: {
+              triggerKind: context.triggerKind === 1 ? 2 : 1,
+              triggerCharacter: context.triggerCharacter,
+            },
+          },
+        );
+        // Fail-closed empty when sidecar missing/dead — never invent suggestions.
+        if (!result) {
+          return { suggestions: [] };
         }
-      );
+      } else {
+        await ensureInitialized(language, uri);
 
-      if (!result) {
-        return { suggestions: [] };
+        await sendLspRequest(language, 'textDocument/didOpen', {
+          textDocument: {
+            uri,
+            languageId: language,
+            version: model.getVersionId(),
+            text: model.getValue(),
+          },
+        });
+
+        result = await sendLspRequest<CompletionList | CompletionItem[]>(
+          language,
+          'textDocument/completion',
+          {
+            textDocument: { uri },
+            position: lspPosition,
+            context: { triggerKind: 1 },
+          }
+        );
+
+        if (!result) {
+          return { suggestions: [] };
+        }
       }
 
       const items = Array.isArray(result) ? result : result.items;
@@ -357,35 +382,52 @@ export function createLspReferencesProvider(
 }
 
 /**
- * Register all LSP providers for a language in Monaco
+ * Register all LSP providers for a language in Monaco.
+ * On Tauri desktop, also attach continuous didChange + diagnostics push when a model is provided.
  */
 export function registerLspProviders(
-  monaco: MonacoApi,
-  language: string
+  monacoApi: MonacoApi,
+  language: string,
+  options?: {
+    model?: monaco.editor.ITextModel | null
+    rootUri?: string | null
+  }
 ): monaco.IDisposable[] {
   const disposables: monaco.IDisposable[] = [];
 
   disposables.push(
-    monaco.languages.registerCompletionItemProvider(language, createLspCompletionProvider(monaco, language))
+    monacoApi.languages.registerCompletionItemProvider(language, createLspCompletionProvider(monacoApi, language))
   );
 
   disposables.push(
-    monaco.languages.registerHoverProvider(language, createLspHoverProvider(language))
+    monacoApi.languages.registerHoverProvider(language, createLspHoverProvider(language))
   );
 
   disposables.push(
-    monaco.languages.registerSignatureHelpProvider(language, createLspSignatureHelpProvider(language))
+    monacoApi.languages.registerSignatureHelpProvider(language, createLspSignatureHelpProvider(language))
   );
 
   disposables.push(
-    monaco.languages.registerDefinitionProvider(language, createLspDefinitionProvider(monaco, language))
+    monacoApi.languages.registerDefinitionProvider(language, createLspDefinitionProvider(monacoApi, language))
   );
 
   disposables.push(
-    monaco.languages.registerReferenceProvider(language, createLspReferencesProvider(monaco, language))
+    monacoApi.languages.registerReferenceProvider(language, createLspReferencesProvider(monacoApi, language))
   );
 
-  log.info(`[LSP HTTP] Registered providers for language: ${language}`);
+  if (detectMonacoLspTauriFarmAvailable() && options?.model) {
+    const sync: TauriLspModelSyncHandle = attachTauriLspModelSync(
+      monacoApi,
+      options.model,
+      language,
+      { rootUri: options.rootUri },
+    );
+    disposables.push({ dispose: () => sync.dispose() });
+    log.info(`[LSP] Tauri farm didChange + diagnostics attached for: ${language}`);
+  } else {
+    log.info(`[LSP HTTP] Registered providers for language: ${language}`);
+  }
+
   return disposables;
 }
 

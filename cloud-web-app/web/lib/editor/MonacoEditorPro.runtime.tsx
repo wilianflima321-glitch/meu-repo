@@ -185,10 +185,18 @@ export function MonacoEditorPro({
 
     registerAethelMonacoTheme(monaco);
 
-    const lspLanguages = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
+    const lspLanguages = [
+      'typescript',
+      'javascript',
+      'typescriptreact',
+      'javascriptreact',
+      'rust',
+    ];
     if (lspLanguages.includes(language)) {
       import('@/lib/monaco-lsp-http').then(({ registerLspProviders }) => {
-        lspDisposablesRef.current = registerLspProviders(monaco, language);
+        lspDisposablesRef.current = registerLspProviders(monaco, language, {
+          model: editor.getModel(),
+        });
       }).catch(err => {
         log.warn('Failed to register LSP providers.', err);
       });

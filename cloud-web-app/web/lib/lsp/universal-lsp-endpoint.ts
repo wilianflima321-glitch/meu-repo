@@ -4,13 +4,13 @@
  *
  * `tauriSidecar`:
  * - `held` — no desktop farm module (historical)
- * - `partial` — Studio Local `lsp_farm.rs` spawn + Monaco hover/definition IPC wired;
+ * - `partial` — Studio Local `lsp_farm.rs` spawn + Monaco didChange/diagnostics/hover wire;
  *   full L.C multi-language soak (Python) still OPEN
  * - `live` — reserved for proven L.C acceptance soak (not claimable via env)
  *
  * `monacoDesktopHoverDefinition`:
  * - `open` — historical / not wired
- * - `partial` — hover/definition IPC wired (fail-closed without live binary)
+ * - `partial` — hover/definition/didChange/diagnostics wired (fail-closed without live binary)
  * - `live` — reserved for L.C soak certificate (not claimable via env)
  */
 

@@ -428,6 +428,8 @@ fn main() {
             lsp_farm::lsp_farm_spawn,
             lsp_farm::lsp_farm_ensure_session,
             lsp_farm::lsp_farm_did_open,
+            lsp_farm::lsp_farm_did_change,
+            lsp_farm::lsp_farm_poll_diagnostics,
             lsp_farm::lsp_farm_request,
             lsp_farm::lsp_farm_list,
             lsp_farm::lsp_farm_stop,

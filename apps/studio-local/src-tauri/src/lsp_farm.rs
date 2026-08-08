@@ -1,4 +1,4 @@
-//! L.13 — UniversalLspFarm (Tauri sidecar + Monaco hover/definition IPC)
+//! L.13 — UniversalLspFarm (Tauri sidecar + Monaco hover/definition/sync IPC)
 //!
 //! Real language-server process spawn/manage for Studio Local desktop.
 //! Binding: `AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md` L.13 + Progress ledger.
@@ -7,9 +7,10 @@
 //! - Spawns a real sidecar when `typescript-language-server` or `rust-analyzer`
 //!   resolves on PATH / env override / local `node_modules/.bin`.
 //! - Fail-closed (`LSP_BINARY_HELD`) when the binary is missing — never fabricates
-//!   diagnostics, hover, or definition results.
-//! - Monaco desktop path: hover + definition over stdio JSON-RPC with minimal
-//!   `textDocument/didOpen` (no full didChange sync / completion / diagnostics push).
+//!   diagnostics, hover, definition, or completion results.
+//! - Continuous `textDocument/didChange` (full-text sync) + `publishDiagnostics`
+//!   buffer/emit → Monaco markers (clear on session death).
+//! - Hover / definition / completion over stdio JSON-RPC.
 //! - Full L.C acceptance (multi-language soak incl. Python) remains OPEN.
 //! - Marketing blocked until acceptance soak.
 
@@ -17,15 +18,19 @@ use std::collections::{HashMap, HashSet};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
-use std::sync::{mpsc, Mutex};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{mpsc, Arc, Mutex};
+use std::thread::JoinHandle;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
 
 const IPC_TIMEOUT: Duration = Duration::from_secs(8);
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(12);
+const DIAGNOSTICS_EVENT: &str = "lsp-farm-diagnostics";
+const SESSION_DEAD_EVENT: &str = "lsp-farm-session-dead";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum LspLanguage {
@@ -66,12 +71,23 @@ impl LspLanguage {
 
     fn spawn_args(self) -> &'static [&'static str] {
         match self {
-            // typescript-language-server requires explicit --stdio.
             Self::TypeScript => &["--stdio"],
-            // rust-analyzer defaults to stdio LSP when launched without a subcommand.
             Self::Rust => &[],
         }
     }
+}
+
+/// Shared stdio hub: writer on command threads; reader owns stdout.
+struct IoHub {
+    stdin: Mutex<Option<ChildStdin>>,
+    pending: Mutex<HashMap<u64, mpsc::Sender<Value>>>,
+    /// uri → last real `publishDiagnostics` params from the language server.
+    diagnostics: Mutex<HashMap<String, LspDiagnosticsEvent>>,
+    /// Drain queue for poll (same events as emit).
+    diag_queue: Mutex<Vec<LspDiagnosticsEvent>>,
+    dead: AtomicBool,
+    session_id: Mutex<String>,
+    app: Mutex<Option<AppHandle>>,
 }
 
 struct LspSession {
@@ -79,8 +95,8 @@ struct LspSession {
     language: LspLanguage,
     binary_path: PathBuf,
     child: Child,
-    stdin: Option<ChildStdin>,
-    stdout: Option<BufReader<ChildStdout>>,
+    hub: Arc<IoHub>,
+    reader_join: Option<JoinHandle<()>>,
     initialized: bool,
     next_request_id: u64,
     open_uris: HashSet<String>,
@@ -88,26 +104,31 @@ struct LspSession {
 
 impl Drop for LspSession {
     fn drop(&mut self) {
+        self.hub.dead.store(true, Ordering::SeqCst);
         let _ = self.child.kill();
         let _ = self.child.wait();
+        if let Some(join) = self.reader_join.take() {
+            let _ = join.join();
+        }
+        emit_session_dead(&self.hub);
     }
 }
 
 #[derive(Default)]
 pub struct LspFarmRegistry {
     next_id: u64,
-    /// language → session_id (one live session per language for Monaco path)
     by_language: HashMap<&'static str, String>,
     sessions: HashMap<String, LspSession>,
+    app: Option<AppHandle>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LspFarmHonestyReport {
     pub cloud_relay_core: bool,
-    /// `partial` = spawn + IPC + Monaco hover/definition wire; never `live` until L.C soak.
+    /// `partial` = spawn + IPC + Monaco wire; never `live` until L.C soak.
     pub tauri_sidecar_spawn: &'static str,
-    /// `partial` = hover/definition IPC wired (fail-closed without binary); full L.C OPEN.
+    /// `partial` = hover/definition/didChange/diagnostics wired; full L.C OPEN.
     pub monaco_desktop_hover_definition: &'static str,
     pub marketing_allowed: bool,
     pub message: String,
@@ -164,6 +185,27 @@ pub struct LspRpcResult {
     pub message: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspDiagnosticsEvent {
+    pub session_id: String,
+    pub uri: String,
+    /// Raw LSP Diagnostic[] from the server — never fabricated.
+    pub diagnostics: Value,
+    pub version: Option<i64>,
+    /// When true, Monaco must clear markers (session dead / stop).
+    pub clear: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspDiagnosticsPollResult {
+    pub session_id: String,
+    pub process_alive: bool,
+    pub events: Vec<LspDiagnosticsEvent>,
+    pub message: String,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LspEnsureArgs {
@@ -183,10 +225,27 @@ pub struct LspDidOpenArgs {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct LspDidChangeArgs {
+    pub session_id: String,
+    pub uri: String,
+    pub text: String,
+    pub version: i32,
+    /// Used only when the URI was not yet opened (auto-didOpen path).
+    pub language_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct LspRequestArgs {
     pub session_id: String,
     pub method: String,
     pub params: Value,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspPollDiagnosticsArgs {
+    pub session_id: String,
 }
 
 fn path_is_executable(path: &Path) -> bool {
@@ -195,7 +254,6 @@ fn path_is_executable(path: &Path) -> bool {
     }
     #[cfg(windows)]
     {
-        // On Windows, PATH entries may be .cmd shims; accept any existing file path.
         true
     }
     #[cfg(not(windows))]
@@ -284,71 +342,13 @@ fn resolve_binary(language: LspLanguage) -> Result<PathBuf, String> {
 
     Err(format!(
         "LSP_BINARY_HELD: {} not found on PATH (install the language server or set {:?})",
-        language.binary_names().first().copied().unwrap_or("language-server"),
+        language
+            .binary_names()
+            .first()
+            .copied()
+            .unwrap_or("language-server"),
         language.env_override_keys()
     ))
-}
-
-fn spawn_language_server(language: LspLanguage, binary: &Path) -> Result<LspSession, String> {
-    let mut cmd = if binary
-        .extension()
-        .and_then(|e| e.to_str())
-        .is_some_and(|e| e.eq_ignore_ascii_case("js"))
-    {
-        // node_modules/.../cli.js entry — run via node.
-        let mut c = Command::new("node");
-        c.arg(binary);
-        c
-    } else {
-        Command::new(binary)
-    };
-
-    for arg in language.spawn_args() {
-        cmd.arg(arg);
-    }
-
-    let mut child = cmd
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|e| {
-            format!(
-                "LSP_SPAWN_FAILED: could not start {} ({}): {e}",
-                language.as_str(),
-                binary.display()
-            )
-        })?;
-
-    let stdin = child
-        .stdin
-        .take()
-        .ok_or_else(|| "LSP_SPAWN_FAILED: stdin pipe unavailable".to_string())?;
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or_else(|| "LSP_SPAWN_FAILED: stdout pipe unavailable".to_string())?;
-
-    // Confirm the process did not exit immediately (missing runtime / bad args).
-    std::thread::sleep(Duration::from_millis(80));
-    if let Ok(Some(status)) = child.try_wait() {
-        return Err(format!(
-            "LSP_SPAWN_FAILED: {} exited immediately with {status}",
-            language.as_str()
-        ));
-    }
-
-    Ok(LspSession {
-        id: String::new(), // filled by registry
-        language,
-        binary_path: binary.to_path_buf(),
-        child,
-        stdin: Some(stdin),
-        stdout: Some(BufReader::new(stdout)),
-        initialized: false,
-        next_request_id: 1,
-        open_uris: HashSet::new(),
-    })
 }
 
 fn write_lsp_message(stdin: &mut ChildStdin, body: &str) -> Result<(), String> {
@@ -383,7 +383,9 @@ fn read_one_lsp_message(reader: &mut BufReader<ChildStdout>) -> Result<String, S
     let len = content_length
         .ok_or_else(|| "LSP_IPC_READ_FAILED: missing Content-Length header".to_string())?;
     if len == 0 || len > 4 * 1024 * 1024 {
-        return Err(format!("LSP_IPC_READ_FAILED: unreasonable Content-Length {len}"));
+        return Err(format!(
+            "LSP_IPC_READ_FAILED: unreasonable Content-Length {len}"
+        ));
     }
 
     let mut buf = vec![0u8; len];
@@ -394,94 +396,225 @@ fn read_one_lsp_message(reader: &mut BufReader<ChildStdout>) -> Result<String, S
 }
 
 fn session_alive(session: &mut LspSession) -> bool {
+    if session.hub.dead.load(Ordering::SeqCst) {
+        return false;
+    }
     match session.child.try_wait() {
         Ok(None) => true,
-        Ok(Some(_)) | Err(_) => false,
+        Ok(Some(_)) | Err(_) => {
+            session.hub.dead.store(true, Ordering::SeqCst);
+            false
+        }
     }
 }
 
-fn message_id_matches(body: &str, expected_id: u64) -> bool {
-    let Ok(value) = serde_json::from_str::<Value>(body) else {
-        return false;
-    };
-    match value.get("id") {
-        Some(Value::Number(n)) => n.as_u64() == Some(expected_id),
-        Some(Value::String(s)) => s.parse::<u64>().ok() == Some(expected_id),
-        _ => false,
-    }
-}
-
-fn is_response_message(body: &str) -> bool {
-    let Ok(value) = serde_json::from_str::<Value>(body) else {
-        return false;
-    };
+fn is_response_message(value: &Value) -> bool {
     value.get("id").is_some() && (value.get("result").is_some() || value.get("error").is_some())
 }
 
-/// Read stdout until a JSON-RPC response with `expected_id` arrives (skip notifications).
-fn read_response_for_id(
-    session: &mut LspSession,
-    expected_id: u64,
-    timeout: Duration,
-) -> Result<Value, String> {
-    let mut reader = session
-        .stdout
-        .take()
-        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdout missing".to_string())?;
+fn response_id(value: &Value) -> Option<u64> {
+    match value.get("id")? {
+        Value::Number(n) => n.as_u64(),
+        Value::String(s) => s.parse().ok(),
+        _ => None,
+    }
+}
 
-    let (tx, rx) = mpsc::channel();
+fn emit_session_dead(hub: &IoHub) {
+    let session_id = hub
+        .session_id
+        .lock()
+        .map(|g| g.clone())
+        .unwrap_or_default();
+    let event = LspDiagnosticsEvent {
+        session_id: session_id.clone(),
+        uri: String::new(),
+        diagnostics: Value::Array(vec![]),
+        version: None,
+        clear: true,
+    };
+    if let Ok(mut q) = hub.diag_queue.lock() {
+        q.push(event.clone());
+    }
+    if let Ok(guard) = hub.app.lock() {
+        if let Some(app) = guard.as_ref() {
+            let _ = app.emit(SESSION_DEAD_EVENT, &event);
+            let _ = app.emit(DIAGNOSTICS_EVENT, &event);
+        }
+    }
+}
+
+fn store_and_emit_diagnostics(hub: &IoHub, params: &Value) {
+    let uri = params
+        .get("uri")
+        .and_then(|u| u.as_str())
+        .unwrap_or("")
+        .to_string();
+    if uri.is_empty() {
+        return;
+    }
+    let diagnostics = params
+        .get("diagnostics")
+        .cloned()
+        .unwrap_or_else(|| Value::Array(vec![]));
+    // Only accept arrays — never invent diagnostic entries.
+    if !diagnostics.is_array() {
+        return;
+    }
+    let version = params.get("version").and_then(|v| v.as_i64());
+    let session_id = hub
+        .session_id
+        .lock()
+        .map(|g| g.clone())
+        .unwrap_or_default();
+    let event = LspDiagnosticsEvent {
+        session_id,
+        uri: uri.clone(),
+        diagnostics,
+        version,
+        clear: false,
+    };
+    if let Ok(mut map) = hub.diagnostics.lock() {
+        map.insert(uri, event.clone());
+    }
+    if let Ok(mut q) = hub.diag_queue.lock() {
+        q.push(event.clone());
+    }
+    if let Ok(guard) = hub.app.lock() {
+        if let Some(app) = guard.as_ref() {
+            let _ = app.emit(DIAGNOSTICS_EVENT, &event);
+        }
+    }
+}
+
+fn start_reader_thread(hub: Arc<IoHub>, stdout: ChildStdout) -> JoinHandle<()> {
     std::thread::spawn(move || {
+        let mut reader = BufReader::new(stdout);
         loop {
+            if hub.dead.load(Ordering::SeqCst) {
+                break;
+            }
             match read_one_lsp_message(&mut reader) {
                 Ok(body) => {
-                    if message_id_matches(&body, expected_id) && is_response_message(&body) {
-                        match serde_json::from_str::<Value>(&body) {
-                            Ok(v) => {
-                                let _ = tx.send(Ok((v, reader)));
-                                return;
+                    let Ok(value) = serde_json::from_str::<Value>(&body) else {
+                        continue;
+                    };
+                    if let Some(method) = value.get("method").and_then(|m| m.as_str()) {
+                        if method == "textDocument/publishDiagnostics" {
+                            if let Some(params) = value.get("params") {
+                                store_and_emit_diagnostics(&hub, params);
                             }
-                            Err(e) => {
-                                let _ = tx.send(Err((
-                                    format!("LSP_IPC_PARSE_FAILED: {e}"),
-                                    reader,
-                                )));
-                                return;
+                        }
+                        // Other notifications: ignore (window/logMessage, etc.).
+                        continue;
+                    }
+                    if is_response_message(&value) {
+                        if let Some(id) = response_id(&value) {
+                            if let Ok(mut pending) = hub.pending.lock() {
+                                if let Some(tx) = pending.remove(&id) {
+                                    let _ = tx.send(value);
+                                }
                             }
                         }
                     }
-                    // Skip server notifications / unrelated traffic.
                 }
-                Err(e) => {
-                    let _ = tx.send(Err((e, reader)));
-                    return;
+                Err(_) => {
+                    hub.dead.store(true, Ordering::SeqCst);
+                    emit_session_dead(&hub);
+                    break;
                 }
             }
         }
-    });
+    })
+}
 
-    match rx.recv_timeout(timeout) {
-        Ok(Ok((value, reader))) => {
-            session.stdout = Some(reader);
-            Ok(value)
-        }
-        Ok(Err((err, reader))) => {
-            session.stdout = Some(reader);
-            Err(err)
-        }
-        Err(_) => {
-            let _ = session.child.kill();
-            let _ = session.child.wait();
-            Err(
-                "LSP_IPC_TIMEOUT: no matching response within deadline — fail-closed (no mock hover)."
-                    .to_string(),
+fn spawn_language_server(language: LspLanguage, binary: &Path) -> Result<LspSession, String> {
+    let mut cmd = if binary
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("js"))
+    {
+        let mut c = Command::new("node");
+        c.arg(binary);
+        c
+    } else {
+        Command::new(binary)
+    };
+
+    for arg in language.spawn_args() {
+        cmd.arg(arg);
+    }
+
+    let mut child = cmd
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| {
+            format!(
+                "LSP_SPAWN_FAILED: could not start {} ({}): {e}",
+                language.as_str(),
+                binary.display()
             )
-        }
+        })?;
+
+    let stdin = child
+        .stdin
+        .take()
+        .ok_or_else(|| "LSP_SPAWN_FAILED: stdin pipe unavailable".to_string())?;
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| "LSP_SPAWN_FAILED: stdout pipe unavailable".to_string())?;
+
+    std::thread::sleep(Duration::from_millis(80));
+    if let Ok(Some(status)) = child.try_wait() {
+        return Err(format!(
+            "LSP_SPAWN_FAILED: {} exited immediately with {status}",
+            language.as_str()
+        ));
+    }
+
+    let hub = Arc::new(IoHub {
+        stdin: Mutex::new(Some(stdin)),
+        pending: Mutex::new(HashMap::new()),
+        diagnostics: Mutex::new(HashMap::new()),
+        diag_queue: Mutex::new(Vec::new()),
+        dead: AtomicBool::new(false),
+        session_id: Mutex::new(String::new()),
+        app: Mutex::new(None),
+    });
+    let reader_join = Some(start_reader_thread(Arc::clone(&hub), stdout));
+
+    Ok(LspSession {
+        id: String::new(),
+        language,
+        binary_path: binary.to_path_buf(),
+        child,
+        hub,
+        reader_join,
+        initialized: false,
+        next_request_id: 1,
+        open_uris: HashSet::new(),
+    })
+}
+
+fn bind_app_handle(hub: &IoHub, app: &AppHandle) {
+    if let Ok(mut guard) = hub.app.lock() {
+        *guard = Some(app.clone());
     }
 }
 
 fn send_notification(session: &mut LspSession, method: &str, params: Value) -> Result<(), String> {
-    let stdin = session
+    if session.hub.dead.load(Ordering::SeqCst) {
+        return Err("LSP_SESSION_DEAD: language server process is not alive".to_string());
+    }
+    let mut stdin_guard = session
+        .hub
         .stdin
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    let stdin = stdin_guard
         .as_mut()
         .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
     let body = serde_json::json!({
@@ -498,20 +631,57 @@ fn send_request(
     params: Value,
     timeout: Duration,
 ) -> Result<Value, String> {
+    if session.hub.dead.load(Ordering::SeqCst) {
+        return Err("LSP_SESSION_DEAD: language server process is not alive".to_string());
+    }
     let id = session.next_request_id;
     session.next_request_id = session.next_request_id.saturating_add(1);
-    let stdin = session
-        .stdin
-        .as_mut()
-        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
-    let body = serde_json::json!({
-        "jsonrpc": "2.0",
-        "id": id,
-        "method": method,
-        "params": params,
-    });
-    write_lsp_message(stdin, &body.to_string())?;
-    read_response_for_id(session, id, timeout)
+
+    let (tx, rx) = mpsc::channel();
+    {
+        let mut pending = session
+            .hub
+            .pending
+            .lock()
+            .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+        pending.insert(id, tx);
+    }
+
+    {
+        let mut stdin_guard = session
+            .hub
+            .stdin
+            .lock()
+            .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+        let stdin = stdin_guard
+            .as_mut()
+            .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
+        let body = serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": method,
+            "params": params,
+        });
+        if let Err(e) = write_lsp_message(stdin, &body.to_string()) {
+            let _ = session.hub.pending.lock().map(|mut p| p.remove(&id));
+            return Err(e);
+        }
+    }
+
+    match rx.recv_timeout(timeout) {
+        Ok(value) => Ok(value),
+        Err(_) => {
+            let _ = session.hub.pending.lock().map(|mut p| p.remove(&id));
+            let _ = session.child.kill();
+            let _ = session.child.wait();
+            session.hub.dead.store(true, Ordering::SeqCst);
+            emit_session_dead(&session.hub);
+            Err(
+                "LSP_IPC_TIMEOUT: no matching response within deadline — fail-closed (no mock LSP)."
+                    .to_string(),
+            )
+        }
+    }
 }
 
 fn ensure_initialized(session: &mut LspSession, root_uri: Option<&str>) -> Result<(), String> {
@@ -524,13 +694,26 @@ fn ensure_initialized(session: &mut LspSession, root_uri: Option<&str>) -> Resul
 
     let params = serde_json::json!({
         "processId": null,
-        "clientInfo": { "name": "aethel-lsp-farm", "version": "0.2.0" },
+        "clientInfo": { "name": "aethel-lsp-farm", "version": "0.3.0" },
         "rootUri": root_uri,
         "capabilities": {
             "textDocument": {
-                "synchronization": { "didSave": true, "dynamicRegistration": false },
+                "synchronization": {
+                    "didSave": true,
+                    "dynamicRegistration": false,
+                    "willSave": false,
+                    "willSaveWaitUntil": false
+                },
                 "hover": { "contentFormat": ["markdown", "plaintext"] },
                 "definition": { "linkSupport": false },
+                "completion": {
+                    "completionItem": {
+                        "snippetSupport": true,
+                        "documentationFormat": ["markdown", "plaintext"]
+                    },
+                    "contextSupport": true
+                },
+                "publishDiagnostics": { "relatedInformation": true }
             },
             "workspace": { "workspaceFolders": false }
         },
@@ -557,12 +740,17 @@ fn insert_session(registry: &mut LspFarmRegistry, mut session: LspSession) -> Ls
     registry.next_id += 1;
     let session_id = format!("lsp-{}-{}", session.language.as_str(), registry.next_id);
     session.id = session_id.clone();
+    if let Ok(mut id_guard) = session.hub.session_id.lock() {
+        *id_guard = session_id.clone();
+    }
+    if let Some(app) = registry.app.as_ref() {
+        bind_app_handle(&session.hub, app);
+    }
     let lang_key = session.language.as_str();
     let alive = session_alive(&mut session);
     let binary_path = session.binary_path.display().to_string();
     let language = session.language.as_str().to_string();
 
-    // Replace any prior session for this language.
     if let Some(old_id) = registry.by_language.insert(lang_key, session_id.clone()) {
         let _ = registry.sessions.remove(&old_id);
     }
@@ -574,7 +762,7 @@ fn insert_session(registry: &mut LspFarmRegistry, mut session: LspSession) -> Ls
         binary_path,
         alive,
         message: if alive {
-            "Language server sidecar running (stdio). Call lsp_farm_ensure_session for initialize + Monaco hover/definition."
+            "Language server sidecar running (stdio). Continuous didChange + diagnostics push enabled."
                 .to_string()
         } else {
             "Language server exited before registration — fail-closed.".to_string()
@@ -582,7 +770,11 @@ fn insert_session(registry: &mut LspFarmRegistry, mut session: LspSession) -> Ls
     }
 }
 
-/// Honesty surface for desktop L.13 Monaco hover/definition wire.
+fn remember_app(registry: &mut LspFarmRegistry, app: &AppHandle) {
+    registry.app = Some(app.clone());
+}
+
+/// Honesty surface for desktop L.13 Monaco wire.
 #[tauri::command]
 pub fn lsp_farm_honesty() -> LspFarmHonestyReport {
     LspFarmHonestyReport {
@@ -590,7 +782,7 @@ pub fn lsp_farm_honesty() -> LspFarmHonestyReport {
         tauri_sidecar_spawn: "partial",
         monaco_desktop_hover_definition: "partial",
         marketing_allowed: false,
-        message: "L.13 Tauri lsp_farm: real binary discovery + sidecar spawn + initialize + minimal didOpen + hover/definition IPC. Full L.C multi-language soak (Python) still OPEN. Marketing blocked.".to_string(),
+        message: "L.13 Tauri lsp_farm: real binary discovery + sidecar spawn + initialize + continuous didChange (full text) + publishDiagnostics→Monaco markers + hover/definition/completion IPC. Full L.C multi-language soak (Python) still OPEN. Marketing blocked.".to_string(),
     }
 }
 
@@ -630,6 +822,7 @@ pub fn lsp_farm_probe() -> Vec<LspBinaryProbe> {
 #[tauri::command]
 pub fn lsp_farm_spawn(
     language: String,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspSpawnResult, String> {
     let lang = LspLanguage::parse(&language).ok_or_else(|| {
@@ -643,14 +836,15 @@ pub fn lsp_farm_spawn(
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     Ok(insert_session(&mut guard, session))
 }
 
 /// Ensure a live initialized session for `language` (spawn + initialize if needed).
-/// Fail-closed when binary missing — never fabricates hover/definition.
 #[tauri::command]
 pub fn lsp_farm_ensure_session(
     args: LspEnsureArgs,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspSessionInfo, String> {
     let lang = LspLanguage::parse(&args.language).ok_or_else(|| {
@@ -663,10 +857,12 @@ pub fn lsp_farm_ensure_session(
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
 
     let existing_id = guard.by_language.get(lang.as_str()).cloned();
     if let Some(session_id) = existing_id {
         if let Some(session) = guard.sessions.get_mut(&session_id) {
+            bind_app_handle(&session.hub, &app);
             if session_alive(session) {
                 ensure_initialized(session, args.root_uri.as_deref())?;
                 return Ok(LspSessionInfo {
@@ -677,13 +873,11 @@ pub fn lsp_farm_ensure_session(
                     initialized: session.initialized,
                 });
             }
-            // Dead session — drop and respawn.
             let _ = guard.sessions.remove(&session_id);
             guard.by_language.remove(lang.as_str());
         }
     }
 
-    // Drop lock briefly so spawn I/O does not hold the farm mutex.
     drop(guard);
     let binary = resolve_binary(lang)?;
     let session = spawn_language_server(lang, &binary)?;
@@ -691,6 +885,7 @@ pub fn lsp_farm_ensure_session(
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     let spawn = insert_session(&mut guard, session);
     let session = guard
         .sessions
@@ -707,42 +902,56 @@ pub fn lsp_farm_ensure_session(
     })
 }
 
-/// Minimal `textDocument/didOpen` (idempotent per URI). No full didChange sync.
+/// `textDocument/didOpen` — if already open, upgrades to full-text `didChange`.
 #[tauri::command]
 pub fn lsp_farm_did_open(
     args: LspDidOpenArgs,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspRpcResult, String> {
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     let session = guard
         .sessions
         .get_mut(&args.session_id)
         .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+    bind_app_handle(&session.hub, &app);
 
     if !session_alive(session) {
+        emit_session_dead(&session.hub);
         return Ok(LspRpcResult {
             session_id: args.session_id,
             ok: false,
             process_alive: false,
             result: None,
             error: None,
-            message: "Language server process is not alive — fail-closed (no mock hover)."
+            message: "Language server process is not alive — fail-closed (no mock LSP)."
                 .to_string(),
         });
     }
 
     ensure_initialized(session, None)?;
+    let version = args.version.unwrap_or(1);
 
     if session.open_uris.contains(&args.uri) {
-        // Limitation: no didChange — re-open with fresh text via didClose + didOpen.
         send_notification(
             session,
-            "textDocument/didClose",
-            serde_json::json!({ "textDocument": { "uri": args.uri } }),
+            "textDocument/didChange",
+            serde_json::json!({
+                "textDocument": { "uri": args.uri, "version": version },
+                "contentChanges": [{ "text": args.text }]
+            }),
         )?;
-        session.open_uris.remove(&args.uri);
+        return Ok(LspRpcResult {
+            session_id: session.id.clone(),
+            ok: true,
+            process_alive: true,
+            result: Some(Value::Null),
+            error: None,
+            message: "didChange (full text) sent for already-open document.".to_string(),
+        });
     }
 
     send_notification(
@@ -752,7 +961,7 @@ pub fn lsp_farm_did_open(
             "textDocument": {
                 "uri": args.uri,
                 "languageId": args.language_id,
-                "version": args.version.unwrap_or(1),
+                "version": version,
                 "text": args.text,
             }
         }),
@@ -765,47 +974,196 @@ pub fn lsp_farm_did_open(
         process_alive: true,
         result: Some(Value::Null),
         error: None,
-        message: "didOpen sent (minimal sync; no continuous didChange).".to_string(),
+        message: "didOpen sent; subsequent edits use continuous didChange.".to_string(),
     })
 }
 
-/// JSON-RPC request over an initialized farm session (hover / definition).
-/// Returns only real server payloads — never fabricates results.
+/// Continuous full-text `textDocument/didChange` for a live farm session.
+/// Opens the document first when needed (fail-closed if session dead).
 #[tauri::command]
-pub fn lsp_farm_request(
-    args: LspRequestArgs,
+pub fn lsp_farm_did_change(
+    args: LspDidChangeArgs,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspRpcResult, String> {
-    let method = args.method.trim();
-    // Desktop wire is intentionally narrow: hover + definition (+ initialize via ensure).
-    const ALLOWED: &[&str] = &[
-        "textDocument/hover",
-        "textDocument/definition",
-        "textDocument/typeDefinition",
-        "shutdown",
-    ];
-    if !ALLOWED.contains(&method) {
-        return Err(format!(
-            "LSP_METHOD_HELD: {method} not on desktop wire (allowed: hover/definition)"
-        ));
-    }
-
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     let session = guard
         .sessions
         .get_mut(&args.session_id)
         .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+    bind_app_handle(&session.hub, &app);
 
     if !session_alive(session) {
+        emit_session_dead(&session.hub);
         return Ok(LspRpcResult {
             session_id: args.session_id,
             ok: false,
             process_alive: false,
             result: None,
             error: None,
-            message: "Language server process is not alive — fail-closed (no mock hover)."
+            message: "Language server process is not alive — fail-closed (clear Monaco markers)."
+                .to_string(),
+        });
+    }
+
+    ensure_initialized(session, None)?;
+
+    if !session.open_uris.contains(&args.uri) {
+        // Caller did not didOpen yet — open with current full text, then done.
+        let language_id = args
+            .language_id
+            .as_deref()
+            .filter(|s| !s.is_empty())
+            .unwrap_or(session.language.as_str());
+        send_notification(
+            session,
+            "textDocument/didOpen",
+            serde_json::json!({
+                "textDocument": {
+                    "uri": args.uri,
+                    "languageId": language_id,
+                    "version": args.version,
+                    "text": args.text,
+                }
+            }),
+        )?;
+        session.open_uris.insert(args.uri.clone());
+        return Ok(LspRpcResult {
+            session_id: session.id.clone(),
+            ok: true,
+            process_alive: true,
+            result: Some(Value::Null),
+            error: None,
+            message: "didOpen (via didChange path) sent with full text.".to_string(),
+        });
+    }
+
+    send_notification(
+        session,
+        "textDocument/didChange",
+        serde_json::json!({
+            "textDocument": { "uri": args.uri, "version": args.version },
+            "contentChanges": [{ "text": args.text }]
+        }),
+    )?;
+
+    Ok(LspRpcResult {
+        session_id: session.id.clone(),
+        ok: true,
+        process_alive: true,
+        result: Some(Value::Null),
+        error: None,
+        message: "didChange (full text) sent to live language server.".to_string(),
+    })
+}
+
+/// Drain buffered `publishDiagnostics` events (also emitted live via Tauri event).
+/// Never fabricates diagnostics — empty events when server sent none.
+#[tauri::command]
+pub fn lsp_farm_poll_diagnostics(
+    args: LspPollDiagnosticsArgs,
+    app: AppHandle,
+    registry: State<'_, Mutex<LspFarmRegistry>>,
+) -> Result<LspDiagnosticsPollResult, String> {
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
+    let session = guard
+        .sessions
+        .get_mut(&args.session_id)
+        .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+    bind_app_handle(&session.hub, &app);
+
+    let alive = session_alive(session);
+    let events = session
+        .hub
+        .diag_queue
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?
+        .drain(..)
+        .collect::<Vec<_>>();
+
+    if !alive {
+        return Ok(LspDiagnosticsPollResult {
+            session_id: args.session_id,
+            process_alive: false,
+            events: if events.is_empty() {
+                vec![LspDiagnosticsEvent {
+                    session_id: session.id.clone(),
+                    uri: String::new(),
+                    diagnostics: Value::Array(vec![]),
+                    version: None,
+                    clear: true,
+                }]
+            } else {
+                events
+            },
+            message: "Session dead — clear Monaco markers (fail-closed; no fake diagnostics)."
+                .to_string(),
+        });
+    }
+
+    let message = if events.is_empty() {
+        "No pending diagnostics from language server.".to_string()
+    } else {
+        format!(
+            "{} diagnostics event(s) from live language server",
+            events.len()
+        )
+    };
+    Ok(LspDiagnosticsPollResult {
+        session_id: session.id.clone(),
+        process_alive: true,
+        events,
+        message,
+    })
+}
+
+/// JSON-RPC request over an initialized farm session.
+/// Returns only real server payloads — never fabricates results.
+#[tauri::command]
+pub fn lsp_farm_request(
+    args: LspRequestArgs,
+    app: AppHandle,
+    registry: State<'_, Mutex<LspFarmRegistry>>,
+) -> Result<LspRpcResult, String> {
+    let method = args.method.trim();
+    const ALLOWED: &[&str] = &[
+        "textDocument/hover",
+        "textDocument/definition",
+        "textDocument/typeDefinition",
+        "textDocument/completion",
+        "shutdown",
+    ];
+    if !ALLOWED.contains(&method) {
+        return Err(format!(
+            "LSP_METHOD_HELD: {method} not on desktop wire (allowed: hover/definition/completion)"
+        ));
+    }
+
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
+    let session = guard
+        .sessions
+        .get_mut(&args.session_id)
+        .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+    bind_app_handle(&session.hub, &app);
+
+    if !session_alive(session) {
+        emit_session_dead(&session.hub);
+        return Ok(LspRpcResult {
+            session_id: args.session_id,
+            ok: false,
+            process_alive: false,
+            result: None,
+            error: None,
+            message: "Language server process is not alive — fail-closed (no mock LSP)."
                 .to_string(),
         });
     }
@@ -826,7 +1184,7 @@ pub fn lsp_farm_request(
                 message: if ok {
                     format!("{method} response from live language server")
                 } else {
-                    format!("{method} returned LSP error — fail-closed UI must not invent hover")
+                    format!("{method} returned LSP error — fail-closed UI must not invent results")
                 },
             })
         }
@@ -860,19 +1218,22 @@ pub fn lsp_farm_list(registry: State<'_, Mutex<LspFarmRegistry>>) -> Result<Vec<
     Ok(out)
 }
 
-/// Stop and remove a farm session (best-effort kill).
+/// Stop and remove a farm session (best-effort kill); emits clear-diagnostics.
 #[tauri::command]
 pub fn lsp_farm_stop(
     session_id: String,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspSessionInfo, String> {
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     let mut session = guard
         .sessions
         .remove(&session_id)
         .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {session_id}"))?;
+    bind_app_handle(&session.hub, &app);
     if let Some(mapped) = guard.by_language.get(session.language.as_str()).cloned() {
         if mapped == session_id {
             guard.by_language.remove(session.language.as_str());
@@ -886,7 +1247,7 @@ pub fn lsp_farm_stop(
         alive: alive_before,
         initialized: session.initialized,
     };
-    drop(session); // Drop kills the child
+    drop(session); // Drop kills child + emits session-dead clear
     Ok(info)
 }
 
@@ -894,17 +1255,21 @@ pub fn lsp_farm_stop(
 #[tauri::command]
 pub fn lsp_farm_ipc_probe(
     session_id: String,
+    app: AppHandle,
     registry: State<'_, Mutex<LspFarmRegistry>>,
 ) -> Result<LspIpcProbeResult, String> {
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    remember_app(&mut guard, &app);
     let session = guard
         .sessions
         .get_mut(&session_id)
         .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {session_id}"))?;
+    bind_app_handle(&session.hub, &app);
 
     if !session_alive(session) {
+        emit_session_dead(&session.hub);
         return Ok(LspIpcProbeResult {
             session_id,
             ok: false,
@@ -920,8 +1285,10 @@ pub fn lsp_farm_ipc_probe(
             session_id,
             ok: true,
             process_alive: true,
-            initialize_response: Some(r#"{"jsonrpc":"2.0","id":0,"result":{"alreadyInitialized":true}}"#.to_string()),
-            message: "Session already initialized for Monaco hover/definition wire.".to_string(),
+            initialize_response: Some(
+                r#"{"jsonrpc":"2.0","id":0,"result":{"alreadyInitialized":true}}"#.to_string(),
+            ),
+            message: "Session already initialized for Monaco LSP wire.".to_string(),
         });
     }
 
@@ -930,8 +1297,10 @@ pub fn lsp_farm_ipc_probe(
             session_id,
             ok: true,
             process_alive: session_alive(session),
-            initialize_response: Some(r#"{"jsonrpc":"2.0","result":{"initialized":true}}"#.to_string()),
-            message: "Stdio initialize handshake succeeded. Monaco hover/definition IPC ready when binary live.".to_string(),
+            initialize_response: Some(
+                r#"{"jsonrpc":"2.0","result":{"initialized":true}}"#.to_string(),
+            ),
+            message: "Stdio initialize handshake succeeded. Monaco didChange/diagnostics/hover ready when binary live.".to_string(),
         }),
         Err(message) => Ok(LspIpcProbeResult {
             session_id,
@@ -949,14 +1318,16 @@ mod tests {
 
     #[test]
     fn parse_language_aliases() {
-        assert_eq!(LspLanguage::parse("typescriptreact"), Some(LspLanguage::TypeScript));
+        assert_eq!(
+            LspLanguage::parse("typescriptreact"),
+            Some(LspLanguage::TypeScript)
+        );
         assert_eq!(LspLanguage::parse("rs"), Some(LspLanguage::Rust));
         assert_eq!(LspLanguage::parse("cobol"), None);
     }
 
     #[test]
     fn missing_binary_is_held_not_fabricated() {
-        // Force a language that won't resolve via a nonsense env override path.
         std::env::set_var(
             "AETHEL_LSP_RUST_ANALYZER",
             "E:\\definitely-missing-rust-analyzer-binary.exe",
@@ -973,13 +1344,48 @@ mod tests {
         assert_eq!(report.monaco_desktop_hover_definition, "partial");
         assert!(!report.marketing_allowed);
         assert!(report.message.contains("OPEN") || report.message.contains("blocked"));
+        assert!(report.message.contains("didChange") || report.message.contains("diagnostics"));
     }
 
     #[test]
     fn message_id_match_helpers() {
-        assert!(message_id_matches(r#"{"jsonrpc":"2.0","id":3,"result":null}"#, 3));
-        assert!(!message_id_matches(r#"{"jsonrpc":"2.0","id":2,"result":null}"#, 3));
-        assert!(is_response_message(r#"{"id":1,"result":{}}"#));
-        assert!(!is_response_message(r#"{"method":"window/logMessage","params":{}}"#));
+        let response: Value = serde_json::from_str(r#"{"id":1,"result":{}}"#).unwrap();
+        assert!(is_response_message(&response));
+        assert_eq!(response_id(&response), Some(1));
+        let note: Value =
+            serde_json::from_str(r#"{"method":"window/logMessage","params":{}}"#).unwrap();
+        assert!(!is_response_message(&note));
+        assert_eq!(response_id(&note), None);
+    }
+
+    #[test]
+    fn store_diagnostics_rejects_non_array() {
+        let hub = IoHub {
+            stdin: Mutex::new(None),
+            pending: Mutex::new(HashMap::new()),
+            diagnostics: Mutex::new(HashMap::new()),
+            diag_queue: Mutex::new(Vec::new()),
+            dead: AtomicBool::new(false),
+            session_id: Mutex::new("lsp-test-1".into()),
+            app: Mutex::new(None),
+        };
+        store_and_emit_diagnostics(
+            &hub,
+            &serde_json::json!({
+                "uri": "file:///a.ts",
+                "diagnostics": "not-an-array"
+            }),
+        );
+        assert!(hub.diagnostics.lock().unwrap().is_empty());
+        store_and_emit_diagnostics(
+            &hub,
+            &serde_json::json!({
+                "uri": "file:///a.ts",
+                "diagnostics": [{ "message": "real", "range": { "start": {"line":0,"character":0}, "end": {"line":0,"character":1} }, "severity": 1 }]
+            }),
+        );
+        let map = hub.diagnostics.lock().unwrap();
+        assert!(map.contains_key("file:///a.ts"));
+        assert!(!map["file:///a.ts"].clear);
     }
 }
