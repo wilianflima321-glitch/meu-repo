@@ -41,7 +41,7 @@
 | 2026-08-08 l10-ui-collab-batch | L.10 lib/ui + components/ui + animation/video + collab/blueprint/quest batch | **PARTIAL** deepen; scanner **424→185** (−239); priority dirs **0**; Hub checkout HELD |
 | 2026-08-08 l10-hardcoded-green | L.10 full `qa:hardcoded-colors` residual clear (email/env/viewport/domain SoT) | **DONE-core** gate; scanner **185→0**; Hub checkout HELD |
 | 2026-08-08 l12-precision-soak | L.12 RepoGraphRAG L-ACC-05 who-imports / neighborhood precision soak | **DONE** L-ACC-05; edge **94.82%→100%**; tests **3/3**; Hub checkout HELD |
-| 2026-08-08 l9-scaffold-ux | L.9 interactive Forge scaffold UX (wizard + fail-closed client) | **PARTIAL** deepen (UX core); tests **12/12** targeted; live create-next-app soak still open; Hub checkout HELD |
+| 2026-08-08 l9-scaffold-ux | L.9 interactive Forge scaffold UX (wizard + fail-closed client) | **PARTIAL** deepen (UX core); commit `e560e6d7b`; tests **12/12** targeted; live create-next-app soak still open; Hub checkout HELD |
 
 ---
 
