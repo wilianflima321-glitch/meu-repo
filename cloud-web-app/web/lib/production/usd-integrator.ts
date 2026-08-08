@@ -24,13 +24,13 @@ import type { ViewportAssetImportFormat } from '@/lib/viewport/viewport-asset-im
 
 const log = createComponentLogger('usd-integrator')
 
-/** Browser USD/USDZ viewer — not shipped as live mesh path (Block 4 + J.7). */
+/** Browser USD/USDZ viewer — HELD per ASSET-001 hierarchy (J.7 honesty) */
 export const USD_BROWSER_VIEWER_SHIP_STATUS = 'HELD' as const
 
 export const USD_INTEGRATOR_HONESTY = {
   noProxyCapsule: 'Proxy capsule is not a shipped character.',
   noTripoOnlyAaa: 'Tripo/Meshy amorphous mesh is not a shipped AAA character without USD cook.',
-  usdViewerHeld: 'USD/USDZ browser viewer remains [HELD] — no fake AAA mesh claim.',
+  usdViewerHeld: 'USD/USDZ browser viewer is HELD — GLTF/FBX/OBJ live; USD cook path pending.',
   libraryPlacementOk: 'UsdIntegrator may position library assets from prompt — not invent final hero mesh.',
 } as const
 
@@ -112,13 +112,13 @@ export function evaluateUsdCharacterShipGate(input: {
     }
   }
 
-  if ((format === 'usd' || format === 'usdz') && input.claimShippedAaa) {
+  if (viewerStatus === 'placeholder' && input.claimShippedAaa) {
     return {
       allowed: false,
       reason: 'usd_viewer_held',
       message: USD_INTEGRATOR_HONESTY.usdViewerHeld,
       shipKind: input.shipKind,
-      viewerStatus: 'held',
+      viewerStatus: viewerStatus,
     }
   }
 

@@ -127,6 +127,9 @@ export function extractVideoToMechanicScaffold(input: {
   return result
 }
 
+/** @deprecated Use extractVideoToMechanicScaffold — kept for CLAUDE.md contract alias */
+export const extractMechanicScaffoldFromVideo = extractVideoToMechanicScaffold
+
 function slug(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || randomUUID().slice(0, 6)
 }

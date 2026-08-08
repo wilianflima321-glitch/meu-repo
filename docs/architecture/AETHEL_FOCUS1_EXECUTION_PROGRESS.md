@@ -330,17 +330,17 @@ without Founder sign-off**, per hard rule already in this ledger and in `CLAUDE.
 | # | Contract | Status | Evidence | What's missing for real DONE |
 |---|----------|--------|----------|-------------------------------|
 | L.1 | ForgeSandboxExecutor | **PARTIAL (real) → `local-isolated` DONE, `e2b` code-path real but env-gated HELD, `firecracker` explicit HELD** | `lib/production/forge-sandbox-executor.ts` + `lib/production/forge-sandbox-path-guard.ts` (round 3). `local-isolated` provider is a genuine sandbox: `child_process.execFile` only (never a PTY — structurally satisfies #48), per-session command allowlist (deny-by-default, no shells in default list), filesystem confinement to `projectRootPath` with symlink-safe realpath resolution + `..`/absolute-path escape detection on both `cwd` and every path-shaped arg, scrubbed child env (only an explicit safe-key allowlist is copied from `process.env` — secrets/API keys/DB URLs never inherited), timeout + `maxBuffer` output caps, CostGuard reserve/settle per session (Trava I, `domain:'forge-sandbox'`), and every command + cost + teardown event appended to a real `task-evidence-ledger`. `e2b` provider reuses the existing preview E2B module (Decision #52, `lib/server/e2b-runtime.ts`) with a real `create`/`commands.run` call path — but this workstation has no `E2B_API_KEY`, so it honestly reports `e2b_api_key_missing`/HELD rather than faking a remote sandbox. 24 new tests, all green (see round-3 report below). | **HELD, honestly:** real OS-level network namespace/firewall isolation for `local-isolated` (`networkPolicy:'none'` today only strips proxy/registry env vars — documented via `describeForgeSandboxNetworkHonesty()` as NOT kernel-level); `firecracker` provider (Linux KVM required, this host is Windows — explicit `firecracker_not_implemented`); live E2B remote execution untested end-to-end (no API key in this environment, though the call path is real code, not a stub). |
-| L.2 | DevContainerManifest | **GAP (0%)** | No `devcontainer-manifest.ts`. | L.1 now exists — this can start; still not begun. |
+| L.2 | DevContainerManifest | **PARTIAL (scaffold — uncommitted)** | `lib/production/devcontainer-manifest.ts` exists (5 templates + Zod); audit **7/7** tests pass — **not in git** per P2c working tree. | Commit + wire into L.9 provision path for DONE |
 | L.3 | AgentShellPolicy | **DONE (doctrine gate) — now genuinely wired to a real sandbox signal** | `lib/production/agent-shell-policy.ts` is enforced as a *policy* (deny host PTY). As of round 3, `forge-sandbox-executor.ts`'s `createForgeSandboxSession` calls `evaluateAgentShellPolicy({requestedTarget:'sandbox', sandboxAvailable: <real L.1 availability>})` before creating any session — L.3 is the actual arbiter, not a decorative check, and denies session creation (fail-closed, no host-PTY fallback) whenever L.1 reports a provider unavailable (proven by test `J-ACC L1-03b`). | Nothing to fix — policy is doing its job, and is now provably load-bearing rather than aspirational. |
 | L.4 | ForgeTerminalBridge | **GAP (0%)** | No file. | L.1 `local-isolated` exec exists now (non-interactive, buffered — no PTY/stream primitive yet). A real terminal bridge needs a *streaming* exec API (xterm ⇄ sandbox), which L.1 does not provide today — still full scope. |
 | L.5 | ProjectValidationGate | **PARTIAL → upgraded round 2, still PARTIAL for Rust** | Round 2 added: `project-l5-lint.ts` (real ESLint Node API against the project's actual `.eslintrc.json`), `project-l5-gate.ts` (combined typecheck→lint gate), `rust-gate-unavailable.ts` (fail-closed block for any `.rs` path in the AI-apply pipeline, wired into `agent-apply-validation-gate.ts` + `preflight.ts`). Also fixed a real, previously-undetected bug in `project-l5-typecheck.ts`'s virtual compiler host that silently dropped TypeScript's own default lib files. | `cargo check`/`cargo clippy`/`cargo test` still do not run through L.5 — round 3 built the generic L.1 exec primitive (`execInForgeSandbox` can run an allowlisted `cargo` command inside a confined project root today) but did **not** rewire `rust-gate-unavailable.ts` to call it; that integration (L.1 exec → L.5 Rust checks) is real follow-up work, not done this round — keeping the honest **BLOCK** for `.rs` files until it is. |
 | L.6 | AutonomousEngineerLoop | **DONE (CORE)** | `lib/production/autonomous-engineer-loop.ts` — wired per `cx` FinOps/God-Mode Forge entry (WeeklyEvolution + HotFix event bus → this loop). | Full acceptance-matrix parity vs Cursor/Devin loop still open per existing `cx` row. |
-| L.7 | AgenticUIStudio | **GAP (0%)** | No file. Referenced only as "still HELD" in the `cx` ledger row. L.1 unblocks the *execution* dependency, but L.7 mainly needs L.8 preview + UI viewport work, not sandbox exec directly. | Full scope — not started. |
-| L.8 | PreviewOrchestrator | **GAP (0%)** | No `preview-orchestrator.ts`. Note: `components/preview/RuntimePreviewSurface.tsx` and `SceneViewportWorkflowDrawer.tsx` exist as UI surfaces but there is no backing orchestrator module. L.1's `e2b` provider path (real code, env-gated) is the piece L.8 would call for a remote dev-server strategy. | Full scope — not started. |
-| L.9 | FullStackScaffoldEngine | **GAP (0%)** | No file. Depends on L.1 (now real for local exec) + L.2 (still GAP) to actually provision a template project. | Full scope — not started. |
-| L.10 | DesignTokenSync | **GAP (0%)** | No file (CW5 design-system government row covers *manual* token migration, not an automated sync engine). | Full scope — not started. |
+| L.7 | AgenticUIStudio | **PARTIAL** | `components/studio/AgenticUIStudio.tsx` — DOM tree + props inspector + Magic Wand via `CustomEvent`; no governed TSX apply loop (v0-class). | Wire Magic Wand → FusionTx apply path |
+| L.8 | PreviewOrchestrator | **PARTIAL (scaffold — uncommitted)** | `lib/production/preview-orchestrator.ts` — inline/local-dev/E2B strategies; **3/3** tests per audit. | Commit + L.7 integration |
+| L.9 | FullStackScaffoldEngine | **PARTIAL (scaffold — uncommitted)** | `lib/production/fullstack-scaffold-engine.ts` — L.1 + template provision; **2/2** tests. | Commit + L.2 registry wired |
+| L.10 | DesignTokenSync | **PARTIAL (scaffold — uncommitted)** | `lib/design-system/DesignTokenSync.ts` — hex→`var(--aethel-*)` snap; wired in autonomous-engineer-loop. | QA gate on apply path |
 | L.11 | UIMutationTransaction | **DONE (CORE)** | `lib/production/ui-mutation-transaction.ts` — wired into `cx` FinOps Forge (APPLY-time UI mutation transaction). | Full multi-surface (not just UI-panel) transactional coverage still open. |
-| L.12 | RepoGraphRAG | **GAP (0%)** | No file; referenced only as "still HELD" in `cx` row. Does not depend on L.1 (it's a read-only RAG layer, not exec) — was mis-attributed as L.1-blocked in round 1; corrected here. | Full scope — not started. |
+| L.12 | RepoGraphRAG | **PARTIAL (scaffold — uncommitted)** | `lib/server/repo-graph-rag/repo-graph-rag.ts` — VectorIndex + import graph; used in `assemble-agent-context.ts`; test passes. | Commit + expand neighborhood quality |
 | L.13 | UniversalLspFarm | **GAP (0%)** | No file anywhere in the repo. LSP sidecar spawn (Tauri) would use a policy like L.1's allowlist/confinement pattern, but is a distinct process class (long-lived server, not one-shot exec) — L.1 does not directly unblock it. | Full scope — not started. |
 | L.14 | MultiSurfaceContextPack | **DONE** | `lib/production/multi-surface-context-pack.ts` — `buildMultiSurfaceContextPack`, `ContextChunk`, `WorkspaceSurfaceMode`, `assertPackWithinBudget`; live per A2 row (supersedes J.3) | — |
 
@@ -637,6 +637,33 @@ Founder pivot 2026-07-25 + this audit **reconfirm**: these remain **STOPPED / HE
 | **Neural AAA kernel grind** (ha–hn series beyond soak fixtures) | Domain 4 WAIT per Index changelog | Platform exit + Critic domain audit |
 | **New hero `*Panel.tsx` files** (Master UX Spec name inflation) | CW0 freeze ACTIVE | CW1 truth matrix 15/15 bench CLOSED |
 
+#### P2f — Web platform J/L deep audit ([Auditoria profunda cloud-web-app web J/L](d8c10da3-0de0-475d-a567-7e5f7a22f434), 2026-08-08)
+
+**Scope:** `cloud-web-app/web/` — production tests + code read (no implementation in audit pass).
+
+| Gate | Result |
+|------|--------|
+| `npx vitest run __tests__/production` | **521 / 536 passed** (15 failed) |
+| `npm run typecheck` | **BLOCKED** — `typescript/bin/tsc` missing in `node_modules` (deps repair needed) |
+
+**Veredicto comercial:** **NÃO** pronto para vender como "Universal IDE" / "AI-native IDE" — claim honesto = DX criativo governado + web demos (alinhado Wedge #1).
+
+**Top gaps bloqueadores (prioridade ship):**
+
+| # | Gap | Status follow-up |
+|---|-----|------------------|
+| 1 | Chat/inline/complete **bypass CreativeBridge** (Trava I) | OPEN — rotas usam `checkAIQuota` paralelo |
+| 2 | **J.6 export missing** — `extractVideoToMechanicScaffold` | **DONE** (2026-08-08) — restored ship-path export + alias; `ai-v1e-j5-j7-core` + `law-xvi-focus1a` Trava III green |
+| 3 | FusionTx in-memory, não Yjs real (Trava II) | OPEN |
+| 4 | J.11/J.12 dual bus, OrchestratorProd orphan | OPEN (J.11/J.12 STOPPED) |
+| 5–6 | L.13 LSP farm, L.4 terminal bridge | GAP |
+| 7 | L.5 CI timeouts + typecheck blocked | OPEN |
+| 10 | Free tier `byok_missing` vs `free_tier_platform_pay_forbidden` drift | OPEN |
+| 11 | J.7 `USD_BROWSER_VIEWER_SHIP_STATUS` IMPLEMENTED vs HELD | **DONE** (2026-08-08) — reverted to `HELD` per ASSET-001 |
+| 15 | consolidation-truth-matrix marketing drift | **IN FIX** — [Fix consolidation-truth-matrix BLOCKERs 7-9](086ba43b-d005-42be-ba44-204b09f7af85) |
+
+**P1b L-table correction (scaffolds exist but were uncommitted / stale in round 3):** audit confirms real code for **L.2** (`devcontainer-manifest.ts`, 7/7 tests), **L.7** (`AgenticUIStudio.tsx` PARTIAL), **L.8** (`preview-orchestrator.ts`), **L.9** (`fullstack-scaffold-engine.ts`), **L.10** (`DesignTokenSync.ts`), **L.12** (`repo-graph-rag.ts`) — treat as **PARTIAL / uncommitted scaffold**, not "0% GAP", until committed + CI green. **L.4** and **L.13** remain genuine GAP.
+
 ### P0 ? Block 2A collaboration
 
 | # | Work | Gate |
@@ -932,6 +959,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 jl-audit | **P2f web J/L deep audit recorded** — [Auditoria profunda cloud-web-app web J/L](d8c10da3-0de0-475d-a567-7e5f7a22f434): **521/536** production tests; typecheck blocked (missing tsc). Veredicto: **not** sellable as Universal IDE yet. Corrected P1b L.2/L.7–L.10/L.12 from stale "0% GAP" to **PARTIAL scaffolds** (exist, largely uncommitted). Top blockers logged; J.6 export fix delegated; consolidation-truth-matrix fix in flight. |
 | 2026-08-08 p2-synth | **P2 synthesizer pass (git-verified)** — added **P2c** (commit `bc8dd1627` anchor vs ~500-file working tree; Antigravity 2026-08-02 header flagged UNCOMMITTED), **P2d** (90-day platform-first plan J→L→RTv1→G→M), **P2e** (explicit AAA deferrals). Master Map §0c + Index changelog synced. **No product code this entry.** |
 | 2026-08-08 doc-sync | **P2 end-to-end audit synthesis + canonical MD alignment** — recorded P2a (66-MD corpus audit: 5 critical doc×doc contradictions, Progress authority) + P2b (Anti-MOCK sweep: 12 BLOCKER / 18 HIGH / 17 MEDIUM). Synced **Master Map** §0c ledger (CW6 apply-path DONE not Composer-surpass certificate; CW4 PARTIAL; F.1-b marketing HELD), **Studio Index** §Execution order + scorecard (J+L ~25–55%) + MaterialX/OpenVDB draft spec links, **Planning Completeness** registry (MaterialX/OpenVDB draft v1.0 hygiene). Header honesty note added — do not read Antigravity header as G.3 AAA or 15-panel ship certificate. **No BLOCKER code fixes this entry** — execution queue in P2b. |
 | 2026-08-08 rtv1 | **P1c RTv1/H/I/F end-to-end audit recorded** — independent audit cross-checked commerce + Hub + LiveOps vs specs. **H.0 DONE** (RevenueLane 30/70 vs 12% IAP in code + tests). **RTv1-a DONE** (F2P tabs + Showcase honesty). **RTv1-b/c PARTIAL** — F.2/I.1 engines CORE shipped but operational loop broken: `playtime-client.ts` not wired to runtime (grep zero in `packages/` + Arcade), `feed/route.ts:52-53` hardcodes `compressionMandatePassed: false` → discovery always empty, `hubCheckoutAudited` fail-closed in prod until full H audit. IDE fiat checkout/earnings **REAL** with Coins `[HELD]` disclosure (distinct from Hub commerce strip). New **P1c** section above with wedge-loop table + prioritized RTv1 follow-ups. No code changed this entry — documentation alignment only. |
