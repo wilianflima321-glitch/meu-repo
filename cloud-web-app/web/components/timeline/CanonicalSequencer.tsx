@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { DEMO_SEQUENCE } from '@/components/sequencer/SequencerTimeline.demo'
 import type { SequenceData, TimelineKeyframe, TimelineTrack } from '@/components/sequencer/SequencerTimeline.types'
+import { EMPTY_SEQUENCE_DATA } from '@/lib/sequencer/timeline-ui-adapter'
 
 const SequencerTimeline = dynamic(() => import('@/components/sequencer/SequencerTimeline'), {
   ssr: false,
@@ -15,15 +16,25 @@ const SequencerTimeline = dynamic(() => import('@/components/sequencer/Sequencer
 })
 
 export type CanonicalSequencerProps = {
+  /**
+   * Project sequence document. Defaults to an honest empty sequence.
+   * Pass `DEMO_SEQUENCE` (or any fixture with that id) only for explicit demo paths.
+   */
   initialSequence?: SequenceData
   className?: string
 }
 
-export function CanonicalSequencer({ initialSequence = DEMO_SEQUENCE, className = '' }: CanonicalSequencerProps) {
+export function CanonicalSequencer({
+  initialSequence = EMPTY_SEQUENCE_DATA,
+  className = '',
+}: CanonicalSequencerProps) {
   const [sequence, setSequence] = useState<SequenceData>(initialSequence)
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const isDemoSequence = initialSequence === DEMO_SEQUENCE || sequence.id === DEMO_SEQUENCE.id
+  const isDemoSequence = initialSequence.id === DEMO_SEQUENCE.id || sequence.id === DEMO_SEQUENCE.id
+  const isEmptyLive =
+    !isDemoSequence &&
+    sequence.groups.every((group) => group.tracks.every((track) => track.keyframes.length === 0))
 
   const updateTrack = useCallback((trackId: string, updater: (track: TimelineTrack) => TimelineTrack) => {
     setSequence((current) => ({
@@ -39,11 +50,16 @@ export function CanonicalSequencer({ initialSequence = DEMO_SEQUENCE, className 
     <section
       className={`flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] ${className}`}
       data-canonical-sequencer="true"
+      data-sequencer-empty={isEmptyLive ? 'true' : 'false'}
     >
       <header className="flex min-h-12 items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4">
         <div>
           <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Sequencer</p>
-          <p className="text-[11px] text-[var(--aethel-text-tertiary)]">Camera, animation, dialogue, audio, FX, gameplay</p>
+          <p className="text-[11px] text-[var(--aethel-text-tertiary)]">
+            {isEmptyLive
+              ? 'No tracks yet — create clips/keyframes to author a sequence'
+              : 'Camera, animation, dialogue, audio, FX, gameplay'}
+          </p>
         </div>
         <span
           className="rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]"
@@ -62,10 +78,12 @@ export function CanonicalSequencer({ initialSequence = DEMO_SEQUENCE, className 
           title={
             isDemoSequence
               ? 'Demo sequence fixture — not live scene/animation timeline data'
-              : 'Live sequence data'
+              : isEmptyLive
+                ? 'Live sequence document with no authored tracks'
+                : 'Live sequence data'
           }
         >
-          {isDemoSequence ? 'Demo sequence' : 'Live'}
+          {isDemoSequence ? 'Demo sequence' : isEmptyLive ? 'Empty' : 'Live'}
         </span>
       </header>
       <div className="min-h-0 flex-1">
@@ -80,7 +98,7 @@ export function CanonicalSequencer({ initialSequence = DEMO_SEQUENCE, className 
             setIsPlaying(false)
             setCurrentTime(0)
           }}
-          onKeyframeAdd={(trackId: string, time: number, value: any) => {
+          onKeyframeAdd={(trackId: string, time: number, value: unknown) => {
             updateTrack(trackId, (track) => ({
               ...track,
               keyframes: [

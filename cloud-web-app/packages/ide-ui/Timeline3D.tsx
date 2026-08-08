@@ -17,6 +17,16 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface TimelineKeyframeData {
+  id: string
+  time: number
+  track: string
+  value: unknown
+}
+
+/** @deprecated Use TimelineKeyframeData */
+type KeyframeData = TimelineKeyframeData
+
 interface TimelineProps {
   duration?: number
   currentTime?: number
@@ -24,17 +34,14 @@ interface TimelineProps {
   onPlay?: () => void
   onPause?: () => void
   /**
-   * When true (default for static callers), show an honesty badge that this
-   * timeline is demo/fixture data — not live scene/animation tracks.
+   * Explicit demo/fixture path only. When true, seeds fixture keyframes and
+   * shows the honesty badge. Live / empty project paths must pass false.
    */
   demoMode?: boolean
-}
-
-interface KeyframeData {
-  id: string
-  time: number
-  track: string
-  value: unknown
+  /** Real (or empty) keyframes from ITimelineService — ignored when demoMode. */
+  keyframes?: TimelineKeyframeData[]
+  /** Track lane ids to render. Empty + !demoMode = honest empty timeline. */
+  tracks?: string[]
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -45,9 +52,19 @@ const TRACK_CONFIGS: Record<string, { color: string; glow: string; label: string
   scale:      { color: '#4ade80', glow: 'rgba(74,222,128,0.5)',  label: 'Scale' },
   visibility: { color: '#facc15', glow: 'rgba(250,204,21,0.5)',  label: 'Visibility' },
   material:   { color: '#fb923c', glow: 'rgba(251,146,60,0.5)',  label: 'Material' },
+  event:      { color: '#f472b6', glow: 'rgba(244,114,182,0.5)', label: 'Event' },
 }
 const DEFAULT_TRACK_CONFIG = { color: '#6b7280', glow: 'rgba(107,114,128,0.5)', label: 'Unknown' }
-const TRACKS = ['position', 'rotation', 'scale', 'visibility', 'material'] as const
+const DEMO_TRACKS = ['position', 'rotation', 'scale', 'visibility', 'material'] as const
+
+/** Fixture keyframes — only used when demoMode={true}. */
+export const TIMELINE3D_DEMO_KEYFRAMES: TimelineKeyframeData[] = [
+  { id: '1', time: 0,   track: 'position', value: { x: 0,   y: 0,  z: 0  } },
+  { id: '2', time: 2,   track: 'position', value: { x: 10,  y: 5,  z: 0  } },
+  { id: '3', time: 4,   track: 'rotation', value: { x: 0,   y: 90, z: 0  } },
+  { id: '4', time: 6,   track: 'scale',    value: { x: 1.5, y: 1.5, z: 1.5 } },
+  { id: '5', time: 3,   track: 'material', value: { opacity: 0.5 } },
+]
 
 const MIN_HEIGHT    = 140
 const DEFAULT_HEIGHT = 200
@@ -147,7 +164,9 @@ export function Timeline3D({
   onTimeChange = () => undefined,
   onPlay = () => undefined,
   onPause = () => undefined,
-  demoMode = true,
+  demoMode = false,
+  keyframes: keyframesProp,
+  tracks: tracksProp,
 }: TimelineProps) {
   const [isPlaying, setIsPlaying]       = useState(false)
   const [isLooping, setIsLooping]       = useState(false)
@@ -155,13 +174,20 @@ export function Timeline3D({
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null)
   const [fps, setFps]                   = useState(24)
   const [showFpsMenu, setShowFpsMenu]   = useState(false)
-  const [keyframes, setKeyframes]       = useState<KeyframeData[]>([
-    { id: '1', time: 0,   track: 'position', value: { x: 0,   y: 0,  z: 0  } },
-    { id: '2', time: 2,   track: 'position', value: { x: 10,  y: 5,  z: 0  } },
-    { id: '3', time: 4,   track: 'rotation', value: { x: 0,   y: 90, z: 0  } },
-    { id: '4', time: 6,   track: 'scale',    value: { x: 1.5, y: 1.5, z: 1.5 } },
-    { id: '5', time: 3,   track: 'material', value: { opacity: 0.5 } },
-  ])
+  const [localKeyframes, setLocalKeyframes] = useState<KeyframeData[]>([])
+
+  const trackList: string[] = demoMode
+    ? [...DEMO_TRACKS]
+    : (tracksProp && tracksProp.length > 0
+        ? tracksProp
+        : [...new Set((keyframesProp ?? []).map((kf) => kf.track))])
+
+  const keyframes: KeyframeData[] = demoMode
+    ? TIMELINE3D_DEMO_KEYFRAMES
+    : (keyframesProp ?? localKeyframes)
+
+  const safeDuration = Math.max(duration, 0.001)
+  const isEmptyLive = !demoMode && trackList.length === 0
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -182,9 +208,9 @@ export function Timeline3D({
   }
 
   const addKeyframeAtCurrentTime = () => {
-    if (!selectedTrack) return
+    if (!selectedTrack || demoMode || keyframesProp) return
     const id = crypto.randomUUID()
-    setKeyframes(prev => [...prev, { id, time: currentTime, track: selectedTrack, value: { x: 0, y: 0, z: 0 } }])
+    setLocalKeyframes(prev => [...prev, { id, time: currentTime, track: selectedTrack, value: { x: 0, y: 0, z: 0 } }])
   }
 
   const handleResize = useCallback((delta: number) => {
@@ -236,11 +262,11 @@ export function Timeline3D({
     ctx.textBaseline = 'middle'
     ctx.textAlign = 'left'
 
-    const interval  = duration > 30 ? 5 : duration > 15 ? 2 : 1
+    const interval  = safeDuration > 30 ? 5 : safeDuration > 15 ? 2 : 1
     const subInterval = interval / 4
 
-    for (let t = 0; t <= duration; t += subInterval) {
-      const x = (t / duration) * rect.width
+    for (let t = 0; t <= safeDuration; t += subInterval) {
+      const x = (t / safeDuration) * rect.width
       const isMajor = Math.abs(t % interval) < 0.001
       const isMinor = !isMajor && Math.abs(t % (subInterval * 2)) < 0.001
 
@@ -258,7 +284,7 @@ export function Timeline3D({
     }
 
     // ── TRACKS ────────────────────────────────────────────────────────────────
-    TRACKS.forEach((track, i) => {
+    trackList.forEach((track, i) => {
       const y    = RULER_HEIGHT + i * TRACK_HEIGHT
       const cfg  = TRACK_CONFIGS[track] ?? DEFAULT_TRACK_CONFIG
       const isSelected = selectedTrack === track
@@ -281,15 +307,15 @@ export function Timeline3D({
       const trackKfs = keyframes.filter(k => k.track === track)
       if (trackKfs.length >= 2) {
         const sorted = [...trackKfs].sort((a, b) => a.time - b.time)
-        const x0 = (sorted[0].time / duration) * rect.width
-        const x1 = (sorted[sorted.length - 1].time / duration) * rect.width
+        const x0 = (sorted[0].time / safeDuration) * rect.width
+        const x1 = (sorted[sorted.length - 1].time / safeDuration) * rect.width
         ctx.fillStyle = cfg.color + '25'
         ctx.fillRect(x0, y + TRACK_HEIGHT / 2 - 3, x1 - x0, 6)
       }
 
       // ── Keyframe diamonds ──
       trackKfs.forEach(kf => {
-        const kfX      = (kf.time / duration) * rect.width
+        const kfX      = (kf.time / safeDuration) * rect.width
         const kfY      = y + TRACK_HEIGHT / 2
         const isHovered  = hoveredKf?.kf.id === kf.id
         const isSelectedKf = selectedKfId === kf.id
@@ -299,7 +325,7 @@ export function Timeline3D({
     })
 
     // ── PLAYHEAD ──────────────────────────────────────────────────────────────
-    const playheadX = (drawTime / duration) * rect.width
+    const playheadX = (drawTime / safeDuration) * rect.width
 
     // Glow
     ctx.save()
@@ -329,7 +355,7 @@ export function Timeline3D({
     ctx.restore()
 
     ctx.restore()
-  }, [duration, keyframes, selectedTrack, hoveredKf, selectedKfId, fps])
+  }, [safeDuration, trackList, keyframes, selectedTrack, hoveredKf, selectedKfId, fps])
 
   // Playback RAF loop
   useEffect(() => {
@@ -340,14 +366,14 @@ export function Timeline3D({
       if (isPlayingRef.current) {
         const delta = (now - lastTime) / 1000
         timeRef.current += delta
-        if (timeRef.current >= duration) {
+        if (timeRef.current >= safeDuration) {
           if (isLoopingRef.current) {
             timeRef.current = 0
             onTimeChange(0)
           } else {
-            timeRef.current = duration
+            timeRef.current = safeDuration
             setIsPlaying(false)
-            onTimeChange(duration)
+            onTimeChange(safeDuration)
           }
         } else {
           onTimeChange(timeRef.current)
@@ -360,7 +386,7 @@ export function Timeline3D({
 
     animationFrameId = requestAnimationFrame(render)
     return () => cancelAnimationFrame(animationFrameId)
-  }, [duration, onTimeChange, drawCanvas])
+  }, [safeDuration, onTimeChange, drawCanvas])
 
   // ─── Pointer Handlers ─────────────────────────────────────────────────────
 
@@ -373,12 +399,12 @@ export function Timeline3D({
     const x    = e.clientX - rect.left
     const y    = e.clientY - rect.top
 
-    for (let i = TRACKS.length - 1; i >= 0; i--) {
-      const track  = TRACKS[i]
+    for (let i = trackList.length - 1; i >= 0; i--) {
+      const track  = trackList[i]
       const trackY = RULER_HEIGHT + i * TRACK_HEIGHT
       const trackKfs = keyframes.filter(k => k.track === track)
       for (const kf of trackKfs) {
-        const kfX = (kf.time / duration) * rect.width
+        const kfX = (kf.time / safeDuration) * rect.width
         const kfY = trackY + TRACK_HEIGHT / 2
         if (Math.abs(x - kfX) < 10 && Math.abs(y - kfY) < 10) {
           setSelectedKfId(kf.id)
@@ -393,7 +419,7 @@ export function Timeline3D({
     const updateTime = (evt: { clientX: number }) => {
       const r    = wrapperRef.current!.getBoundingClientRect()
       const nx   = Math.max(0, Math.min(evt.clientX - r.left, r.width))
-      const newTime = (nx / r.width) * duration
+      const newTime = (nx / r.width) * safeDuration
       timeRef.current = newTime
       onTimeChange(newTime)
       if (!isPlayingRef.current) drawCanvas()
@@ -416,12 +442,12 @@ export function Timeline3D({
     const y    = e.clientY - rect.top
 
     let found: typeof hoveredKf = null
-    for (let i = TRACKS.length - 1; i >= 0; i--) {
-      const track  = TRACKS[i]
+    for (let i = trackList.length - 1; i >= 0; i--) {
+      const track  = trackList[i]
       const trackY = RULER_HEIGHT + i * TRACK_HEIGHT
       const trackKfs = keyframes.filter(k => k.track === track)
       for (const kf of trackKfs) {
-        const kfX = (kf.time / duration) * rect.width
+        const kfX = (kf.time / safeDuration) * rect.width
         const kfY = trackY + TRACK_HEIGHT / 2
         if (Math.abs(x - kfX) < 10 && Math.abs(y - kfY) < 10) {
           found = { x: kfX, y: kfY, kf }
@@ -459,6 +485,21 @@ export function Timeline3D({
           data-timeline-demo="true"
         >
           Demo timeline — fixture keyframes only (not wired to scene/animation data)
+        </div>
+      )}
+      {isEmptyLive && (
+        <div
+          className="flex shrink-0 items-center gap-2 px-3 text-[10px] font-semibold uppercase tracking-[0.12em]"
+          style={{
+            height: 22,
+            background: 'color-mix(in srgb, var(--aethel-text-tertiary) 10%, transparent)',
+            color: 'var(--aethel-text-tertiary)',
+            borderBottom: '1px solid var(--aethel-border-subtle)',
+          }}
+          role="status"
+          data-timeline-empty="true"
+        >
+          Empty timeline — no sequence tracks (author clips in Sequencer)
         </div>
       )}
 
@@ -509,7 +550,7 @@ export function Timeline3D({
           {/* Skip Forward */}
           <button
             type="button"
-            onClick={() => { timeRef.current = duration; onTimeChange(duration) }}
+            onClick={() => { timeRef.current = safeDuration; onTimeChange(safeDuration) }}
             className="flex items-center justify-center w-7 h-7 rounded-md transition-all duration-100"
             style={{ color: 'rgba(148,163,184,0.6)' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(148,163,184,0.08)'; e.currentTarget.style.color = '#f7f9fc' }}
@@ -653,7 +694,16 @@ export function Timeline3D({
           {/* Ruler gutter */}
           <div style={{ height: RULER_HEIGHT, borderBottom: '1px solid rgba(148,163,184,0.08)' }} />
 
-          {TRACKS.map(track => {
+          {isEmptyLive && (
+            <div
+              className="flex items-center px-3 text-[11px] text-[var(--aethel-text-tertiary)]"
+              style={{ height: TRACK_HEIGHT * 2 }}
+              data-timeline-empty-tracks="true"
+            >
+              No tracks bound to this project sequence.
+            </div>
+          )}
+          {trackList.map(track => {
             const cfg        = TRACK_CONFIGS[track] ?? DEFAULT_TRACK_CONFIG
             const isSelected = selectedTrack === track
             const kfCount    = keyframes.filter(k => k.track === track).length

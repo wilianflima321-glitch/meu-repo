@@ -117,9 +117,44 @@ export interface IFileService {
   writeFile(path: string, content: string): Promise<void>
 }
 
+/**
+ * Presentational snapshot for Timeline3D / sequencer docks.
+ * Keyframes come only from a bound SequencerTimeline (curves/clips) —
+ * never fabricated from static scene transforms (Zero-MVP).
+ */
+export interface IDETimelineKeyframe {
+  id: string
+  time: number
+  track: string
+  value: unknown
+}
+
+export interface IDETimelineSnapshot {
+  /** True when a project sequence document is bound (may still have zero tracks). */
+  bound: boolean
+  duration: number
+  frameRate: number
+  trackIds: string[]
+  keyframes: IDETimelineKeyframe[]
+  sequenceId: string | null
+  label: string | null
+  /** True only when the bound document is an explicit demo/fixture timeline. */
+  isDemo: boolean
+}
+
+/**
+ * Read access to the project sequence document backing Timeline3D.
+ * Concrete backends bridge `aethel.timeline.v1` (lib/sequencer) — not IDESceneNode transforms.
+ */
+export interface ITimelineService {
+  getSnapshot(): IDETimelineSnapshot
+  subscribe(listener: () => void): () => void
+}
+
 export interface IIDEBackend {
   readonly scene: ISceneService
   readonly viewport: IViewportService
   readonly jobs: IJobService
   readonly files: IFileService
+  readonly timeline: ITimelineService
 }

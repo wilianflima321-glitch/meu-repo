@@ -21,6 +21,7 @@ import type {
   IDERenderJobStatus,
   IDESceneNode,
   IDESceneNodeTransformPatch,
+  IDETimelineSnapshot,
   IDETransformMode,
   IDETransformSpace,
   IDERenderMode,
@@ -28,8 +29,14 @@ import type {
   IIDEBackend,
   IJobService,
   ISceneService,
+  ITimelineService,
   IViewportService,
 } from '../../../packages/ide-ui/backend/types';
+import {
+  getProjectTimelineBinding,
+  subscribeProjectTimeline,
+} from '@/lib/sequencer/project-timeline-store';
+import { bindingToIDETimelineSnapshot } from '@/lib/sequencer/timeline-ui-adapter';
 
 const log = createComponentLogger('WebIDEBackend');
 
@@ -238,14 +245,28 @@ class WebFileService implements IFileService {
   }
 }
 
+class WebTimelineService implements ITimelineService {
+  constructor(private readonly projectId: string) {}
+
+  getSnapshot(): IDETimelineSnapshot {
+    return bindingToIDETimelineSnapshot(getProjectTimelineBinding(this.projectId));
+  }
+
+  subscribe(listener: () => void): () => void {
+    return subscribeProjectTimeline(listener);
+  }
+}
+
 export class WebIDEBackend implements IIDEBackend {
   readonly scene: ISceneService = new WebSceneService();
   readonly viewport: IViewportService;
   readonly jobs: IJobService = new WebJobService();
   readonly files: IFileService;
+  readonly timeline: ITimelineService;
 
   constructor(renderMode: IDERenderMode = 'draft', projectId = '') {
     this.viewport = new WebViewportService(renderMode);
     this.files = new WebFileService(projectId);
+    this.timeline = new WebTimelineService(projectId);
   }
 }

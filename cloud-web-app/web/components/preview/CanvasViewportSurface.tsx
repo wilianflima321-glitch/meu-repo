@@ -8,6 +8,7 @@
 // file). Relative paths are used instead of a new tsconfig alias because no
 // existing web import proves an `@aethel/ide-ui` alias actually resolves
 // through Next's webpack config today.
+import { useSyncExternalStore } from 'react';
 import { Boxes, Film, SlidersHorizontal, Terminal as TerminalIcon } from 'lucide-react';
 import { Outliner3D } from '../../../packages/ide-ui/Outliner3D';
 import type { SceneNode } from '../../../packages/ide-ui/Outliner3D';
@@ -15,9 +16,20 @@ import { PropertiesPanel3D, buildScenePropertySections } from '../../../packages
 import { Timeline3D } from '../../../packages/ide-ui/Timeline3D';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
 import { useIDEBackend } from '@/lib/ide/useIDEBackend';
-import type { IDESceneNode } from '../../../packages/ide-ui/backend/types';
+import type { IDESceneNode, IDETimelineSnapshot } from '../../../packages/ide-ui/backend/types';
 import { DockPanel } from '../../../packages/ide-ui/docking';
 import { ConsoleIntegration } from '../../../packages/ide-ui/ConsoleIntegration';
+
+const EMPTY_TIMELINE_SNAPSHOT: IDETimelineSnapshot = {
+  bound: false,
+  duration: 0,
+  frameRate: 30,
+  trackIds: [],
+  keyframes: [],
+  sequenceId: null,
+  label: null,
+  isDemo: false,
+};
 
 // R1.2: Canvas mode ("Nexus") has no dedicated R3F renderer of its own — the
 // only live 3D renderer today is `SceneViewportSurface` (Scene tab). Rather
@@ -55,6 +67,11 @@ export default function CanvasViewportSurface({
 }) {
   const { backend, nodes, selectedIds } = useIDEBackend(renderMode, projectId ?? '');
   const selectedNode = nodes.find((node) => selectedIds.includes(node.id)) ?? null;
+  const timeline = useSyncExternalStore(
+    (onStoreChange) => backend.timeline.subscribe(onStoreChange),
+    () => backend.timeline.getSnapshot(),
+    () => EMPTY_TIMELINE_SNAPSHOT,
+  );
 
   return (
     <ViewportWorkbenchShell
@@ -100,7 +117,12 @@ export default function CanvasViewportSurface({
       bottom={
         <>
           <DockPanel id="timeline" title="Timeline" icon={Film} defaultRegion="bottomBar">
-            <Timeline3D duration={8} demoMode />
+            <Timeline3D
+              duration={timeline.duration}
+              demoMode={timeline.isDemo}
+              keyframes={timeline.keyframes}
+              tracks={timeline.trackIds}
+            />
           </DockPanel>
           <DockPanel id="console" title="Console" icon={TerminalIcon} defaultRegion="bottomBar">
             <ConsoleIntegration />
