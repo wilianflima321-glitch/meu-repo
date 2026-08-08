@@ -154,16 +154,26 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
     expect(report.heldItems.some((i) => i.id === 'founder_treasury_signoff')).toBe(false)
   })
 
+  const allModulesReady = {
+    modulePresence: {
+      aethel_coin_ledger: true,
+      treasury_spend_router: true,
+      item_custody_escrow: true,
+      chargeback_handler: true,
+    },
+    moduleSemantics: {
+      aethel_coin_ledger: true,
+      treasury_spend_router: true,
+      item_custody_escrow: true,
+      chargeback_handler: true,
+    },
+  } as const
+
   it('does not unlock with modules alone (human certificate still HELD)', () => {
     const report = evaluateTreasuryAudit({
       stripeCheckoutConfigured: true,
       certificate: null,
-      modulePresence: {
-        aethel_coin_ledger: true,
-        treasury_spend_router: true,
-        item_custody_escrow: true,
-        chargeback_handler: true,
-      },
+      ...allModulesReady,
       coinLedgerSchemaPresent: true,
       h0RevenueLanesReady: true,
     })
@@ -171,7 +181,7 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
     expect(report.heldItems.every((i) => i.kind === 'human')).toBe(true)
   })
 
-  it('flips hubCheckoutAudited only when all technical + human items PASS', () => {
+  it('file presence without semantics stays HELD', () => {
     const report = evaluateTreasuryAudit({
       stripeCheckoutConfigured: true,
       certificate: makeCertificate(),
@@ -181,6 +191,27 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
         item_custody_escrow: true,
         chargeback_handler: true,
       },
+      moduleSemantics: {
+        aethel_coin_ledger: false,
+        treasury_spend_router: false,
+        item_custody_escrow: false,
+        chargeback_handler: false,
+      },
+      coinLedgerSchemaPresent: true,
+      h0RevenueLanesReady: true,
+    })
+    expect(report.hubCheckoutAudited).toBe(false)
+    expect(report.heldItems.some((i) => i.id === 'coin_mint_burn_api')).toBe(true)
+    expect(report.heldItems.some((i) => i.heldReason === 'coins_mint_semantics_held')).toBe(
+      true,
+    )
+  })
+
+  it('flips hubCheckoutAudited only when all technical + human items PASS', () => {
+    const report = evaluateTreasuryAudit({
+      stripeCheckoutConfigured: true,
+      certificate: makeCertificate(),
+      ...allModulesReady,
       coinLedgerSchemaPresent: true,
       h0RevenueLanesReady: true,
     })
@@ -195,12 +226,7 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
       certificate: makeCertificate({
         signedChecklistIds: ['founder_treasury_signoff'],
       }),
-      modulePresence: {
-        aethel_coin_ledger: true,
-        treasury_spend_router: true,
-        item_custody_escrow: true,
-        chargeback_handler: true,
-      },
+      ...allModulesReady,
       coinLedgerSchemaPresent: true,
       h0RevenueLanesReady: true,
     })
@@ -222,12 +248,7 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
     try {
       const report = evaluateTreasuryAudit({
         stripeCheckoutConfigured: true,
-        modulePresence: {
-          aethel_coin_ledger: true,
-          treasury_spend_router: true,
-          item_custody_escrow: true,
-          chargeback_handler: true,
-        },
+        ...allModulesReady,
         coinLedgerSchemaPresent: true,
         h0RevenueLanesReady: true,
       })
@@ -238,6 +259,25 @@ describe('H.1+ Treasury audit probe fail-closed', () => {
       else process.env.AETHEL_TREASURY_AUDIT_ROOT = prevRoot
       fs.rmSync(root, { recursive: true, force: true })
     }
+  })
+
+  it('live shipped modules PASS technical probes but hubCheckoutAudited stays false without certificate', () => {
+    const report = evaluateTreasuryAudit({
+      stripeCheckoutConfigured: true,
+      certificate: null,
+      coinLedgerSchemaPresent: true,
+      h0RevenueLanesReady: true,
+      // No modulePresence/moduleSemantics overrides — real files + real probes.
+    })
+    expect(report.checklist.find((i) => i.id === 'coin_mint_burn_api')?.status).toBe('PASS')
+    expect(report.checklist.find((i) => i.id === 'treasury_spend_router')?.status).toBe('PASS')
+    expect(report.checklist.find((i) => i.id === 'backpack_custody_escrow')?.status).toBe(
+      'PASS',
+    )
+    expect(report.checklist.find((i) => i.id === 'chargeback_handler')?.status).toBe('PASS')
+    expect(report.heldItems.every((i) => i.kind === 'human')).toBe(true)
+    expect(report.hubCheckoutAudited).toBe(false)
+    expect(report.marketingCoinsAllowed).toBe(false)
   })
 })
 

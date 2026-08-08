@@ -13,6 +13,9 @@ import {
   RevenueLane,
 } from '@/lib/marketplace/payouts-lanes'
 import { createComponentLogger } from '@/lib/observability/logger'
+import { probeAethelCoinLedgerReady } from '@/lib/treasury/aethel-coin-ledger'
+import { probeChargebackHandlerReady } from '@/lib/treasury/chargeback-handler'
+import { probeItemCustodyEscrowReady } from '@/lib/treasury/item-custody-escrow'
 import {
   detectForbiddenHubCheckoutForceEnv,
   isHumanChecklistSigned,
@@ -21,6 +24,7 @@ import {
   type TreasuryAuditEvidenceCertificate,
   type TreasuryHumanChecklistId,
 } from '@/lib/treasury/treasury-audit-authority'
+import { probeTreasurySpendRouterReady } from '@/lib/treasury/treasury-spend-router'
 
 const log = createComponentLogger('treasury-audit-capability')
 
@@ -63,8 +67,16 @@ export interface TreasuryAuditProbeInput {
   stripeCheckoutConfigured?: boolean
   /** Inject certificate for tests — production probe reads disk. */
   certificate?: TreasuryAuditEvidenceCertificate | null
-  /** Override module existence map (tests). */
+  /**
+   * Override module file presence (tests).
+   * PASS still requires behavioral semantics unless moduleSemantics overrides.
+   */
   modulePresence?: Partial<Record<TreasuryTechnicalModuleId, boolean>>
+  /**
+   * Override behavioral semantics probe (tests).
+   * Production: each module's probe*Ready() must return true.
+   */
+  moduleSemantics?: Partial<Record<TreasuryTechnicalModuleId, boolean>>
   /** Override schema probe (tests). */
   coinLedgerSchemaPresent?: boolean
   /** Override H.0 lane math probe (tests). */
@@ -102,6 +114,44 @@ function probeModuleExists(
       return false
     }
   })
+}
+
+const MODULE_SEMANTICS_PROBES: Record<TreasuryTechnicalModuleId, () => boolean> = {
+  aethel_coin_ledger: probeAethelCoinLedgerReady,
+  treasury_spend_router: probeTreasurySpendRouterReady,
+  item_custody_escrow: probeItemCustodyEscrowReady,
+  chargeback_handler: probeChargebackHandlerReady,
+}
+
+/**
+ * Technical module PASS = file present AND custody semantics probe green.
+ * Empty theater files / broken probes stay HELD.
+ */
+function probeModuleReady(
+  cwd: string,
+  id: TreasuryTechnicalModuleId,
+  presenceOverrides?: Partial<Record<TreasuryTechnicalModuleId, boolean>>,
+  semanticsOverrides?: Partial<Record<TreasuryTechnicalModuleId, boolean>>,
+): { ready: boolean; filePresent: boolean; semanticsOk: boolean } {
+  const filePresent = probeModuleExists(cwd, id, presenceOverrides)
+  if (!filePresent) {
+    return { ready: false, filePresent: false, semanticsOk: false }
+  }
+  let semanticsOk = false
+  if (typeof semanticsOverrides?.[id] === 'boolean') {
+    semanticsOk = semanticsOverrides[id]!
+  } else {
+    try {
+      semanticsOk = MODULE_SEMANTICS_PROBES[id]() === true
+    } catch (err) {
+      log.warn('treasury_module_semantics_probe_threw', {
+        id,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      semanticsOk = false
+    }
+  }
+  return { ready: filePresent && semanticsOk, filePresent, semanticsOk }
 }
 
 function probeCoinLedgerSchema(cwd: string, override?: boolean): boolean {
@@ -174,10 +224,30 @@ export function evaluateTreasuryAudit(
   const stripeReady = input.stripeCheckoutConfigured === true
   const h0Ready = probeH0RevenueLanes(input.h0RevenueLanesReady)
   const schemaReady = probeCoinLedgerSchema(cwd, input.coinLedgerSchemaPresent)
-  const mintApi = probeModuleExists(cwd, 'aethel_coin_ledger', input.modulePresence)
-  const spendRouter = probeModuleExists(cwd, 'treasury_spend_router', input.modulePresence)
-  const backpack = probeModuleExists(cwd, 'item_custody_escrow', input.modulePresence)
-  const chargeback = probeModuleExists(cwd, 'chargeback_handler', input.modulePresence)
+  const mintApi = probeModuleReady(
+    cwd,
+    'aethel_coin_ledger',
+    input.modulePresence,
+    input.moduleSemantics,
+  )
+  const spendRouter = probeModuleReady(
+    cwd,
+    'treasury_spend_router',
+    input.modulePresence,
+    input.moduleSemantics,
+  )
+  const backpack = probeModuleReady(
+    cwd,
+    'item_custody_escrow',
+    input.modulePresence,
+    input.moduleSemantics,
+  )
+  const chargeback = probeModuleReady(
+    cwd,
+    'chargeback_handler',
+    input.modulePresence,
+    input.moduleSemantics,
+  )
 
   const checklist: TreasuryAuditChecklistItem[] = [
     h0Ready
@@ -230,13 +300,13 @@ export function evaluateTreasuryAudit(
           reason: 'AethelCoinLedgerEntry model missing from schema',
           heldReason: 'coin_ledger_schema_held',
         },
-    mintApi
+    mintApi.ready
       ? {
           id: 'coin_mint_burn_api',
           kind: 'technical',
           title: 'Aethel Coins mint/burn API module',
           status: 'PASS',
-          reason: 'lib/treasury/aethel-coin-ledger.ts present',
+          reason: 'Append-only mint/burn ledger semantics verified',
           evidenceRef: 'lib/treasury/aethel-coin-ledger.ts',
         }
       : {
@@ -244,16 +314,18 @@ export function evaluateTreasuryAudit(
           kind: 'technical',
           title: 'Aethel Coins mint/burn API module',
           status: 'HELD',
-          reason: 'Coins mint/burn module not shipped — schema stub only',
-          heldReason: 'coins_mint_held',
+          reason: mintApi.filePresent
+            ? 'Coins mint/burn module present but custody semantics probe failed'
+            : 'Coins mint/burn module not shipped — schema stub only',
+          heldReason: mintApi.filePresent ? 'coins_mint_semantics_held' : 'coins_mint_held',
         },
-    spendRouter
+    spendRouter.ready
       ? {
           id: 'treasury_spend_router',
           kind: 'technical',
           title: 'TreasurySpendRouter',
           status: 'PASS',
-          reason: 'lib/treasury/treasury-spend-router.ts present',
+          reason: 'Reserve/settle spend router semantics verified',
           evidenceRef: 'lib/treasury/treasury-spend-router.ts',
         }
       : {
@@ -261,16 +333,20 @@ export function evaluateTreasuryAudit(
           kind: 'technical',
           title: 'TreasurySpendRouter',
           status: 'HELD',
-          reason: 'TreasurySpendRouter not shipped',
-          heldReason: 'treasury_spend_router_held',
+          reason: spendRouter.filePresent
+            ? 'TreasurySpendRouter present but reserve/settle probe failed'
+            : 'TreasurySpendRouter not shipped',
+          heldReason: spendRouter.filePresent
+            ? 'treasury_spend_router_semantics_held'
+            : 'treasury_spend_router_held',
         },
-    backpack
+    backpack.ready
       ? {
           id: 'backpack_custody_escrow',
           kind: 'technical',
           title: 'Backpack / item custody escrow',
           status: 'PASS',
-          reason: 'lib/treasury/item-custody-escrow.ts present',
+          reason: '48h custodial → owned / revoke semantics verified',
           evidenceRef: 'lib/treasury/item-custody-escrow.ts',
         }
       : {
@@ -278,16 +354,20 @@ export function evaluateTreasuryAudit(
           kind: 'technical',
           title: 'Backpack / item custody escrow',
           status: 'HELD',
-          reason: 'PlayerOwnedItem custody escrow module not shipped',
-          heldReason: 'backpack_custody_held',
+          reason: backpack.filePresent
+            ? 'Custody escrow present but 48h / revoke probe failed'
+            : 'PlayerOwnedItem custody escrow module not shipped',
+          heldReason: backpack.filePresent
+            ? 'backpack_custody_semantics_held'
+            : 'backpack_custody_held',
         },
-    chargeback
+    chargeback.ready
       ? {
           id: 'chargeback_handler',
           kind: 'technical',
           title: 'Chargeback / dispute handler',
           status: 'PASS',
-          reason: 'lib/treasury/chargeback-handler.ts present',
+          reason: 'Chargeback reverse path (items + coins) semantics verified',
           evidenceRef: 'lib/treasury/chargeback-handler.ts',
         }
       : {
@@ -295,8 +375,12 @@ export function evaluateTreasuryAudit(
           kind: 'technical',
           title: 'Chargeback / dispute handler',
           status: 'HELD',
-          reason: 'Treasury chargeback handler not shipped',
-          heldReason: 'chargeback_handler_held',
+          reason: chargeback.filePresent
+            ? 'Chargeback handler present but reverse-path probe failed'
+            : 'Treasury chargeback handler not shipped',
+          heldReason: chargeback.filePresent
+            ? 'chargeback_handler_semantics_held'
+            : 'chargeback_handler_held',
         },
     humanItem('founder_treasury_signoff', 'Founder Treasury sign-off', certificate),
     humanItem('legal_kyc_tax_review', 'Legal KYC / tax (W-8/W-9 Connect) review', certificate),

@@ -107,7 +107,9 @@ export function evaluateTreasuryHonesty(input: {
         coinItem?.status === 'PASS' && audited
           ? ['Coins mint/burn audited and live']
           : [
-              'AethelCoinLedgerEntry schema stub only — no mint/burn API until H.1+ audit',
+              coinItem?.status === 'PASS'
+                ? 'Mint/burn module core shipped — Hub Coins marketing still HELD until full H.1+ certificate'
+                : 'Aethel Coins mint/burn not ready',
               coinItem?.reason ?? 'coins_mint_held',
             ],
       heldReason: coinItem?.status === 'PASS' && audited ? undefined : 'coins_mint_held',
