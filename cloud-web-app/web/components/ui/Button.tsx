@@ -112,7 +112,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ${variantClasses[variant]}
       ${sizeClasses[size]}
       ${fullWidth ? 'w-full' : ''}
-      ${glow && !isDisabled ? 'hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]' : ''}
+      ${glow && !isDisabled ? 'hover:shadow-[0_0_20px_rgba(var(--aethel-indigo-rgb),0.4)]' : ''}
       ${className}
     `
 

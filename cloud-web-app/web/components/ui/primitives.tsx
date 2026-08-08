@@ -81,12 +81,12 @@ export function GlowBadge({
   className = '',
 }: GlowBadgeProps) {
   const colorMap = {
-    cyan: { bg: 'rgba(6, 182, 212, 0.15)', border: 'rgba(6, 182, 212, 0.35)', text: 'var(--aethel-info-light)' },
-    emerald: { bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.35)', text: 'var(--aethel-success-light)' },
-    indigo: { bg: 'rgba(99, 102, 241, 0.15)', border: 'rgba(99, 102, 241, 0.35)', text: 'var(--aethel-primary-light)' },
-    violet: { bg: 'rgba(139, 92, 246, 0.15)', border: 'rgba(139, 92, 246, 0.35)', text: 'var(--aethel-accent-light)' },
-    amber: { bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.35)', text: 'var(--aethel-warning-light)' },
-    rose: { bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.35)', text: 'var(--aethel-error-light)' },
+    cyan: { bg: 'rgba(var(--aethel-cyan-bright-rgb), 0.15)', border: 'rgba(var(--aethel-cyan-bright-rgb), 0.35)', text: 'var(--aethel-info-light)' },
+    emerald: { bg: 'rgba(var(--aethel-emerald-bright-rgb), 0.15)', border: 'rgba(var(--aethel-emerald-bright-rgb), 0.35)', text: 'var(--aethel-success-light)' },
+    indigo: { bg: 'rgba(var(--aethel-indigo-rgb), 0.15)', border: 'rgba(var(--aethel-indigo-rgb), 0.35)', text: 'var(--aethel-primary-light)' },
+    violet: { bg: 'rgba(var(--aethel-accent-rgb), 0.15)', border: 'rgba(var(--aethel-accent-rgb), 0.35)', text: 'var(--aethel-accent-light)' },
+    amber: { bg: 'rgba(var(--aethel-warning-rgb), 0.15)', border: 'rgba(var(--aethel-warning-rgb), 0.35)', text: 'var(--aethel-warning-light)' },
+    rose: { bg: 'rgba(var(--aethel-error-rgb), 0.15)', border: 'rgba(var(--aethel-error-rgb), 0.35)', text: 'var(--aethel-error-light)' },
   };
 
   const sizeMap = {
@@ -183,7 +183,7 @@ export function AethelButton({
       border: `1px solid ${tokens.colors.border.light}`,
     },
     danger: {
-      background: 'rgba(239, 68, 68, 0.9)',
+      background: 'rgba(var(--aethel-error-rgb), 0.9)',
       color: tokens.colors.text.primary,
     },
   };

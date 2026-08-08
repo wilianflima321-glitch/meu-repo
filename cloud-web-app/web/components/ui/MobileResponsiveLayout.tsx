@@ -58,7 +58,7 @@ export function MobileBottomNav({
   return (
     <nav
       className={joinClasses(
-        'mobile-bottom-nav fixed inset-x-3 bottom-3 z-40 grid gap-1 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] p-1 shadow-[0_18px_60px_rgba(2,6,23,0.42)] backdrop-blur-xl md:hidden',
+        'mobile-bottom-nav fixed inset-x-3 bottom-3 z-40 grid gap-1 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] p-1 shadow-[0_18px_60px_rgba(var(--aethel-overlay-ink-rgb),0.42)] backdrop-blur-xl md:hidden',
         columnClass,
       )}
       role="navigation"

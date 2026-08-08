@@ -1,5 +1,15 @@
+import { resolveCssColor } from '@/lib/design-system/resolveCssColor';
 import { formatTime, formatTimecode } from './VideoTimeline.parts';
 import type { TimelineMarker, TimelineTool, TimelineTrack, VideoClip } from './VideoTimeline.types';
+
+function paint(tokenOrColor: string): string {
+  return resolveCssColor(
+    tokenOrColor.startsWith('var(') || tokenOrColor.startsWith('#') || tokenOrColor.startsWith('rgb')
+      ? tokenOrColor
+      : `var(${tokenOrColor})`,
+    tokenOrColor,
+  );
+}
 
 type TimelinePoint = { x: number; y: number };
 
@@ -51,15 +61,15 @@ export function drawVideoTimelineCanvas({
   rulerHeight,
 }: DrawVideoTimelineCanvasOptions) {
     // Clear
-    ctx.fillStyle = "var(--aethel-surface-primary)";
+    ctx.fillStyle = paint("var(--aethel-surface-primary)");
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Ruler
-    ctx.fillStyle = "var(--aethel-surface-tertiary)";
+    ctx.fillStyle = paint("var(--aethel-surface-tertiary)");
     ctx.fillRect(0, 0, canvasWidth, rulerHeight);
 
     // Time markers
-    ctx.fillStyle = "var(--aethel-text-quaternary)";
+    ctx.fillStyle = paint("var(--aethel-text-quaternary)");
     ctx.font = "10px monospace";
     ctx.textAlign = "center";
 
@@ -70,7 +80,7 @@ export function drawVideoTimelineCanvas({
 
       // Major tick
       if (t % (secondsPerMarker * 2) === 0) {
-        ctx.strokeStyle = "var(--aethel-text-tertiary)";
+        ctx.strokeStyle = paint("var(--aethel-text-tertiary)");
         ctx.beginPath();
         ctx.moveTo(x, rulerHeight - 15);
         ctx.lineTo(x, rulerHeight);
@@ -79,7 +89,7 @@ export function drawVideoTimelineCanvas({
         ctx.fillText(formatTime(t), x, rulerHeight - 18);
       } else {
         // Minor tick
-        ctx.strokeStyle = "var(--aethel-border-primary)";
+        ctx.strokeStyle = paint("var(--aethel-border-primary)");
         ctx.beginPath();
         ctx.moveTo(x, rulerHeight - 8);
         ctx.lineTo(x, rulerHeight);
@@ -92,14 +102,15 @@ export function drawVideoTimelineCanvas({
       const y = rulerHeight + i * trackHeight;
 
       // Track background
-      ctx.fillStyle =
+      ctx.fillStyle = paint(
         i % 2 === 0
           ? "var(--aethel-surface-tertiary)"
-          : "var(--aethel-surface-secondary)";
+          : "var(--aethel-surface-secondary)",
+      );
       ctx.fillRect(0, y, canvasWidth, trackHeight);
 
       // Track separator
-      ctx.strokeStyle = "var(--aethel-border-primary)";
+      ctx.strokeStyle = paint("var(--aethel-border-primary)");
       ctx.beginPath();
       ctx.moveTo(0, y + trackHeight);
       ctx.lineTo(canvasWidth, y + trackHeight);
@@ -132,7 +143,7 @@ export function drawVideoTimelineCanvas({
           : clip.type === "audio"
             ? "var(--aethel-success)"
             : "var(--aethel-warning)");
-      ctx.fillStyle = baseColor;
+      ctx.fillStyle = paint(baseColor);
 
       // Rounded corners
       const radius = 4;
@@ -142,14 +153,14 @@ export function drawVideoTimelineCanvas({
 
       // Hover highlight
       if (isHovered && !isSelected) {
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.strokeStyle = paint("var(--aethel-video-white-50)");
         ctx.lineWidth = 1;
         ctx.stroke();
       }
 
       // Selection border
       if (isSelected) {
-        ctx.strokeStyle = "var(--aethel-text-primary)";
+        ctx.strokeStyle = paint("var(--aethel-text-primary)");
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.lineWidth = 1;
@@ -157,20 +168,20 @@ export function drawVideoTimelineCanvas({
 
       // Locked indicator
       if (clip.locked) {
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillStyle = paint("var(--aethel-video-black-50)");
         ctx.beginPath();
         ctx.roundRect(x, y, width, height, radius);
         ctx.fill();
 
         // Lock icon
-        ctx.fillStyle = "var(--aethel-text-primary)";
+        ctx.fillStyle = paint("var(--aethel-text-primary)");
         ctx.font = "14px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("", x + width / 2, y + height / 2 + 5);
       }
 
       // Clip name with better styling
-      ctx.fillStyle = "var(--aethel-text-primary)";
+      ctx.fillStyle = paint("var(--aethel-text-primary)");
       ctx.font = "11px Inter, system-ui, sans-serif";
       ctx.textAlign = "left";
       const textX = x + 8;
@@ -182,14 +193,14 @@ export function drawVideoTimelineCanvas({
         ctx.clip();
 
         // Text shadow for readability
-        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowColor = paint("var(--aethel-video-black-50)");
         ctx.shadowBlur = 2;
         ctx.fillText(clip.name, textX, y + 15);
         ctx.shadowBlur = 0;
 
         // Duration indicator
         ctx.font = "9px monospace";
-        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillStyle = paint("var(--aethel-video-white-70)");
         ctx.fillText(formatTimecode(clip.duration), textX, y + height - 6);
         ctx.restore();
       }
@@ -198,8 +209,8 @@ export function drawVideoTimelineCanvas({
       if (isSelected || isHovered) {
         // Left handle
         const handleGradient = ctx.createLinearGradient(x, y, x + 8, y);
-        handleGradient.addColorStop(0, "rgba(255,255,255,0.9)");
-        handleGradient.addColorStop(1, "rgba(255,255,255,0.3)");
+        handleGradient.addColorStop(0, paint("var(--aethel-video-white-90)"));
+        handleGradient.addColorStop(1, paint("var(--aethel-video-white-30)"));
         ctx.fillStyle = handleGradient;
         ctx.fillRect(x, y, 8, height);
 
@@ -210,8 +221,8 @@ export function drawVideoTimelineCanvas({
           x + width,
           y,
         );
-        handleGradientR.addColorStop(0, "rgba(255,255,255,0.3)");
-        handleGradientR.addColorStop(1, "rgba(255,255,255,0.9)");
+        handleGradientR.addColorStop(0, paint("var(--aethel-video-white-30)"));
+        handleGradientR.addColorStop(1, paint("var(--aethel-video-white-90)"));
         ctx.fillStyle = handleGradientR;
         ctx.fillRect(x + width - 8, y, 8, height);
       }
@@ -233,9 +244,9 @@ export function drawVideoTimelineCanvas({
             0,
             centerY + maxAmp,
           );
-          waveGradient.addColorStop(0, "rgba(255,255,255,0.45)");
-          waveGradient.addColorStop(0.5, "rgba(255,255,255,0.25)");
-          waveGradient.addColorStop(1, "rgba(255,255,255,0.45)");
+          waveGradient.addColorStop(0, paint("var(--aethel-video-white-45)"));
+          waveGradient.addColorStop(0.5, paint("var(--aethel-video-white-25)"));
+          waveGradient.addColorStop(1, paint("var(--aethel-video-white-45)"));
           ctx.fillStyle = waveGradient;
 
           ctx.beginPath();
@@ -270,9 +281,9 @@ export function drawVideoTimelineCanvas({
 
       // Video thumbnail indicator (primeira frame)
       if (clip.type === "video" && width > 60 && !clip.locked) {
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fillStyle = paint("var(--aethel-video-black-30)");
         ctx.fillRect(x + 4, y + 4, 32, 18);
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.fillStyle = paint("var(--aethel-video-white-50)");
         ctx.font = "10px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("", x + 20, y + 17);
@@ -284,7 +295,7 @@ export function drawVideoTimelineCanvas({
       const mx = marker.time * zoom;
 
       // Marker line
-      ctx.strokeStyle = marker.color || "var(--aethel-warning)";
+      ctx.strokeStyle = paint(marker.color || "var(--aethel-warning)");
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 2]);
       ctx.beginPath();
@@ -294,7 +305,7 @@ export function drawVideoTimelineCanvas({
       ctx.setLineDash([]);
 
       // Marker flag
-      ctx.fillStyle = marker.color || "var(--aethel-warning)";
+      ctx.fillStyle = paint(marker.color || "var(--aethel-warning)");
       ctx.beginPath();
       ctx.moveTo(mx - 6, 0);
       ctx.lineTo(mx + 6, 0);
@@ -305,7 +316,7 @@ export function drawVideoTimelineCanvas({
       ctx.fill();
 
       // Marker type icon
-      ctx.fillStyle = "var(--aethel-surface-primary)";
+      ctx.fillStyle = paint("var(--aethel-surface-primary)");
       ctx.font = "8px sans-serif";
       ctx.textAlign = "center";
       const icon =
@@ -320,9 +331,9 @@ export function drawVideoTimelineCanvas({
       const sw = Math.abs(multiSelectEnd.x - multiSelectStart.x);
       const sh = Math.abs(multiSelectEnd.y - multiSelectStart.y);
 
-      ctx.fillStyle = "rgba(59, 130, 246, 0.2)";
+      ctx.fillStyle = paint("var(--aethel-video-select-fill)");
       ctx.fillRect(sx, sy, sw, sh);
-      ctx.strokeStyle = "var(--aethel-primary)";
+      ctx.strokeStyle = paint("var(--aethel-primary)");
       ctx.lineWidth = 1;
       ctx.strokeRect(sx, sy, sw, sh);
     }
@@ -340,7 +351,7 @@ export function drawVideoTimelineCanvas({
             Math.abs(snapX - clipStart) < snapThreshold ||
             Math.abs(snapX - clipEnd) < snapThreshold
           ) {
-            ctx.strokeStyle = "var(--aethel-success)";
+            ctx.strokeStyle = paint("var(--aethel-success)");
             ctx.lineWidth = 1;
             ctx.setLineDash([2, 2]);
             ctx.beginPath();
@@ -355,7 +366,7 @@ export function drawVideoTimelineCanvas({
 
     // Playhead
     const playheadX = currentTime * zoom;
-    ctx.strokeStyle = "var(--aethel-error)";
+    ctx.strokeStyle = paint("var(--aethel-error)");
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
@@ -363,7 +374,7 @@ export function drawVideoTimelineCanvas({
     ctx.stroke();
 
     // Playhead head (triangle)
-    ctx.fillStyle = "var(--aethel-error)";
+    ctx.fillStyle = paint("var(--aethel-error)");
     ctx.beginPath();
     ctx.moveTo(playheadX - 8, 0);
     ctx.lineTo(playheadX + 8, 0);
@@ -373,9 +384,9 @@ export function drawVideoTimelineCanvas({
 
     // Tool indicator
     if (tool !== "select") {
-      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillStyle = paint("var(--aethel-video-black-70)");
       ctx.fillRect(canvasWidth - 80, canvasHeight - 24, 75, 20);
-      ctx.fillStyle = "var(--aethel-text-primary)";
+      ctx.fillStyle = paint("var(--aethel-text-primary)");
       ctx.font = "10px sans-serif";
       ctx.textAlign = "right";
       const toolNames: Record<TimelineTool, string> = {

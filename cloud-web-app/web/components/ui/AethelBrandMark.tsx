@@ -38,15 +38,15 @@ export function AethelBrandMark({ size = 28, className = '', animated = true }: 
       <defs>
         {/* Cyan → Indigo → Violet gradient — main fill */}
         <linearGradient id={gradId} x1="4" y1="28" x2="28" y2="4" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#06b6d4" />
-          <stop offset="48%"  stopColor="#818cf8" />
-          <stop offset="100%" stopColor="#8b5cf6" />
+          <stop offset="0%"   stopColor="var(--aethel-brand-cyan)" />
+          <stop offset="48%"  stopColor="var(--aethel-neon-indigo)" />
+          <stop offset="100%" stopColor="var(--aethel-accent)" />
         </linearGradient>
 
         {/* Soft neon glow on the paths */}
         <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="blur" />
-          <feFlood floodColor="#06b6d4" floodOpacity="0.55" result="color" />
+          <feFlood floodColor="var(--aethel-brand-cyan)" floodOpacity="0.55" result="color" />
           <feComposite in="color" in2="blur" operator="in" result="glow" />
           <feMerge>
             <feMergeNode in="glow" />
@@ -56,10 +56,10 @@ export function AethelBrandMark({ size = 28, className = '', animated = true }: 
 
         {/* Scan-line gradient — sweeps top→bottom */}
         <linearGradient id={scanId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#06b6d4" stopOpacity="0" />
-          <stop offset="45%"  stopColor="#06b6d4" stopOpacity="0.18" />
-          <stop offset="55%"  stopColor="#06b6d4" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+          <stop offset="0%"   stopColor="var(--aethel-brand-cyan)" stopOpacity="0" />
+          <stop offset="45%"  stopColor="var(--aethel-brand-cyan)" stopOpacity="0.18" />
+          <stop offset="55%"  stopColor="var(--aethel-brand-cyan)" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="var(--aethel-brand-cyan)" stopOpacity="0" />
         </linearGradient>
 
         <clipPath id={maskId}>
@@ -105,11 +105,11 @@ export function AethelBrandMark({ size = 28, className = '', animated = true }: 
         />
 
         {/* Apex accent dot */}
-        <circle cx="16" cy="4.2" r="1.6" fill="#06b6d4" opacity="0.9" />
-        <circle cx="16" cy="4.2" r="2.8" fill="#06b6d4" fillOpacity="0.18" />
+        <circle cx="16" cy="4.2" r="1.6" fill="var(--aethel-brand-cyan)" opacity="0.9" />
+        <circle cx="16" cy="4.2" r="2.8" fill="var(--aethel-brand-cyan)" fillOpacity="0.18" />
 
         {/* Cyberpunk notch — bottom-right corner cutout */}
-        <polygon points="32,26 26,32 32,32" fill="#020617" />
+        <polygon points="32,26 26,32 32,32" fill="var(--aethel-overlay-ink)" />
 
         {/* Scan-line sweep — only rendered if animated */}
         {animated && (

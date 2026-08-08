@@ -218,7 +218,7 @@ export function SwipeablePanel({
   const overlayStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
+    background: 'rgba(var(--aethel-brand-pure-black-rgb), 0.5)',
     opacity: isOpen ? 1 : 0,
     visibility: isOpen ? 'visible' : 'hidden',
     transition: `opacity ${tokens.animation.duration.normal}, visibility ${tokens.animation.duration.normal}`,
@@ -412,7 +412,7 @@ export function BottomSheet({
   const backdropStyle: React.CSSProperties = {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0, 0, 0, 0.5)',
+    background: 'rgba(var(--aethel-brand-pure-black-rgb), 0.5)',
     opacity: isOpen ? 1 : 0,
     visibility: isOpen ? 'visible' : 'hidden',
     transition: `opacity ${tokens.animation.duration.normal}`,

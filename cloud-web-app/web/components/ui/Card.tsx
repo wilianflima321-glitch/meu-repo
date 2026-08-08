@@ -40,8 +40,8 @@ const variantClasses: Record<string, string> = {
   glow: `
     bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]
     border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
-    shadow-[0_0_30px_rgba(99,102,241,0.15)]
-    hover:shadow-[0_0_40px_rgba(99,102,241,0.25)]
+    shadow-[0_0_30px_rgba(var(--aethel-indigo-rgb),0.15)]
+    hover:shadow-[0_0_40px_rgba(var(--aethel-indigo-rgb),0.25)]
     hover:border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]
   `,
 }

@@ -2,18 +2,28 @@ import * as Y from 'yjs';
 
 import type { SceneObject } from './yjs-collaboration-contracts';
 
-const COLORS = [
-  '#e63946', '#f4a261', '#2a9d8f', '#264653',
-  '#e76f51', '#f1c40f', '#9b59b6', '#3498db',
-  '#1abc9c', '#e74c3c', '#2ecc71', '#f39c12'
-];
+const COLOR_TOKENS = [
+  '--aethel-collab-warm-0',
+  '--aethel-collab-warm-1',
+  '--aethel-collab-warm-2',
+  '--aethel-collab-warm-3',
+  '--aethel-collab-warm-4',
+  '--aethel-collab-warm-5',
+  '--aethel-collab-warm-6',
+  '--aethel-collab-warm-7',
+  '--aethel-collab-warm-8',
+  '--aethel-collab-warm-9',
+  '--aethel-collab-warm-10',
+  '--aethel-collab-warm-11',
+] as const;
 
 export function generateYjsUserColor(userId: string): string {
   let hash = 0;
   for (let i = 0; i < userId.length; i++) {
     hash = userId.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return COLORS[Math.abs(hash) % COLORS.length];
+  const token = COLOR_TOKENS[Math.abs(hash) % COLOR_TOKENS.length];
+  return `var(${token})`;
 }
 
 function isVector3(value: unknown): value is SceneObject['position'] {

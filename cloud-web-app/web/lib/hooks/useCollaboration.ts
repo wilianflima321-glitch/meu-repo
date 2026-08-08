@@ -335,7 +335,7 @@ export function useCollaboration(options: UseCollaborationOptions): UseCollabora
     return serviceRef.current?.getLocalUser() || {
       id: userId,
       name: userName,
-      color: userColor || '#89b4fa',
+      color: userColor || 'var(--aethel-collab-mocha-6)',
       lastActive: Date.now(),
     };
   }, [userId, userName, userColor]);

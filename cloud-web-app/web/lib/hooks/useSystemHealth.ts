@@ -414,10 +414,10 @@ export function formatUptime(seconds: number): string {
 
 export function getStatusColor(status: HealthStatus): string {
   switch (status) {
-    case 'healthy': return '#10b981'; // green-500
-    case 'warning': return '#f59e0b'; // amber-500
-    case 'critical': return '#ef4444'; // red-500
-    default: return '#6b7280'; // gray-500
+    case 'healthy': return 'var(--aethel-success)';
+    case 'warning': return 'var(--aethel-warning)';
+    case 'critical': return 'var(--aethel-error)';
+    default: return 'var(--aethel-text-muted)';
   }
 }
 

@@ -131,12 +131,12 @@ export const cardHover = {
   rest: {
     scale: 1,
     y: 0,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 4px 6px -1px rgba(var(--aethel-brand-pure-black-rgb), 0.1)',
   },
   hover: {
     scale: 1.01,
     y: -2,
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 0 20px rgba(99, 102, 241, 0.15)',
+    boxShadow: '0 20px 25px -5px rgba(var(--aethel-brand-pure-black-rgb), 0.2), 0 0 20px rgba(var(--aethel-indigo-rgb), 0.15)',
     transition: {
       duration: durations.fast,
       ease: easing.spring,
@@ -260,9 +260,9 @@ export const gradientText = {
 export const glowPulse = {
   animate: {
     boxShadow: [
-      '0 0 20px rgba(99, 102, 241, 0.2)',
-      '0 0 40px rgba(99, 102, 241, 0.4)',
-      '0 0 20px rgba(99, 102, 241, 0.2)',
+      '0 0 20px rgba(var(--aethel-indigo-rgb), 0.2)',
+      '0 0 40px rgba(var(--aethel-indigo-rgb), 0.4)',
+      '0 0 20px rgba(var(--aethel-indigo-rgb), 0.2)',
     ],
     transition: {
       duration: 3,

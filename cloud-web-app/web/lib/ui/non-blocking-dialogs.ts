@@ -22,7 +22,7 @@ function createBackdrop() {
   backdrop.style.alignItems = 'center'
   backdrop.style.justifyContent = 'center'
   backdrop.style.padding = '16px'
-  backdrop.style.background = 'rgba(2, 6, 23, 0.72)'
+  backdrop.style.background = 'rgba(var(--aethel-overlay-ink-rgb), 0.72)'
   backdrop.style.backdropFilter = 'blur(4px)'
   return backdrop
 }
@@ -32,11 +32,11 @@ function createDialogShell(title: string, message: string) {
   dialog.setAttribute('role', 'dialog')
   dialog.setAttribute('aria-modal', 'true')
   dialog.style.width = 'min(440px, calc(100vw - 32px))'
-  dialog.style.background = '#09090b'
-  dialog.style.border = '1px solid rgba(148, 163, 184, 0.2)'
+  dialog.style.background = 'var(--aethel-dialog-surface)'
+  dialog.style.border = '1px solid rgba(var(--aethel-border-slate-rgb), 0.2)'
   dialog.style.borderRadius = '10px'
-  dialog.style.boxShadow = '0 24px 48px rgba(2, 6, 23, 0.45)'
-  dialog.style.color = '#e4e4e7'
+  dialog.style.boxShadow = '0 24px 48px rgba(var(--aethel-overlay-ink-rgb), 0.45)'
+  dialog.style.color = 'var(--aethel-dialog-text)'
   dialog.style.padding = '16px'
 
   const heading = document.createElement('h3')
@@ -50,7 +50,7 @@ function createDialogShell(title: string, message: string) {
   body.style.margin = '0'
   body.style.fontSize = '12px'
   body.style.lineHeight = '1.45'
-  body.style.color = '#cbd5e1'
+  body.style.color = 'var(--aethel-dialog-text-muted)'
 
   dialog.appendChild(heading)
   dialog.appendChild(body)
@@ -65,9 +65,13 @@ function createButton(label: string, variant: 'primary' | 'secondary') {
   button.style.height = '30px'
   button.style.padding = '0 12px'
   button.style.borderRadius = '6px'
-  button.style.border = variant === 'primary' ? '1px solid #0284c7' : '1px solid rgba(148, 163, 184, 0.3)'
-  button.style.background = variant === 'primary' ? '#0284c7' : 'rgba(15, 23, 42, 0.6)'
-  button.style.color = '#f8fafc'
+  button.style.border =
+    variant === 'primary'
+      ? '1px solid var(--aethel-sky-600)'
+      : '1px solid rgba(var(--aethel-border-slate-rgb), 0.3)'
+  button.style.background =
+    variant === 'primary' ? 'var(--aethel-sky-600)' : 'rgba(var(--aethel-slate-900-rgb), 0.6)'
+  button.style.color = 'var(--aethel-dialog-btn-text)'
   button.style.fontSize = '12px'
   button.style.fontWeight = '500'
   button.style.cursor = 'pointer'
@@ -75,32 +79,32 @@ function createButton(label: string, variant: 'primary' | 'secondary') {
 
   button.onmouseenter = () => {
     if (variant === 'primary') {
-      button.style.background = '#0369a1'
-      button.style.border = '1px solid #0369a1'
+      button.style.background = 'var(--aethel-sky-700)'
+      button.style.border = '1px solid var(--aethel-sky-700)'
       return
     }
-    button.style.background = 'rgba(30, 41, 59, 0.8)'
-    button.style.border = '1px solid rgba(148, 163, 184, 0.4)'
+    button.style.background = 'rgba(var(--aethel-slate-800-rgb), 0.8)'
+    button.style.border = '1px solid rgba(var(--aethel-border-slate-rgb), 0.4)'
   }
 
   button.onmouseleave = () => {
     if (variant === 'primary') {
-      button.style.background = '#0284c7'
-      button.style.border = '1px solid #0284c7'
+      button.style.background = 'var(--aethel-sky-600)'
+      button.style.border = '1px solid var(--aethel-sky-600)'
       return
     }
-    button.style.background = 'rgba(15, 23, 42, 0.6)'
-    button.style.border = '1px solid rgba(148, 163, 184, 0.3)'
+    button.style.background = 'rgba(var(--aethel-slate-900-rgb), 0.6)'
+    button.style.border = '1px solid rgba(var(--aethel-border-slate-rgb), 0.3)'
   }
 
   return button
 }
 
 export function openConfirmDialog({
-  title = 'Confirmar ação',
+  title = 'Confirm action',
   message,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
 }: ConfirmDialogOptions): Promise<boolean> {
   if (typeof document === 'undefined') {
     return Promise.resolve(false)
@@ -152,12 +156,12 @@ export function openConfirmDialog({
 }
 
 export function openPromptDialog({
-  title = 'Informar valor',
+  title = 'Enter value',
   message,
   placeholder,
   defaultValue = '',
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
 }: PromptDialogOptions): Promise<string | null> {
   if (typeof document === 'undefined') {
     return Promise.resolve(null)
@@ -175,9 +179,9 @@ export function openPromptDialog({
     input.style.height = '32px'
     input.style.marginTop = '12px'
     input.style.borderRadius = '6px'
-    input.style.border = '1px solid rgba(148, 163, 184, 0.35)'
-    input.style.background = '#0f172a'
-    input.style.color = '#e2e8f0'
+    input.style.border = '1px solid rgba(var(--aethel-border-slate-rgb), 0.35)'
+    input.style.background = 'var(--aethel-dialog-input-bg)'
+    input.style.color = 'var(--aethel-dialog-input-text)'
     input.style.padding = '0 10px'
     input.style.fontSize = '12px'
 

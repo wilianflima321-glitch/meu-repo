@@ -47,11 +47,11 @@ export class DialogueUIRenderer {
   private createDialogueBox(): HTMLDivElement {
     const box = document.createElement('div');
     box.style.cssText = `
-      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(20,20,40,0.95) 100%);
-      border: 2px solid rgba(100, 150, 255, 0.5);
+      background: linear-gradient(180deg, var(--aethel-dialogue-gradient-top) 0%, var(--aethel-dialogue-gradient-bot) 100%);
+      border: 2px solid var(--aethel-quest-border);
       border-radius: 15px;
       padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(var(--aethel-brand-pure-black-rgb), 0.5);
       display: flex;
       gap: 20px;
     `;
@@ -64,13 +64,13 @@ export class DialogueUIRenderer {
       position: absolute;
       top: -15px;
       left: 100px;
-      background: linear-gradient(90deg, #4488ff, #66aaff);
+      background: var(--aethel-dialogue-title);
       padding: 5px 20px;
       border-radius: 10px;
       font-weight: bold;
       font-size: 16px;
       color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      text-shadow: 0 2px 4px rgba(var(--aethel-brand-pure-black-rgb), 0.3);
     `;
     return name;
   }
@@ -93,7 +93,7 @@ export class DialogueUIRenderer {
       width: 120px;
       height: 120px;
       border-radius: 10px;
-      border: 2px solid rgba(100, 150, 255, 0.5);
+      border: 2px solid var(--aethel-quest-border);
       object-fit: cover;
     `;
     return img;
@@ -163,8 +163,8 @@ export class DialogueUIRenderer {
       const button = document.createElement('button');
       button.textContent = choice.text;
       button.style.cssText = `
-        background: rgba(50, 80, 150, 0.7);
-        border: 1px solid rgba(100, 150, 255, 0.5);
+        background: var(--aethel-dialogue-btn);
+        border: 1px solid var(--aethel-quest-border);
         border-radius: 8px;
         padding: 12px 20px;
         color: white;
@@ -175,13 +175,13 @@ export class DialogueUIRenderer {
       `;
       
       button.onmouseenter = () => {
-        button.style.background = 'rgba(70, 100, 180, 0.9)';
-        button.style.borderColor = 'rgba(150, 200, 255, 0.8)';
+        button.style.background = 'var(--aethel-dialogue-btn-hover)';
+        button.style.borderColor = 'var(--aethel-dialogue-btn-border-hover)';
       };
       
       button.onmouseleave = () => {
-        button.style.background = 'rgba(50, 80, 150, 0.7)';
-        button.style.borderColor = 'rgba(100, 150, 255, 0.5)';
+        button.style.background = 'var(--aethel-dialogue-btn)';
+        button.style.borderColor = 'var(--aethel-quest-border)';
       };
       
       button.onclick = () => onSelect(choice.id);
@@ -283,7 +283,7 @@ export class SubtitleRenderer {
   private createSubtitleElement(subtitle: SubtitleEntry): HTMLDivElement {
     const element = document.createElement('div');
     element.style.cssText = `
-      background: rgba(0, 0, 0, 0.75);
+      background: var(--aethel-dialogue-caption-bg);
       padding: 10px 20px;
       border-radius: 5px;
       margin: 5px 0;
@@ -292,13 +292,13 @@ export class SubtitleRenderer {
     
     if (subtitle.speaker) {
       const speaker = document.createElement('span');
-      speaker.style.cssText = 'color: #66aaff; font-weight: bold; margin-right: 10px;';
+      speaker.style.cssText = 'color: var(--aethel-dialogue-speaker); font-weight: bold; margin-right: 10px;';
       speaker.textContent = `${subtitle.speaker}:`;
       element.appendChild(speaker);
     }
     
     const text = document.createElement('span');
-    text.style.cssText = 'color: white; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);';
+    text.style.cssText = 'color: var(--aethel-text-inverse); font-size: 18px; text-shadow: 2px 2px 4px rgba(var(--aethel-brand-pure-black-rgb), 0.8);';
     text.textContent = subtitle.text;
     element.appendChild(text);
     

@@ -5,7 +5,12 @@
  * Permite que a IA execute comandos diretamente na cena 3D.
  */
 
+import { resolveCssColor } from '@/lib/design-system/resolveCssColor';
 import { SceneObject, sceneIntegration } from './asset-drag-drop';
+
+function resolveSceneColor(color: string): string {
+  return resolveCssColor(color, color);
+}
 
 // ============================================================================
 // TYPES
@@ -54,19 +59,19 @@ export const PRIMITIVE_GEOMETRIES = {
 };
 
 export const MATERIAL_COLORS: Record<string, string> = {
-  red: '#ef4444',
-  green: '#22c55e',
-  blue: '#3b82f6',
-  yellow: '#eab308',
-  orange: '#f97316',
-  purple: '#a855f7',
-  pink: '#ec4899',
-  cyan: '#06b6d4',
-  white: '#ffffff',
-  black: '#1a1a1a',
-  gray: '#6b7280',
-  gold: '#fbbf24',
-  silver: '#94a3b8',
+  red: 'var(--aethel-error)',
+  green: 'var(--aethel-success)',
+  blue: 'var(--aethel-primary)',
+  yellow: 'var(--aethel-scene-material-yellow)',
+  orange: 'var(--aethel-scene-material-orange)',
+  purple: 'var(--aethel-scene-material-purple)',
+  pink: 'var(--aethel-scene-material-pink)',
+  cyan: 'var(--aethel-brand-cyan)',
+  white: 'var(--aethel-text-inverse)',
+  black: 'var(--aethel-scene-material-black)',
+  gray: 'var(--aethel-scene-material-gray)',
+  gold: 'var(--aethel-neon-amber)',
+  silver: 'var(--aethel-text-tertiary)',
 };
 
 export const LIGHT_TYPES = {
@@ -145,7 +150,7 @@ export class CommandParser {
     }
 
     // Detectar cor
-    let color = '#3b82f6'; // default blue
+    let color = 'var(--aethel-primary)'; // default blue
     for (const [name, hex] of Object.entries(MATERIAL_COLORS)) {
       const ptBr = this.getPortugueseColor(name);
       if (input.includes(name) || input.includes(ptBr)) {
@@ -203,7 +208,7 @@ export class CommandParser {
     }
 
     // Detectar cor
-    let color = '#ffffff';
+    let color = 'var(--aethel-text-inverse)';
     for (const [name, hex] of Object.entries(MATERIAL_COLORS)) {
       const ptBr = this.getPortugueseColor(name);
       if (input.includes(name) || input.includes(ptBr)) {
@@ -400,7 +405,7 @@ export class SceneCommandExecutor {
       metadata: {
         geometry: geoConfig.type,
         geometryArgs: geoConfig.args,
-        materialColor: color,
+        materialColor: resolveSceneColor(color),
         createdByAI: true,
         createdAt: new Date().toISOString(),
       },
@@ -490,7 +495,7 @@ export class SceneCommandExecutor {
       scale: { x: 1, y: 1, z: 1 },
       metadata: {
         lightType: lightConfig.type,
-        color,
+        color: resolveSceneColor(color),
         intensity: lightConfig.intensity,
         createdByAI: true,
       },

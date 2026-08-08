@@ -138,6 +138,115 @@
     --aethel-neon-amber-rgb:        251, 191, 36;
     --aethel-neon-emerald-rgb:      52, 211, 153;
     --aethel-neon-violet-rgb:       167, 139, 250;
+    --aethel-indigo-rgb:            99, 102, 241;
+    --aethel-cyan-bright-rgb:       6, 182, 212;
+    --aethel-emerald-bright-rgb:    16, 185, 129;
+    --aethel-overlay-ink-rgb:       2, 6, 23;
+    --aethel-slate-900-rgb:         15, 23, 42;
+    --aethel-slate-800-rgb:         30, 41, 59;
+
+    /* UI dialogs / overlays (lib/ui + components/ui) */
+    --aethel-overlay-ink:           #020617;
+    --aethel-dialog-surface:        #09090b;
+    --aethel-dialog-text:           #e4e4e7;
+    --aethel-dialog-text-muted:     #cbd5e1;
+    --aethel-dialog-input-bg:       #0f172a;
+    --aethel-dialog-input-text:     #e2e8f0;
+    --aethel-dialog-btn-text:       #f8fafc;
+    --aethel-sky-600:               #0284c7;
+    --aethel-sky-700:               #0369a1;
+    --aethel-brand-cyan:            #06b6d4;
+
+    /* Blueprint node category accents */
+    --aethel-blueprint-event:       #c0392b;
+    --aethel-blueprint-flow:        #8e44ad;
+    --aethel-blueprint-math:        #27ae60;
+    --aethel-blueprint-data:        #3498db;
+    --aethel-blueprint-util:        #f39c12;
+    --aethel-blueprint-exec:        #9b59b6;
+    --aethel-blueprint-time:        #1abc9c;
+
+    /* Collaboration presence palettes */
+    --aethel-collab-mocha-0:  #f38ba8;
+    --aethel-collab-mocha-1:  #fab387;
+    --aethel-collab-mocha-2:  #f9e2af;
+    --aethel-collab-mocha-3:  #a6e3a1;
+    --aethel-collab-mocha-4:  #94e2d5;
+    --aethel-collab-mocha-5:  #89dceb;
+    --aethel-collab-mocha-6:  #89b4fa;
+    --aethel-collab-mocha-7:  #cba6f7;
+    --aethel-collab-mocha-8:  #f5c2e7;
+    --aethel-collab-mocha-9:  #b4befe;
+    --aethel-collab-vivid-0:  #FF6B6B;
+    --aethel-collab-vivid-1:  #4ECDC4;
+    --aethel-collab-vivid-2:  #45B7D1;
+    --aethel-collab-vivid-3:  #96CEB4;
+    --aethel-collab-vivid-4:  #FFEAA7;
+    --aethel-collab-vivid-5:  #DDA0DD;
+    --aethel-collab-vivid-6:  #98D8C8;
+    --aethel-collab-vivid-7:  #F7DC6F;
+    --aethel-collab-vivid-8:  #BB8FCE;
+    --aethel-collab-vivid-9:  #85C1E9;
+    --aethel-collab-vivid-10: #F8B500;
+    --aethel-collab-vivid-11: #00CED1;
+    --aethel-collab-vivid-12: #FF69B4;
+    --aethel-collab-vivid-13: #32CD32;
+    --aethel-collab-vivid-14: #FFD700;
+    --aethel-collab-warm-0:   #e63946;
+    --aethel-collab-warm-1:   #f4a261;
+    --aethel-collab-warm-2:   #2a9d8f;
+    --aethel-collab-warm-3:   #264653;
+    --aethel-collab-warm-4:   #e76f51;
+    --aethel-collab-warm-5:   #f1c40f;
+    --aethel-collab-warm-6:   #9b59b6;
+    --aethel-collab-warm-7:   #3498db;
+    --aethel-collab-warm-8:   #1abc9c;
+    --aethel-collab-warm-9:   #e74c3c;
+    --aethel-collab-warm-10:  #2ecc71;
+    --aethel-collab-warm-11:  #f39c12;
+
+    /* Video / animation canvas overlays (resolved via resolveCssColor) */
+    --aethel-video-white-90: rgba(255, 255, 255, 0.9);
+    --aethel-video-white-70: rgba(255, 255, 255, 0.7);
+    --aethel-video-white-50: rgba(255, 255, 255, 0.5);
+    --aethel-video-white-45: rgba(255, 255, 255, 0.45);
+    --aethel-video-white-30: rgba(255, 255, 255, 0.3);
+    --aethel-video-white-25: rgba(255, 255, 255, 0.25);
+    --aethel-video-black-70: rgba(0, 0, 0, 0.7);
+    --aethel-video-black-50: rgba(0, 0, 0, 0.5);
+    --aethel-video-black-30: rgba(0, 0, 0, 0.3);
+    --aethel-video-select-fill: rgba(59, 130, 246, 0.2);
+    --aethel-anim-overlay: rgba(0, 0, 0, 0.8);
+    --aethel-anim-menu-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    /* Quest / dialogue HUD surfaces */
+    --aethel-quest-panel-bg: rgba(20, 20, 40, 0.95);
+    --aethel-quest-panel-bg-soft: rgba(30, 30, 60, 0.8);
+    --aethel-quest-panel-row: rgba(50, 80, 150, 0.5);
+    --aethel-quest-border: rgba(100, 150, 255, 0.5);
+    --aethel-quest-border-soft: rgba(100, 150, 255, 0.3);
+    --aethel-quest-border-strong: rgba(150, 200, 255, 0.6);
+    --aethel-quest-accent: #ffcc00;
+    --aethel-quest-danger: #ff6666;
+    --aethel-quest-complete: #66ff66;
+    --aethel-quest-muted: #888888;
+    --aethel-quest-desc: #cccccc;
+    --aethel-quest-track-on: rgba(100, 200, 100, 0.5);
+    --aethel-quest-track-off: rgba(100, 100, 100, 0.5);
+    --aethel-dialogue-gradient-top: rgba(0, 0, 0, 0.9);
+    --aethel-dialogue-gradient-bot: rgba(20, 20, 40, 0.95);
+    --aethel-dialogue-title: linear-gradient(90deg, #4488ff, #66aaff);
+    --aethel-dialogue-btn: rgba(50, 80, 150, 0.7);
+    --aethel-dialogue-btn-hover: rgba(70, 100, 180, 0.9);
+    --aethel-dialogue-btn-border-hover: rgba(150, 200, 255, 0.8);
+    --aethel-dialogue-speaker: #66aaff;
+    --aethel-dialogue-caption-bg: rgba(0, 0, 0, 0.75);
+    --aethel-scene-material-yellow: #eab308;
+    --aethel-scene-material-orange: #f97316;
+    --aethel-scene-material-purple: #a855f7;
+    --aethel-scene-material-pink: #ec4899;
+    --aethel-scene-material-black: #1a1a1a;
+    --aethel-scene-material-gray: #6b7280;
 
     /*
      * ── Terminal / xterm ANSI palettes (L.10) ──

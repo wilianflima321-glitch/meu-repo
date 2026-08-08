@@ -1,7 +1,12 @@
 // @aethel-heavy-async-boundary Studio quest UI and marker renderer; load only inside Studio/viewport contexts.
 import * as THREE from 'three';
+import { resolveCssColor } from '@/lib/design-system/resolveCssColor';
 import { ObjectiveState, type Quest, type QuestMarker } from './quest-mission-contracts';
 import type { QuestManager } from './quest-mission-system';
+
+function paint(color: string): string {
+  return resolveCssColor(color.startsWith('var(') ? color : color, color);
+}
 
 export class QuestUIRenderer {
   private container: HTMLDivElement;
@@ -52,8 +57,8 @@ export class QuestUIRenderer {
       transform: translate(-50%, -50%);
       width: 600px;
       height: 500px;
-      background: rgba(20, 20, 40, 0.95);
-      border: 2px solid rgba(100, 150, 255, 0.5);
+      background: var(--aethel-quest-panel-bg);
+      border: 2px solid var(--aethel-quest-border);
       border-radius: 10px;
       display: none;
       pointer-events: auto;
@@ -71,20 +76,20 @@ export class QuestUIRenderer {
     for (const quest of tracked) {
       const questElement = document.createElement('div');
       questElement.style.cssText = `
-        background: rgba(0, 0, 0, 0.7);
-        border-left: 3px solid ${quest.markerColor || '#ffcc00'};
+        background: var(--aethel-video-black-70);
+        border-left: 3px solid ${quest.markerColor || 'var(--aethel-quest-accent)'};
         padding: 10px 15px;
         margin-bottom: 10px;
         border-radius: 5px;
       `;
       const nameEl = document.createElement('div');
-      nameEl.style.cssText = 'color: #ffcc00; font-weight: bold; margin-bottom: 5px;';
+      nameEl.style.cssText = 'color: var(--aethel-quest-accent); font-weight: bold; margin-bottom: 5px;';
       nameEl.textContent = this.questManager.getQuestName(quest);
       questElement.appendChild(nameEl);
       const remainingTime = this.questManager.getRemainingTime(quest.id);
       if (remainingTime !== null) {
         const timeEl = document.createElement('div');
-        timeEl.style.cssText = 'color: #ff6666; font-size: 12px; margin-bottom: 5px;';
+        timeEl.style.cssText = 'color: var(--aethel-quest-danger); font-size: 12px; margin-bottom: 5px;';
         timeEl.textContent = `Time: ${this.formatTime(remainingTime)}`;
         questElement.appendChild(timeEl);
       }
@@ -92,7 +97,7 @@ export class QuestUIRenderer {
         if (obj.hidden || obj.state === ObjectiveState.INACTIVE) continue;
         const objEl = document.createElement('div');
         objEl.style.cssText = `
-          color: ${obj.state === ObjectiveState.COMPLETED ? '#66ff66' : '#ffffff'};
+          color: ${obj.state === ObjectiveState.COMPLETED ? 'var(--aethel-quest-complete)' : 'var(--aethel-text-inverse)'};
           font-size: 14px;
           padding-left: 10px;
           margin-top: 3px;
@@ -138,10 +143,10 @@ export class QuestUIRenderer {
       justify-content: space-between;
       align-items: center;
       padding: 15px 20px;
-      border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+      border-bottom: 1px solid var(--aethel-quest-border-soft);
     `;
     const title = document.createElement('h2');
-    title.style.cssText = 'color: #ffcc00; margin: 0;';
+    title.style.cssText = 'color: var(--aethel-quest-accent); margin: 0;';
     title.textContent = 'Quest Journal';
     header.appendChild(title);
     const closeBtn = document.createElement('button');
@@ -166,8 +171,8 @@ export class QuestUIRenderer {
     for (const cat of categories) {
       const tab = document.createElement('button');
       tab.style.cssText = `
-        background: rgba(50, 80, 150, 0.5);
-        border: 1px solid rgba(100, 150, 255, 0.3);
+        background: var(--aethel-quest-panel-row);
+        border: 1px solid var(--aethel-quest-border-soft);
         color: white;
         padding: 8px 20px;
         border-radius: 5px;
@@ -208,7 +213,7 @@ export class QuestUIRenderer {
     }
     if (quests.length === 0) {
       const empty = document.createElement('div');
-      empty.style.cssText = 'color: #888; text-align: center; padding: 40px;';
+      empty.style.cssText = 'color: var(--aethel-quest-muted); text-align: center; padding: 40px;';
       empty.textContent = 'No quests in this category';
       listContainer.appendChild(empty);
       return;
@@ -216,31 +221,31 @@ export class QuestUIRenderer {
     for (const quest of quests) {
       const questEl = document.createElement('div');
       questEl.style.cssText = `
-        background: rgba(30, 30, 60, 0.8);
-        border: 1px solid rgba(100, 150, 255, 0.3);
+        background: var(--aethel-quest-panel-bg-soft);
+        border: 1px solid var(--aethel-quest-border-soft);
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 10px;
         cursor: pointer;
       `;
       questEl.onmouseenter = () => {
-        questEl.style.borderColor = 'rgba(150, 200, 255, 0.6)';
+        questEl.style.borderColor = 'var(--aethel-quest-border-strong)';
       };
       questEl.onmouseleave = () => {
-        questEl.style.borderColor = 'rgba(100, 150, 255, 0.3)';
+        questEl.style.borderColor = 'var(--aethel-quest-border-soft)';
       };
       const nameEl = document.createElement('div');
-      nameEl.style.cssText = 'color: #ffcc00; font-weight: bold; font-size: 16px;';
+      nameEl.style.cssText = 'color: var(--aethel-quest-accent); font-weight: bold; font-size: 16px;';
       nameEl.textContent = this.questManager.getQuestName(quest);
       questEl.appendChild(nameEl);
       const descEl = document.createElement('div');
-      descEl.style.cssText = 'color: #ccc; font-size: 14px; margin-top: 5px;';
+      descEl.style.cssText = 'color: var(--aethel-quest-desc); font-size: 14px; margin-top: 5px;';
       descEl.textContent = this.questManager.getQuestDescription(quest);
       questEl.appendChild(descEl);
       if (category === 'active') {
         const trackBtn = document.createElement('button');
         trackBtn.style.cssText = `
-          background: ${quest.isTracked ? 'rgba(100, 200, 100, 0.5)' : 'rgba(100, 100, 100, 0.5)'};
+          background: ${quest.isTracked ? 'var(--aethel-quest-track-on)' : 'var(--aethel-quest-track-off)'};
           border: none;
           color: white;
           padding: 5px 10px;
@@ -307,14 +312,14 @@ export class QuestMarkerRenderer {
     canvas.width = 64;
     canvas.height = 64;
     const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = marker.color;
+    ctx.fillStyle = paint(marker.color);
     ctx.beginPath();
     ctx.arc(32, 32, 28, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = paint('var(--aethel-text-inverse)');
     ctx.lineWidth = 3;
     ctx.stroke();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = paint('var(--aethel-text-inverse)');
     ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

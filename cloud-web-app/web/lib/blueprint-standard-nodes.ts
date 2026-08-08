@@ -8,7 +8,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Events',
     displayName: 'Event Begin Play',
     description: 'Called when the game starts',
-    color: '#c0392b',
+    color: 'var(--aethel-blueprint-event)',
     inputs: [],
     outputs: [{ id: 'exec', name: '', type: 'exec' }],
     isEvent: true,
@@ -18,7 +18,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Events',
     displayName: 'Event Tick',
     description: 'Called every frame',
-    color: '#c0392b',
+    color: 'var(--aethel-blueprint-event)',
     inputs: [],
     outputs: [
       { id: 'exec', name: '', type: 'exec' },
@@ -31,7 +31,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Events',
     displayName: 'Event Begin Overlap',
     description: 'Called when overlap begins',
-    color: '#c0392b',
+    color: 'var(--aethel-blueprint-event)',
     inputs: [],
     outputs: [
       { id: 'exec', name: '', type: 'exec' },
@@ -46,7 +46,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Flow Control',
     displayName: 'Branch',
     description: 'If/else branching',
-    color: '#8e44ad',
+    color: 'var(--aethel-blueprint-flow)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'condition', name: 'Condition', type: 'data', dataType: 'boolean' },
@@ -61,7 +61,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Flow Control',
     displayName: 'For Loop',
     description: 'Loop from first to last index',
-    color: '#8e44ad',
+    color: 'var(--aethel-blueprint-flow)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'firstIndex', name: 'First Index', type: 'data', dataType: 'integer', defaultValue: 0 },
@@ -78,7 +78,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Flow Control',
     displayName: 'Sequence',
     description: 'Execute multiple branches in order',
-    color: '#8e44ad',
+    color: 'var(--aethel-blueprint-flow)',
     inputs: [{ id: 'exec', name: '', type: 'exec' }],
     outputs: [
       { id: 'then0', name: 'Then 0', type: 'exec' },
@@ -91,7 +91,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Flow Control',
     displayName: 'Delay',
     description: 'Wait for specified time',
-    color: '#8e44ad',
+    color: 'var(--aethel-blueprint-flow)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'duration', name: 'Duration', type: 'data', dataType: 'float', defaultValue: 1.0 },
@@ -106,7 +106,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Add',
     description: 'Add two values',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -119,7 +119,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Subtract',
     description: 'Subtract two values',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -132,7 +132,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Multiply',
     description: 'Multiply two values',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -145,7 +145,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Divide',
     description: 'Divide two values',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -158,7 +158,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Random Float',
     description: 'Get random float in range',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'min', name: 'Min', type: 'data', dataType: 'float', defaultValue: 0 },
       { id: 'max', name: 'Max', type: 'data', dataType: 'float', defaultValue: 1 },
@@ -171,7 +171,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Clamp',
     description: 'Clamp value between min and max',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'value', name: 'Value', type: 'data', dataType: 'float' },
       { id: 'min', name: 'Min', type: 'data', dataType: 'float' },
@@ -185,7 +185,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Math',
     displayName: 'Lerp',
     description: 'Linear interpolation',
-    color: '#27ae60',
+    color: 'var(--aethel-blueprint-math)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -201,7 +201,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Comparison',
     displayName: 'Equal',
     description: 'Check if values are equal',
-    color: '#3498db',
+    color: 'var(--aethel-blueprint-data)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -214,7 +214,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Comparison',
     displayName: 'Greater Than',
     description: 'Check if A > B',
-    color: '#3498db',
+    color: 'var(--aethel-blueprint-data)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -227,7 +227,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Comparison',
     displayName: 'Less Than',
     description: 'Check if A < B',
-    color: '#3498db',
+    color: 'var(--aethel-blueprint-data)',
     inputs: [
       { id: 'a', name: 'A', type: 'data', dataType: 'float' },
       { id: 'b', name: 'B', type: 'data', dataType: 'float' },
@@ -242,7 +242,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Transform',
     displayName: 'Get Actor Location',
     description: 'Get the actor world location',
-    color: '#f39c12',
+    color: 'var(--aethel-blueprint-util)',
     inputs: [{ id: 'target', name: 'Target', type: 'data', dataType: 'object' }],
     outputs: [{ id: 'location', name: 'Location', type: 'data', dataType: 'vector' }],
     isPure: true,
@@ -252,7 +252,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Transform',
     displayName: 'Set Actor Location',
     description: 'Set the actor world location',
-    color: '#f39c12',
+    color: 'var(--aethel-blueprint-util)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'target', name: 'Target', type: 'data', dataType: 'object' },
@@ -269,7 +269,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Transform',
     displayName: 'Add Actor Local Offset',
     description: 'Add offset to actor in local space',
-    color: '#f39c12',
+    color: 'var(--aethel-blueprint-util)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'target', name: 'Target', type: 'data', dataType: 'object' },
@@ -284,7 +284,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Input',
     displayName: 'Get Input Axis',
     description: 'Get input axis value',
-    color: '#9b59b6',
+    color: 'var(--aethel-blueprint-exec)',
     inputs: [{ id: 'axisName', name: 'Axis Name', type: 'data', dataType: 'string' }],
     outputs: [{ id: 'value', name: 'Value', type: 'data', dataType: 'float' }],
     isPure: true,
@@ -294,7 +294,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Input',
     displayName: 'Is Input Key Down',
     description: 'Check if key is pressed',
-    color: '#9b59b6',
+    color: 'var(--aethel-blueprint-exec)',
     inputs: [{ id: 'key', name: 'Key', type: 'data', dataType: 'string' }],
     outputs: [{ id: 'isDown', name: 'Is Down', type: 'data', dataType: 'boolean' }],
     isPure: true,
@@ -306,7 +306,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Debug',
     displayName: 'Print String',
     description: 'Print text to screen',
-    color: '#1abc9c',
+    color: 'var(--aethel-blueprint-time)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'string', name: 'String', type: 'data', dataType: 'string' },
@@ -320,7 +320,7 @@ export const StandardNodes: NodeDefinition[] = [
     category: 'Debug',
     displayName: 'Draw Debug Line',
     description: 'Draw a debug line',
-    color: '#1abc9c',
+    color: 'var(--aethel-blueprint-time)',
     inputs: [
       { id: 'exec', name: '', type: 'exec' },
       { id: 'start', name: 'Start', type: 'data', dataType: 'vector' },

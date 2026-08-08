@@ -1,18 +1,18 @@
 import type { Command, Keybinding, Theme } from './useTheiaSystemsHooks'
 
 export async function loadThemes(): Promise<Theme[]> {
-    // Built-in themes
+    // Built-in themes — hex SoT lives in globals.css (--aethel-theme-*)
     return [
         {
             id: 'dark-plus',
             name: 'Dark+',
             type: 'dark',
             colors: {
-                'editor.background': '#1e1e1e',
-                'editor.foreground': '#d4d4d4',
-                'activityBar.background': '#333333',
-                'sideBar.background': '#252526',
-                'statusBar.background': '#007acc',
+                'editor.background': 'var(--aethel-theme-dark-plus-editor-background)',
+                'editor.foreground': 'var(--aethel-theme-dark-plus-editor-foreground)',
+                'activityBar.background': 'var(--aethel-theme-dark-plus-activityBar-background)',
+                'sideBar.background': 'var(--aethel-theme-dark-plus-sideBar-background)',
+                'statusBar.background': 'var(--aethel-theme-dark-plus-statusBar-background)',
             },
         },
         {
@@ -20,11 +20,11 @@ export async function loadThemes(): Promise<Theme[]> {
             name: 'Light+',
             type: 'light',
             colors: {
-                'editor.background': '#ffffff',
-                'editor.foreground': '#000000',
-                'activityBar.background': '#2c2c2c',
-                'sideBar.background': '#f3f3f3',
-                'statusBar.background': '#007acc',
+                'editor.background': 'var(--aethel-theme-light-plus-editor-background)',
+                'editor.foreground': 'var(--aethel-theme-light-plus-editor-foreground)',
+                'activityBar.background': 'var(--aethel-theme-light-plus-activityBar-background)',
+                'sideBar.background': 'var(--aethel-theme-light-plus-sideBar-background)',
+                'statusBar.background': 'var(--aethel-theme-light-plus-statusBar-background)',
             },
         },
         {
@@ -32,11 +32,11 @@ export async function loadThemes(): Promise<Theme[]> {
             name: 'High Contrast',
             type: 'high-contrast',
             colors: {
-                'editor.background': '#000000',
-                'editor.foreground': '#ffffff',
-                'activityBar.background': '#000000',
-                'sideBar.background': '#000000',
-                'statusBar.background': '#000000',
+                'editor.background': 'var(--aethel-theme-high-contrast-editor-background)',
+                'editor.foreground': 'var(--aethel-theme-high-contrast-editor-foreground)',
+                'activityBar.background': 'var(--aethel-theme-high-contrast-activityBar-background)',
+                'sideBar.background': 'var(--aethel-theme-high-contrast-sideBar-background)',
+                'statusBar.background': 'var(--aethel-theme-high-contrast-statusBar-background)',
             },
         },
     ];

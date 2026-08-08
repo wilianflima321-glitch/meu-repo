@@ -77,7 +77,7 @@ export function GlassCard({
   const variantStyles = {
     default: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur}`,
     elevated: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-2xl shadow-black/30`,
-    glow: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-[0_0_40px_rgba(99,102,241,0.15)]`,
+    glow: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-[0_0_40px_rgba(var(--aethel-indigo-rgb),0.15)]`,
     gradient: 'bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-text-primary)_8%,transparent)] via-[color-mix(in_srgb,var(--aethel-text-primary)_4%,transparent)] to-transparent backdrop-blur-xl',
     glass: 'bg-[var(--aethel-surface-primary)]/30 backdrop-blur-2xl backdrop-saturate-150',
   }
@@ -183,8 +183,8 @@ export function GradientButton({
     glow: `
       bg-[var(--aethel-info)]
       text-[var(--aethel-text-primary)]
-      shadow-[0_0_20px_rgba(6,182,212,0.5)]
-      hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]
+      shadow-[0_0_20px_rgba(var(--aethel-cyan-bright-rgb),0.5)]
+      hover:shadow-[0_0_30px_rgba(var(--aethel-cyan-bright-rgb),0.6)]
       border-0
     `,
   }
@@ -273,9 +273,9 @@ export function GlowBadge({
       `}
       animate={pulse ? {
         boxShadow: [
-          '0 0 0 rgba(99, 102, 241, 0)',
-          '0 0 20px rgba(99, 102, 241, 0.3)',
-          '0 0 0 rgba(99, 102, 241, 0)',
+          '0 0 0 rgba(var(--aethel-indigo-rgb), 0)',
+          '0 0 20px rgba(var(--aethel-indigo-rgb), 0.3)',
+          '0 0 0 rgba(var(--aethel-indigo-rgb), 0)',
         ],
       } : {}}
       transition={{ duration: 2, repeat: pulse ? Infinity : 0 }}
@@ -338,7 +338,7 @@ export function AnimatedGradient({ className = '', children }: AnimatedGradientP
       <motion.div
         className="absolute inset-0 opacity-30"
         style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.3), transparent 50%)',
+          background: 'radial-gradient(circle at 50% 50%, rgba(var(--aethel-indigo-rgb), 0.3), transparent 50%)',
         }}
         animate={{
           scale: [1, 1.2, 1],
@@ -353,7 +353,7 @@ export function AnimatedGradient({ className = '', children }: AnimatedGradientP
       <motion.div
         className="absolute -inset-[100%] opacity-20"
         style={{
-          background: 'conic-gradient(from 0deg, transparent, rgba(99, 102, 241, 0.3), transparent 30%)',
+          background: 'conic-gradient(from 0deg, transparent, rgba(var(--aethel-indigo-rgb), 0.3), transparent 30%)',
         }}
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -404,9 +404,9 @@ export function GlowInput({
             transition-all duration-200
             focus:outline-none
             focus:border-[var(--aethel-primary)]/50
-            focus:shadow-[0_0_20px_rgba(99,102,241,0.2)]
+            focus:shadow-[0_0_20px_rgba(var(--aethel-indigo-rgb),0.2)]
             focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-            ${error ? 'border-[var(--aethel-error)]/50 focus:border-[var(--aethel-error)]/50 focus:shadow-[0_0_20px_rgba(239,68,68,0.2)]' : ''}
+            ${error ? 'border-[var(--aethel-error)]/50 focus:border-[var(--aethel-error)]/50 focus:shadow-[0_0_20px_rgba(var(--aethel-error-rgb),0.2)]' : ''}
             ${className}
           `}
           {...props}

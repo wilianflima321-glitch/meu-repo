@@ -313,22 +313,22 @@ export function getOutputManager(): OutputManager {
  */
 export class ANSIFormatter {
   private static readonly ANSI_COLORS: Record<number, string> = {
-    30: '#000000', // Black
-    31: '#cd3131', // Red
-    32: '#0dbc79', // Green
-    33: '#e5e510', // Yellow
-    34: '#2472c8', // Blue
-    35: '#bc3fbc', // Magenta
-    36: '#11a8cd', // Cyan
-    37: '#e5e5e5', // White
-    90: '#666666', // Bright Black (Gray)
-    91: '#f14c4c', // Bright Red
-    92: '#23d18b', // Bright Green
-    93: '#f5f543', // Bright Yellow
-    94: '#3b8eea', // Bright Blue
-    95: '#d670d6', // Bright Magenta
-    96: '#29b8db', // Bright Cyan
-    97: '#ffffff', // Bright White
+    30: 'var(--aethel-terminal-dark-plus-black)',
+    31: 'var(--aethel-terminal-dark-plus-red)',
+    32: 'var(--aethel-terminal-dark-plus-green)',
+    33: 'var(--aethel-terminal-dark-plus-yellow)',
+    34: 'var(--aethel-terminal-dark-plus-blue)',
+    35: 'var(--aethel-terminal-dark-plus-magenta)',
+    36: 'var(--aethel-terminal-dark-plus-cyan)',
+    37: 'var(--aethel-terminal-dark-plus-white)',
+    90: 'var(--aethel-terminal-dark-plus-bright-black)',
+    91: 'var(--aethel-terminal-dark-plus-bright-red)',
+    92: 'var(--aethel-terminal-dark-plus-bright-green)',
+    93: 'var(--aethel-terminal-dark-plus-bright-yellow)',
+    94: 'var(--aethel-terminal-dark-plus-bright-blue)',
+    95: 'var(--aethel-terminal-dark-plus-bright-magenta)',
+    96: 'var(--aethel-terminal-dark-plus-bright-cyan)',
+    97: 'var(--aethel-terminal-dark-plus-bright-white)',
   };
 
   /**

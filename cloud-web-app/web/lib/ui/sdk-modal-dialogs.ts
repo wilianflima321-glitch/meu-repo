@@ -24,7 +24,7 @@ export function openSdkModalDialog({
     backdrop.style.cssText = `
       position: fixed;
       inset: 0;
-      background: rgba(2, 6, 23, 0.72);
+      background: rgba(var(--aethel-overlay-ink-rgb), 0.72);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -36,11 +36,11 @@ export function openSdkModalDialog({
     const dialog = document.createElement('div');
     dialog.style.cssText = `
       width: min(440px, calc(100vw - 32px));
-      background: #09090b;
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: var(--aethel-dialog-surface);
+      border: 1px solid rgba(var(--aethel-border-slate-rgb), 0.25);
       border-radius: 10px;
-      box-shadow: 0 24px 48px rgba(2, 6, 23, 0.45);
-      color: #e4e4e7;
+      box-shadow: 0 24px 48px rgba(var(--aethel-overlay-ink-rgb), 0.45);
+      color: var(--aethel-dialog-text);
       padding: 16px;
     `;
 
@@ -51,7 +51,8 @@ export function openSdkModalDialog({
 
     const body = document.createElement('p');
     body.textContent = detail ? `${message}\n\n${detail}` : message;
-    body.style.cssText = 'margin:0;font-size:12px;line-height:1.45;color:#cbd5e1;white-space:pre-wrap;';
+    body.style.cssText =
+      'margin:0;font-size:12px;line-height:1.45;color:var(--aethel-dialog-text-muted);white-space:pre-wrap;';
     dialog.appendChild(body);
 
     const footer = document.createElement('div');
@@ -82,9 +83,9 @@ export function openSdkModalDialog({
         height: 30px;
         padding: 0 12px;
         border-radius: 6px;
-        border: 1px solid ${primary ? '#0284c7' : 'rgba(148, 163, 184, 0.3)'};
-        background: ${primary ? '#0284c7' : 'rgba(15, 23, 42, 0.6)'};
-        color: #f8fafc;
+        border: 1px solid ${primary ? 'var(--aethel-sky-600)' : 'rgba(var(--aethel-border-slate-rgb), 0.3)'};
+        background: ${primary ? 'var(--aethel-sky-600)' : 'rgba(var(--aethel-slate-900-rgb), 0.6)'};
+        color: var(--aethel-dialog-btn-text);
         font-size: 12px;
         font-weight: 500;
         cursor: pointer;
@@ -124,7 +125,7 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
     backdrop.style.cssText = `
       position: fixed;
       inset: 0;
-      background: rgba(2, 6, 23, 0.72);
+      background: rgba(var(--aethel-overlay-ink-rgb), 0.72);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -136,11 +137,11 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
     const dialog = document.createElement('div');
     dialog.style.cssText = `
       width: min(440px, calc(100vw - 32px));
-      background: #09090b;
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      background: var(--aethel-dialog-surface);
+      border: 1px solid rgba(var(--aethel-border-slate-rgb), 0.25);
       border-radius: 10px;
-      box-shadow: 0 24px 48px rgba(2, 6, 23, 0.45);
-      color: #e4e4e7;
+      box-shadow: 0 24px 48px rgba(var(--aethel-overlay-ink-rgb), 0.45);
+      color: var(--aethel-dialog-text);
       padding: 16px;
     `;
 
@@ -151,7 +152,7 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
 
     const body = document.createElement('p');
     body.textContent = message;
-    body.style.cssText = 'margin:0;font-size:12px;line-height:1.45;color:#cbd5e1;';
+    body.style.cssText = 'margin:0;font-size:12px;line-height:1.45;color:var(--aethel-dialog-text-muted);';
     dialog.appendChild(body);
 
     const input = document.createElement('input');
@@ -162,9 +163,9 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
       height: 32px;
       margin-top: 12px;
       border-radius: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: #0f172a;
-      color: #e2e8f0;
+      border: 1px solid rgba(var(--aethel-border-slate-rgb), 0.35);
+      background: var(--aethel-dialog-input-bg);
+      color: var(--aethel-dialog-input-text);
       padding: 0 10px;
       font-size: 12px;
     `;
@@ -198,9 +199,9 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
       height: 30px;
       padding: 0 12px;
       border-radius: 6px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      background: rgba(15, 23, 42, 0.6);
-      color: #f8fafc;
+      border: 1px solid rgba(var(--aethel-border-slate-rgb), 0.3);
+      background: rgba(var(--aethel-slate-900-rgb), 0.6);
+      color: var(--aethel-dialog-btn-text);
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
@@ -214,9 +215,9 @@ export function openSdkModalPrompt(message: string, defaultValue = '', title = '
       height: 30px;
       padding: 0 12px;
       border-radius: 6px;
-      border: 1px solid #0284c7;
-      background: #0284c7;
-      color: #f8fafc;
+      border: 1px solid var(--aethel-sky-600);
+      background: var(--aethel-sky-600);
+      color: var(--aethel-dialog-btn-text);
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
