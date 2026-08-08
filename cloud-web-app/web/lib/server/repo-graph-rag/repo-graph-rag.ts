@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { searchVectorIndex } from '@/lib/server/vector-index/search'
-import { buildRepositoryImportGraph } from './repo-graph-builder'
+import { buildRepositoryImportGraph, type RepoGraph } from './repo-graph-builder'
 import { extractNeighborhoodSlice, SymbolSlice } from './neighborhood-slicer'
+import { resolveWhoImports } from './import-precision-soak'
 import type { RepositoryCartographyManifest } from '@/lib/production/repository-cartography-contracts'
 
 export interface RepoGraphRagResult {
@@ -17,6 +18,9 @@ export interface RepoGraphRagResult {
     excerpt: string
   }>
 }
+
+export { resolveWhoImports, buildRepositoryImportGraph }
+export type { RepoGraph }
 
 /**
  * L.12 RepoGraphRAG: AST Supreme Edition

@@ -43,7 +43,21 @@ export function extractAstSymbols(content: string, fileName: string): AstExtract
     if (!ts.canHaveModifiers(node)) return false
     const modifiers = ts.getModifiers(node)
     if (!modifiers) return false
-    return modifiers.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+    return modifiers.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
+  }
+
+  function pushExport(
+    name: string,
+    kind: SymbolBounds['kind'],
+    start: number,
+    end: number
+  ): void {
+    exportedSymbols.push({
+      name,
+      kind,
+      startLine: getLineFromPos(start),
+      endLine: getLineFromPos(end),
+    })
   }
 
   function visit(node: ts.Node) {
@@ -51,7 +65,7 @@ export function extractAstSymbols(content: string, fileName: string): AstExtract
       if (ts.isStringLiteral(node.moduleSpecifier)) {
         const specifier = node.moduleSpecifier.text
         const importedNames: string[] = []
-        
+
         if (node.importClause) {
           if (node.importClause.name) {
             importedNames.push('default')
@@ -59,65 +73,83 @@ export function extractAstSymbols(content: string, fileName: string): AstExtract
           if (node.importClause.namedBindings) {
             if (ts.isNamedImports(node.importClause.namedBindings)) {
               for (const element of node.importClause.namedBindings.elements) {
-                importedNames.push(element.name.text)
+                // Module export name (not local alias): `import { foo as bar }` → `foo`
+                importedNames.push(element.propertyName?.text ?? element.name.text)
               }
             } else if (ts.isNamespaceImport(node.importClause.namedBindings)) {
               importedNames.push('*')
             }
           }
+        } else {
+          // Side-effect import: `import './x'`
+          importedNames.push('*')
         }
         imports.push({ moduleSpecifier: specifier, importedNames })
       }
+    } else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      node.arguments[0] &&
+      ts.isStringLiteralLike(node.arguments[0])
+    ) {
+      imports.push({
+        moduleSpecifier: node.arguments[0].text,
+        importedNames: ['*'],
+      })
     } else if (hasExportModifier(node)) {
-      if (ts.isFunctionDeclaration(node) && node.name) {
-        exportedSymbols.push({
-          name: node.name.text,
-          kind: 'function',
-          startLine: getLineFromPos(node.getStart(sourceFile)),
-          endLine: getLineFromPos(node.getEnd())
-        })
-      } else if (ts.isClassDeclaration(node) && node.name) {
-        exportedSymbols.push({
-          name: node.name.text,
-          kind: 'class',
-          startLine: getLineFromPos(node.getStart(sourceFile)),
-          endLine: getLineFromPos(node.getEnd())
-        })
+      const isDefault = Boolean(
+        ts.canHaveModifiers(node) &&
+          ts.getModifiers(node)?.some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)
+      )
+      if (ts.isFunctionDeclaration(node)) {
+        if (node.name) {
+          pushExport(node.name.text, 'function', node.getStart(sourceFile), node.getEnd())
+        }
+        if (isDefault) {
+          pushExport('default', 'function', node.getStart(sourceFile), node.getEnd())
+        }
+      } else if (ts.isClassDeclaration(node)) {
+        if (node.name) {
+          pushExport(node.name.text, 'class', node.getStart(sourceFile), node.getEnd())
+        }
+        if (isDefault) {
+          pushExport('default', 'class', node.getStart(sourceFile), node.getEnd())
+        }
       } else if (ts.isInterfaceDeclaration(node) && node.name) {
-        exportedSymbols.push({
-          name: node.name.text,
-          kind: 'interface',
-          startLine: getLineFromPos(node.getStart(sourceFile)),
-          endLine: getLineFromPos(node.getEnd())
-        })
+        pushExport(node.name.text, 'interface', node.getStart(sourceFile), node.getEnd())
       } else if (ts.isTypeAliasDeclaration(node) && node.name) {
-        exportedSymbols.push({
-          name: node.name.text,
-          kind: 'type',
-          startLine: getLineFromPos(node.getStart(sourceFile)),
-          endLine: getLineFromPos(node.getEnd())
-        })
+        pushExport(node.name.text, 'type', node.getStart(sourceFile), node.getEnd())
       } else if (ts.isVariableStatement(node)) {
         for (const decl of node.declarationList.declarations) {
           if (ts.isIdentifier(decl.name)) {
-            exportedSymbols.push({
-              name: decl.name.text,
-              kind: 'variable',
-              startLine: getLineFromPos(node.getStart(sourceFile)),
-              endLine: getLineFromPos(node.getEnd())
-            })
+            pushExport(decl.name.text, 'variable', node.getStart(sourceFile), node.getEnd())
           }
         }
+      } else if (ts.isEnumDeclaration(node) && node.name) {
+        pushExport(node.name.text, 'unknown', node.getStart(sourceFile), node.getEnd())
       }
+    } else if (ts.isExportAssignment(node) && !node.isExportEquals) {
+      pushExport('default', 'unknown', node.getStart(sourceFile), node.getEnd())
     } else if (ts.isExportDeclaration(node)) {
       if (node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-        // export * from 'X' or export { Y } from 'X'
         imports.push({
           moduleSpecifier: node.moduleSpecifier.text,
-          importedNames: node.exportClause && ts.isNamedExports(node.exportClause)
-            ? node.exportClause.elements.map(e => e.name.text)
-            : ['*']
+          importedNames:
+            node.exportClause && ts.isNamedExports(node.exportClause)
+              ? node.exportClause.elements.map(
+                  (e) => e.propertyName?.text ?? e.name.text
+                )
+              : ['*'],
         })
+      } else if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        for (const el of node.exportClause.elements) {
+          pushExport(
+            el.name.text,
+            'unknown',
+            node.getStart(sourceFile),
+            node.getEnd()
+          )
+        }
       }
     }
 
