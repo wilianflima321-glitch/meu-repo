@@ -1,9 +1,9 @@
 /**
  * Base class for DAP (Debug Adapter Protocol) implementations
  *
- * @deprecated Use DAPClient from './dap-client' instead.
- * This class is kept for backwards compatibility but uses HTTP API for real communication.
- * The mock methods are only used as fallback when API is unavailable.
+ * @deprecated Prefer DAPClient from './dap-client' (same real `/api/dap` session path).
+ * Legacy adapters remain for language-specific helpers only.
+ * P2b BLOCKER 11: never invent mock DAP responses with success:true when the API is down.
  */
 
 import { EventEmitter } from 'events';
@@ -11,6 +11,14 @@ import { EventEmitter } from 'events';
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('dap/dap-adapter-base')
+
+/** Explicit opt-in for unit tests that must exercise the legacy mock path. Never a prod default. */
+export function isDapMockExplicitlyAllowed(): boolean {
+  return process.env.AETHEL_DAP_ALLOW_MOCK === '1' || process.env.AETHEL_DAP_ALLOW_MOCK === 'true'
+}
+
+export const DAP_SESSION_UNAVAILABLE =
+  'DAP_SESSION_UNAVAILABLE: real debug adapter session required via /api/dap (mock success path forbidden)'
 
 export interface DAPAdapterConfig {
   command: string;
@@ -180,39 +188,39 @@ export abstract class DAPAdapterBase extends EventEmitter {
     }
 
     try {
-      // Try to start real session via API
-      if (this.useRealAPI && typeof fetch !== 'undefined') {
-        try {
-          const response = await fetch('/api/dap/session/start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: this.getAdapterID(),
-              request: 'launch',
-              name: `Debug ${this.getAdapterID()}`,
-              cwd: this.config.cwd,
-            }),
-          });
-
-          if (response.ok) {
-            const data = await response.json() as DAPApiSessionStartResponse;
-            if (data.success && data.sessionId) {
-              this.sessionId = data.sessionId;
-              this.emit('ready');
-              log.info(`[DAP] ${this.config.command} adapter started (real API, session: ${this.sessionId})`);
-              return;
-            }
-          }
-        } catch (apiError) {
-          log.warn('[DAP] API unavailable, entering compatibility response mode:', apiError);
-          this.useRealAPI = false;
-        }
+      if (!(this.useRealAPI && typeof fetch !== 'undefined')) {
+        throw new Error(DAP_SESSION_UNAVAILABLE);
       }
 
-      // Legacy compatibility mode keeps older adapters observable until the real API is available.
+      const response = await fetch('/api/dap/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: this.getAdapterID(),
+          request: 'launch',
+          name: `Debug ${this.getAdapterID()}`,
+          cwd: this.config.cwd,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `${DAP_SESSION_UNAVAILABLE} (HTTP ${response.status})`,
+        );
+      }
+
+      const data = await response.json() as DAPApiSessionStartResponse;
+      if (!data.success || !data.sessionId) {
+        throw new Error(
+          `${DAP_SESSION_UNAVAILABLE} (session start returned no sessionId)`,
+        );
+      }
+
+      this.sessionId = data.sessionId;
       this.emit('ready');
-      log.info(`[DAP] ${this.config.command} adapter started (compatibility response mode - API unavailable)`);
+      log.info(`[DAP] ${this.config.command} adapter started (real API, session: ${this.sessionId})`);
     } catch (error) {
+      this.useRealAPI = false;
       this.emit('error', error);
       throw error;
     }
@@ -443,32 +451,42 @@ export abstract class DAPAdapterBase extends EventEmitter {
 
         if (response.ok) {
           const data = await response.json() as DAPApiRequestResponse<TResult>;
-          if (data.success !== false) {
+          if (data.success === true) {
             return (data.body || {}) as TResult;
           }
           throw new Error(data.message || 'DAP request failed');
         }
+        throw new Error(`DAP request HTTP ${response.status} for ${command}`);
       } catch (apiError) {
-        log.warn(`[DAP] API request failed for ${command}, using mock:`, apiError);
+        log.warn(`[DAP] API request failed for ${command} (fail-closed, no mock):`, apiError);
+        throw apiError instanceof Error
+          ? apiError
+          : new Error(`${DAP_SESSION_UNAVAILABLE} (command=${command})`);
       }
     }
 
-    // Fallback to mock response
-    return new Promise<TResult>((resolve, reject) => {
-      this.pendingRequests.set(seq, { resolve: resolve as (value: unknown) => void, reject });
+    // Explicit test-only mock path — never a silent production fallback.
+    if (isDapMockExplicitlyAllowed()) {
+      return new Promise<TResult>((resolve, reject) => {
+        this.pendingRequests.set(seq, { resolve: resolve as (value: unknown) => void, reject });
+        setTimeout(() => {
+          try {
+            const mockResponse = this.getMockResponse(command, args);
+            this.handleResponse({
+              type: 'response',
+              request_seq: seq,
+              success: true,
+              command,
+              body: mockResponse,
+            });
+          } catch (mockError) {
+            reject(mockError instanceof Error ? mockError : new Error(String(mockError)));
+          }
+        }, 50);
+      });
+    }
 
-      // Deprecated compatibility fallback for legacy adapters.
-      setTimeout(() => {
-        const mockResponse = this.getMockResponse(command, args);
-        this.handleResponse({
-          type: 'response',
-          request_seq: seq,
-          success: true,
-          command,
-          body: mockResponse,
-        });
-      }, 50);
-    });
+    throw new Error(`${DAP_SESSION_UNAVAILABLE} (command=${command})`);
   }
 
   /**
@@ -539,10 +557,14 @@ export abstract class DAPAdapterBase extends EventEmitter {
   }
 
   /**
-   * Get mock response for testing
-   * Override in subclasses for adapter-specific mocks
+   * Mock responses are forbidden on the ship path (P2b BLOCKER 11).
+   * Only reachable when AETHEL_DAP_ALLOW_MOCK=1; subclasses may override for tests.
    */
-  protected abstract getMockResponse(command: string, args: DAPRequestArguments): unknown;
+  protected getMockResponse(command: string, _args: DAPRequestArguments): unknown {
+    throw new Error(
+      `DAP_MOCK_FORBIDDEN: mock response for '${command}' is not implemented — use a real /api/dap session`,
+    );
+  }
 
   /**
    * Check if adapter is ready

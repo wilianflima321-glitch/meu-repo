@@ -1,120 +1,71 @@
-use deno_core::{JsRuntime, RuntimeOptions};
-use serde::{Deserialize, Serialize};
-use std::time::Duration;
+//! Plugin sandbox IPC surface — honesty-first (P2b BLOCKER 12).
+//!
+//! Prior revision shipped fake FPS/DOM telemetry (`start_sandbox_telemetry`) and a
+//! synthetic 512-D "vibe" embedding (`export_vibe_embedding`) while claiming live
+//! WebGPU/Physics hooks + local ViT. Those paths are fail-closed HELD until a real
+//! V8 isolate (deno_core / equivalent) and real sensor feeds exist.
+//!
+//! `execute_sandbox_plugin` is also HELD: there is no `deno_core` dependency in this
+//! crate, so inventing a JS runtime success would be Zero-MVP theater.
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct PluginActionRequest {
-    pub risk_level: String,
-    pub action_type: String,
-    pub payload: String,
-}
+use tauri::AppHandle;
 
-pub struct PluginSandbox {
-    runtime: JsRuntime,
-}
+const SANDBOX_V8_HELD: &str = "PLUGIN_SANDBOX_HELD: V8 isolate / deno_core not wired — refuse to invent plugin execution success";
+const TELEMETRY_HELD: &str = "PLUGIN_TELEMETRY_HELD: refuse fake FPS/DOM/collision telemetry — wire real GPU/physics hooks before streaming aethel-telemetry-feed";
+const VIBE_EMBEDDING_HELD: &str = "VIBE_EMBEDDING_HELD: refuse synthetic 512-D embedding — local ViT / screen buffer encoder not implemented";
+const AESTHETIC_LORA_HELD: &str = "AESTHETIC_LORA_HELD: local LoRA aesthetic override not implemented — refuse silent Ok(())";
 
-impl PluginSandbox {
-    pub fn new() -> Self {
-        // Phase 14: L5 V8 Isolate Architecture (ASGS Engine)
-        // A pure, locked-down ECMAScript environment for AI-generated Micro-Kernels.
-        let runtime = JsRuntime::new(RuntimeOptions::default());
-        Self { runtime }
-    }
-
-    /// Evaluates a third-party plugin securely inside the V8 Isolate.
-    /// IMPLEMENTATION L5: Enforces a strict 16ms execution timeout (60FPS rule)
-    /// to prevent AI-generated death loops, returning a binary buffer for Physics.
-    pub fn execute_plugin_code(&mut self, js_code: &str) -> Result<Vec<u8>, String> {
-        let code = js_code.to_string();
-        
-        let result = tokio::task::block_in_place(|| {
-            tokio::runtime::Handle::current().block_on(async {
-                // 16ms Timeout Enforcer
-                let execution_future = async {
-                    let result = self.runtime.execute_script("<plugin>", code);
-                    match result {
-                        Ok(global) => {
-                            let mut scope = self.runtime.handle_scope();
-                            let local = deno_core::v8::Local::new(&mut scope, global);
-                            
-                            // For zero-copy physics bridging, we expect the JS to return an ArrayBuffer.
-                            // If it's just a string/number, we mock the serialization into bytes here.
-                            let js_string = local.to_rust_string_lossy(&mut scope);
-                            Ok(js_string.into_bytes())
-                        }
-                        Err(e) => Err(format!("Sandbox Execution Error: {}", e)),
-                    }
-                };
-
-                match tokio::time::timeout(Duration::from_millis(16), execution_future).await {
-                    Ok(res) => res,
-                    Err(_) => Err("Sandbox Execution Error: 16ms Timeout Exceeded (Death Loop Prevented)".to_string()),
-                }
-            })
-        });
-
-        result
-    }
-}
-
-// Tauri command to execute a plugin (Returns Base64 or raw bytes depending on frontend need)
+/// Evaluates third-party plugin JS. Fail-closed until a real isolate ships.
 #[tauri::command]
-pub fn execute_sandbox_plugin(js_code: String) -> Result<Vec<u8>, String> {
-    let mut sandbox = PluginSandbox::new();
-    sandbox.execute_plugin_code(&js_code)
+pub fn execute_sandbox_plugin(_js_code: String) -> Result<Vec<u8>, String> {
+    Err(SANDBOX_V8_HELD.to_string())
 }
 
-// ============================================================================
-// LIVE EPHEMERAL TELEMETRY (NO IMAGE BLOAT)
-// ============================================================================
-
+/// Live ephemeral telemetry feed. Fail-closed — never emits fabricated metrics.
 #[tauri::command]
-pub fn start_sandbox_telemetry(app: tauri::AppHandle, hook_id: String) -> Result<(), String> {
-    // Spawns a background thread to simulate hooking into the WebGPU/Physics state
-    // and streaming the mathematical metrics (AST/DOM/Spatial) back to the AI.
-    std::thread::spawn(move || {
-        use tauri::Manager;
-        let mut cycle = 0;
-        // Mocking a live stream of spatial data that dies after 100 cycles to free RAM.
-        while cycle < 100 { 
-            std::thread::sleep(std::time::Duration::from_millis(50));
-            let payload = format!("{{\"hook_id\":\"{}\",\"fps\":60,\"dom_nodes\":1024,\"collision_active\":false,\"cycle\":{}}}", hook_id, cycle);
-            let _ = app.emit_all("aethel-telemetry-feed", payload);
-            cycle += 1;
-        }
-    });
-    Ok(())
+pub fn start_sandbox_telemetry(_app: AppHandle, _hook_id: String) -> Result<(), String> {
+    Err(TELEMETRY_HELD.to_string())
 }
 
-// ============================================================================
-// L5 VIBE EMBEDDINGS (SUBCONSCIOUS ESTHETIC SENSOR)
-// ============================================================================
-
+/// Perceptual "vibe" embedding export. Fail-closed — never returns a fake vector.
 #[tauri::command]
 pub fn export_vibe_embedding() -> Result<Vec<f32>, String> {
-    // In a real L5 Engine, we run a quantized Vision Transformer (ViT) locally.
-    // It captures the screen/buffers and compresses the entire aesthetic "Vibe"
-    // into a dense 512-dimensional vector. This allows the Cloud AI to "feel"
-    // the layout and lighting quality natively via Cross-Attention without images.
-    
-    // Generating a mock 512D vector representing the perceptual state
-    let mut embedding = Vec::with_capacity(512);
-    for i in 0..512 {
-        embedding.push(0.5 + (i as f32 * 0.001).sin() * 0.5); // Mock continuous state
-    }
-    
-    Ok(embedding)
+    Err(VIBE_EMBEDDING_HELD.to_string())
 }
 
-// ============================================================================
-// L5 GOD MODE: LOCAL LORA FINE-TUNING (AESTHETIC OVERRIDE)
-// ============================================================================
+/// User aesthetic override / local LoRA train hook. Fail-closed.
 #[tauri::command]
-pub fn register_user_aesthetic_override(metrics: String) -> Result<(), String> {
-    // When the user manually corrects the AI's UI/UX, the frontend sends the
-    // delta metrics here. The local Rust engine feeds this into a small LoRA
-    // adapter. The Vibe Embedding will gradually shift towards the user's specific
-    // "Taste" (e.g., dark synthwave, minimalist apple).
-    println!("L5 God Mode: Training local aesthetic LoRA with user overrides: {}", metrics);
-    Ok(())
+pub fn register_user_aesthetic_override(_metrics: String) -> Result<(), String> {
+    Err(AESTHETIC_LORA_HELD.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn execute_sandbox_plugin_fails_closed() {
+        let err = execute_sandbox_plugin("1+1".into()).unwrap_err();
+        assert!(err.contains("PLUGIN_SANDBOX_HELD"));
+    }
+
+    #[test]
+    fn export_vibe_embedding_refuses_synthetic_vector() {
+        let err = export_vibe_embedding().unwrap_err();
+        assert!(err.contains("VIBE_EMBEDDING_HELD"));
+        assert!(!err.is_empty());
+    }
+
+    #[test]
+    fn aesthetic_override_refuses_silent_ok() {
+        let err = register_user_aesthetic_override("{}".into()).unwrap_err();
+        assert!(err.contains("AESTHETIC_LORA_HELD"));
+    }
+
+    #[test]
+    fn telemetry_held_reason_is_honest() {
+        // AppHandle cannot be constructed in a unit test; assert the constant contract.
+        assert!(TELEMETRY_HELD.contains("PLUGIN_TELEMETRY_HELD"));
+        assert!(TELEMETRY_HELD.contains("refuse fake"));
+    }
 }

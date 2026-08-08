@@ -413,7 +413,11 @@ fn main() {
             motion_matching::motion_matching_evaluate,
             motion_matching::motion_matching_status,
             entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
-            entropy_gpu_particles::probe_entropy_gpu_particles_cmd
+            entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
+            aethel_studio_local::plugin_sandbox::execute_sandbox_plugin,
+            aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
+            aethel_studio_local::plugin_sandbox::export_vibe_embedding,
+            aethel_studio_local::plugin_sandbox::register_user_aesthetic_override
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");

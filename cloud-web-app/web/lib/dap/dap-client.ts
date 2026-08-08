@@ -3,10 +3,6 @@
  * Updated to use new adapter implementations
  */
 
-import { DAPAdapterBase } from './dap-adapter-base';
-import { createNodeJSDAPAdapter } from './adapters/nodejs-dap';
-import { createPythonDAPAdapter } from './adapters/python-dap';
-
 import {createComponentLogger, logger} from '@/lib/observability/logger'
 
 const log = createComponentLogger('dap/dap-client')

@@ -1,20 +1,20 @@
 /**
  * DAP (Debug Adapter Protocol) Module
- * 
- * IMPORTANTE: Use DAPClient para debug real.
- * Os adapters em ./adapters/ são DEPRECATED e retornam dados mock.
- * 
- * Uso correto:
+ *
+ * Prefer DAPClient for debug sessions. Legacy language adapters share the same
+ * real `/api/dap` path and fail closed when no session exists (P2b BLOCKER 11 —
+ * no mock success:true fallback).
+ *
  * ```typescript
  * import { DAPClient } from '@/lib/dap';
- * 
+ *
  * const client = new DAPClient({
- *   type: 'node',  // ou 'python', 'go', etc.
+ *   type: 'node',
  *   request: 'launch',
  *   program: '/path/to/file.js',
  *   cwd: '/path/to/workspace'
  * });
- * 
+ *
  * await client.initialize();
  * await client.launch();
  * ```
@@ -44,9 +44,7 @@ export type {
 } from './dap-adapter-base';
 
 /**
- * @deprecated Use DAPClient instead
- * Os adapters individuais retornam dados MOCK.
- * Para debug real, use DAPClient com o tipo apropriado.
+ * @deprecated Prefer DAPClient — adapters are fail-closed without a real session.
  */
 export const DEPRECATED_ADAPTERS = {
   nodejs: '@/lib/dap/adapters/nodejs-dap',
