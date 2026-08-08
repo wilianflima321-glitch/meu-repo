@@ -1,7 +1,8 @@
 /**
  * CW4 — UI persistence spine.
  * Versioned, typed adapter for critical IDE / Studio / session keys.
- * Raw localStorage remains exception-only outside this module.
+ * Raw localStorage remains exception-only outside this module
+ * (secrets + documented domain allowlist — see ui-persistence-critical-inventory).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -34,6 +35,28 @@ export const UI_PERSISTENCE_PENDING_DELTA_KEY = 'aethel.ui.persistence.pending.v
 
 export const UI_PERSISTENCE_LOCK_NAME = 'aethel.ui.persistence.lock'
 
+/**
+ * One-way legacy mirror write window (compat for pre-spine readers).
+ * Closed 2026-08-08 with CW4 LWW ship — bag is sole write authority after expire.
+ * Bootstrap migrate may still *read* legacy once into the bag.
+ */
+export const UI_PERSISTENCE_LEGACY_MIRROR_EXPIRES_AT = '2026-08-08T00:00:00.000Z'
+
+/** Test override: `true`/`false` force, `null` = use wall-clock expiry. */
+let _legacyMirrorOverrideForTests: boolean | null = null
+
+export function isUiPersistenceLegacyMirrorActive(nowMs: number = Date.now()): boolean {
+  if (_legacyMirrorOverrideForTests !== null) return _legacyMirrorOverrideForTests
+  const expires = Date.parse(UI_PERSISTENCE_LEGACY_MIRROR_EXPIRES_AT)
+  if (!Number.isFinite(expires)) return false
+  return nowMs < expires
+}
+
+/** Test-only: force legacy mirror on/off; pass null to restore expiry clock. */
+export function __setUiPersistenceLegacyMirrorOverrideForTests(active: boolean | null): void {
+  _legacyMirrorOverrideForTests = active
+}
+
 export type UiPersistenceNamespace =
   | 'ide.dock'
   | 'ide.session'
@@ -57,6 +80,11 @@ export type UiPersistenceNamespace =
   | 'workbench.lastProjectId'
   | 'workbench.preview.runtimeUrl'
   | 'workbench.preview.sandboxId'
+  | 'chrome.commandHistory'
+  | 'chrome.searchHistory'
+  | 'chrome.notifications'
+  | 'settings.user'
+  | 'settings.workspace'
 
 /** Legacy flat keys that migrate into the versioned bag. */
 export const UI_PERSISTENCE_LEGACY_KEYS = {
@@ -69,6 +97,8 @@ export const UI_PERSISTENCE_LEGACY_KEYS = {
   workbenchPrefix: 'aethel-workbench-layout:',
   workspaceProfile: 'aethel.workspace.profile',
   themeCurrent: 'current-theme',
+  /** ThemeContext pre-spine id — migrate into theme.current; never dual-read after migrate. */
+  themeContextLegacy: 'aethel-theme',
   themeIcon: 'current-icon-theme',
   dashboardSessionHistory: 'aethel-dashboard::session-history',
   dashboardSettings: 'aethel-dashboard::settings',
@@ -83,6 +113,12 @@ export const UI_PERSISTENCE_LEGACY_KEYS = {
   dashboardFirstValueDismissed: 'aethel.dashboard.first-value.dismissed',
   workbenchPreviewRuntimeUrl: 'aethel.workbench.preview.runtimeUrl',
   workbenchPreviewSandboxId: 'aethel.workbench.preview.sandboxId',
+  commandHistory: 'aethel_command_history',
+  searchHistory: 'aethel_search_history',
+  replaceHistory: 'aethel_replace_history',
+  notifications: 'aethel:notifications',
+  userSettings: 'user-settings',
+  workspaceSettings: 'workspace-settings',
 } as const
 
 /** Viewport dock modes mirrored into `viewport.dock` (no secrets). */
@@ -290,7 +326,7 @@ function flushWriteQueueSync() {
 // bag write behind `navigator.locks.request`, a microtask/macrotask hop. If
 // the tab is closed/navigated/backgrounded before that callback runs, the
 // in-memory queue would be lost — durable pending-delta + sync flush close
-// that window. Legacy mirror remains one-way (never read back into bag).
+// that window. Legacy mirror (when active) remains one-way — never read back into bag.
 if (typeof window !== 'undefined') {
   const flushPendingSync = () => {
     if (
@@ -378,8 +414,12 @@ export function migrateUiPersistenceSpine(): UiPersistenceBag {
   const profile = readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.workspaceProfile)
   ensure('workspace.profile', profile)
 
-  // Theme ids only (no BYOK / auth secrets).
-  ensure('theme.current', readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.themeCurrent))
+  // Theme ids only (no BYOK / auth secrets). Prefer current-theme, else ThemeContext legacy.
+  ensure(
+    'theme.current',
+    readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.themeCurrent) ??
+      readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.themeContextLegacy),
+  )
   ensure('theme.icon', readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.themeIcon))
 
   ensure(
@@ -455,6 +495,32 @@ export function migrateUiPersistenceSpine(): UiPersistenceBag {
     }
   }
 
+  // Non-secret chrome formerly dual-sourced via raw localStorage.
+  ensure(
+    'chrome.commandHistory',
+    parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.commandHistory)),
+  )
+  if (bag.entries['chrome.searchHistory'] === undefined) {
+    const search = parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.searchHistory))
+    const replace = parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.replaceHistory))
+    if (search !== null || replace !== null) {
+      bag.entries['chrome.searchHistory'] = {
+        search: Array.isArray(search) ? search : [],
+        replace: Array.isArray(replace) ? replace : [],
+      }
+      changed = true
+    }
+  }
+  ensure(
+    'chrome.notifications',
+    parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.notifications)),
+  )
+  ensure('settings.user', parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.userSettings)))
+  ensure(
+    'settings.workspace',
+    parseLegacyJson(readLegacyRaw(UI_PERSISTENCE_LEGACY_KEYS.workspaceSettings)),
+  )
+
   if (changed) {
     writeBag(bag)
     log.info('ui_persistence_migrated', {
@@ -479,10 +545,10 @@ export function migrateUiPersistenceSpine(): UiPersistenceBag {
  * module scope, so no `WorkspaceStore` can ever be created before the
  * adapter exists, on any route. `ide.dock`/`viewport.dock` writes go
  * through `setIdeDockLayout`/`setViewportDockLayoutForMode` exclusively;
- * the raw legacy key is written *by* `mirrorLegacy` below as a one-way,
- * same-call compat mirror (one release), never read back into the bag
- * after the initial one-shot `migrateUiPersistenceSpine()` bootstrap.
- * Do not reintroduce a read-time legacy resync — that recreates the race.
+ * the raw legacy key *was* written by `mirrorLegacy` as a one-way compat
+ * mirror; that write window expired (`UI_PERSISTENCE_LEGACY_MIRROR_EXPIRES_AT`).
+ * Never read legacy back into the bag after the initial one-shot
+ * `migrateUiPersistenceSpine()` bootstrap — that recreates dual-source races.
  */
 function ensureMigrated(): UiPersistenceBag {
   // Always run — migrate is idempotent and must pick up legacy keys written
@@ -564,8 +630,10 @@ export function setUiPersistence<T>(namespace: UiPersistenceNamespace, value: T)
     upsertPendingDelta({ [namespace]: write })
     // 2. Async exclusive RMW under Web Locks (multi-tab LWW) when available
     void flushWriteQueue()
-    // 3. One-way legacy mirror (compat window; never read back into bag)
-    mirrorLegacy(namespace, value)
+    // 3. One-way legacy mirror only while compat window is open (never read back)
+    if (isUiPersistenceLegacyMirrorActive()) {
+      mirrorLegacy(namespace, value)
+    }
     return true
   } catch (error) {
     log.warn('ui_persistence_set_failed', {
@@ -600,6 +668,7 @@ export function __flushUiPersistenceForTests(): void {
 
 function mirrorLegacy(namespace: UiPersistenceNamespace, value: unknown): void {
   if (typeof window === 'undefined') return
+  if (!isUiPersistenceLegacyMirrorActive()) return
   try {
     switch (namespace) {
       case 'ide.dock':
@@ -722,8 +791,46 @@ function mirrorLegacy(namespace: UiPersistenceNamespace, value: unknown): void {
           }
         }
         break
+      case 'chrome.commandHistory':
+        window.localStorage.setItem(
+          UI_PERSISTENCE_LEGACY_KEYS.commandHistory,
+          JSON.stringify(value),
+        )
+        break
+      case 'chrome.searchHistory':
+        if (value && typeof value === 'object') {
+          const hist = value as { search?: unknown; replace?: unknown }
+          if (Array.isArray(hist.search)) {
+            window.localStorage.setItem(
+              UI_PERSISTENCE_LEGACY_KEYS.searchHistory,
+              JSON.stringify(hist.search),
+            )
+          }
+          if (Array.isArray(hist.replace)) {
+            window.localStorage.setItem(
+              UI_PERSISTENCE_LEGACY_KEYS.replaceHistory,
+              JSON.stringify(hist.replace),
+            )
+          }
+        }
+        break
+      case 'chrome.notifications':
+        window.localStorage.setItem(
+          UI_PERSISTENCE_LEGACY_KEYS.notifications,
+          JSON.stringify(value),
+        )
+        break
+      case 'settings.user':
+        window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.userSettings, JSON.stringify(value))
+        break
+      case 'settings.workspace':
+        window.localStorage.setItem(
+          UI_PERSISTENCE_LEGACY_KEYS.workspaceSettings,
+          JSON.stringify(value),
+        )
+        break
       case 'agents.opsMemory':
-        // Project-scoped; callers mirror via setAgentsOpsMemory.
+        // Project-scoped; callers mirror via setAgentsOpsMemory when window open.
         break
       default:
         break
@@ -793,6 +900,22 @@ function removeLegacy(namespace: UiPersistenceNamespace): void {
     case 'workbench.preview.sandboxId':
       removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.workbenchPreviewSandboxId)
       break
+    case 'chrome.commandHistory':
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.commandHistory)
+      break
+    case 'chrome.searchHistory':
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.searchHistory)
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.replaceHistory)
+      break
+    case 'chrome.notifications':
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.notifications)
+      break
+    case 'settings.user':
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.userSettings)
+      break
+    case 'settings.workspace':
+      removeClientStorageItem(UI_PERSISTENCE_LEGACY_KEYS.workspaceSettings)
+      break
     default:
       break
   }
@@ -853,7 +976,8 @@ export function setAgentsOpsMemory(projectId: string | undefined, value: unknown
   const key = projectId || 'default'
   map[key] = value
   const ok = setUiPersistence('agents.opsMemory', map)
-  if (typeof window !== 'undefined') {
+  // One-way legacy flat key only while compat mirror window is open.
+  if (ok && typeof window !== 'undefined' && isUiPersistenceLegacyMirrorActive()) {
     try {
       window.localStorage.setItem(getAgentsOpsMemoryKey(projectId), JSON.stringify(value))
     } catch {
@@ -1012,6 +1136,70 @@ export function setWorkbenchPreviewSandboxId(sandboxId: string | null): boolean 
     return true
   }
   return setUiPersistence('workbench.preview.sandboxId', sandboxId)
+}
+
+export type ChromeSearchHistoryBag = {
+  search: string[]
+  replace: string[]
+}
+
+export function getChromeCommandHistory<T>(fallback: T[]): T[] {
+  const value = getUiPersistence<unknown>('chrome.commandHistory', fallback)
+  return Array.isArray(value) ? (value as T[]) : fallback
+}
+
+export function setChromeCommandHistory(entries: unknown[]): boolean {
+  return setUiPersistence('chrome.commandHistory', entries)
+}
+
+export function clearChromeCommandHistory(): void {
+  removeUiPersistence('chrome.commandHistory')
+}
+
+export function getChromeSearchHistory(): ChromeSearchHistoryBag {
+  return getUiPersistence<ChromeSearchHistoryBag>(
+    'chrome.searchHistory',
+    { search: [], replace: [] },
+    (v): v is ChromeSearchHistoryBag =>
+      !!v &&
+      typeof v === 'object' &&
+      Array.isArray((v as ChromeSearchHistoryBag).search) &&
+      Array.isArray((v as ChromeSearchHistoryBag).replace),
+  )
+}
+
+export function setChromeSearchHistory(bag: ChromeSearchHistoryBag): boolean {
+  return setUiPersistence('chrome.searchHistory', {
+    search: [...bag.search],
+    replace: [...bag.replace],
+  })
+}
+
+export function getChromeNotifications<T>(fallback: T[]): T[] {
+  const value = getUiPersistence<unknown>('chrome.notifications', fallback)
+  return Array.isArray(value) ? (value as T[]) : fallback
+}
+
+export function setChromeNotifications(notifications: unknown[]): boolean {
+  return setUiPersistence('chrome.notifications', notifications)
+}
+
+export function getUserSettingsBag<T extends object>(fallback: T): T {
+  const value = getUiPersistence<unknown>('settings.user', fallback)
+  return value && typeof value === 'object' ? ({ ...fallback, ...(value as object) } as T) : fallback
+}
+
+export function setUserSettingsBag(settings: object): boolean {
+  return setUiPersistence('settings.user', settings)
+}
+
+export function getWorkspaceSettingsBag<T extends object>(fallback: T): T {
+  const value = getUiPersistence<unknown>('settings.workspace', fallback)
+  return value && typeof value === 'object' ? ({ ...fallback, ...(value as object) } as T) : fallback
+}
+
+export function setWorkspaceSettingsBag(settings: object): boolean {
+  return setUiPersistence('settings.workspace', settings)
 }
 
 export function wrapEnvelope<T>(data: T): UiPersistenceEnvelope<T> {

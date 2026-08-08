@@ -80,7 +80,7 @@ Before executing any block, the executor MUST comply with `AETHEL_AAA_SYSTEM_ARC
 | **CW7** | Disk austerity | Cargo/target on E:/D:; CAS; prune |
 
 **Still STOPPED:** J.11 ACP / J.12 OrchestratorProd.  
-**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW1–CW5,CW7 **PARTIAL**; **CW6 DONE (2026-08-02) apply-path only** — multi-file AST/L.5 swarm + per-file validation receipts live; `composerSurpassClaim=true` is **product posture**, not ship certificate (`treeSitterAstIndexerWebWired=false`; J.11/J.12 STOPPED). **CW4 PARTIAL** (critical dock spine + **multi-tab LWW DONE** 2026-08-08 via WebLocks+entryMeta+pending-delta; exception-only/legacy mirror remain — do not mark CW4 DONE). CW0 ACTIVE. **2026-08-08:** P2b Anti-MOCK fully cleared; Forge L PARTIALs (not GAP) — see §0b Forge L note + Progress Remaining OPEN. **HELD** vs Cursor / Figma / UE Chaos.
+**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW1–CW3,CW5,CW7 **PARTIAL**; **CW4 DONE (2026-08-08)** — LWW + exception-only allowlist (2 secret + 7 domain) + expired one-way legacy mirror; open chrome debt 0; **CW6 DONE (2026-08-02) apply-path only** — multi-file AST/L.5 swarm + per-file validation receipts live; `composerSurpassClaim=true` is **product posture**, not ship certificate (`treeSitterAstIndexerWebWired=false`; J.11/J.12 STOPPED). CW0 ACTIVE. **2026-08-08:** P2b Anti-MOCK fully cleared; Forge L PARTIALs (not GAP) — see §0b Forge L note + Progress Remaining OPEN. **HELD** vs Cursor / Figma / UE Chaos.
 **UX vision (not ship cert):** [`AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md`](./AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md) Â§0.
 
 ---

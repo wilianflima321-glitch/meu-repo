@@ -1,5 +1,9 @@
 import { createComponentLogger } from '@/lib/observability/logger'
 import type { Notification, NotificationListener } from '@/lib/notifications-system.types'
+import {
+  getChromeNotifications,
+  setChromeNotifications,
+} from '@/lib/storage/ui-persistence-spine'
 
 const log = createComponentLogger('notifications-system')
 
@@ -181,21 +185,16 @@ export class NotificationManager {
   }
 
   private saveToStorage(): void {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('aethel:notifications', JSON.stringify(this.notifications.slice(0, 100)))
-    }
+    if (typeof window === 'undefined') return
+    setChromeNotifications(this.notifications.slice(0, 100))
   }
 
   private loadFromStorage(): void {
-    if (typeof localStorage !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('aethel:notifications')
-        if (stored) {
-          this.notifications = JSON.parse(stored) as Notification[]
-        }
-      } catch (error) {
-        log.error('[Notifications] Failed to load from storage:', error)
-      }
+    if (typeof window === 'undefined') return
+    try {
+      this.notifications = getChromeNotifications<Notification>([])
+    } catch (error) {
+      log.error('[Notifications] Failed to load from storage:', error)
     }
   }
 

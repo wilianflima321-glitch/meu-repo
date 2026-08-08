@@ -7,6 +7,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  getThemePreferenceId,
+  setThemePreferenceId,
+} from '@/lib/storage/ui-persistence-spine';
 import { builtInThemes, darkPlusTheme } from './ThemeContext.themes';
 
 // ============================================================================
@@ -200,9 +204,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   const [currentThemeId, setCurrentThemeId] = useState<string>(defaultTheme);
 
-  // Load saved theme preference
+  // Load saved theme preference via CW4 spine (aethel-theme migrates once).
   useEffect(() => {
-    const saved = localStorage.getItem('aethel-theme');
+    const saved = getThemePreferenceId();
     if (saved && themes.some(t => t.id === saved)) {
       setCurrentThemeId(saved);
     }
@@ -217,7 +221,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const setTheme = useCallback((themeId: string) => {
     if (themes.some(t => t.id === themeId)) {
       setCurrentThemeId(themeId);
-      localStorage.setItem('aethel-theme', themeId);
+      setThemePreferenceId(themeId);
     }
   }, [themes]);
 

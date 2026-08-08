@@ -67,18 +67,20 @@ describe('CW1 consolidation truth matrix', () => {
     expect(kernel?.marketingAllowed).toBe(false)
   })
 
-  it('keeps CW4 spine row PARTIAL (no criticalPath=DONE theater)', () => {
+  it('marks CW4 spine IMPLEMENTED with allowlist heldReason (marketing still false)', () => {
     const matrix = buildConsolidationTruthMatrix()
     const spine = matrix.rows.find((r) => r.id === 'ui.persistence.spine')
-    expect(spine?.status).toBe('PARTIAL')
-    expect(spine?.lastEvidence).toMatch(/criticalPath=PARTIAL/)
-    expect(spine?.lastEvidence).not.toMatch(/criticalPath=DONE/)
+    expect(spine?.status).toBe('IMPLEMENTED')
+    expect(spine?.lastEvidence).toMatch(/criticalPath=DONE/)
     expect(spine?.lastEvidence).toMatch(/lockLWW=DONE/)
+    expect(spine?.lastEvidence).toMatch(/legacyMirror=DONE/)
+    expect(spine?.lastEvidence).toMatch(/exceptionOnly=DONE/)
+    expect(spine?.lastEvidence).toMatch(/openChromeDebt=0/)
     expect(spine?.marketingAllowed).toBe(false)
-    expect(spine?.heldReason).toMatch(/cw4_/)
+    expect(spine?.heldReason).toBe('cw4_secret_domain_allowlist')
   })
 
-  it('blocks marketing for P2b BLOCKER rows 7–9 (J.9 / J.11–J.12 / CW1 15-panel)', () => {
+  it('blocks marketing for P2b BLOCKER rows 7–9 (J.9 / J.11–J.12 / CW1 15-panel) + CW4 allowlist', () => {
     const matrix = buildConsolidationTruthMatrix()
     const blockedIds = [
       'agents.receipt.completeness',
@@ -92,20 +94,26 @@ describe('CW1 consolidation truth matrix', () => {
       expect(row, `missing row ${id}`).toBeDefined()
       expect(row?.marketingAllowed, `${id} marketing must be false`).toBe(false)
       expect(row?.heldReason, `${id} must cite heldReason`).toBeTruthy()
-      expect(row?.status, `${id} must not claim IMPLEMENTED`).not.toBe('IMPLEMENTED')
     }
 
     const receipt = matrix.rows.find((r) => r.id === 'agents.receipt.completeness')
     expect(receipt?.heldReason).toBe('j9_visual_evidence_webm_held')
     expect(receipt?.lastEvidence).toMatch(/j9WebM=HELD/)
+    expect(receipt?.status).not.toBe('IMPLEMENTED')
 
     const nexus = matrix.rows.find((r) => r.id === 'agents.nexus.task-graph')
     expect(nexus?.heldReason).toBe('j11_j12_founder_stop')
     expect(nexus?.lastEvidence).toMatch(/j11j12=STOPPED/)
+    expect(nexus?.status).not.toBe('IMPLEMENTED')
 
     const hero = matrix.rows.find((r) => r.id === 'master-ux.hero-panels')
     expect(hero?.heldReason).toBe('cw1_15_panel_bench_open')
     expect(hero?.lastEvidence).toMatch(/cw1Bench=OPEN/)
+    expect(hero?.status).not.toBe('IMPLEMENTED')
+
+    const spine = matrix.rows.find((r) => r.id === 'ui.persistence.spine')
+    expect(spine?.status).toBe('IMPLEMENTED')
+    expect(spine?.marketingAllowed).toBe(false)
   })
 
   it('applyConsolidationMarketingFailClosed cannot re-enable blocked rows', () => {

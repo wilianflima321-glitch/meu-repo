@@ -1,7 +1,13 @@
 import { logger } from '@/lib/observability/logger';
+import {
+  getUserSettingsBag,
+  getWorkspaceSettingsBag,
+  setUserSettingsBag,
+  setWorkspaceSettingsBag,
+} from '@/lib/storage/ui-persistence-spine';
 /**
  * Settings Manager
- * Manages workspace and user settings with persistence
+ * Manages workspace and user settings with persistence (CW4 spine).
  */
 
 export interface SettingsSchema {
@@ -152,16 +158,13 @@ export class SettingsManager {
 
   private async loadSettings(): Promise<void> {
     try {
-      // Load user settings
-      const userSettingsStr = localStorage.getItem('user-settings');
-      if (userSettingsStr) {
-        this.userSettings = JSON.parse(userSettingsStr);
+      const user = getUserSettingsBag<Partial<SettingsSchema>>({})
+      if (Object.keys(user).length > 0) {
+        this.userSettings = user
       }
-
-      // Load workspace settings
-      const workspaceSettingsStr = localStorage.getItem('workspace-settings');
-      if (workspaceSettingsStr) {
-        this.workspaceSettings = JSON.parse(workspaceSettingsStr);
+      const workspace = getWorkspaceSettingsBag<Partial<SettingsSchema>>({})
+      if (Object.keys(workspace).length > 0) {
+        this.workspaceSettings = workspace
       }
     } catch (error) {
       logger.error('Failed to load settings:', error);
@@ -170,7 +173,7 @@ export class SettingsManager {
 
   private async saveUserSettings(): Promise<void> {
     try {
-      localStorage.setItem('user-settings', JSON.stringify(this.userSettings));
+      setUserSettingsBag(this.userSettings);
     } catch (error) {
       logger.error('Failed to save user settings:', error);
     }
@@ -178,7 +181,7 @@ export class SettingsManager {
 
   private async saveWorkspaceSettings(): Promise<void> {
     try {
-      localStorage.setItem('workspace-settings', JSON.stringify(this.workspaceSettings));
+      setWorkspaceSettingsBag(this.workspaceSettings);
     } catch (error) {
       logger.error('Failed to save workspace settings:', error);
     }

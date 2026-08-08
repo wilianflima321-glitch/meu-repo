@@ -5,17 +5,23 @@ import {
   UI_PERSISTENCE_LEGACY_KEYS,
   __resetUiPersistenceMigrateGateForTests,
   __resetUiPersistenceWriteStateForTests,
+  __setUiPersistenceLegacyMirrorOverrideForTests,
   clearStudioSessionId,
   getAgentsOpsMemory,
   getStudioSessionId,
   getAgentsOpsPrefs,
+  getChromeCommandHistory,
+  getChromeSearchHistory,
   getUiPersistence,
   getViewportFidelityPreference,
   getWorkbenchLastProjectId,
   getWorkbenchLayout,
+  isUiPersistenceLegacyMirrorActive,
   migrateUiPersistenceSpine,
   setAgentsOpsMemory,
   setAgentsOpsPrefs,
+  setChromeCommandHistory,
+  setChromeSearchHistory,
   setStudioSessionId,
   setUiPersistence,
   setIdeDockLayout,
@@ -42,6 +48,8 @@ describe('ui-persistence-spine (CW4)', () => {
     __resetUiPersistenceMigrateGateForTests()
     __resetUiPersistenceWriteStateForTests()
     __resetUiPersistenceCrossTabForTests()
+    // Default production: mirror expired. Opt-in per test when asserting legacy writes.
+    __setUiPersistenceLegacyMirrorOverrideForTests(null)
   })
 
   it('round-trips typed namespace get/set', () => {
@@ -199,6 +207,7 @@ describe('ui-persistence-spine (CW4)', () => {
   })
 
   it('migrates theme + workbench panel + agents prefs (CW4 deepen)', () => {
+    __setUiPersistenceLegacyMirrorOverrideForTests(true)
     window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.themeCurrent, 'aethel-dark')
     window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.themeIcon, 'aethel-icons')
     window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.workbenchBottomPanel, 'terminal')
@@ -217,7 +226,14 @@ describe('ui-persistence-spine (CW4)', () => {
     )
   })
 
+  it('migrates ThemeContext aethel-theme when current-theme absent', () => {
+    window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.themeContextLegacy, 'dark-plus')
+    const bag = migrateUiPersistenceSpine()
+    expect(bag.entries['theme.current']).toBe('dark-plus')
+  })
+
   it('agents ops prefs helpers round-trip calm mode', () => {
+    __setUiPersistenceLegacyMirrorOverrideForTests(true)
     expect(setAgentsOpsPrefs({ calmMode: false, showAdvancedControls: true })).toBe(true)
     expect(getAgentsOpsPrefs()).toMatchObject({
       calmMode: false,
@@ -227,6 +243,7 @@ describe('ui-persistence-spine (CW4)', () => {
   })
 
   it('migrates viewport fidelity + lastProjectId + viewport.dock (no secrets)', () => {
+    __setUiPersistenceLegacyMirrorOverrideForTests(true)
     window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.viewportFidelity, 'quality')
     window.localStorage.setItem(UI_PERSISTENCE_LEGACY_KEYS.workbenchLastProjectId, 'proj_cw4')
     window.localStorage.setItem(
@@ -272,21 +289,24 @@ describe('ui-persistence-spine (CW4)', () => {
     expect(getUiPersistenceCrossTabGeneration()).toBeGreaterThan(before)
   })
 
-  it('setIdeDockLayout dual-writes bag + legacy (spine authority, no secrets)', () => {
+  it('setIdeDockLayout writes bag; legacy mirror only when compat window forced on', () => {
     const layout = {
       regions: { bottomBar: { size: 36, tabIds: [], activeTabId: null, open: true } },
       zenMode: false,
       presets: {},
     }
+    expect(isUiPersistenceLegacyMirrorActive()).toBe(false)
     expect(setIdeDockLayout(layout)).toBe(true)
     expect(getIdeDockLayout(null)).toMatchObject({
       regions: { bottomBar: { size: 36 } },
     })
+    expect(window.localStorage.getItem(UI_PERSISTENCE_LEGACY_KEYS.ideDock)).toBeNull()
+
+    __setUiPersistenceLegacyMirrorOverrideForTests(true)
+    expect(setIdeDockLayout({ ...layout, zenMode: true })).toBe(true)
     const legacyRaw = window.localStorage.getItem(UI_PERSISTENCE_LEGACY_KEYS.ideDock)
     expect(legacyRaw).toBeTruthy()
-    expect(JSON.parse(legacyRaw as string)).toMatchObject({
-      regions: { bottomBar: { size: 36 } },
-    })
+    expect(JSON.parse(legacyRaw as string)).toMatchObject({ zenMode: true })
     const bag = JSON.parse(window.localStorage.getItem(UI_PERSISTENCE_BAG_KEY) as string) as {
       entries: Record<string, unknown>
     }
@@ -319,7 +339,7 @@ describe('ui-persistence-spine (CW4)', () => {
     })
   })
 
-  it('setViewportDockLayoutForMode writes bag + mirrors legacy mode key', () => {
+  it('setViewportDockLayoutForMode writes bag; no legacy race when mirror expired', () => {
     expect(parseViewportDockStorageMode('aethel.viewport.dock.runtime.v1')).toBe('runtime')
     expect(parseViewportDockStorageMode('aethel.ide.dock.v1')).toBeNull()
 
@@ -327,10 +347,47 @@ describe('ui-persistence-spine (CW4)', () => {
       setViewportDockLayoutForMode('runtime', { zenMode: true, regions: { bottomBar: { size: 22 } } }),
     ).toBe(true)
     expect(getViewportDockLayoutForMode('runtime', null)).toMatchObject({ zenMode: true })
-    const legacy = window.localStorage.getItem(
+    expect(
+      window.localStorage.getItem(`${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}runtime.v1`),
+    ).toBeNull()
+
+    // Foreign legacy write must not win over bag (no dual-source read path).
+    window.localStorage.setItem(
       `${UI_PERSISTENCE_LEGACY_KEYS.viewportDockPrefix}runtime.v1`,
+      JSON.stringify({ zenMode: false, poisoned: true }),
     )
-    expect(legacy).toBeTruthy()
-    expect(JSON.parse(legacy as string)).toMatchObject({ zenMode: true })
+    expect(getViewportDockLayoutForMode('runtime', null)).toMatchObject({ zenMode: true })
+    expect(getViewportDockLayoutForMode('runtime', null)).not.toMatchObject({ poisoned: true })
+  })
+
+  it('migrates chrome command/search history and round-trips without dual-source race', () => {
+    window.localStorage.setItem(
+      UI_PERSISTENCE_LEGACY_KEYS.commandHistory,
+      JSON.stringify([{ commandId: 'file.save', timestamp: 1 }]),
+    )
+    window.localStorage.setItem(
+      UI_PERSISTENCE_LEGACY_KEYS.searchHistory,
+      JSON.stringify(['foo']),
+    )
+    window.localStorage.setItem(
+      UI_PERSISTENCE_LEGACY_KEYS.replaceHistory,
+      JSON.stringify(['bar']),
+    )
+    migrateUiPersistenceSpine()
+    expect(getChromeCommandHistory([])).toEqual([{ commandId: 'file.save', timestamp: 1 }])
+    expect(getChromeSearchHistory()).toEqual({ search: ['foo'], replace: ['bar'] })
+
+    expect(setChromeCommandHistory([{ commandId: 'edit.undo', timestamp: 2 }])).toBe(true)
+    expect(setChromeSearchHistory({ search: ['baz'], replace: [] })).toBe(true)
+    // Mirror expired → no raw rewrite; bag remains authority.
+    expect(window.localStorage.getItem(UI_PERSISTENCE_LEGACY_KEYS.commandHistory)).toBe(
+      JSON.stringify([{ commandId: 'file.save', timestamp: 1 }]),
+    )
+    expect(getChromeCommandHistory([])).toEqual([{ commandId: 'edit.undo', timestamp: 2 }])
+    window.localStorage.setItem(
+      UI_PERSISTENCE_LEGACY_KEYS.commandHistory,
+      JSON.stringify([{ commandId: 'poison', timestamp: 9 }]),
+    )
+    expect(getChromeCommandHistory([])).toEqual([{ commandId: 'edit.undo', timestamp: 2 }])
   })
 })

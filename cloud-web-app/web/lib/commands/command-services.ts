@@ -1,6 +1,10 @@
 'use client';
 
 import { logger } from '@/lib/observability/logger';
+import {
+  getChromeSearchHistory,
+  setChromeSearchHistory,
+} from '@/lib/storage/ui-persistence-spine';
 
 export { clipboardService, undoRedoManager } from './command-editing-services';
 
@@ -244,17 +248,17 @@ class SearchService {
   }
 
   private saveHistory(): void {
-    localStorage.setItem('aethel_search_history', JSON.stringify(this.searchHistory));
-    localStorage.setItem('aethel_replace_history', JSON.stringify(this.replaceHistory));
+    setChromeSearchHistory({
+      search: this.searchHistory,
+      replace: this.replaceHistory,
+    });
   }
 
   loadHistory(): void {
     try {
-      const searchHistory = localStorage.getItem('aethel_search_history');
-      const replaceHistory = localStorage.getItem('aethel_replace_history');
-      
-      if (searchHistory) this.searchHistory = JSON.parse(searchHistory);
-      if (replaceHistory) this.replaceHistory = JSON.parse(replaceHistory);
+      const bag = getChromeSearchHistory();
+      this.searchHistory = bag.search;
+      this.replaceHistory = bag.replace;
     } catch {
       // Ignore parse errors
     }

@@ -10,6 +10,11 @@
  */
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, type ReactNode } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
+import {
+  clearChromeCommandHistory,
+  getChromeCommandHistory,
+  setChromeCommandHistory,
+} from '@/lib/storage/ui-persistence-spine';
 import { DEFAULT_COMMANDS } from './default-commands';
 
 // ============================================================================
@@ -217,25 +222,19 @@ export function CommandRegistryProvider({ children }: CommandRegistryProviderPro
   const [commands, setCommands] = useState<Map<string, CommandDefinition>>(new Map());
   const [history, setHistory] = useState<CommandHistoryEntry[]>([]);
 
-  // Load history from localStorage
+  // Load history from CW4 spine (legacy aethel_command_history migrates once).
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('aethel_command_history');
-      if (saved) {
-        try {
-          setHistory(JSON.parse(saved));
-        } catch {
-          // Invalid JSON, ignore
-        }
-      }
+    if (typeof window === 'undefined') return;
+    const saved = getChromeCommandHistory<CommandHistoryEntry>([]);
+    if (saved.length > 0) {
+      setHistory(saved);
     }
   }, []);
 
-  // Save history to localStorage
+  // Persist history through spine
   useEffect(() => {
-    if (typeof window !== 'undefined' && history.length > 0) {
-      localStorage.setItem('aethel_command_history', JSON.stringify(history.slice(0, 50)));
-    }
+    if (typeof window === 'undefined' || history.length === 0) return;
+    setChromeCommandHistory(history.slice(0, 50));
   }, [history]);
 
   const registerCommand = useCallback((command: CommandDefinition) => {
@@ -406,9 +405,7 @@ export function CommandRegistryProvider({ children }: CommandRegistryProviderPro
 
   const clearHistory = useCallback(() => {
     setHistory([]);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('aethel_command_history');
-    }
+    clearChromeCommandHistory();
   }, []);
 
   const hasCommand = useCallback((commandId: string) => {

@@ -8,16 +8,32 @@ import { describe, expect, it } from 'vitest'
 import {
   CW4_CRITICAL_PATH_STATUS,
   CW4_CRITICAL_SPINE_NAMESPACES,
+  CW4_EXCEPTION_COUNT_AFTER,
+  CW4_EXCEPTION_COUNT_BEFORE,
+  CW4_EXCEPTION_DOMAIN_ALLOWLIST,
+  CW4_EXCEPTION_ONLY_STATUS,
+  CW4_EXCEPTION_SECRET_ALLOWLIST,
   CW4_HELD_RAW_LOCALSTORAGE_DEBT,
+  CW4_LEGACY_MIRROR_STATUS,
   CW4_LWW_STATUS,
+  CW4_OVERALL_STATUS,
+  CW4_RESOLVED_HISTORY,
   listCw4CriticalPathBlockers,
+  listCw4OpenExceptionAllowlist,
 } from '@/lib/storage/ui-persistence-critical-inventory'
+import {
+  isUiPersistenceLegacyMirrorActive,
+  UI_PERSISTENCE_LEGACY_MIRROR_EXPIRES_AT,
+} from '@/lib/storage/ui-persistence-spine'
 
 const webRoot = join(__dirname, '../..')
 
 describe('CW4 critical persistence inventory', () => {
-  it('lists critical IDE/Studio namespaces including preview runtime', () => {
+  it('lists critical IDE/Studio namespaces including chrome + preview runtime', () => {
     expect(CW4_CRITICAL_PATH_STATUS).toBe('DONE')
+    expect(CW4_OVERALL_STATUS).toBe('DONE')
+    expect(CW4_EXCEPTION_ONLY_STATUS).toBe('DONE')
+    expect(CW4_LEGACY_MIRROR_STATUS).toBe('DONE')
     expect(CW4_CRITICAL_SPINE_NAMESPACES).toEqual(
       expect.arrayContaining([
         'ide.dock',
@@ -27,27 +43,46 @@ describe('CW4 critical persistence inventory', () => {
         'viewport.dock',
         'workbench.preview.runtimeUrl',
         'workbench.preview.sandboxId',
+        'chrome.commandHistory',
+        'chrome.searchHistory',
+        'chrome.notifications',
+        'settings.user',
+        'settings.workspace',
       ]),
     )
   })
 
-  it('has zero critical-path blockers — dock dual-write blocker is closed', () => {
-    expect(CW4_HELD_RAW_LOCALSTORAGE_DEBT.length).toBeGreaterThan(3)
+  it('has zero critical-path blockers and documents exception allowlist counts', () => {
     const blockers = listCw4CriticalPathBlockers()
     expect(blockers.length).toBe(0)
     expect(CW4_HELD_RAW_LOCALSTORAGE_DEBT.every((e) => e.criticalIdeStudioPath === false)).toBe(
       true,
     )
-    expect(
-      CW4_HELD_RAW_LOCALSTORAGE_DEBT.some((e) => e.disposition === 'exception-secret'),
-    ).toBe(true)
+    expect(CW4_EXCEPTION_SECRET_ALLOWLIST.length).toBe(CW4_EXCEPTION_COUNT_AFTER.secret)
+    expect(CW4_EXCEPTION_DOMAIN_ALLOWLIST.length).toBe(CW4_EXCEPTION_COUNT_AFTER.domain)
+    expect(CW4_EXCEPTION_COUNT_AFTER.openChromeDebt).toBe(0)
+    expect(CW4_EXCEPTION_COUNT_AFTER.secret).toBe(2)
+    expect(CW4_EXCEPTION_COUNT_AFTER.domain).toBe(7)
+    expect(CW4_EXCEPTION_COUNT_BEFORE.openNonCriticalDebt).toBeGreaterThan(
+      CW4_EXCEPTION_COUNT_AFTER.openChromeDebt,
+    )
+    const open = listCw4OpenExceptionAllowlist()
+    expect(open.length).toBe(
+      CW4_EXCEPTION_COUNT_AFTER.secret + CW4_EXCEPTION_COUNT_AFTER.domain,
+    )
+    expect(open.every((e) => e.disposition === 'exception-secret' || e.disposition === 'exception-domain')).toBe(
+      true,
+    )
+    expect(CW4_RESOLVED_HISTORY.some((e) => e.keyPattern.includes('legacy mirror'))).toBe(true)
   })
 
-  it('marks multi-tab LWW production path DONE (not HELD forever)', () => {
+  it('marks multi-tab LWW + legacy mirror DONE', () => {
     expect(CW4_LWW_STATUS).toBe('DONE')
-    const lww = CW4_HELD_RAW_LOCALSTORAGE_DEBT.find((e) => e.keyPattern.includes('LWW'))
+    expect(CW4_LEGACY_MIRROR_STATUS).toBe('DONE')
+    expect(isUiPersistenceLegacyMirrorActive()).toBe(false)
+    expect(Date.parse(UI_PERSISTENCE_LEGACY_MIRROR_EXPIRES_AT)).toBeLessThanOrEqual(Date.now())
+    const lww = CW4_RESOLVED_HISTORY.find((e) => e.keyPattern.includes('LWW'))
     expect(lww?.reason).toMatch(/CLOSED/)
-    expect(lww?.reason).not.toMatch(/full lock\/LWW HELD/)
   })
 
   it('routes viewport dock keys through spine adapter (not raw-only bypass)', () => {
@@ -58,7 +93,7 @@ describe('CW4 critical persistence inventory', () => {
     expect(adapterSrc).toContain('parseViewportDockStorageMode')
     expect(adapterSrc).toContain('setViewportDockLayoutForMode')
     expect(adapterSrc).toContain('getViewportDockLayoutForMode')
-    // Prior lie: non-ide keys always fell through to localStorage.setItem
+    expect(adapterSrc).toContain('isUiPersistenceLegacyMirrorActive')
     expect(adapterSrc).not.toMatch(
       /if \(storageKey !== UI_PERSISTENCE_LEGACY_KEYS\.ideDock\) \{\s*try \{\s*window\.localStorage\.setItem/,
     )
@@ -69,12 +104,31 @@ describe('CW4 critical persistence inventory', () => {
       join(webRoot, '../packages/ide-ui/docking/WorkspaceProvider.tsx'),
       'utf8',
     )
-    // Must be a module-scope side effect (not inside a specific shell like
-    // ModernIDEShell), so every <WorkspaceProvider> consumer — IDE or
-    // viewport, on any route — is covered before any store is created.
     expect(providerSrc).toContain('registerIdeDockSpinePersistence')
     expect(providerSrc).toMatch(
       /if \(typeof window !== 'undefined'\) \{\s*registerIdeDockSpinePersistence\(\);?\s*\}/,
     )
+  })
+
+  it('ThemeContext / command / search / notifications / settings no longer raw-write chrome keys', () => {
+    const themeSrc = readFileSync(join(webRoot, 'contexts/ThemeContext.tsx'), 'utf8')
+    expect(themeSrc).toContain('setThemePreferenceId')
+    expect(themeSrc).not.toMatch(/localStorage\.setItem\(\s*['"]aethel-theme['"]/)
+
+    const cmdSrc = readFileSync(join(webRoot, 'lib/commands/command-registry.tsx'), 'utf8')
+    expect(cmdSrc).toContain('setChromeCommandHistory')
+    expect(cmdSrc).not.toMatch(/localStorage\.setItem\(\s*['"]aethel_command_history['"]/)
+
+    const searchSrc = readFileSync(join(webRoot, 'lib/commands/command-services.ts'), 'utf8')
+    expect(searchSrc).toContain('setChromeSearchHistory')
+    expect(searchSrc).not.toMatch(/localStorage\.setItem\(\s*['"]aethel_search_history['"]/)
+
+    const notifSrc = readFileSync(join(webRoot, 'lib/notifications-system.manager.ts'), 'utf8')
+    expect(notifSrc).toContain('setChromeNotifications')
+    expect(notifSrc).not.toMatch(/localStorage\.setItem\(\s*['"]aethel:notifications['"]/)
+
+    const settingsSrc = readFileSync(join(webRoot, 'lib/settings/settings-manager.ts'), 'utf8')
+    expect(settingsSrc).toContain('setUserSettingsBag')
+    expect(settingsSrc).not.toMatch(/localStorage\.setItem\(\s*['"]user-settings['"]/)
   })
 })

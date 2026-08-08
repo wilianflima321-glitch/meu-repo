@@ -12,8 +12,13 @@ import {
   evaluateNexusTaskGraphCompleteness,
 } from '@/lib/production/agents-receipt-completeness'
 import {
+  CW4_EXCEPTION_COUNT_AFTER,
+  CW4_EXCEPTION_ONLY_STATUS,
+  CW4_LEGACY_MIRROR_STATUS,
   CW4_LWW_STATUS,
+  CW4_OVERALL_STATUS,
   listCw4CriticalPathBlockers,
+  listCw4OpenExceptionAllowlist,
 } from '@/lib/storage/ui-persistence-critical-inventory'
 import {
   RENDER_PATH_CATALOG,
@@ -156,8 +161,11 @@ export function buildConsolidationTruthMatrix(
   const emptyNexus = evaluateNexusTaskGraphCompleteness(null)
   const cw4CriticalBlockers = listCw4CriticalPathBlockers()
   const cw4LwwDone = CW4_LWW_STATUS === 'DONE'
+  const cw4ExceptionAllowlist = listCw4OpenExceptionAllowlist()
   const cw4SpineStatus: ConsolidationTruthStatus =
-    cw4CriticalBlockers.length > 0 ? 'PARTIAL' : 'PARTIAL'
+    cw4CriticalBlockers.length > 0 || CW4_OVERALL_STATUS !== 'DONE'
+      ? 'PARTIAL'
+      : 'IMPLEMENTED'
 
   const rows: ConsolidationTruthRow[] = [
     {
@@ -263,13 +271,13 @@ export function buildConsolidationTruthMatrix(
     {
       id: 'ui.persistence.spine',
       claim:
-        'CW4/CW5 critical IDE/Studio path on spine — LWW WebLocks DONE; exception-only + CW1 bench [PARTIAL]',
+        'CW4 UI persistence spine — LWW WebLocks + exception-only allowlist + expired one-way legacy mirror',
       path: 'lib/storage/ui-persistence-critical-inventory.ts',
       status: cw4SpineStatus,
       marketingAllowed: false,
-      heldReason: 'cw4_exception_only_partial',
-      note: 'Critical dock dual-write closed; multi-tab LWW (WebLocks+entryMeta+pending-delta) DONE; global exception-only + legacy mirror + CW1 bench remain',
-      lastEvidence: `criticalPath=PARTIAL;blockers=${cw4CriticalBlockers.length};lockLWW=${cw4LwwDone ? 'DONE' : 'HELD'};cw1Bench=OPEN;exceptionOnly=OPEN`,
+      heldReason: 'cw4_secret_domain_allowlist',
+      note: `Critical path + LWW + chrome migrate DONE; legacy mirror expired; remaining raw localStorage = ${CW4_EXCEPTION_COUNT_AFTER.secret} secrets + ${CW4_EXCEPTION_COUNT_AFTER.domain} domain (intentional). CW1 15-panel bench is CW1 scope.`,
+      lastEvidence: `criticalPath=DONE;blockers=${cw4CriticalBlockers.length};lockLWW=${cw4LwwDone ? 'DONE' : 'HELD'};legacyMirror=${CW4_LEGACY_MIRROR_STATUS};exceptionOnly=${CW4_EXCEPTION_ONLY_STATUS};allowlist=${cw4ExceptionAllowlist.length};openChromeDebt=${CW4_EXCEPTION_COUNT_AFTER.openChromeDebt}`,
       gatedNames: ['BYOK', 'token vault'],
     },
     {
