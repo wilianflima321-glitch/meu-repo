@@ -12,7 +12,14 @@ import { probeImpressionLedgerWritable } from '@/lib/hub/impression-ledger-autho
 import { probeGameSaveAuthorityWritable } from '@/lib/liveops/game-save-authority'
 import { probeGameSaveCloudReady } from '@/lib/liveops/gamesave-cloud-capability'
 import { probeGameSaveCloudMarketingReady } from '@/lib/liveops/gamesave-cloud-marketing'
-import { probePlaytimeAuthorityWritable } from '@/lib/liveops/player-playtime-authority'
+import {
+  probePlaytimeAuthorityWritable,
+  recordSessionPlaytime,
+} from '@/lib/liveops/player-playtime-authority'
+import {
+  SESSION_PLAYTIME_EVENT,
+  createMemoryTelemetrySpool,
+} from '@/lib/liveops/telemetry-spool'
 
 const log = createComponentLogger('liveops-f2-capability')
 
@@ -209,11 +216,43 @@ function buildProductCopy(input: {
   return `${head} ${durableNote} ${mid} ${cloudNote}`
 }
 
+/**
+ * P2b HIGH #18 — exercise TelemetrySpool enqueue/clear contract (never hardcode true).
+ */
+export async function probeTelemetrySpoolModuleReady(): Promise<{ ready: boolean }> {
+  try {
+    const spool = createMemoryTelemetrySpool(`f2_probe_${Date.now()}`)
+    await spool.clearAll()
+    const row = await spool.enqueue({
+      event: SESSION_PLAYTIME_EVENT,
+      gameId: '__f2_probe__',
+      sessionId: '__f2_probe__',
+      payload: { deltaSeconds: 1 },
+    })
+    await spool.clearAll()
+    return { ready: typeof row.id === 'string' && row.id.length > 0 && row.synced === false }
+  } catch {
+    return { ready: false }
+  }
+}
+
+/**
+ * P2b HIGH #18 — ingest ready only when authority + spool event contract are present.
+ */
+export function probePlaytimeIngestRouteReady(): { ready: boolean } {
+  return {
+    ready:
+      typeof recordSessionPlaytime === 'function' &&
+      SESSION_PLAYTIME_EVENT === 'session_playtime_seconds',
+  }
+}
+
 export function evaluateLiveOpsF2Honesty(
   input: LiveOpsF2HonestyInput = {},
 ): LiveOpsF2HonestyReport {
-  const spoolReady = input.spoolModuleReady !== false
-  const ingestReady = input.playtimeIngestReady !== false
+  // Fail-closed: omitted flags are NOT ready (P2b HIGH #18).
+  const spoolReady = input.spoolModuleReady === true
+  const ingestReady = input.playtimeIngestReady === true
   const statsWritable = input.playerStatsWritable === true
   const heatmapsReady = input.heatmapsReady === true
   const gameSaveDurableReady = input.gameSaveDurableReady === true
@@ -449,6 +488,7 @@ export async function probeLiveOpsF2Honesty(): Promise<LiveOpsF2HonestyReport> {
     gameSaveProbe,
     cloudProbe,
     marketingProbe,
+    spoolProbe,
   ] = await Promise.all([
     probePlaytimeAuthorityWritable(),
     probeReviewsStoreWritable(),
@@ -457,14 +497,16 @@ export async function probeLiveOpsF2Honesty(): Promise<LiveOpsF2HonestyReport> {
     probeGameSaveAuthorityWritable(),
     probeGameSaveCloudReady(),
     probeGameSaveCloudMarketingReady(),
+    probeTelemetrySpoolModuleReady(),
   ])
+  const ingestProbe = probePlaytimeIngestRouteReady()
   const discoveryProbe = probeDiscoveryFeedEngine({
     impressionLedgerWritable: impressionsProbe.writable,
     discoveryModerationWritable: moderationHonesty.aiModerationReady,
   })
   return evaluateLiveOpsF2Honesty({
-    spoolModuleReady: true,
-    playtimeIngestReady: true,
+    spoolModuleReady: spoolProbe.ready,
+    playtimeIngestReady: ingestProbe.ready,
     playerStatsWritable: probe.writable,
     heatmapsReady: false,
     /** Flip when durable GameSave root is writable (disk authority + sync API shipped). */

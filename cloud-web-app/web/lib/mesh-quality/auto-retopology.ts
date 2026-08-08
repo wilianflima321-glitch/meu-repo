@@ -68,6 +68,11 @@ export interface AutoRetopoResult {
   instantMeshesParity: false
   remeshQualityDeepened: true
   deferredToWorker: boolean
+  /**
+   * P2b HIGH #24 — true when cluster simplify missed budget and used
+   * subsamplePreferManifold (not QEM / Instant Meshes).
+   */
+  subsampleBudgetFallbackUsed: boolean
   /** Optional native IPC probe result (HELD until commercial remesher). */
   nativeWorker?: NativeRetopoIpcStatus
   topologyBefore?: MeshTopologyMetrics
@@ -242,6 +247,7 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
       instantMeshesParity: false,
       remeshQualityDeepened: true,
       deferredToWorker: true,
+      subsampleBudgetFallbackUsed: false,
       nativeWorker,
       topologyBefore,
       topologyAfter: topologyBefore,
@@ -270,6 +276,7 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
       instantMeshesParity: false,
       remeshQualityDeepened: true,
       deferredToWorker: false,
+      subsampleBudgetFallbackUsed: false,
       nativeWorker,
       topologyBefore,
       topologyAfter,
@@ -319,6 +326,7 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
     facialMocapReadyHint: semanticFields.facialMocapReadyHint,
     instantMeshesParityReady: false,
     remeshQualityDeepened: true,
+    subsampleBudgetFallbackUsed: simplified.subsampleBudgetFallbackUsed,
   })
 
   const improved =
@@ -337,6 +345,7 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
     instantMeshesParity: false,
     remeshQualityDeepened: true,
     deferredToWorker: false,
+    subsampleBudgetFallbackUsed: simplified.subsampleBudgetFallbackUsed,
     nativeWorker,
     topologyBefore,
     topologyAfter,
@@ -353,6 +362,9 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
         'remesh-quality-deepened-bz',
         'instant-meshes-parity-HELD',
         'semantic-commercial-parity-HELD',
+        ...(simplified.subsampleBudgetFallbackUsed
+          ? ['subsample-budget-fallback-not-qem']
+          : []),
       ],
       heldReason:
         trianglesAfter >= trianglesBefore
@@ -377,6 +389,7 @@ export function runAutoRetopology(input: AutoRetopoInput): AutoRetopoResult {
         instantMeshesParityReady: false,
         remeshQualityDeepened: true,
         semanticCommercialParityReady: false,
+        subsampleBudgetFallbackUsed: simplified.subsampleBudgetFallbackUsed,
       },
     },
   }
@@ -387,7 +400,7 @@ function simplifyFeatureAware(
   indices: Uint32Array,
   targetTriangles: number,
   semanticLock?: Float32Array,
-): { positions: Float32Array; indices: Uint32Array } {
+): { positions: Float32Array; indices: Uint32Array; subsampleBudgetFallbackUsed: boolean } {
   let minX = Infinity
   let minY = Infinity
   let minZ = Infinity
@@ -427,13 +440,16 @@ function simplifyFeatureAware(
 
   best = manifoldCleanupPass(best.positions, best.indices)
 
+  let subsampleBudgetFallbackUsed = false
   if (best.indices.length / 3 > targetTriangles) {
+    // Honesty: this is manifold-preferring triangle subsample — NOT QEM / Instant Meshes.
     best = subsamplePreferManifold(best.positions, best.indices, targetTriangles)
     best = manifoldCleanupPass(best.positions, best.indices)
+    subsampleBudgetFallbackUsed = true
   }
 
   best = pairQuadIsh(best.positions, best.indices)
-  return best
+  return { ...best, subsampleBudgetFallbackUsed }
 }
 
 function clusterFeatureAware(
@@ -721,6 +737,7 @@ export function runAutoRetopologyBwBaseline(input: AutoRetopoInput): AutoRetopoR
     instantMeshesParity: false,
     remeshQualityDeepened: true,
     deferredToWorker: false,
+    subsampleBudgetFallbackUsed: false,
     topologyBefore,
     topologyAfter,
     facialMocapReadyHint: false,

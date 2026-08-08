@@ -211,8 +211,11 @@ export function tickAcousticAtmosphere(input: {
   })
 }
 
-/** Test / IDE helper — mutable transmission + wet sink (no AudioContext required). */
-export function createAcousticMockBus(): {
+/**
+ * In-memory audio-bus sink for soak / playtest proofs (no AudioContext required).
+ * P2b HIGH #30 — not a production Web Audio mock; rename from createAcousticMockBus.
+ */
+export function createAcousticInMemoryBus(): {
   target: AcousticAudioBusTarget
   getGain: () => number | null
   getWet: () => number | null
@@ -249,6 +252,9 @@ export function createAcousticMockBus(): {
     getMedium: () => medium,
   }
 }
+
+/** @deprecated Use createAcousticInMemoryBus — kept as alias for existing soak callers. */
+export const createAcousticMockBus = createAcousticInMemoryBus
 
 export function buildVacuumAcousticSamples(): AcousticSamplePoint[] {
   return [
@@ -318,8 +324,8 @@ export function proveAcousticAtmosphereSoak(
   capabilityScore = 38,
 ): AcousticAtmosphereSoakResult {
   const notes: string[] = []
-  const mock = createAcousticMockBus()
-  bindAcousticAudioBus(mock.target)
+  const bus = createAcousticInMemoryBus()
+  bindAcousticAudioBus(bus.target)
 
   const interfaceProof = proveAcousticAtmosphere()
   if (!interfaceProof.passed || !interfaceProof.noSpaceExplosion) {
@@ -338,7 +344,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildVacuumAcousticSamples(),
     sourceInHull: false,
     listenerInHull: false,
-    target: mock.target,
+    target: bus.target,
   })
   frames += 1
   if (
@@ -347,7 +353,7 @@ export function proveAcousticAtmosphereSoak(
     vacuumTick.transmission === 0 &&
     vacuumTick.wetGain === 0 &&
     vacuumTick.medium === 'vacuum' &&
-    mock.getGain() === 0
+    bus.getGain() === 0
   ) {
     vacuumSilentOnBus = true
   }
@@ -359,7 +365,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildHullAcousticSamples(),
     sourceInHull: true,
     listenerInHull: true,
-    target: mock.target,
+    target: bus.target,
   })
   frames += 1
   if (
@@ -367,7 +373,7 @@ export function proveAcousticAtmosphereSoak(
     hullTick.structureBorne &&
     hullTick.transmission > 0.3 &&
     hullTick.medium === 'hull-structure' &&
-    (mock.getGain() ?? 0) > 0.3
+    (bus.getGain() ?? 0) > 0.3
   ) {
     hullCarriesOnBus = true
   }
@@ -379,7 +385,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(1),
     sourceInHull: false,
     listenerInHull: false,
-    target: mock.target,
+    target: bus.target,
   })
   frames += 1
   if (
@@ -388,7 +394,7 @@ export function proveAcousticAtmosphereSoak(
     airTick.transmission > 0.5 &&
     airTick.wetGain > 0 &&
     !airTick.structureBorne &&
-    (mock.getGain() ?? 0) > 0.5
+    (bus.getGain() ?? 0) > 0.5
   ) {
     atmosphereWetOnBus = true
   }
@@ -400,7 +406,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(0.4),
     sourceInHull: false,
     listenerInHull: false,
-    target: mock.target,
+    target: bus.target,
   })
   frames += 1
   if (!(thinTick.applied && thinTick.vacuumExplosionForbidden)) {
@@ -425,7 +431,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(1),
     sourceInHull: false,
     listenerInHull: false,
-    target: createAcousticMockBus().target,
+    target: createAcousticInMemoryBus().target,
   })
   const highTick = tickAcousticAtmosphere({
     capabilityScore: 80,
@@ -434,7 +440,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(1),
     sourceInHull: false,
     listenerInHull: false,
-    target: createAcousticMockBus().target,
+    target: createAcousticInMemoryBus().target,
   })
   const capScoreContrast =
     contrast.passed &&
@@ -460,7 +466,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(1),
     sourceInHull: false,
     listenerInHull: false,
-    target: mock.target,
+    target: bus.target,
   })
   const cosmosOff = tickAcousticAtmosphere({
     capabilityScore,
@@ -469,7 +475,7 @@ export function proveAcousticAtmosphereSoak(
     samples: buildAtmosphereAcousticSamples(1),
     sourceInHull: false,
     listenerInHull: false,
-    target: mock.target,
+    target: bus.target,
   })
   const zeroUiOk =
     unbound.zeroUiUnavailable &&

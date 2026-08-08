@@ -79,7 +79,9 @@ export class PartitionCellStore {
     }
 
     cell.state = 'loading'
-    await Promise.resolve() // yield — simulates async SSD read
+    // Yield to the event loop before promoting in-memory CAS → resident RAM.
+    // Does NOT claim disk/SSD I/O — CAS payload is already in-process.
+    await Promise.resolve()
 
     while (
       this.memoryUsed + cas.bytes > this.budgetBytes &&

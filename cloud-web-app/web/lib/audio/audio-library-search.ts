@@ -20,7 +20,10 @@ export interface AudioLibraryHit {
   hash: string | null
   metasoundsGraphId: string | null
   durationSec: number | null
-  foleyEligible: true
+  /** True only for first-party/Treasury metadata rows — never for partner stubs without assets. */
+  foleyEligible: boolean
+  /** Index-only rows (no CDN / partner adapter) must stay false. */
+  playableAssetReady: boolean
 }
 
 export interface AudioLibrarySearchResult {
@@ -31,6 +34,9 @@ export interface AudioLibrarySearchResult {
   generativeCreditsDebited: 0
   planBHint: string
   honestyBadge: 'library-first'
+  /** Partner/Freesound live search adapter — HELD until real API wire. */
+  partnerCatalogStatus: 'HELD'
+  partnerCatalogHeldReason: 'freesound_adapter_not_wired'
 }
 
 export type FoleyProviderLane =
@@ -50,6 +56,7 @@ const TREASURY_FOLEY_PACK: AudioLibraryHit[] = [
     metasoundsGraphId: 'ms-footstep-stone',
     durationSec: 0.18,
     foleyEligible: true,
+    playableAssetReady: false,
   },
   {
     id: 'treasury-foley-sword-swing-01',
@@ -62,6 +69,7 @@ const TREASURY_FOLEY_PACK: AudioLibraryHit[] = [
     metasoundsGraphId: 'ms-sword-swing',
     durationSec: 0.4,
     foleyEligible: true,
+    playableAssetReady: false,
   },
   {
     id: 'treasury-foley-rain-loop-01',
@@ -74,6 +82,7 @@ const TREASURY_FOLEY_PACK: AudioLibraryHit[] = [
     metasoundsGraphId: 'ms-rain-loop',
     durationSec: 8,
     foleyEligible: true,
+    playableAssetReady: false,
   },
   {
     id: 'treasury-foley-gunshot-01',
@@ -86,6 +95,7 @@ const TREASURY_FOLEY_PACK: AudioLibraryHit[] = [
     metasoundsGraphId: 'ms-gunshot',
     durationSec: 0.6,
     foleyEligible: true,
+    playableAssetReady: false,
   },
   {
     id: 'treasury-foley-roar-monster-01',
@@ -98,36 +108,17 @@ const TREASURY_FOLEY_PACK: AudioLibraryHit[] = [
     metasoundsGraphId: 'ms-monster-roar',
     durationSec: 1.8,
     foleyEligible: true,
+    playableAssetReady: false,
   },
 ]
 
-/** Curated Freesound-style CC entries — partner search adapter surface (no fake download). */
-const FREESOUND_CATALOG: AudioLibraryHit[] = [
-  {
-    id: 'fs-cc0-impact-wood-01',
-    title: 'Wood Impact (CC0 catalog stub)',
-    source: 'freesound',
-    license: 'CC0',
-    tags: ['impact', 'wood', 'foley', 'footstep'],
-    sourceUrl: null,
-    hash: null,
-    metasoundsGraphId: null,
-    durationSec: 0.25,
-    foleyEligible: true,
-  },
-  {
-    id: 'fs-cc-by-ui-click-01',
-    title: 'UI Click Soft (CC-BY catalog stub)',
-    source: 'freesound',
-    license: 'CC-BY',
-    tags: ['ui', 'click', 'foley'],
-    sourceUrl: null,
-    hash: null,
-    metasoundsGraphId: null,
-    durationSec: 0.08,
-    foleyEligible: true,
-  },
-]
+/**
+ * P2b HIGH #20 — partner/Freesound Foley stubs removed from the ship search pool.
+ * Empty until a real Freesound/partner adapter returns licensed rows with sourceUrl/hash.
+ */
+export const FREESOUND_PARTNER_CATALOG_STATUS = 'HELD' as const
+export const FREESOUND_PARTNER_CATALOG_HELD_REASON = 'freesound_adapter_not_wired' as const
+const FREESOUND_CATALOG: readonly AudioLibraryHit[] = []
 
 function tokenize(query: string): string[] {
   return query
@@ -159,6 +150,7 @@ export function searchAudioLibrary(
       ? 8
       : Math.max(1, Math.min(24, queryOrInput.limit ?? 8))
   const tokens = tokenize(query || '')
+  // Partner catalog intentionally empty (HELD) — Treasury metadata only.
   const pool = [...TREASURY_FOLEY_PACK, ...FREESOUND_CATALOG]
 
   const ranked = pool
@@ -180,12 +172,15 @@ export function searchAudioLibrary(
     planBHint:
       'Generative audio (Suno/ElevenLabs) is Plan B for exclusive sung score + speech only — never default Foley.',
     honestyBadge: 'library-first',
+    partnerCatalogStatus: FREESOUND_PARTNER_CATALOG_STATUS,
+    partnerCatalogHeldReason: FREESOUND_PARTNER_CATALOG_HELD_REASON,
   }
 
   log.info('audio_library_search', {
     query,
     hits: hits.length,
     sources: [...new Set(hits.map((h) => h.source))],
+    partnerCatalogStatus: result.partnerCatalogStatus,
   })
 
   return result

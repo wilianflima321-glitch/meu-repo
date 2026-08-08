@@ -1,6 +1,7 @@
 /**
  * Block 8 — WebXR honesty capability (VR-001).
  * Foveation must be applied per-frame when a session layer exists; otherwise HELD.
+ * Spatial XR marketing stays fail-closed until Onda K / Founder ship gate (Law XV).
  */
 
 export type WebXrHonestyReport = {
@@ -12,6 +13,12 @@ export type WebXrHonestyReport = {
   marketingAllowed: boolean
   evidenceRefs: string[]
 }
+
+/**
+ * P2b HIGH #17 — never flip XR marketing from technical wire flags alone.
+ * Technical shipStatus may advance; marketing requires an explicit Founder lift.
+ */
+export const WEBXR_MARKETING_SHIP_ALLOWED = false
 
 export function evaluateWebXrHonesty(input: {
   webxrApiAvailable: boolean
@@ -45,8 +52,14 @@ export function evaluateWebXrHonesty(input: {
   return {
     ...input,
     shipStatus: 'IMPLEMENTED',
-    marketingAllowed: true,
-    evidenceRefs: [...evidenceRefs, 'webxr:session-live', 'webxr:foveation-live'],
+    // Technical wires proven ≠ Spatial XR marketing certificate (P2b HIGH #17).
+    marketingAllowed: WEBXR_MARKETING_SHIP_ALLOWED,
+    evidenceRefs: [
+      ...evidenceRefs,
+      'webxr:session-live',
+      'webxr:foveation-live',
+      'webxr:marketing-held',
+    ],
   }
 }
 

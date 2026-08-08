@@ -37,8 +37,9 @@ export async function GET(req: NextRequest) {
 
   const report = hasOverride
     ? evaluateLiveOpsF2Honesty({
-        spoolModuleReady: parseBool('spool') ?? true,
-        playtimeIngestReady: parseBool('ingest') ?? true,
+        // Fail-closed: omitted override keys stay false (P2b HIGH #18).
+        spoolModuleReady: parseBool('spool') === true,
+        playtimeIngestReady: parseBool('ingest') === true,
         playerStatsWritable: parseBool('stats') === true,
         heatmapsReady: parseBool('heatmaps') === true,
         gameSaveDurableReady: parseBool('durableSave') === true,

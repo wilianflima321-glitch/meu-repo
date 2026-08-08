@@ -1,8 +1,9 @@
 /**
  * Project Commits API - Para TimeMachine
  * GET /api/projects/[id]/commits
- * 
- * Retorna histórico de commits/snapshots do projeto
+ *
+ * P2b HIGH (re-grep) — fail-closed empty until a real git/snapshot store is wired.
+ * Never fabricate random commit stats or synthetic history.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -14,6 +15,9 @@ import { createComponentLogger } from '@/lib/observability/logger';
 const routeLogger = createComponentLogger('api/projects/[id]/commits/route');
 
 export const dynamic = 'force-dynamic';
+
+export const PROJECT_COMMITS_SHIP_STATUS = 'HELD' as const;
+export const PROJECT_COMMITS_HELD_REASON = 'real_git_snapshot_store_not_wired' as const;
 
 interface ProjectCommit {
   id: string;
@@ -36,6 +40,23 @@ interface ProjectCommit {
   isAutoSave: boolean;
 }
 
+/** Honesty surface for TimeMachine — empty commits, never fabricated. */
+export function listProjectCommitsHonesty(): {
+  commits: ProjectCommit[];
+  shipStatus: typeof PROJECT_COMMITS_SHIP_STATUS;
+  heldReason: typeof PROJECT_COMMITS_HELD_REASON;
+  total: number;
+  hasMore: false;
+} {
+  return {
+    commits: [],
+    shipStatus: PROJECT_COMMITS_SHIP_STATUS,
+    heldReason: PROJECT_COMMITS_HELD_REASON,
+    total: 0,
+    hasMore: false,
+  };
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -43,14 +64,7 @@ export async function GET(
   try {
     const user = requireAuth(req);
     const { id: projectId } = await params;
-    const { searchParams } = new URL(req.url);
-    
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    const since = searchParams.get('since'); // ISO date
-    const until = searchParams.get('until'); // ISO date
 
-    // Verificar projeto
     const project = await prisma.project.findFirst({
       where: { id: projectId, userId: user.userId },
       select: { id: true, name: true, createdAt: true },
@@ -60,20 +74,21 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Buscar commits do projeto (tabela projectSnapshot ou similar)
-    // Em produção, isso viria do banco + Git real
-    const commits = await generateProjectCommits(project, {
-      limit,
-      offset,
-      since: since ? new Date(since) : undefined,
-      until: until ? new Date(until) : undefined,
+    const honesty = listProjectCommitsHonesty();
+
+    routeLogger.info('project_commits_held', {
+      projectId,
+      shipStatus: honesty.shipStatus,
+      heldReason: honesty.heldReason,
     });
 
     return NextResponse.json({
       projectId,
-      commits,
-      total: commits.length + offset, // Simplified
-      hasMore: commits.length === limit,
+      commits: honesty.commits,
+      total: honesty.total,
+      hasMore: honesty.hasMore,
+      shipStatus: honesty.shipStatus,
+      heldReason: honesty.heldReason,
     });
   } catch (error) {
     routeLogger.error('Commits API error:', error);
@@ -81,69 +96,4 @@ export async function GET(
     if (mapped) return mapped;
     return apiInternalError();
   }
-}
-
-async function generateProjectCommits(
-  project: { id: string; name: string; createdAt: Date },
-  options: { limit: number; offset: number; since?: Date; until?: Date }
-): Promise<ProjectCommit[]> {
-  const commits: ProjectCommit[] = [];
-  const now = Date.now();
-  
-  // Gerar commits baseados na idade do projeto
-  const commitMessages = [
-    { msg: 'feat: Added particle system', type: 'feature' as const },
-    { msg: 'fix: Fixed collision bug', type: 'fix' as const },
-    { msg: 'asset: Novos modelos de personagem', type: 'asset' as const },
-    { msg: 'refactor: Otimizado sistema de LOD', type: 'refactor' as const },
-    { msg: 'feat: Implementado ciclo dia/noite', type: 'feature' as const },
-    { msg: 'fix: Texture memory leak', type: 'fix' as const },
-    { msg: 'asset: Texturas PBR atualizadas', type: 'asset' as const },
-    { msg: 'config: Graphics quality adjustments', type: 'config' as const },
-    { msg: 'feat: Sistema de save/load', type: 'feature' as const },
-    { msg: 'auto: Automatic snapshot', type: 'auto' as const },
-  ];
-
-  const numCommits = Math.min(options.limit, 50);
-  
-  for (let i = options.offset; i < options.offset + numCommits; i++) {
-    const msgData = commitMessages[i % commitMessages.length];
-    const hash = generateHash(project.id + i);
-    const commitTime = new Date(now - (i * 3600000 * 6)); // 6 horas entre commits
-    
-    // Filtrar por data se especificado
-    if (options.since && commitTime < options.since) continue;
-    if (options.until && commitTime > options.until) continue;
-
-    commits.push({
-      id: `commit_${hash}`,
-      hash,
-      shortHash: hash.slice(0, 7),
-      message: msgData.msg,
-      author: {
-        name: 'You',
-        email: 'user@aethel.studio',
-      },
-      date: commitTime.toISOString(),
-      timestamp: commitTime.getTime(),
-      type: msgData.type,
-      filesChanged: Math.floor(Math.random() * 15) + 1,
-      additions: Math.floor(Math.random() * 200) + 10,
-      deletions: Math.floor(Math.random() * 50),
-      isBookmarked: Math.random() > 0.9,
-      isAutoSave: msgData.type === 'auto',
-    });
-  }
-
-  return commits;
-}
-
-function generateHash(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    const char = seed.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(40, '0').slice(0, 40);
 }
