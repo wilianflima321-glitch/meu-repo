@@ -37,7 +37,7 @@ export function WorkbenchPreviewProposalOverlay({
 
   return (
     <div className="pointer-events-none absolute right-4 top-4 z-20 flex w-full max-w-[340px] justify-end">
-      <section className="pointer-events-auto overflow-hidden rounded-[22px] border border-[color-mix(in_srgb,var(--aethel-primary)_18%,var(--aethel-border-primary))] bg-[linear-gradient(180deg,rgba(8,11,18,0.96),rgba(8,11,18,0.9))] shadow-[0_28px_84px_rgba(2,6,23,0.45)] backdrop-blur-xl">
+      <section className="pointer-events-auto overflow-hidden rounded-[22px] border border-[color-mix(in_srgb,var(--aethel-primary)_18%,var(--aethel-border-primary))] bg-[linear-gradient(180deg,var(--aethel-panel-strong),var(--aethel-panel))] shadow-[0_28px_84px_color-mix(in_srgb,var(--aethel-brand-pure-black)_45%,transparent)] backdrop-blur-xl">
         <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_82%,transparent)] px-4 py-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
             <Sparkles className="h-3.5 w-3.5" />
