@@ -182,23 +182,29 @@ describe('project L.5 typecheck', () => {
 })
 
 describe('Focus 2A renderer honesty', () => {
-  it('never markets AAA from webgl2-only + desktop held', () => {
+  it('never markets AAA from r3f-webgl2-only + desktop held', () => {
     const report = evaluateRendererHonesty({
       webgpuAvailable: false,
       webgl2Available: true,
       desktopWgpuAvailable: false,
     })
-    expect(report.web.activePath).toBe('webgl2')
+    // CW3: canonical present path is R3F→WebGL2 (not bare "webgl2" / WebGPU)
+    expect(report.web.activePath).toBe('r3f-webgl2')
     expect(report.desktop.status).toBe('held')
     expect(report.marketingAllowed).toBe(false)
     expect(report.web.placeboForbidden).toBe(true)
   })
 
-  it('allows marketing only when both live', () => {
+  it('keeps marketing fail-closed even when WebGPU API + desktop mount probe exist', () => {
     const report = evaluateRendererHonesty({
       webgpuAvailable: true,
+      webgl2Available: true,
       desktopWgpuAvailable: true,
     })
-    expect(report.marketingAllowed).toBe(true)
+    // Adapter/mount ≠ dual-live AAA present — marketing stays closed (CW3)
+    expect(report.web.activePath).toBe('r3f-webgl2')
+    expect(report.desktop.activePath).toBe('wgpu-mount')
+    expect(report.desktop.status).not.toBe('live')
+    expect(report.marketingAllowed).toBe(false)
   })
 })
