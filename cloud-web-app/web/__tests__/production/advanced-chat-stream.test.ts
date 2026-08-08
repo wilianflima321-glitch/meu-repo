@@ -1,9 +1,13 @@
 /**
- * R19 — Advanced chat must consume real SSE token deltas, not a completed JSON typewriter.
+ * R19 — Advanced chat must consume real SSE (single-agent tokens or Apex coordinator).
+ * Never invent a typewriter over completed JSON.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { streamAdvancedChat, AdvancedChatRequestError } from '@/lib/ai-chat-advanced-client'
+import {
+  streamAdvancedChat,
+  foldCoordinatorStreamIntoNexus,
+} from '@/lib/ai-chat-advanced-client'
 
 function sseBlock(payload: Record<string, unknown>): string {
   return `data: ${JSON.stringify(payload)}\n\n`
@@ -114,20 +118,317 @@ describe('streamAdvancedChat (AIChatPanelPro / chat-advanced)', () => {
     ).rejects.toMatchObject({ code: 'AI_STREAM_UNAVAILABLE', status: 502 })
   })
 
-  it('rejects multi-agent profiles client-side without inventing a stream', async () => {
-    const fetchMock = vi.fn()
-    vi.stubGlobal('fetch', fetchMock)
+  it('streams Apex coordinator status + final_complete without claiming per-agent tokens', async () => {
+    const statuses: string[] = []
+    const cells: string[] = []
+    const deltas: Array<{ chunk: string; tokenSource?: string }> = []
+    let resolveAfterStatus: (() => void) | undefined
+    const afterStatusGate = new Promise<void>((resolve) => {
+      resolveAfterStatus = resolve
+    })
 
-    await expect(
-      streamAdvancedChat({
-        message: 'deep audit',
-        model: 'test-model',
-        messages: [{ role: 'user', content: 'deep audit' }],
-        profileOverride: { qualityMode: 'studio', agentCount: 3, enableWebResearch: true },
-        onDelta: () => undefined,
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        const body = typeof init?.body === 'string' ? init.body : ''
+        expect(body).toContain('"stream":true')
+        expect(body).toContain('"agentCount":3')
+        expect(body).toContain('"enableApexMoA":true')
+
+        const encoder = new TextEncoder()
+        let step = 0
+        const stream = new ReadableStream<Uint8Array>({
+          async pull(controller) {
+            if (step === 0) {
+              controller.enqueue(
+                encoder.encode(
+                  sseBlock({
+                    type: 'meta',
+                    streamMode: 'apex_coordinator',
+                    notice: 'Coordinator status + final answer only.',
+                    traceId: 'tr-moa',
+                    model: 'test-model',
+                  }) +
+                    sseBlock({
+                      type: 'status',
+                      phase: 'maestro_planning',
+                      label: 'Maestro planning…',
+                      at: '2026-08-08T12:00:00.000Z',
+                    }) +
+                    sseBlock({
+                      type: 'status',
+                      phase: 'swarm_parallel',
+                      label: 'Swarm on parallel cells…',
+                      detail: '2 cell(s)',
+                      at: '2026-08-08T12:00:01.000Z',
+                    }) +
+                    sseBlock({
+                      type: 'cell',
+                      taskId: 't-crit',
+                      role: 'critical',
+                      status: 'started',
+                    }),
+                ),
+              )
+              step = 1
+              return
+            }
+            if (step === 1) {
+              await afterStatusGate
+              controller.enqueue(
+                encoder.encode(
+                  sseBlock({
+                    type: 'cell',
+                    taskId: 't-crit',
+                    role: 'critical',
+                    status: 'completed',
+                    moaVerdict: 'CANDIDATE',
+                    healVerdict: 'APPLY',
+                    healRounds: 1,
+                  }) +
+                    sseBlock({
+                      type: 'status',
+                      phase: 'apply',
+                      label: 'Apply candidate ready',
+                      at: '2026-08-08T12:00:02.000Z',
+                    }) +
+                    sseBlock({
+                      type: 'content',
+                      delta: 'export const x = 1\n',
+                      content: 'export const x = 1\n',
+                      tokenSource: 'final_complete',
+                    }) +
+                    sseBlock({
+                      type: 'done',
+                      tokensUsed: 1200,
+                      traceId: 'tr-moa',
+                      content: 'export const x = 1\n',
+                      streamMode: 'apex_coordinator',
+                      apexMission: {
+                        missionId: 'm-1',
+                        verdict: 'APPLY',
+                        nexus: {
+                          missionId: 'm-1',
+                          currentPhase: 'apply',
+                          phaseLabel: 'Apply candidate ready',
+                          phases: [],
+                          cells: [],
+                          verdict: 'APPLY',
+                          estimatedSpendTokens: 1200,
+                        },
+                      },
+                    }),
+                ),
+              )
+              step = 2
+              return
+            }
+            controller.close()
+          },
+        })
+        return new Response(stream, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'X-Aethel-Stream-Mode': 'apex_coordinator',
+          },
+        })
       }),
-    ).rejects.toBeInstanceOf(AdvancedChatRequestError)
+    )
 
-    expect(fetchMock).not.toHaveBeenCalled()
+    const result = await streamAdvancedChat({
+      message: 'deep audit implement refactor',
+      model: 'test-model',
+      messages: [{ role: 'user', content: 'deep audit implement refactor' }],
+      profileOverride: { qualityMode: 'studio', agentCount: 3, enableWebResearch: true },
+      onDelta: (chunk, _acc, meta) => {
+        deltas.push({ chunk, tokenSource: meta?.tokenSource })
+      },
+      onStatus: (s) => {
+        statuses.push(s.phase)
+        if (statuses.length === 2) resolveAfterStatus?.()
+      },
+      onCell: (c) => {
+        cells.push(`${c.taskId}:${c.status}`)
+      },
+    })
+
+    expect(statuses).toEqual(['maestro_planning', 'swarm_parallel', 'apply'])
+    expect(cells).toEqual(['t-crit:started', 't-crit:completed'])
+    expect(deltas).toEqual([{ chunk: 'export const x = 1\n', tokenSource: 'final_complete' }])
+    expect(result.streamMode).toBe('apex_coordinator')
+    expect(result.content).toBe('export const x = 1\n')
+    expect(result.apexMission?.verdict).toBe('APPLY')
+    expect(result.meta?.streamMode).toBe('apex_coordinator')
+    expect(result.aborted).toBe(false)
+  })
+
+  it('foldCoordinatorStreamIntoNexus accumulates phases and cells as RUNNING then APPLY', () => {
+    let nexus = foldCoordinatorStreamIntoNexus(null, {
+      kind: 'status',
+      status: {
+        phase: 'maestro_planning',
+        label: 'Maestro planning…',
+        at: 't0',
+      },
+    })
+    expect(nexus.verdict).toBe('RUNNING')
+    expect(nexus.phases).toHaveLength(1)
+
+    nexus = foldCoordinatorStreamIntoNexus(nexus, {
+      kind: 'cell',
+      cell: { taskId: 'a', role: 'critical', status: 'started' },
+    })
+    expect(nexus.cells[0]?.status).toBe('working')
+
+    nexus = foldCoordinatorStreamIntoNexus(nexus, {
+      kind: 'status',
+      status: {
+        phase: 'apply',
+        label: 'Apply candidate ready',
+        at: 't1',
+      },
+    })
+    expect(nexus.verdict).toBe('APPLY')
+    expect(nexus.phases).toHaveLength(2)
+  })
+})
+
+describe('handleApexCoordinatorStream (server SSE contract)', () => {
+  it('emits apex_coordinator meta, status, final_complete content, and done', async () => {
+    vi.resetModules()
+    const settle = vi.fn(async () => undefined)
+    const cancel = vi.fn(async () => undefined)
+    const settleZero = vi.fn(async () => undefined)
+
+    vi.doMock('@/lib/production/apex-mission-orchestrator', () => ({
+      runApexCodeMission: vi.fn(async (input: {
+        onPhase?: (e: { phase: string; label: string; at: string; detail?: string }) => void
+        onCell?: (e: {
+          taskId: string
+          role: 'critical' | 'peripheral'
+          status: 'started' | 'completed' | 'blocked'
+        }) => void
+      }) => {
+        input.onPhase?.({
+          phase: 'maestro_planning',
+          label: 'Maestro planning…',
+          at: '2026-08-08T00:00:00.000Z',
+        })
+        input.onCell?.({ taskId: 'c1', role: 'critical', status: 'started' })
+        input.onCell?.({ taskId: 'c1', role: 'critical', status: 'completed' })
+        input.onPhase?.({
+          phase: 'apply',
+          label: 'Apply candidate ready',
+          at: '2026-08-08T00:00:01.000Z',
+        })
+        return {
+          missionId: 'mission-1',
+          plan: { trivialBypass: false, peripheralTasks: [], criticalTask: { taskId: 'c1', allowedPaths: ['x.ts'], intent: 'i', riskScore: 40 } },
+          estimatedSpendTokens: 900,
+          cells: [
+            {
+              taskId: 'c1',
+              role: 'critical',
+              moa: { verdict: 'CANDIDATE', generatorWidth: 1 },
+              heal: { verdict: 'APPLY', turns: [{}], finalPatch: 'const ok = true\n' },
+              finalPatch: 'const ok = true\n',
+            },
+          ],
+          verdict: 'APPLY',
+          supremePatch: 'const ok = true\n',
+          liveProvider: true,
+          phases: [
+            { phase: 'maestro_planning', label: 'Maestro planning…', at: '2026-08-08T00:00:00.000Z' },
+            { phase: 'apply', label: 'Apply candidate ready', at: '2026-08-08T00:00:01.000Z' },
+          ],
+          nucleusRole: 'architect',
+          peripheralRoles: [],
+        }
+      }),
+    }))
+    vi.doMock('@/lib/production/nexus-mission-ui', () => ({
+      buildNexusMissionUiPayload: vi.fn(() => ({
+        missionId: 'mission-1',
+        currentPhase: 'apply',
+        phaseLabel: 'Apply candidate ready',
+        phases: [],
+        cells: [],
+        verdict: 'APPLY',
+        estimatedSpendTokens: 900,
+      })),
+    }))
+    vi.doMock('@/lib/production/apex-mission-evidence', () => ({
+      buildApexMissionEvidenceLedger: vi.fn(() => ({ entries: [] })),
+    }))
+    vi.doMock('@/lib/server/ai-change-apply/persist-governed-evidence', () => ({
+      persistGovernedTaskEvidence: vi.fn(async () => undefined),
+    }))
+    vi.doMock('@/lib/production/creative-fusion-transaction', () => ({
+      createMemoryFusionScopeStore: vi.fn(() => ({
+        applySnapshot: vi.fn(),
+      })),
+      beginCreativeFusionTransaction: vi.fn(async () => ({
+        id: 'tx-1',
+        snapshotHashBefore: 'h0',
+      })),
+      commitCreativeFusionTransaction: vi.fn(async () => ({
+        snapshotHashAfter: 'h1',
+        record: { id: 'tx-1' },
+      })),
+      abortCreativeFusionTransaction: vi.fn(async () => undefined),
+    }))
+    vi.doMock('@/lib/production/fusion-tx-client-handoff', () => ({
+      buildFusionTxClientHandoff: vi.fn(() => ({ id: 'tx-1' })),
+      serializeFusionTxClientHandoff: vi.fn(() => '{"id":"tx-1"}'),
+    }))
+    vi.doMock('@/lib/production/architecture-context-spine', () => ({
+      buildArchitectureContextSpine: vi.fn(async () => ({
+        promptSection: '',
+        lawsPackId: 'l',
+        contextPackId: 'c',
+        projectMemoryDigestId: 'm',
+        cartographyManifestId: 'k',
+      })),
+    }))
+
+    const { handleApexCoordinatorStream } = await import(
+      '@/lib/server/ai-chat-advanced/apex-coordinator-stream'
+    )
+
+    const response = await handleApexCoordinatorStream({
+      userId: 'u1',
+      planId: 'pro',
+      model: 'test-model',
+      lastUserMessage: 'ship it',
+      enhancedSystemMessage: 'sys',
+      projectId: 'p1',
+      targetFilePath: 'mission/candidate.ts',
+      riskScore: 55,
+      enableLlmFuse: true,
+      spendSession: {
+        reservationId: 'r1',
+        lane: 'subscription_fast',
+        modelId: 'test-model',
+        headers: {},
+        settle,
+        cancel,
+        settleZero,
+      },
+      traceId: 'tr-server',
+    })
+
+    expect(response.headers.get('Content-Type')).toContain('text/event-stream')
+    expect(response.headers.get('X-Aethel-Stream-Mode')).toBe('apex_coordinator')
+
+    const text = await response.text()
+    expect(text).toContain('"streamMode":"apex_coordinator"')
+    expect(text).toContain('"type":"status"')
+    expect(text).toContain('"type":"cell"')
+    expect(text).toContain('"tokenSource":"final_complete"')
+    expect(text).toContain('const ok = true')
+    expect(text).toContain('"type":"done"')
+    expect(settle).toHaveBeenCalledWith(900)
+    expect(cancel).not.toHaveBeenCalled()
   })
 })

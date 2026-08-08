@@ -49,6 +49,20 @@ export interface ApexMissionInput {
   projectMemoryDigestId?: string
   /** J.2 — phase callback for Nexus UI chrome */
   onPhase?: (event: NexusPhaseEvent) => void
+  /**
+   * R19 — per-cell lifecycle for coordinator SSE (status only; not MoA token fan-in).
+   * Cells run in parallel; events are unordered across peripherals.
+   */
+  onCell?: (event: ApexMissionCellProgressEvent) => void
+}
+
+export interface ApexMissionCellProgressEvent {
+  taskId: string
+  role: 'critical' | 'peripheral'
+  status: 'started' | 'completed' | 'blocked'
+  moaVerdict?: string
+  healVerdict?: string
+  healRounds?: number
 }
 
 export interface ApexMissionCellOutcome {
@@ -107,13 +121,20 @@ async function runCellWithHeal(input: {
   intent: string
   riskScore: number
   filePath: string
+  trivialBypass: boolean
 }): Promise<ApexMissionCellOutcome> {
+  input.mission.onCell?.({
+    taskId: input.taskId,
+    role: input.role,
+    status: 'started',
+  })
+
   const generate = createMoAGeneratorFn()
   const fuseFn =
     input.mission.enableLlmFuse === false
       ? undefined
       : adaptiveMoAWidth(input.riskScore, input.mission.planId) >= 2
-        ? createCriticalFuseFn({ fuseModelId: input.mission.maestroModelId })
+        ? createCriticalFuseFn({ fuseModelId: input.trivialBypass ? 'apex-fast-ow' : input.mission.maestroModelId })
         : undefined
 
   let lazyRejectCount = 0
@@ -156,6 +177,12 @@ async function runCellWithHeal(input: {
   }
 
   if (moa.verdict !== 'CANDIDATE' || !moa.supremePatch) {
+    input.mission.onCell?.({
+      taskId: input.taskId,
+      role: input.role,
+      status: 'blocked',
+      moaVerdict: moa.verdict,
+    })
     return { taskId: input.taskId, role: input.role, moa }
   }
 
@@ -165,19 +192,28 @@ async function runCellWithHeal(input: {
       filePath: input.filePath,
       ambientFiles: input.mission.ambientFiles,
     }),
-    repair: createHealRepairFn({ repairModelId: input.mission.maestroModelId }),
+    repair: createHealRepairFn({ repairModelId: input.trivialBypass ? 'apex-fast-ow' : input.mission.maestroModelId }),
     maxRounds: input.mission.maxHealRounds ?? 3,
     systemPrompt: input.mission.systemPrompt,
     escalateOnExhaust: input.role === 'critical',
   })
 
-  return {
+  const outcome: ApexMissionCellOutcome = {
     taskId: input.taskId,
     role: input.role,
     moa,
     heal,
     finalPatch: heal.verdict === 'APPLY' ? heal.finalPatch : moa.supremePatch,
   }
+  input.mission.onCell?.({
+    taskId: input.taskId,
+    role: input.role,
+    status: heal.verdict === 'APPLY' ? 'completed' : 'blocked',
+    moaVerdict: moa.verdict,
+    healVerdict: heal.verdict,
+    healRounds: heal.turns.length,
+  })
+  return outcome
 }
 
 /**
@@ -240,6 +276,7 @@ export async function runApexCodeMission(input: ApexMissionInput): Promise<ApexM
     intent: plan.criticalTask.intent,
     riskScore: plan.criticalTask.riskScore,
     filePath: criticalPath,
+    trivialBypass: plan.trivialBypass,
   })
 
   const peripheralPromises = plan.peripheralTasks.map((task) =>
@@ -250,6 +287,7 @@ export async function runApexCodeMission(input: ApexMissionInput): Promise<ApexM
       intent: task.intent,
       riskScore: task.riskScore,
       filePath: task.allowedPaths[0] ?? `${criticalPath}.peripheral.ts`,
+      trivialBypass: plan.trivialBypass,
     }),
   )
 

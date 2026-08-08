@@ -436,11 +436,11 @@ export function useAIChatController({
           })
         }
 
-        // R19 — single-agent path: real SSE token stream (cancelable). Multi-agent / agentId stay JSON.
-        const canStreamTokens =
-          !selectedAgentId && profileResolution.profile.agentCount === 1
+        // R19 — SSE for single-agent tokens + multi-agent Apex coordinator (status/final).
+        // AgentExecutor (`agentId`) stays JSON — no fake stream.
+        const canStreamAdvanced = !selectedAgentId
 
-        if (canStreamTokens) {
+        if (canStreamAdvanced) {
           const streamingId = `assistant-${Date.now()}`
           setMessages((prev) => [
             ...prev,
@@ -471,15 +471,50 @@ export function useAIChatController({
                 ),
               )
             },
+            onNexus: (nexus) => {
+              setMessages((prev) =>
+                prev.map((entry) =>
+                  entry.id === streamingId ? { ...entry, nexusMission: nexus } : entry,
+                ),
+              )
+            },
           })
 
           const latencyMs = Math.max(
             0,
             Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt),
           )
+          const apexMission = streamResult.apexMission
+          const ledgerArtifact = buildLedgerEvidenceArtifact(apexMission?.evidenceLedger)
+          const undoHint =
+            apexMission &&
+            typeof apexMission.undoHint === 'object' &&
+            apexMission.undoHint &&
+            typeof (apexMission.undoHint as { transactionId?: unknown }).transactionId === 'string'
+              ? {
+                  transactionId: String((apexMission.undoHint as { transactionId: string }).transactionId),
+                  message: String(
+                    (apexMission.undoHint as { message?: string }).message ||
+                      'Ctrl+Z reverts this AI edit atomically.',
+                  ),
+                  fusionHandoffJson:
+                    typeof (apexMission.undoHint as { fusionHandoffJson?: unknown }).fusionHandoffJson ===
+                    'string'
+                      ? String((apexMission.undoHint as { fusionHandoffJson: string }).fusionHandoffJson)
+                      : undefined,
+                }
+              : null
+
           const finalContent =
             streamResult.content ||
-            (streamResult.aborted ? 'Generation stopped.' : 'No response from model.')
+            (streamResult.aborted
+              ? 'Generation stopped.'
+              : streamResult.blocked
+                ? String(
+                    (apexMission as { reason?: string } | undefined)?.reason ||
+                      'Apex MoA mission did not produce an APPLY candidate.',
+                  )
+                : 'No response from model.')
 
           setMessages((prev) =>
             prev.map((entry) =>
@@ -489,14 +524,36 @@ export function useAIChatController({
                     content: finalContent,
                     tokens: streamResult.tokensUsed,
                     model: currentModel,
+                    nexusMission: streamResult.nexusMission ?? entry.nexusMission,
+                    ledgerArtifact: ledgerArtifact ?? entry.ledgerArtifact,
+                    fusionUndoHint: undoHint,
                   }
                 : entry,
             ),
           )
 
+          if (
+            apexMission &&
+            typeof apexMission === 'object' &&
+            (apexMission as { verdict?: string }).verdict === 'APPLY' &&
+            typeof window !== 'undefined'
+          ) {
+            void import('@/lib/production/visual-evidence-auto-attach').then(
+              ({ autoAttachViewportVisualEvidenceAfterApply }) =>
+                autoAttachViewportVisualEvidenceAfterApply({
+                  label: String((apexMission as { missionId?: string }).missionId ?? 'apply'),
+                  afterPatch: finalContent,
+                }),
+            )
+          }
+
           analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
             surface: 'ide',
-            status: streamResult.aborted ? 'aborted' : 'success',
+            status: streamResult.aborted
+              ? 'aborted'
+              : streamResult.blocked
+                ? 'blocked'
+                : 'success',
             model: currentModel,
           })
           analytics?.track?.('ai', 'ai_stream', {
@@ -505,15 +562,23 @@ export function useAIChatController({
               model: currentModel,
               projectId,
               latencyMs,
-              status: streamResult.aborted ? 'aborted' : 'success',
-              transport: 'sse-chat-advanced',
+              status: streamResult.aborted
+                ? 'aborted'
+                : streamResult.blocked
+                  ? 'blocked'
+                  : 'success',
+              transport:
+                streamResult.streamMode === 'apex_coordinator'
+                  ? 'sse-apex-coordinator'
+                  : 'sse-chat-advanced',
               usedFallback: false,
               qualityMode: profileResolution.profile.qualityMode,
-              agentCount: 1,
+              agentCount: profileResolution.profile.agentCount,
               enableWebResearch: profileResolution.profile.enableWebResearch,
               consoleMode: context?.consoleMode ?? 'ask',
               mentionTags: profileResolution.tags,
               traceId: streamResult.traceId,
+              streamMode: streamResult.streamMode ?? 'token',
             },
           })
           return

@@ -19,6 +19,7 @@ export function NexusMissionPhaseStrip({ nexus, isWorking }: NexusMissionPhaseSt
 
   const phaseLabel = nexus?.phaseLabel ?? 'Maestro planning…'
   const blocked = nexus?.verdict === 'BLOCK' || nexus?.verdict === 'ESCALATE'
+  const running = nexus?.verdict === 'RUNNING' || Boolean(isWorking && nexus && !blocked)
   const taskGraph = evaluateNexusTaskGraphCompleteness(nexus)
   const dependencies = nexus ? buildNexusTaskDependencyList(nexus.cells) : []
 
@@ -37,6 +38,11 @@ export function NexusMissionPhaseStrip({ nexus, isWorking }: NexusMissionPhaseSt
         >
           {isWorking && !nexus ? 'Maestro planning…' : phaseLabel}
         </span>
+        {running && !blocked ? (
+          <span className="rounded border border-[var(--aethel-border-secondary)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)]">
+            Live stream
+          </span>
+        ) : null}
         {nexus?.visualEvidence?.status === 'HELD' && (
           <span className="rounded border border-[var(--aethel-border-secondary)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)]">
             VisualEvidence [HELD]

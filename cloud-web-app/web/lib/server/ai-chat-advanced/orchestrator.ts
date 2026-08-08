@@ -32,6 +32,7 @@ import {
   summarizeCritic,
 } from './model-policy'
 import { handleAgentRequest, handleStreamingResponse } from './agent-and-streaming'
+import { handleApexCoordinatorStream } from './apex-coordinator-stream'
 import type { AdvancedChatRequest, ChatMessage, ChatResponse } from './types'
 import { runApexCodeMission, estimateMoASpendTokens } from '@/lib/production/apex-mission-orchestrator'
 import { buildNexusMissionUiPayload } from '@/lib/production/nexus-mission-ui'
@@ -240,14 +241,7 @@ export async function handleAdvancedChatRequest(params: {
         { status: 403 }
       )
     }
-
-    if (stream) {
-      if (spendSession) await spendSession.cancel().catch(() => {})
-      return NextResponse.json(
-        { error: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE', message: 'Streaming is not supported in multi-role mode yet.' },
-        { status: 400 }
-      )
-    }
+    // R19 — multi-agent stream is Apex coordinator SSE (status + final), not STREAM_NOT_SUPPORTED_*.
   }
 
   if (agentCount <= 1) {
@@ -351,16 +345,6 @@ export async function handleAdvancedChatRequest(params: {
   })
 
   if (enableApexMoA === true) {
-    if (stream) {
-      if (spendSession) await spendSession.cancel().catch(() => {})
-      return NextResponse.json(
-        {
-          error: 'STREAM_NOT_SUPPORTED_FOR_APEX_MOA',
-          message: 'Streaming is not supported for Apex MoA missions yet.',
-        },
-        { status: 400 },
-      )
-    }
     if (!spendSession) {
       return NextResponse.json(
         { error: 'SPEND_SESSION_REQUIRED', message: 'Apex MoA requires an active spend session.' },
@@ -369,6 +353,25 @@ export async function handleAdvancedChatRequest(params: {
     }
 
     const targetPath = String(apexTargetFilePath || 'mission/candidate.ts').replace(/\\/g, '/')
+
+    // R19 — coordinator SSE: status/cell events + final_complete answer (not per-agent token fan-in).
+    if (stream) {
+      return handleApexCoordinatorStream({
+        userId,
+        planId: planDef.id,
+        model,
+        lastUserMessage,
+        enhancedSystemMessage,
+        projectId,
+        targetFilePath: targetPath,
+        riskScore: riskForMoA,
+        enableLlmFuse: planDef.id !== 'free',
+        spendSession,
+        traceId,
+        abortSignal,
+      })
+    }
+
     try {
       let spinePrompt = enhancedSystemMessage
       let spineIds: {

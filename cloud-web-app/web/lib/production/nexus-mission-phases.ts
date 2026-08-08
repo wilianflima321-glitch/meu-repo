@@ -30,13 +30,16 @@ export interface NexusCellUi {
   dependsOnTaskIds?: string[]
 }
 
+/** Terminal + in-flight (R19 coordinator SSE). RUNNING is never a ship success. */
+export type NexusMissionVerdict = 'APPLY' | 'BLOCK' | 'ESCALATE' | 'RUNNING'
+
 export interface NexusMissionUiPayload {
   missionId: string
   currentPhase: NexusMissionPhase
   phaseLabel: string
   phases: NexusPhaseEvent[]
   cells: NexusCellUi[]
-  verdict: 'APPLY' | 'BLOCK' | 'ESCALATE'
+  verdict: NexusMissionVerdict
   /** Never treat L.5 FAIL as success — explicit blocked copy for UI */
   blockedReason?: string
   estimatedSpendTokens: number

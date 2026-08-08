@@ -1,4 +1,10 @@
 import { CAPABILITY_STATUS_NOT_IMPLEMENTED } from '@/lib/capability-constants'
+import type {
+  NexusCellUi,
+  NexusMissionPhase,
+  NexusMissionUiPayload,
+  NexusPhaseEvent,
+} from '@/lib/production/nexus-mission-phases'
 
 export type ChatAdvancedMessage = {
   role: 'user' | 'assistant' | 'system'
@@ -119,7 +125,7 @@ function parseAdvancedChatError(raw: string, status: number): AdvancedChatReques
     const metadata =
       typeof data?.metadata === 'object' && data.metadata !== null
         ? { ...(data.metadata as Record<string, unknown>), quotaBody: data }
-        : ({ quotaBody: data } as Record<string, any>)
+        : ({ quotaBody: data } as Record<string, unknown>)
     const setupUrl =
       typeof data?.setupUrl === 'string'
         ? data.setupUrl
@@ -287,6 +293,25 @@ export type AdvancedChatStreamMeta = {
   estimatedTokens?: number
   spendLane?: string
   noticeCode?: string
+  /** `token` = single-agent chatStream; `apex_coordinator` = status+final MoA */
+  streamMode?: 'token' | 'apex_coordinator'
+  notice?: string
+}
+
+export type AdvancedChatStreamStatusEvent = {
+  phase: NexusMissionPhase
+  label: string
+  detail?: string
+  at: string
+}
+
+export type AdvancedChatStreamCellEvent = {
+  taskId: string
+  role: 'critical' | 'peripheral'
+  status: 'started' | 'completed' | 'blocked'
+  moaVerdict?: string
+  healVerdict?: string
+  healRounds?: number
 }
 
 export type AdvancedChatStreamResult = {
@@ -296,6 +321,10 @@ export type AdvancedChatStreamResult = {
   meta?: AdvancedChatStreamMeta
   /** True when the client aborted mid-stream (partial content may be present). */
   aborted: boolean
+  streamMode?: 'token' | 'apex_coordinator'
+  apexMission?: Record<string, unknown>
+  nexusMission?: NexusMissionUiPayload | null
+  blocked?: boolean
 }
 
 function parseSseDataBlocks(buffer: string): { events: string[]; rest: string } {
@@ -317,10 +346,100 @@ function parseSseDataBlocks(buffer: string): { events: string[]; rest: string } 
   return { events, rest }
 }
 
+function isNexusPhase(value: unknown): value is NexusMissionPhase {
+  return (
+    value === 'maestro_planning' ||
+    value === 'swarm_parallel' ||
+    value === 'healing' ||
+    value === 'apply' ||
+    value === 'blocked' ||
+    value === 'escalated'
+  )
+}
+
+/** Progressive Nexus UI from coordinator status/cell events (never invents MoA tokens). */
+export function foldCoordinatorStreamIntoNexus(
+  prev: NexusMissionUiPayload | null,
+  event:
+    | { kind: 'status'; status: AdvancedChatStreamStatusEvent }
+    | { kind: 'cell'; cell: AdvancedChatStreamCellEvent },
+): NexusMissionUiPayload {
+  if (event.kind === 'status') {
+    const phaseEvent: NexusPhaseEvent = {
+      phase: event.status.phase,
+      at: event.status.at,
+      label: event.status.label,
+      detail: event.status.detail,
+    }
+    const phases = [...(prev?.phases ?? []), phaseEvent]
+    const terminal =
+      event.status.phase === 'apply'
+        ? 'APPLY'
+        : event.status.phase === 'blocked'
+          ? 'BLOCK'
+          : event.status.phase === 'escalated'
+            ? 'ESCALATE'
+            : 'RUNNING'
+    return {
+      missionId: prev?.missionId ?? 'streaming-apex',
+      currentPhase: event.status.phase,
+      phaseLabel: event.status.label,
+      phases,
+      cells: prev?.cells ?? [],
+      verdict: terminal,
+      blockedReason:
+        terminal === 'BLOCK' || terminal === 'ESCALATE'
+          ? event.status.detail || prev?.blockedReason
+          : undefined,
+      estimatedSpendTokens: prev?.estimatedSpendTokens ?? 0,
+      fusionTransactionId: prev?.fusionTransactionId,
+      snapshotHashBefore: prev?.snapshotHashBefore,
+      snapshotHashAfter: prev?.snapshotHashAfter,
+      fusionHandoffJson: prev?.fusionHandoffJson,
+      visualEvidence: prev?.visualEvidence,
+    }
+  }
+
+  const cell = event.cell
+  const uiRole = cell.role === 'critical' ? 'nucleus' : 'peripheral'
+  const nextCell: NexusCellUi = {
+    taskId: cell.taskId,
+    role: uiRole,
+    domainLabel: cell.role === 'critical' ? 'Nucleus (Maestro)' : 'Peripheral (Swarm)',
+    status:
+      cell.status === 'started' ? 'working' : cell.status === 'completed' ? 'completed' : 'blocked',
+    moaVerdict: cell.moaVerdict,
+    healVerdict: cell.healVerdict,
+    healRounds: cell.healRounds,
+    dependsOnTaskIds: [],
+  }
+  const cells = [...(prev?.cells ?? [])]
+  const idx = cells.findIndex((c) => c.taskId === cell.taskId)
+  if (idx >= 0) cells[idx] = { ...cells[idx], ...nextCell }
+  else cells.push(nextCell)
+
+  return {
+    missionId: prev?.missionId ?? 'streaming-apex',
+    currentPhase: prev?.currentPhase ?? 'swarm_parallel',
+    phaseLabel: prev?.phaseLabel ?? 'Swarm on parallel cells…',
+    phases: prev?.phases ?? [],
+    cells,
+    verdict: prev?.verdict ?? 'RUNNING',
+    blockedReason: prev?.blockedReason,
+    estimatedSpendTokens: prev?.estimatedSpendTokens ?? 0,
+    fusionTransactionId: prev?.fusionTransactionId,
+    snapshotHashBefore: prev?.snapshotHashBefore,
+    snapshotHashAfter: prev?.snapshotHashAfter,
+    fusionHandoffJson: prev?.fusionHandoffJson,
+    visualEvidence: prev?.visualEvidence,
+  }
+}
+
 /**
- * Token streaming for AIChatPanelPro / advanced chat (single-agent path).
- * Uses `/api/ai/chat-advanced` with `stream: true` → SSE deltas from chatStream.
- * Multi-agent / Apex MoA remain JSON (server fail-closes STREAM_NOT_SUPPORTED_*).
+ * Token / coordinator streaming for AIChatPanelPro / advanced chat.
+ * - Single-agent: real `aiService.chatStream` SSE deltas.
+ * - Multi-agent / Apex MoA: `apex_coordinator` SSE (status + cell + final_complete).
+ * - `agentId` AgentExecutor path remains JSON (client must not call this with agentId).
  * Do not fake a typewriter over a completed JSON fetch.
  */
 export async function streamAdvancedChat(options: {
@@ -331,18 +450,16 @@ export async function streamAdvancedChat(options: {
   headers?: Record<string, string>
   signal?: AbortSignal
   profileOverride?: AdvancedProfile
-  onDelta: (chunk: string, accumulated: string) => void
+  /** Explicit Apex MoA (also implied by agentCount >= 2 on the server). */
+  enableApexMoA?: boolean
+  apexTargetFilePath?: string
+  onDelta: (chunk: string, accumulated: string, meta?: { tokenSource?: string }) => void
   onMeta?: (meta: AdvancedChatStreamMeta) => void
+  onStatus?: (status: AdvancedChatStreamStatusEvent) => void
+  onCell?: (cell: AdvancedChatStreamCellEvent) => void
+  onNexus?: (nexus: NexusMissionUiPayload) => void
 }): Promise<AdvancedChatStreamResult> {
   const profile = options.profileOverride ?? inferAdvancedProfile(options.message)
-  if (profile.agentCount > 1) {
-    throw new AdvancedChatRequestError({
-      code: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE',
-      message: 'Streaming is not supported in multi-role mode yet.',
-      status: 400,
-    })
-  }
-
   const byokHeaders = getByokHeaders()
   const response = await fetch('/api/ai/chat-advanced', {
     method: 'POST',
@@ -357,10 +474,12 @@ export async function streamAdvancedChat(options: {
       messages: options.messages,
       projectId: options.projectId,
       qualityMode: profile.qualityMode,
-      agentCount: 1 as const,
+      agentCount: profile.agentCount,
       enableWebResearch: profile.enableWebResearch,
       includeTrace: true,
       stream: true,
+      enableApexMoA: options.enableApexMoA === true || profile.agentCount >= 2,
+      apexTargetFilePath: options.apexTargetFilePath,
     }),
     signal: options.signal,
   })
@@ -388,6 +507,10 @@ export async function streamAdvancedChat(options: {
   let traceId: string | undefined
   let meta: AdvancedChatStreamMeta | undefined
   let aborted = false
+  let streamMode: 'token' | 'apex_coordinator' | undefined
+  let apexMission: Record<string, unknown> | undefined
+  let nexusMission: NexusMissionUiPayload | null = null
+  let blocked = false
 
   try {
     while (true) {
@@ -406,6 +529,9 @@ export async function streamAdvancedChat(options: {
         }
         const type = typeof event.type === 'string' ? event.type : ''
         if (type === 'meta') {
+          const mode =
+            event.streamMode === 'apex_coordinator' ? 'apex_coordinator' : ('token' as const)
+          streamMode = mode
           meta = {
             traceId: typeof event.traceId === 'string' ? event.traceId : undefined,
             model: typeof event.model === 'string' ? event.model : undefined,
@@ -413,12 +539,47 @@ export async function streamAdvancedChat(options: {
               typeof event.estimatedTokens === 'number' ? event.estimatedTokens : undefined,
             spendLane: typeof event.spendLane === 'string' ? event.spendLane : undefined,
             noticeCode: typeof event.noticeCode === 'string' ? event.noticeCode : undefined,
+            streamMode: mode,
+            notice: typeof event.notice === 'string' ? event.notice : undefined,
           }
           if (meta.traceId) traceId = meta.traceId
           options.onMeta?.(meta)
           continue
         }
+        if (type === 'status' && isNexusPhase(event.phase)) {
+          const status: AdvancedChatStreamStatusEvent = {
+            phase: event.phase,
+            label: typeof event.label === 'string' ? event.label : String(event.phase),
+            detail: typeof event.detail === 'string' ? event.detail : undefined,
+            at: typeof event.at === 'string' ? event.at : new Date().toISOString(),
+          }
+          options.onStatus?.(status)
+          nexusMission = foldCoordinatorStreamIntoNexus(nexusMission, { kind: 'status', status })
+          options.onNexus?.(nexusMission)
+          continue
+        }
+        if (type === 'cell' && typeof event.taskId === 'string') {
+          const cell: AdvancedChatStreamCellEvent = {
+            taskId: event.taskId,
+            role: event.role === 'peripheral' ? 'peripheral' : 'critical',
+            status:
+              event.status === 'completed'
+                ? 'completed'
+                : event.status === 'blocked'
+                  ? 'blocked'
+                  : 'started',
+            moaVerdict: typeof event.moaVerdict === 'string' ? event.moaVerdict : undefined,
+            healVerdict: typeof event.healVerdict === 'string' ? event.healVerdict : undefined,
+            healRounds: typeof event.healRounds === 'number' ? event.healRounds : undefined,
+          }
+          options.onCell?.(cell)
+          nexusMission = foldCoordinatorStreamIntoNexus(nexusMission, { kind: 'cell', cell })
+          options.onNexus?.(nexusMission)
+          continue
+        }
         if (type === 'content') {
+          const tokenSource =
+            typeof event.tokenSource === 'string' ? event.tokenSource : undefined
           const delta =
             typeof event.delta === 'string'
               ? event.delta
@@ -429,24 +590,46 @@ export async function streamAdvancedChat(options: {
                   : ''
           if (!delta) continue
           content += delta
-          options.onDelta(delta, content)
+          options.onDelta(delta, content, { tokenSource })
           continue
         }
         if (type === 'done') {
           if (typeof event.tokensUsed === 'number') tokensUsed = event.tokensUsed
           if (typeof event.traceId === 'string') traceId = event.traceId
+          if (event.streamMode === 'apex_coordinator') streamMode = 'apex_coordinator'
+          if (event.blocked === true) blocked = true
+          if (event.apexMission && typeof event.apexMission === 'object') {
+            apexMission = event.apexMission as Record<string, unknown>
+            const nexus = (event.apexMission as { nexus?: NexusMissionUiPayload }).nexus
+            if (nexus && typeof nexus === 'object') {
+              nexusMission = nexus
+              options.onNexus?.(nexus)
+            }
+          }
           if (typeof event.content === 'string' && event.content.length > content.length) {
             const tail = event.content.slice(content.length)
             if (tail) {
               content = event.content
-              options.onDelta(tail, content)
+              options.onDelta(tail, content, { tokenSource: 'final_complete' })
             }
           }
           continue
         }
         if (type === 'error') {
-          const code =
-            typeof event.error === 'string' ? event.error : 'AI_STREAM_ERROR'
+          if (event.apexMission && typeof event.apexMission === 'object') {
+            apexMission = event.apexMission as Record<string, unknown>
+            const nexus = (event.apexMission as { nexus?: NexusMissionUiPayload }).nexus
+            if (nexus && typeof nexus === 'object') {
+              nexusMission = nexus
+              options.onNexus?.(nexus)
+            }
+          }
+          const code = typeof event.error === 'string' ? event.error : 'AI_STREAM_ERROR'
+          // Soft-block: coordinator finished with BLOCK — surface via result, not throw.
+          if (code === 'APEX_MISSION_BLOCKED') {
+            blocked = true
+            continue
+          }
           const message =
             typeof event.message === 'string'
               ? event.message
@@ -465,10 +648,30 @@ export async function streamAdvancedChat(options: {
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       aborted = true
-      return { content, tokensUsed, traceId, meta, aborted }
+      return {
+        content,
+        tokensUsed,
+        traceId,
+        meta,
+        aborted,
+        streamMode,
+        apexMission,
+        nexusMission,
+        blocked,
+      }
     }
     throw err
   }
 
-  return { content, tokensUsed, traceId, meta, aborted }
+  return {
+    content,
+    tokensUsed,
+    traceId,
+    meta,
+    aborted,
+    streamMode,
+    apexMission,
+    nexusMission,
+    blocked,
+  }
 }
