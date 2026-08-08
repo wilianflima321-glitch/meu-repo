@@ -48,7 +48,7 @@
 | 2026-08-08 l13-monaco-hover | L.13 Monaco desktop hover/definition ↔ Tauri `lsp_farm` IPC | **PARTIAL** deepen; hover+definition wired (minimal didOpen); Python/L.C soak still OPEN; Hub checkout HELD |
 | 2026-08-08 l13-tauri-farm | L.13 Tauri `lsp_farm.rs` first-light (spawn + IPC probe) | **PARTIAL** deepen; commit `e114b3133`; `cargo check`+`clippy -D warnings` green; Monaco hover acceptance still OPEN; Hub checkout HELD |
 | 2026-08-08 l4-sandbox-pty | L.4 sandbox PTY first-light (node-pty in Forge duplex) | **PARTIAL** deepen; `ptyApplied:true` when live IPty; pipe fallback; tests **12/12**; E2B remote PTY still HELD; Hub checkout HELD |
-| 2026-08-08 timeline-authoring | Timeline3D clip/keyframe authoring UI → ITimelineService / store / persist | **PARTIAL** deepen (authoring core); Add Track / Add Keyframe / Delete; empty until authored; Hub checkout HELD |
+| 2026-08-08 timeline-authoring | Timeline3D clip/keyframe authoring UI → ITimelineService / store / persist | **PARTIAL** deepen (authoring core); commit `c3bad4554`; tests **27/27**; Hub checkout HELD |
 
 ---
 
