@@ -1,9 +1,14 @@
 /**
  * Wave H — Treasury / Coins capability honesty surface.
- * Never claim Aethel Coins mint, Universal Store economy, or in-app payouts as live.
+ * Never claim Aethel Coins mint, Universal Store economy, or in-app payouts as live
+ * until H.1+ treasury audit checklist PASSes (see treasury-audit-capability).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  evaluateTreasuryAudit,
+  type TreasuryAuditReport,
+} from '@/lib/treasury/treasury-audit-capability'
 
 const log = createComponentLogger('treasury-capability')
 
@@ -27,20 +32,39 @@ export interface TreasuryHonestyReport {
   marketplaceCheckout: TreasurySurfaceReport
   /** In-app Request Payout as Aethel Treasury — HELD */
   inAppPayout: TreasurySurfaceReport
-  /** Aethel Coins mint/burn — HELD */
+  /** Aethel Coins mint/burn — HELD until audit + module */
   aethelCoins: TreasurySurfaceReport
   /** Universal Store / Backpack / circular spend — HELD */
   universalEconomy: TreasurySurfaceReport
-  marketingCoinsAllowed: false
-  marketingUniversalStoreAllowed: false
+  /** H.1+ audit checklist (technical + human) */
+  treasuryAudit: TreasuryAuditReport
+  /** True only when full H.1+ audit PASSes — never FORCE_* env */
+  hubCheckoutAudited: boolean
+  marketingCoinsAllowed: boolean
+  marketingUniversalStoreAllowed: boolean
+  marketingHubCheckoutAllowed: boolean
   claim: string
   productCopy: string
 }
 
 export function evaluateTreasuryHonesty(input: {
   stripeCheckoutConfigured?: boolean
+  /** Injected audit report (tests) — otherwise probe evaluateTreasuryAudit */
+  auditReport?: TreasuryAuditReport
+  cwd?: string
 } = {}): TreasuryHonestyReport {
   const checkoutReady = input.stripeCheckoutConfigured === true
+  const audit =
+    input.auditReport ??
+    evaluateTreasuryAudit({
+      cwd: input.cwd,
+      stripeCheckoutConfigured: checkoutReady,
+    })
+  const audited = audit.hubCheckoutAudited === true
+
+  const coinItem = audit.checklist.find((c) => c.id === 'coin_mint_burn_api')
+  const backpackItem = audit.checklist.find((c) => c.id === 'backpack_custody_escrow')
+  const spendItem = audit.checklist.find((c) => c.id === 'treasury_spend_router')
 
   const report: TreasuryHonestyReport = {
     generatedAt: new Date().toISOString(),
@@ -77,28 +101,52 @@ export function evaluateTreasuryHonesty(input: {
     },
     aethelCoins: {
       surface: 'Aethel Coins',
-      status: 'HELD',
-      connectable: false,
-      notes: ['AethelCoinLedgerEntry schema stub only — no mint/burn API'],
-      heldReason: 'coins_mint_held',
+      status: coinItem?.status === 'PASS' && audited ? 'IMPLEMENTED' : 'HELD',
+      connectable: coinItem?.status === 'PASS' && audited,
+      notes:
+        coinItem?.status === 'PASS' && audited
+          ? ['Coins mint/burn audited and live']
+          : [
+              'AethelCoinLedgerEntry schema stub only — no mint/burn API until H.1+ audit',
+              coinItem?.reason ?? 'coins_mint_held',
+            ],
+      heldReason: coinItem?.status === 'PASS' && audited ? undefined : 'coins_mint_held',
     },
     universalEconomy: {
       surface: 'Universal Store / Backpack',
-      status: 'HELD',
-      connectable: false,
-      notes: ['Cross-game cosmetics, PlayerOwnedItem, TreasurySpendRouter not shipped'],
-      heldReason: 'wave_h_economy_held',
+      status:
+        backpackItem?.status === 'PASS' && spendItem?.status === 'PASS' && audited
+          ? 'IMPLEMENTED'
+          : 'HELD',
+      connectable:
+        backpackItem?.status === 'PASS' && spendItem?.status === 'PASS' && audited,
+      notes: [
+        backpackItem?.reason ?? 'Backpack custody not shipped',
+        spendItem?.reason ?? 'TreasurySpendRouter not shipped',
+      ],
+      heldReason:
+        backpackItem?.status === 'PASS' && spendItem?.status === 'PASS' && audited
+          ? undefined
+          : 'wave_h_economy_held',
     },
-    marketingCoinsAllowed: false,
-    marketingUniversalStoreAllowed: false,
-    claim: 'IDE extension marketplace = fiat Stripe Connect — Aethel Coins / Universal Store [HELD]',
-    productCopy:
-      'Creators earn fiat via Stripe Connect (70/30 store lane). Aethel Coins mint, in-app Treasury payouts, and Universal Store economy remain [HELD] until Wave H audit completes.',
+    treasuryAudit: audit,
+    hubCheckoutAudited: audited,
+    marketingCoinsAllowed: audited,
+    marketingUniversalStoreAllowed: audited,
+    marketingHubCheckoutAllowed: audited,
+    claim: audited
+      ? 'IDE marketplace + Hub Coins Treasury audited'
+      : 'IDE extension marketplace = fiat Stripe Connect — Aethel Coins / Universal Store / Hub checkout [HELD]',
+    productCopy: audited
+      ? 'Creators earn fiat via Stripe Connect (70/30 store lane). Hub Coins and Universal Store are audited live.'
+      : 'Creators earn fiat via Stripe Connect (70/30 store lane). Aethel Coins mint, in-app Treasury payouts, Universal Store economy, and Hub checkout remain [HELD] until every H.1+ Treasury audit checklist item PASSes.',
   }
 
   log.info('treasury_honesty_evaluated', {
     checkout: report.marketplaceCheckout.status,
     coins: report.aethelCoins.status,
+    hubCheckoutAudited: report.hubCheckoutAudited,
+    heldAuditItems: audit.heldItems.length,
   })
 
   return report

@@ -301,8 +301,11 @@ export function evaluateHubHonesty(input: HubHonestyInput = {}): HubHonestyRepor
   if (!socialModerationReady) heldBits.push('social moderation')
   if (!socialPartyReady) heldBits.push('party')
   heldBits.push('Agones session')
-  heldBits.push('Hub checkout')
-  const claim = `${claimParts.join(' ')} — ${heldBits.join(' / ')} [HELD]`
+  if (!checkoutAudited) heldBits.push('Hub checkout')
+  const claim =
+    heldBits.length > 0
+      ? `${claimParts.join(' ')} — ${heldBits.join(' / ')} [HELD]`
+      : `${claimParts.join(' ')} — Hub surfaces live`
 
   const productCopy =
     discoveryReady && impressionLedgerReady && playtimeReady && reviewsStoreReady && socialModerationReady

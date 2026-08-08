@@ -15,7 +15,17 @@ import { DiscoveryFeedPanel } from '@/components/hub/DiscoveryFeedPanel'
 import { SocialModerationPanel } from '@/components/hub/SocialModerationPanel'
 import { PartyPresencePanel } from '@/components/hub/PartyPresencePanel'
 import { CrossSavePolicyPanel } from '@/components/hub/CrossSavePolicyPanel'
+import { TreasuryAuditStatusPanel } from '@/components/hub/TreasuryAuditStatusPanel'
 import { createComponentLogger } from '@/lib/observability/logger'
+
+type TreasuryHeldReason = {
+  id: string
+  kind?: string
+  title: string
+  status: string
+  reason: string
+  heldReason?: string
+}
 
 const log = createComponentLogger('ShowcaseHonestyPanels')
 
@@ -69,6 +79,8 @@ export function ShowcaseHonestyPanels({
     marketingCrossSaveAllowed: false,
     crossSaveDefaultOnOptOutHeld: true,
   })
+  const [treasuryHeld, setTreasuryHeld] = useState<TreasuryHeldReason[]>([])
+  const [treasuryClaim, setTreasuryClaim] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     let cancelled = false
@@ -80,6 +92,10 @@ export function ShowcaseHonestyPanels({
           report?: HubHonestyReport
           crossPlay?: CrossSaveHonestySlice
           f2?: { gameSaveCloudReady?: boolean }
+          treasuryAudit?: {
+            heldReasons?: TreasuryHeldReason[]
+            claim?: string
+          }
         }
         if (!cancelled && data.report) setReport(data.report)
         if (!cancelled) {
@@ -90,6 +106,8 @@ export function ShowcaseHonestyPanels({
             crossSaveStatus: data.crossPlay?.crossSaveStatus,
             gameSaveCloudReady: data.f2?.gameSaveCloudReady === true,
           })
+          setTreasuryHeld(data.treasuryAudit?.heldReasons ?? [])
+          setTreasuryClaim(data.treasuryAudit?.claim)
         }
       } catch (err) {
         log.warn('showcase_honesty_probe_failed', {
@@ -213,9 +231,10 @@ export function ShowcaseHonestyPanels({
       )}
 
       {!report.marketingHubCheckoutAllowed ? (
-        <HeldPanel
-          title="Hub checkout / Coins [HELD]"
-          body="No Buy, earnings, or Aethel Coins CTAs on Showcase until H audit. Fail-closed — not a mock store strip."
+        <TreasuryAuditStatusPanel
+          compact
+          heldReasons={treasuryHeld}
+          claim={treasuryClaim}
         />
       ) : null}
     </div>
