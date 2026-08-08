@@ -44,6 +44,7 @@ type HonestyPayload = {
  * Focus 2A / C4 / CW3 — viewport chrome honesty badge.
  * Shows live present-path class (canonical|compatibility|experimental|condemned|held).
  * When marketingAllowed is false, never imply AAA / live GPU supremacy.
+ * Adapter/device probes must never read as Unified RHI or WebGPU present.
  */
 export function RendererHonestyBadge({ projectId }: { projectId?: string | null }) {
   const [report, setReport] = useState<HonestyPayload | null>(null)
@@ -120,8 +121,10 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
   const presentRoot =
     report?.presentRoot || report?.livePath?.presentRoot || null
   const rootLabel = presentRoot?.canonicalPresentLabel || 'R3F/WebGL2'
-  const webgpuRole = presentRoot?.webgpuRole || 'exclusive_rhi'
+  // Fail-closed defaults: never invent exclusive RHI / dual-live desktop.
+  const webgpuRole = presentRoot?.webgpuRole || 'adapter_probe_only'
   const desktopRole = presentRoot?.desktopWgpuRole || 'experimental_mount'
+  const desktopLivePresent = desktopRole === 'live_present'
   const classTone =
     pathClass === 'canonical'
       ? 'text-[var(--aethel-info-light)]'
@@ -154,16 +157,21 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
       <span className={`mt-0.5 block text-[10px] font-normal uppercase tracking-[0.12em] ${classTone}`}>
         Path · {pathClass}
       </span>
-      <div className="flex gap-2 text-[var(--aethel-text-quaternary)]">
-        Present root · {rootLabel} · WebGPU {webgpuRole.replace(/_/g, ' ')} · Desktop{' '}
-        {report?.livePath?.desktopPresented ? '[LIVE]' : '[FALLBACK]'}
+      <div className="flex flex-wrap gap-x-2 text-[var(--aethel-text-quaternary)]">
+        <span>
+          Present root · {rootLabel} · WebGPU {webgpuRole.replace(/_/g, ' ')} · Desktop{' '}
+          {desktopLivePresent ? '[LIVE_PRESENT]' : '[FALLBACK]'}
+        </span>
         {report?.livePath?.webgpuAdapterAcquired === true && (
-          <span className="text-[var(--aethel-primary-light)]">· Unified RHI Acquired</span>
+          <span className="text-[var(--aethel-primary-light)]">
+            · WebGPU adapter probed (not present)
+          </span>
         )}
       </div>
       <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
-        {marketingAllowed ? 'Capability probe live' : 'Hardware Capability Probe Active'}
-        {' · WebGPU Target Active'}
+        {marketingAllowed
+          ? 'Capability probe live'
+          : 'AAA marketing blocked · no WebGPU/desktop dual-live claim'}
       </span>
       <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
         {finalNote}

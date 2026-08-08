@@ -2,6 +2,8 @@
  * CW3 — render-path honesty catalog + live present classification + present root.
  */
 
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   CANONICAL_PRESENT_ROOT_ID,
@@ -263,5 +265,19 @@ describe('CW3 render-path honesty catalog', () => {
     expect(probe.presentsFrames).toBe(false)
     expect(typeof probe.apiAvailable).toBe('boolean')
     expect(typeof probe.adapterAcquired).toBe('boolean')
+  })
+
+  it('RendererHonestyBadge never markets Unified RHI / WebGPU Target / exclusive_rhi default', () => {
+    const src = readFileSync(
+      join(process.cwd(), 'components/preview/RendererHonestyBadge.tsx'),
+      'utf8',
+    )
+    expect(src).not.toContain('Unified RHI Acquired')
+    expect(src).not.toContain('WebGPU Target Active')
+    expect(src).not.toContain("|| 'exclusive_rhi'")
+    expect(src).toContain("|| 'adapter_probe_only'")
+    expect(src).toContain('desktopRole === \'live_present\'')
+    expect(src).toContain('AAA marketing blocked')
+    expect(src).toContain('WebGPU adapter probed (not present)')
   })
 })

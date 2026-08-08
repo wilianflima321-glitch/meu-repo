@@ -73,14 +73,14 @@ Before executing any block, the executor MUST comply with `AETHEL_AAA_SYSTEM_ARC
 | **CW0** | Freeze surface inflation | No PR that only adds probe/vitrine |
 | **CW1** | Truth matrix (claim/path/status/bench/marketing) | Master UX Â§0 + Progress HELD honesty |
 | **CW2** | Kernel load-scale (SPH/XPBD/LBM/fracture) on RTX 3060 | Budgets + fixtures; AAA still HELD |
-| **CW3** | Single render authority path | Present-root doc + catalog classified; UE single RHI still OPEN |
+| **CW3** | Single render authority path | **DONE-core (2026-08-08)** — present-root + catalog + fail-closed marketing; UE single RHI / WebGPU viewport / WebView exclusive still HELD |
 | **CW4** | UI persistence spine | localStorage exception-only |
 | **CW5** | Design-system government | Deepen shells; tokens only |
 | **CW6** | Agents work-OS (not J.11/J.12 restart) | **DONE apply-path (2026-08-02)** — AST/L.5 multi-file swarm; Composer surpass = posture not certificate |
 | **CW7** | Disk austerity | Cargo/target on E:/D:; CAS; prune |
 
 **Still STOPPED:** J.11 ACP / J.12 OrchestratorProd.  
-**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW2/CW3/CW5/CW7 **PARTIAL**; **CW1 DONE-core** (2026-08-08 — 15-slot hero bench CLOSED; product depth PARTIAL); **CW4 DONE (2026-08-08)** — LWW + exception-only allowlist (2 secret + 7 domain) + expired one-way legacy mirror; open chrome debt 0; **CW6 DONE (2026-08-02) apply-path only** — multi-file AST/L.5 swarm + per-file validation receipts live; `composerSurpassClaim=true` is **product posture**, not ship certificate (`treeSitterAstIndexerWebWired=false`; J.11/J.12 STOPPED). CW0 ACTIVE. **2026-08-08:** P2b Anti-MOCK fully cleared; Forge L PARTIALs (not GAP); Timeline material UNHELD + event cue PARTIAL — see §0b Forge L note + Progress Remaining OPEN. **HELD** vs Cursor / Figma / UE Chaos.
+**Ledger:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) Consolidation table — CW2/CW5/CW7 **PARTIAL**; **CW1 DONE-core** (2026-08-08 — 15-slot hero bench CLOSED; product depth PARTIAL); **CW3 DONE-core (2026-08-08)** — catalog + present-root + `marketingAllowed:false` (UE RHI residual HELD); **CW4 DONE (2026-08-08)** — LWW + exception-only allowlist (2 secret + 7 domain) + expired one-way legacy mirror; open chrome debt 0; **CW6 DONE (2026-08-02) apply-path only** — multi-file AST/L.5 swarm + per-file validation receipts live; `composerSurpassClaim=true` is **product posture**, not ship certificate (`treeSitterAstIndexerWebWired=false`; J.11/J.12 STOPPED). CW0 ACTIVE. **2026-08-08:** P2b Anti-MOCK fully cleared; Forge L PARTIALs (not GAP); Timeline material UNHELD + event cue PARTIAL — see §0b Forge L note + Progress Remaining OPEN. **HELD** vs Cursor / Figma / UE Chaos.
 **UX vision (not ship cert):** [`AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md`](./AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md) Â§0.
 
 ---
