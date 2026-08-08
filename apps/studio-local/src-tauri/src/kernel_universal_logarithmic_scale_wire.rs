@@ -29,11 +29,7 @@ pub struct KernelUniversalLogarithmicScaleWireReport {
     pub rebase_count: u32,
     pub absolute_origin_x: f64,
     pub fingerprint: u64,
-    pub distinct_from_geometric_scale_constraints_probe: bool,
-    pub distinct_from_digital_pressure_chamber_probe: bool,
-    pub distinct_from_dynamic_matter_entropy_probe: bool,
-    pub distinct_from_contextual_physics_override_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub star_citizen_cosmos_aaa_ready: bool,
@@ -61,14 +57,7 @@ fn to_report(
         rebase_count: r.rebase_count,
         absolute_origin_x: r.absolute_origin_x,
         fingerprint: r.fingerprint,
-        distinct_from_geometric_scale_constraints_probe: r
-            .distinct_from_geometric_scale_constraints_probe,
-        distinct_from_digital_pressure_chamber_probe: r
-            .distinct_from_digital_pressure_chamber_probe,
-        distinct_from_dynamic_matter_entropy_probe: r.distinct_from_dynamic_matter_entropy_probe,
-        distinct_from_contextual_physics_override_probe: r
-            .distinct_from_contextual_physics_override_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "fc".into(),
         note: note.into(),
         star_citizen_cosmos_aaa_ready: r.star_citizen_cosmos_aaa_ready,

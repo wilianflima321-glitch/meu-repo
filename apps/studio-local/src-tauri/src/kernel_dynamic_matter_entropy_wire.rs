@@ -37,14 +37,7 @@ pub struct KernelDynamicMatterEntropyWireReport {
     pub fingerprint: u64,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_mnemonic_matter_entropy_probe: bool,
-    pub distinct_from_contextual_physics_override_probe: bool,
-    pub distinct_from_fractal_energy_perturbation_probe: bool,
-    pub distinct_from_atmospheric_physical_damping_probe: bool,
-    pub distinct_from_autonomous_entropy_corrector_probe: bool,
-    pub distinct_from_sdf_audio_raymarching_probe: bool,
-    pub distinct_from_volumetric_extinction_medium_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub chaos_thermodynamics_aaa_ready: bool,
@@ -76,19 +69,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_mnemonic_matter_entropy_probe: r.distinct_from_mnemonic_matter_entropy_probe,
-        distinct_from_contextual_physics_override_probe: r
-            .distinct_from_contextual_physics_override_probe,
-        distinct_from_fractal_energy_perturbation_probe: r
-            .distinct_from_fractal_energy_perturbation_probe,
-        distinct_from_atmospheric_physical_damping_probe: r
-            .distinct_from_atmospheric_physical_damping_probe,
-        distinct_from_autonomous_entropy_corrector_probe: r
-            .distinct_from_autonomous_entropy_corrector_probe,
-        distinct_from_sdf_audio_raymarching_probe: r.distinct_from_sdf_audio_raymarching_probe,
-        distinct_from_volumetric_extinction_medium_probe: r
-            .distinct_from_volumetric_extinction_medium_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "hp".into(),
         note: note.into(),
         chaos_thermodynamics_aaa_ready: r.chaos_thermodynamics_aaa_ready,

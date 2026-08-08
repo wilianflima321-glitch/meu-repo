@@ -28,11 +28,7 @@ pub struct KernelSdfAudioRaymarchingWireReport {
     pub blocked_solid_path: f32,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_volumetric_extinction_medium_probe: bool,
-    pub distinct_from_acoustic_raytracing_echo_probe: bool,
-    pub distinct_from_acoustic_reverb_geometry_probe: bool,
-    pub distinct_from_sdf_sculptor_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub metasounds_hrtf_aaa_ready: bool,
@@ -56,14 +52,7 @@ fn to_report(
         blocked_solid_path: r.blocked_solid_path,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_volumetric_extinction_medium_probe: r
-            .distinct_from_volumetric_extinction_medium_probe,
-        distinct_from_acoustic_raytracing_echo_probe: r
-            .distinct_from_acoustic_raytracing_echo_probe,
-        distinct_from_acoustic_reverb_geometry_probe: r
-            .distinct_from_acoustic_reverb_geometry_probe,
-        distinct_from_sdf_sculptor_probe: r.distinct_from_sdf_sculptor_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "ex".into(),
         note: note.into(),
         metasounds_hrtf_aaa_ready: r.metasounds_hrtf_aaa_ready,

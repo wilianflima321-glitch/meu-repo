@@ -30,12 +30,7 @@ pub struct KernelSparseSeedInstancingWireReport {
     pub fingerprint: u64,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_universal_logarithmic_scale_probe: bool,
-    pub distinct_from_geometric_scale_constraints_probe: bool,
-    pub distinct_from_digital_pressure_chamber_probe: bool,
-    pub distinct_from_dynamic_matter_entropy_probe: bool,
-    pub distinct_from_contextual_physics_override_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub hism_nanite_foliage_aaa_ready: bool,
@@ -61,16 +56,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_universal_logarithmic_scale_probe: r
-            .distinct_from_universal_logarithmic_scale_probe,
-        distinct_from_geometric_scale_constraints_probe: r
-            .distinct_from_geometric_scale_constraints_probe,
-        distinct_from_digital_pressure_chamber_probe: r
-            .distinct_from_digital_pressure_chamber_probe,
-        distinct_from_dynamic_matter_entropy_probe: r.distinct_from_dynamic_matter_entropy_probe,
-        distinct_from_contextual_physics_override_probe: r
-            .distinct_from_contextual_physics_override_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "fd".into(),
         note: note.into(),
         hism_nanite_foliage_aaa_ready: r.hism_nanite_foliage_aaa_ready,

@@ -17,9 +17,7 @@ pub struct KernelLatticeBoltzmannGasFluidWireReport {
     pub mass_drift: f64,
     pub temperature_diffused: bool,
     pub velocity_affected_by_temp: bool,
-    pub distinct_from_aerodynamic_navier_stokes_probe: bool,
-    pub distinct_from_matter_thermodynamics_sph_probe: bool,
-    pub distinct_from_hybrid_eulerian_lagrangian_pbd_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
 }
@@ -34,9 +32,7 @@ fn to_report(
         mass_drift: r.mass_drift,
         temperature_diffused: r.temperature_diffused,
         velocity_affected_by_temp: r.velocity_affected_by_temp,
-        distinct_from_aerodynamic_navier_stokes_probe: r.distinct_from_aerodynamic_navier_stokes_probe,
-        distinct_from_matter_thermodynamics_sph_probe: r.distinct_from_matter_thermodynamics_sph_probe,
-        distinct_from_hybrid_eulerian_lagrangian_pbd_probe: r.distinct_from_hybrid_eulerian_lagrangian_pbd_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "gx".into(),
         note: note.into(),
     }

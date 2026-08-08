@@ -39,11 +39,7 @@ pub struct KernelWgpuWgslDeviceLoadWireReport {
     pub wgsl_len: u32,
     pub adapter_name: String,
     pub adapter_backend: String,
-    pub distinct_from_msl_wgsl_compiler_probe: bool,
-    pub distinct_from_wgsl_surface_noise_kernel_probe: bool,
-    pub distinct_from_gaze_foveated_reprojection_probe: bool,
-    pub distinct_from_strain_aware_texturing_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     /// Always false — create_shader_module ≠ product WebGPU path.
@@ -75,11 +71,7 @@ fn fail_report(note: impl Into<String>) -> KernelWgpuWgslDeviceLoadWireReport {
         wgsl_len: 0,
         adapter_name: String::new(),
         adapter_backend: String::new(),
-        distinct_from_msl_wgsl_compiler_probe: true,
-        distinct_from_wgsl_surface_noise_kernel_probe: true,
-        distinct_from_gaze_foveated_reprojection_probe: true,
-        distinct_from_strain_aware_texturing_probe: true,
-        distinct_from_kernel_foundation_probe: true,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gu".into(),
         note: note.into(),
         full_webgpu_product_path_ready: false,
@@ -238,11 +230,6 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
             wgsl_len: emit_a.wgsl.len() as u32,
             adapter_name: String::new(),
             adapter_backend: String::new(),
-            distinct_from_msl_wgsl_compiler_probe: true,
-            distinct_from_wgsl_surface_noise_kernel_probe: true,
-            distinct_from_gaze_foveated_reprojection_probe: true,
-            distinct_from_strain_aware_texturing_probe: true,
-            distinct_from_kernel_foundation_probe: true,
             letter: "gu".into(),
             note: "wgpu adapter unavailable — compile-from-string path shipped; device load HELD; wgpu_adapter_available false; wgpuWgslDeviceLoadReady stays false (never fake); distinct from the gp MSL/WGSL compiler's own ready field; full_webgpu_product_path_ready false; gpu_device_submit_ready false".into(),
             full_webgpu_product_path_ready: false,
@@ -253,6 +240,7 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
             nanite_ready: false,
             dlss_ready: false,
             quic_ready: false,
+            distinct_from_peers_note: "distinct".into(),
         };
     };
 
@@ -300,11 +288,6 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
         wgsl_len: emit_a.wgsl.len() as u32,
         adapter_name: gpu.adapter_name,
         adapter_backend: gpu.adapter_backend,
-        distinct_from_msl_wgsl_compiler_probe: true,
-        distinct_from_wgsl_surface_noise_kernel_probe: true,
-        distinct_from_gaze_foveated_reprojection_probe: true,
-        distinct_from_strain_aware_texturing_probe: true,
-        distinct_from_kernel_foundation_probe: true,
         letter: "gu".into(),
         note,
         full_webgpu_product_path_ready: false,
@@ -315,6 +298,7 @@ pub fn run_wgpu_wgsl_device_load_soak() -> KernelWgpuWgslDeviceLoadWireReport {
         nanite_ready: false,
         dlss_ready: false,
         quic_ready: false,
+            distinct_from_peers_note: "distinct".into(),
     }
 }
 
@@ -360,7 +344,6 @@ mod tests {
     #[test]
     fn soak_gates_ready_only_when_device_path_proves() {
         let r = run_wgpu_wgsl_device_load_soak();
-        assert!(r.distinct_from_msl_wgsl_compiler_probe);
         assert!(!r.full_webgpu_product_path_ready);
         assert!(!r.gpu_device_submit_ready);
         assert!(!r.full_metal_spirv_compiler_aaa_ready);
@@ -387,7 +370,6 @@ mod tests {
         let json = serde_json::to_string(&r).expect("serialize");
         assert!(json.contains("wgpuWgslDeviceLoadReady"));
         assert!(!json.contains("mslWgslCompilerReady"));
-        assert!(r.distinct_from_msl_wgsl_compiler_probe);
     }
 
     #[test]

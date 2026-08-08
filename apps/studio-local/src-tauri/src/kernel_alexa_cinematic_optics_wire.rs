@@ -36,11 +36,7 @@ pub struct KernelAlexaCinematicOpticsWireReport {
     pub anamorphic_aspect: f32,
     pub sample_count: u32,
     pub fingerprint: u64,
-    pub distinct_from_aces_cinematic_tonemapper_probe: bool,
-    pub distinct_from_radiance_cascades_gi_probe: bool,
-    pub distinct_from_atmospheric_spine_particles_probe: bool,
-    pub distinct_from_hybrid_cluster_shading_vsvm_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub arri_alexa_aaa_ready: bool,
@@ -73,14 +69,7 @@ fn to_report(
         anamorphic_aspect: r.anamorphic_aspect,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_aces_cinematic_tonemapper_probe: r
-            .distinct_from_aces_cinematic_tonemapper_probe,
-        distinct_from_radiance_cascades_gi_probe: r.distinct_from_radiance_cascades_gi_probe,
-        distinct_from_atmospheric_spine_particles_probe: r
-            .distinct_from_atmospheric_spine_particles_probe,
-        distinct_from_hybrid_cluster_shading_vsvm_probe: r
-            .distinct_from_hybrid_cluster_shading_vsvm_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "gn".into(),
         note: note.into(),
         arri_alexa_aaa_ready: r.arri_alexa_aaa_ready,

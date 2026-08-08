@@ -29,11 +29,7 @@ pub struct KernelFormalLogicVerifierWireReport {
     pub events_checked: u32,
     pub scales_checked: u32,
     pub fingerprint: u64,
-    pub distinct_from_genomic_seed_transmitter_probe: bool,
-    pub distinct_from_genomic_seed_library_probe: bool,
-    pub distinct_from_delta_seed_synchronization_probe: bool,
-    pub distinct_from_geometric_scale_constraints_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub theorem_prover_aaa_ready: bool,
@@ -60,14 +56,7 @@ fn to_report(
         events_checked: r.events_checked,
         scales_checked: r.scales_checked,
         fingerprint: r.fingerprint,
-        distinct_from_genomic_seed_transmitter_probe: r
-            .distinct_from_genomic_seed_transmitter_probe,
-        distinct_from_genomic_seed_library_probe: r.distinct_from_genomic_seed_library_probe,
-        distinct_from_delta_seed_synchronization_probe: r
-            .distinct_from_delta_seed_synchronization_probe,
-        distinct_from_geometric_scale_constraints_probe: r
-            .distinct_from_geometric_scale_constraints_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "fv".into(),
         note: note.into(),
         theorem_prover_aaa_ready: r.theorem_prover_aaa_ready,

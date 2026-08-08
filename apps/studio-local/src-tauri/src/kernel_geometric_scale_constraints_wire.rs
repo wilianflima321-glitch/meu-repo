@@ -31,11 +31,7 @@ pub struct KernelGeometricScaleConstraintsWireReport {
     pub scale_child_after: f32,
     pub scale_in_range_after: f32,
     pub fingerprint: u64,
-    pub distinct_from_digital_pressure_chamber_probe: bool,
-    pub distinct_from_dynamic_matter_entropy_probe: bool,
-    pub distinct_from_contextual_physics_override_probe: bool,
-    pub distinct_from_mnemonic_matter_entropy_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub ue_constraint_aaa_ready: bool,
@@ -65,14 +61,7 @@ fn to_report(
         scale_child_after: r.scale_child_after,
         scale_in_range_after: r.scale_in_range_after,
         fingerprint: r.fingerprint,
-        distinct_from_digital_pressure_chamber_probe: r
-            .distinct_from_digital_pressure_chamber_probe,
-        distinct_from_dynamic_matter_entropy_probe: r.distinct_from_dynamic_matter_entropy_probe,
-        distinct_from_contextual_physics_override_probe: r
-            .distinct_from_contextual_physics_override_probe,
-        distinct_from_mnemonic_matter_entropy_probe: r
-            .distinct_from_mnemonic_matter_entropy_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "fb".into(),
         note: note.into(),
         ue_constraint_aaa_ready: r.ue_constraint_aaa_ready,

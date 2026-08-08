@@ -38,13 +38,7 @@ pub struct KernelSpectralLightPipelineWireReport {
     pub flesh_thin_t: f32,
     pub flesh_thick_t: f32,
     pub sample_count: u32,
-    pub fingerprint: u64,
-    pub distinct_from_spectral_dispersion_caustics_probe: bool,
-    pub distinct_from_chromatic_glass_refraction_probe: bool,
-    pub distinct_from_preintegrated_sss_transmittance_probe: bool,
-    pub distinct_from_radiance_cascades_gi_probe: bool,
-    pub distinct_from_aces_cinematic_tonemapper_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub spectral_path_tracer_aaa_ready: bool,
@@ -79,17 +73,7 @@ fn to_report(
         flesh_thin_t: r.flesh_thin_t,
         flesh_thick_t: r.flesh_thick_t,
         sample_count: r.sample_count,
-        fingerprint: r.fingerprint,
-        distinct_from_spectral_dispersion_caustics_probe: r
-            .distinct_from_spectral_dispersion_caustics_probe,
-        distinct_from_chromatic_glass_refraction_probe: r
-            .distinct_from_chromatic_glass_refraction_probe,
-        distinct_from_preintegrated_sss_transmittance_probe: r
-            .distinct_from_preintegrated_sss_transmittance_probe,
-        distinct_from_radiance_cascades_gi_probe: r.distinct_from_radiance_cascades_gi_probe,
-        distinct_from_aces_cinematic_tonemapper_probe: r
-            .distinct_from_aces_cinematic_tonemapper_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "go".into(),
         note: note.into(),
         spectral_path_tracer_aaa_ready: r.spectral_path_tracer_aaa_ready,

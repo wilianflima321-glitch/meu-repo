@@ -35,15 +35,7 @@ pub struct KernelContextualPhysicsOverrideWireReport {
     pub fingerprint: u64,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_sdf_audio_raymarching_probe: bool,
-    pub distinct_from_volumetric_extinction_medium_probe: bool,
-    pub distinct_from_atmospheric_physical_damping_probe: bool,
-    pub distinct_from_fractal_energy_perturbation_probe: bool,
-    pub distinct_from_micro_displacement_noise_probe: bool,
-    pub distinct_from_internal_voxel_density_probe: bool,
-    pub distinct_from_velocity_buffer_ecs_probe: bool,
-    pub distinct_from_position_based_dynamics_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub chaos_physics_volume_aaa_ready: bool,
@@ -72,20 +64,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_sdf_audio_raymarching_probe: r.distinct_from_sdf_audio_raymarching_probe,
-        distinct_from_volumetric_extinction_medium_probe: r
-            .distinct_from_volumetric_extinction_medium_probe,
-        distinct_from_atmospheric_physical_damping_probe: r
-            .distinct_from_atmospheric_physical_damping_probe,
-        distinct_from_fractal_energy_perturbation_probe: r
-            .distinct_from_fractal_energy_perturbation_probe,
-        distinct_from_micro_displacement_noise_probe: r
-            .distinct_from_micro_displacement_noise_probe,
-        distinct_from_internal_voxel_density_probe: r.distinct_from_internal_voxel_density_probe,
-        distinct_from_velocity_buffer_ecs_probe: r.distinct_from_velocity_buffer_ecs_probe,
-        distinct_from_position_based_dynamics_probe: r
-            .distinct_from_position_based_dynamics_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "ey".into(),
         note: note.into(),
         chaos_physics_volume_aaa_ready: r.chaos_physics_volume_aaa_ready,

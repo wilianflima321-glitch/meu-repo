@@ -35,11 +35,7 @@ pub struct KernelHybridClusterShadingVsvmWireReport {
     pub mean_fixture_luminance: f32,
     pub sample_count: u32,
     pub fingerprint: u64,
-    pub distinct_from_fluid_ninja_compute_probe: bool,
-    pub distinct_from_aces_cinematic_tonemapper_probe: bool,
-    pub distinct_from_preintegrated_sss_transmittance_probe: bool,
-    pub distinct_from_chromatic_glass_refraction_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub full_forward_plus_ready: bool,
@@ -71,14 +67,7 @@ fn to_report(
         mean_fixture_luminance: r.mean_fixture_luminance,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_fluid_ninja_compute_probe: r.distinct_from_fluid_ninja_compute_probe,
-        distinct_from_aces_cinematic_tonemapper_probe: r
-            .distinct_from_aces_cinematic_tonemapper_probe,
-        distinct_from_preintegrated_sss_transmittance_probe: r
-            .distinct_from_preintegrated_sss_transmittance_probe,
-        distinct_from_chromatic_glass_refraction_probe: r
-            .distinct_from_chromatic_glass_refraction_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "gk".into(),
         note: note.into(),
         full_forward_plus_ready: r.full_forward_plus_ready,

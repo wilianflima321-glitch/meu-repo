@@ -37,12 +37,7 @@ pub struct KernelWgslSurfaceNoiseKernelWireReport {
     pub fingerprint: u64,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_aces_cinematic_tonemapper_probe: bool,
-    pub distinct_from_fluid_ninja_compute_probe: bool,
-    pub distinct_from_preintegrated_sss_transmittance_probe: bool,
-    pub distinct_from_chromatic_glass_refraction_probe: bool,
-    pub distinct_from_micro_displacement_noise_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub wgsl_gpu_dispatch_aaa_ready: bool,
@@ -73,16 +68,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_aces_cinematic_tonemapper_probe: r
-            .distinct_from_aces_cinematic_tonemapper_probe,
-        distinct_from_fluid_ninja_compute_probe: r.distinct_from_fluid_ninja_compute_probe,
-        distinct_from_preintegrated_sss_transmittance_probe: r
-            .distinct_from_preintegrated_sss_transmittance_probe,
-        distinct_from_chromatic_glass_refraction_probe: r
-            .distinct_from_chromatic_glass_refraction_probe,
-        distinct_from_micro_displacement_noise_probe: r
-            .distinct_from_micro_displacement_noise_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "gh".into(),
         note: note.into(),
         wgsl_gpu_dispatch_aaa_ready: r.wgsl_gpu_dispatch_aaa_ready,

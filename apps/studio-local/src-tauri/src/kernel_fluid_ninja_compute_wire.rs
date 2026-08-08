@@ -39,13 +39,7 @@ pub struct KernelFluidNinjaComputeWireReport {
     pub fingerprint: u64,
     pub evidence_kind: String,
     pub evidence_fingerprint: u64,
-    pub distinct_from_preintegrated_sss_transmittance_probe: bool,
-    pub distinct_from_chromatic_glass_refraction_probe: bool,
-    pub distinct_from_aerodynamic_navier_stokes_probe: bool,
-    pub distinct_from_lattice_boltzmann_fluid_solver_probe: bool,
-    pub distinct_from_matter_thermodynamics_sph_probe: bool,
-    pub distinct_from_aces_cinematic_tonemapper_probe: bool,
-    pub distinct_from_kernel_foundation_probe: bool,
+    pub distinct_from_peers_note: String,
     pub letter: String,
     pub note: String,
     pub fluid_ninja_aaa_ready: bool,
@@ -80,19 +74,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_preintegrated_sss_transmittance_probe: r
-            .distinct_from_preintegrated_sss_transmittance_probe,
-        distinct_from_chromatic_glass_refraction_probe: r
-            .distinct_from_chromatic_glass_refraction_probe,
-        distinct_from_aerodynamic_navier_stokes_probe: r
-            .distinct_from_aerodynamic_navier_stokes_probe,
-        distinct_from_lattice_boltzmann_fluid_solver_probe: r
-            .distinct_from_lattice_boltzmann_fluid_solver_probe,
-        distinct_from_matter_thermodynamics_sph_probe: r
-            .distinct_from_matter_thermodynamics_sph_probe,
-        distinct_from_aces_cinematic_tonemapper_probe: r
-            .distinct_from_aces_cinematic_tonemapper_probe,
-        distinct_from_kernel_foundation_probe: r.distinct_from_kernel_foundation_probe,
+        distinct_from_peers_note: r.distinct_from_peers_note,
         letter: "gg".into(),
         note: note.into(),
         fluid_ninja_aaa_ready: r.fluid_ninja_aaa_ready,
