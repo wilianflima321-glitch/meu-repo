@@ -77,6 +77,44 @@ export function clearProjectTimeline(projectId: string): void {
   setProjectTimeline(projectId, null)
 }
 
+/**
+ * Ensure a non-demo project timeline is bound. Does not invent tracks/clips —
+ * empty shell only when unbound.
+ */
+export function ensureProjectTimelineBound(
+  projectId: string,
+  options?: { durationSec?: number },
+): ProjectTimelineBinding {
+  const existing = bindings.get(projectId)
+  if (existing) return existing
+  const timeline = createEmptyProjectTimeline(projectId)
+  if (options?.durationSec != null && options.durationSec > 0) {
+    const durationMs = Math.max(1000, Math.round(options.durationSec * 1000))
+    timeline.durationMs = durationMs
+    timeline.range = { startMs: 0, endMs: durationMs }
+  }
+  const binding: ProjectTimelineBinding = { timeline, isDemo: false }
+  bindings.set(projectId, binding)
+  emit()
+  return binding
+}
+
+/** Replace bound timeline document (preserves isDemo unless overridden). */
+export function updateProjectTimeline(
+  projectId: string,
+  timeline: SequencerTimeline,
+  options?: { isDemo?: boolean },
+): ProjectTimelineBinding | null {
+  const existing = bindings.get(projectId)
+  if (!existing && options?.isDemo == null) {
+    setProjectTimeline(projectId, timeline, { isDemo: false })
+    return bindings.get(projectId) ?? null
+  }
+  const isDemo = options?.isDemo ?? existing?.isDemo ?? false
+  setProjectTimeline(projectId, timeline, { isDemo })
+  return bindings.get(projectId) ?? null
+}
+
 export function subscribeProjectTimeline(listener: Listener): () => void {
   listeners.add(listener)
   return () => {

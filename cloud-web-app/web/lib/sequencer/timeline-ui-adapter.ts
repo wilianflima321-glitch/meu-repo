@@ -56,6 +56,11 @@ export function sequencerTimelineToTimeline3DView(timeline: SequencerTimeline): 
   const trackIds = new Set<string>()
 
   for (const track of timeline.tracks) {
+    // Authoring lanes use stable `lane-<id>` track ids so empty lanes still appear in Timeline3D.
+    if (track.id.startsWith('lane-')) {
+      const lane = track.id.slice('lane-'.length)
+      if (lane) trackIds.add(lane)
+    }
     for (const clip of track.clips) {
       for (const curve of clip.curves ?? []) {
         const lane = propertyToTimelineLane(curve.property)
@@ -72,8 +77,12 @@ export function sequencerTimelineToTimeline3DView(timeline: SequencerTimeline): 
       // Clip-only markers (no curves) surface as event keyframes — still real authored content.
       if ((!clip.curves || clip.curves.length === 0) && track.kind === 'marker') {
         trackIds.add('event')
+        const eventId =
+          clip.metadata?.authored === true || clip.metadata?.timelineLane === 'event'
+            ? clip.id
+            : `${clip.id}-start`
         keyframes.push({
-          id: `${clip.id}-start`,
+          id: eventId,
           time: clip.startMs / 1000,
           track: 'event',
           value: { label: clip.label },

@@ -6,7 +6,7 @@
  */
 
 import { createElement } from 'react'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { Timeline3D, TIMELINE3D_DEMO_KEYFRAMES } from '../../../packages/ide-ui/Timeline3D'
 import { WebIDEBackend } from '@/lib/ide/WebIDEBackend'
@@ -148,5 +148,26 @@ describe('Timeline3D demoMode honesty', () => {
     expect(container.querySelector('[data-timeline-demo="true"]')).toBeNull()
     expect(container.textContent).toContain('0 kf')
     expect(container.querySelector('[data-timeline-empty-tracks="true"]')).toBeTruthy()
+  })
+
+  it('authoring prop exposes Add Track controls without fabricating lanes', () => {
+    const onAddTrack = vi.fn()
+    const { container } = render(
+      createElement(Timeline3D, {
+        duration: 10,
+        demoMode: false,
+        keyframes: [],
+        tracks: [],
+        authoring: {
+          availableLanes: ['position', 'rotation'],
+          onAddTrack,
+          onAddKeyframe: vi.fn(),
+        },
+      }),
+    )
+    expect(container.querySelector('[data-timeline-authoring="true"]')).toBeTruthy()
+    expect(container.querySelector('[data-timeline-add-track="true"]')).toBeTruthy()
+    expect(container.querySelector('[data-timeline-empty="true"]')).toBeTruthy()
+    expect(container.textContent).toContain('Add Track')
   })
 })

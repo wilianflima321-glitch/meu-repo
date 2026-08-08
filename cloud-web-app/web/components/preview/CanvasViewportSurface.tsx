@@ -118,10 +118,29 @@ export default function CanvasViewportSurface({
         <>
           <DockPanel id="timeline" title="Timeline" icon={Film} defaultRegion="bottomBar">
             <Timeline3D
-              duration={timeline.duration}
+              duration={timeline.duration > 0 ? timeline.duration : 10}
               demoMode={timeline.isDemo}
               keyframes={timeline.keyframes}
               tracks={timeline.trackIds}
+              authoring={
+                timeline.isDemo
+                  ? undefined
+                  : {
+                      availableLanes: backend.timeline.listAvailableTracks?.() ?? [],
+                      onAddTrack: (laneId) => {
+                        void backend.timeline.addTrack?.(laneId)
+                      },
+                      onAddKeyframe: (laneId, timeSec) => {
+                        void backend.timeline.addKeyframe?.({ track: laneId, time: timeSec })
+                      },
+                      onRemoveKeyframe: (keyframeId) => {
+                        void backend.timeline.removeKeyframe?.(keyframeId)
+                      },
+                      onRemoveTrack: (laneId) => {
+                        void backend.timeline.removeTrack?.(laneId)
+                      },
+                    }
+              }
             />
           </DockPanel>
           <DockPanel id="console" title="Console" icon={TerminalIcon} defaultRegion="bottomBar">

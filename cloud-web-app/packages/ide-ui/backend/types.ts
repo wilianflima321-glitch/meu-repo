@@ -150,10 +150,19 @@ export type IDETimelineHydrateResult =
   | { ok: true; path: string }
   | { ok: false; reason: string; message: string }
 
+export type IDETimelineAuthorResult =
+  | {
+      ok: true
+      snapshot: IDETimelineSnapshot
+      /** Present when a persist attempt ran after the mutation. */
+      persist?: IDETimelinePersistResult
+    }
+  | { ok: false; reason: string; message: string }
+
 /**
- * Read access to the project sequence document backing Timeline3D.
+ * Project sequence document backing Timeline3D.
  * Concrete backends bridge `aethel.timeline.v1` (lib/sequencer) — not IDESceneNode transforms.
- * Persist/hydrate write `*.timeline.json` into the project file store (authoring UI may lag).
+ * Persist/hydrate write `*.timeline.json`; authoring mutates the bound SequencerTimeline in-place.
  */
 export interface ITimelineService {
   getSnapshot(): IDETimelineSnapshot
@@ -162,6 +171,20 @@ export interface ITimelineService {
   persistToProject?(relativePath?: string): Promise<IDETimelinePersistResult>
   /** Hydrate in-memory bind from project `*.timeline.json`. */
   hydrateFromProject?(relativePath?: string): Promise<IDETimelineHydrateResult>
+  /** Bind an empty non-demo shell when unbound (no fabricated tracks). */
+  ensureBound?(options?: { durationSec?: number }): IDETimelineSnapshot
+  /** Add a Timeline3D authoring lane (position/rotation/…). Demo binds blocked. */
+  addTrack?(laneId: string): Promise<IDETimelineAuthorResult>
+  /** Add/upsert a keyframe on a lane at time (seconds). Creates the lane if missing. */
+  addKeyframe?(input: {
+    track: string
+    time: number
+    value?: number
+  }): Promise<IDETimelineAuthorResult>
+  removeKeyframe?(keyframeId: string): Promise<IDETimelineAuthorResult>
+  removeTrack?(laneId: string): Promise<IDETimelineAuthorResult>
+  /** Lanes not yet present on the bound document (empty when unbound/demo). */
+  listAvailableTracks?(): string[]
 }
 
 export interface IIDEBackend {

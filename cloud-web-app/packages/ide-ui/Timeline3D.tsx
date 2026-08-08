@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { drawTimelineCanvas } from './Timeline3D.canvas'
+import { TimelineEmptyAuthoringHint, orderAvailableLanes } from './Timeline3D.authoring'
+import { TimelineResizeHandle } from './Timeline3D.resize'
 import { TimelineHonestyBadges, TimelineToolbar } from './Timeline3D.toolbar'
 import {
   DEFAULT_HEIGHT,
@@ -12,7 +14,6 @@ import {
   PANEL_BORDER,
   PANEL_BORDER_SUBTLE,
   PANEL_SURFACE,
-  RESIZE_GRIP,
   RULER_HEIGHT,
   SHADOW_TOOLTIP,
   TEXT_PRIMARY,
@@ -35,6 +36,15 @@ export interface TimelineKeyframeData {
 /** @deprecated Use TimelineKeyframeData */
 type KeyframeData = TimelineKeyframeData
 
+export type TimelineAuthoringApi = {
+  /** Lanes still available to add (from ITimelineService.listAvailableTracks). */
+  availableLanes?: string[]
+  onAddTrack: (laneId: string) => void
+  onAddKeyframe: (laneId: string, timeSec: number) => void
+  onRemoveKeyframe?: (keyframeId: string) => void
+  onRemoveTrack?: (laneId: string) => void
+}
+
 interface TimelineProps {
   duration?: number
   currentTime?: number
@@ -50,6 +60,11 @@ interface TimelineProps {
   keyframes?: TimelineKeyframeData[]
   /** Track lane ids to render. Empty + !demoMode = honest empty timeline. */
   tracks?: string[]
+  /**
+   * Live authoring callbacks (ITimelineService). When set and !demoMode,
+   * Add Track / Add Keyframe write through the project store — not local fixture state.
+   */
+  authoring?: TimelineAuthoringApi
 }
 
 /** Fixture keyframes — only used when demoMode={true}. */
@@ -60,51 +75,6 @@ export const TIMELINE3D_DEMO_KEYFRAMES: TimelineKeyframeData[] = [
   { id: '4', time: 6, track: 'scale', value: { x: 1.5, y: 1.5, z: 1.5 } },
   { id: '5', time: 3, track: 'material', value: { opacity: 0.5 } },
 ]
-
-// ─── ResizeHandle ─────────────────────────────────────────────────────────────
-
-function ResizeHandle({ onResize }: { onResize: (delta: number) => void }) {
-  const isDragging = useRef(false)
-  const lastY = useRef(0)
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true
-    lastY.current = e.clientY
-    e.preventDefault()
-  }
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!isDragging.current) return
-      const delta = lastY.current - e.clientY
-      lastY.current = e.clientY
-      onResize(delta)
-    }
-    const onUp = () => { isDragging.current = false }
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
-    return () => {
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
-    }
-  }, [onResize])
-
-  return (
-    <div
-      className="group flex h-[5px] w-full cursor-ns-resize items-center justify-center transition-colors"
-      style={{ background: PANEL_SURFACE, borderTop: `1px solid ${PANEL_BORDER}` }}
-      onMouseDown={handleMouseDown}
-      aria-label="Drag to resize timeline panel"
-      role="separator"
-      aria-orientation="horizontal"
-    >
-      <div
-        className="h-[3px] w-12 rounded-full transition-all duration-200 group-hover:w-20"
-        style={{ background: RESIZE_GRIP }}
-      />
-    </div>
-  )
-}
 
 // ─── Timeline3D ──────────────────────────────────────────────────────────────
 
@@ -117,6 +87,7 @@ export function Timeline3D({
   demoMode = false,
   keyframes: keyframesProp,
   tracks: tracksProp,
+  authoring,
 }: TimelineProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLooping, setIsLooping] = useState(false)
@@ -124,13 +95,19 @@ export function Timeline3D({
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null)
   const [fps, setFps] = useState(24)
   const [showFpsMenu, setShowFpsMenu] = useState(false)
+  const [showAddTrackMenu, setShowAddTrackMenu] = useState(false)
   const [localKeyframes, setLocalKeyframes] = useState<KeyframeData[]>([])
+  const [localTracks, setLocalTracks] = useState<string[]>([])
+
+  const authoringEnabled = Boolean(authoring) && !demoMode
 
   const trackList: string[] = demoMode
     ? [...DEMO_TRACKS]
     : (tracksProp && tracksProp.length > 0
         ? tracksProp
-        : [...new Set((keyframesProp ?? []).map((kf) => kf.track))])
+        : localTracks.length > 0
+          ? localTracks
+          : [...new Set((keyframesProp ?? localKeyframes).map((kf) => kf.track))])
 
   const keyframes: KeyframeData[] = demoMode
     ? TIMELINE3D_DEMO_KEYFRAMES
@@ -138,6 +115,12 @@ export function Timeline3D({
 
   const safeDuration = Math.max(duration, 0.001)
   const isEmptyLive = !demoMode && trackList.length === 0
+  const availableLanes = orderAvailableLanes(
+    authoring?.availableLanes ??
+      ['position', 'rotation', 'scale', 'visibility', 'material', 'event'].filter(
+        (lane) => !trackList.includes(lane),
+      ),
+  )
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -152,15 +135,65 @@ export function Timeline3D({
   useEffect(() => { timeRef.current = currentTime }, [currentTime])
   useEffect(() => { isLoopingRef.current = isLooping }, [isLooping])
 
+  useEffect(() => {
+    if (selectedTrack && !trackList.includes(selectedTrack)) setSelectedTrack(null)
+    if (selectedKfId && !keyframes.some((kf) => kf.id === selectedKfId)) setSelectedKfId(null)
+  }, [trackList, keyframes, selectedTrack, selectedKfId])
+
   const handlePlayPause = () => {
     if (isPlaying) { setIsPlaying(false); onPause() }
     else { setIsPlaying(true); onPlay() }
   }
 
   const addKeyframeAtCurrentTime = () => {
-    if (!selectedTrack || demoMode || keyframesProp) return
+    if (!selectedTrack || demoMode) return
+    if (authoring) {
+      authoring.onAddKeyframe(selectedTrack, currentTime)
+      return
+    }
+    if (keyframesProp) return
     const id = crypto.randomUUID()
-    setLocalKeyframes(prev => [...prev, { id, time: currentTime, track: selectedTrack, value: { x: 0, y: 0, z: 0 } }])
+    setLocalKeyframes((prev) => [
+      ...prev,
+      { id, time: currentTime, track: selectedTrack, value: { x: 0, y: 0, z: 0 } },
+    ])
+  }
+
+  const handleAddTrack = (laneId: string) => {
+    setShowAddTrackMenu(false)
+    if (demoMode) return
+    if (authoring) {
+      authoring.onAddTrack(laneId)
+      setSelectedTrack(laneId)
+      return
+    }
+    setLocalTracks((prev) => (prev.includes(laneId) ? prev : [...prev, laneId]))
+    setSelectedTrack(laneId)
+  }
+
+  const handleRemoveKeyframe = (keyframeId: string) => {
+    if (demoMode) return
+    if (authoring?.onRemoveKeyframe) {
+      authoring.onRemoveKeyframe(keyframeId)
+      setSelectedKfId(null)
+      return
+    }
+    if (keyframesProp) return
+    setLocalKeyframes((prev) => prev.filter((kf) => kf.id !== keyframeId))
+    setSelectedKfId(null)
+  }
+
+  const handleRemoveTrack = (laneId: string) => {
+    if (demoMode) return
+    if (authoring?.onRemoveTrack) {
+      authoring.onRemoveTrack(laneId)
+      setSelectedTrack(null)
+      return
+    }
+    if (tracksProp) return
+    setLocalTracks((prev) => prev.filter((t) => t !== laneId))
+    setLocalKeyframes((prev) => prev.filter((kf) => kf.track !== laneId))
+    setSelectedTrack(null)
   }
 
   const handleResize = useCallback((delta: number) => {
@@ -285,6 +318,24 @@ export function Timeline3D({
 
   const selectedCfg = selectedTrack ? trackConfig(selectedTrack) : null
 
+  useEffect(() => {
+    if (!authoringEnabled) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (selectedKfId) {
+        e.preventDefault()
+        handleRemoveKeyframe(selectedKfId)
+      } else if (selectedTrack) {
+        e.preventDefault()
+        handleRemoveTrack(selectedTrack)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [authoringEnabled, selectedKfId, selectedTrack])
+
   return (
     <div
       className="flex flex-col relative"
@@ -293,8 +344,9 @@ export function Timeline3D({
         background: PANEL_SURFACE,
         borderTop: `1px solid ${PANEL_BORDER}`,
       }}
+      data-timeline-authoring={authoringEnabled ? 'true' : 'false'}
     >
-      <ResizeHandle onResize={handleResize} />
+      <TimelineResizeHandle onResize={handleResize} />
       <TimelineHonestyBadges demoMode={demoMode} isEmptyLive={isEmptyLive} />
       <TimelineToolbar
         isPlaying={isPlaying}
@@ -313,6 +365,21 @@ export function Timeline3D({
         onAddKeyframe={addKeyframeAtCurrentTime}
         onToggleFpsMenu={() => setShowFpsMenu(v => !v)}
         onSelectFps={(next) => { setFps(next); setShowFpsMenu(false) }}
+        authoring={
+          authoringEnabled
+            ? {
+                enabled: true,
+                availableLanes,
+                selectedTrack,
+                selectedKfId,
+                showAddTrackMenu,
+                onToggleAddTrackMenu: () => setShowAddTrackMenu((v) => !v),
+                onAddTrack: handleAddTrack,
+                onRemoveTrack: handleRemoveTrack,
+                onRemoveKeyframe: handleRemoveKeyframe,
+              }
+            : undefined
+        }
       />
 
       <div className="flex min-h-0 flex-1 overflow-hidden relative">
@@ -332,7 +399,7 @@ export function Timeline3D({
               style={{ height: TRACK_HEIGHT * 2 }}
               data-timeline-empty-tracks="true"
             >
-              No tracks bound to this project sequence.
+              <TimelineEmptyAuthoringHint enabled={authoringEnabled} />
             </div>
           )}
           {trackList.map(track => {
@@ -388,7 +455,17 @@ export function Timeline3D({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerLeave={() => setHoveredKf(null)}
-          onClick={() => setShowFpsMenu(false)}
+          onClick={() => {
+            setShowFpsMenu(false)
+            setShowAddTrackMenu(false)
+          }}
+          onDoubleClick={(e) => {
+            if (!authoringEnabled || !selectedTrack || !wrapperRef.current) return
+            const rect = wrapperRef.current.getBoundingClientRect()
+            const nx = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
+            const time = (nx / rect.width) * safeDuration
+            authoring?.onAddKeyframe(selectedTrack, time)
+          }}
         >
           <canvas
             ref={canvasRef}

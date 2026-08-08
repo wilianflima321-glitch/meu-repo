@@ -9,6 +9,10 @@ import {
   ChevronDown,
 } from 'lucide-react'
 import {
+  TimelineAuthoringControls,
+  type TimelineAuthoringProps,
+} from './Timeline3D.authoring'
+import {
   GLASS_SURFACE,
   ICON_HOVER_BG,
   ICON_HOVER_BG_SOFT,
@@ -53,6 +57,7 @@ type TimelineToolbarProps = {
   onAddKeyframe: () => void
   onToggleFpsMenu: () => void
   onSelectFps: (fps: number) => void
+  authoring?: TimelineAuthoringProps
 }
 
 export function TimelineHonestyBadges({
@@ -91,7 +96,7 @@ export function TimelineHonestyBadges({
           role="status"
           data-timeline-empty="true"
         >
-          Empty timeline — no sequence tracks (author clips in Sequencer)
+          Empty timeline — no sequence tracks (add a track to begin authoring)
         </div>
       )}
     </>
@@ -115,6 +120,7 @@ export function TimelineToolbar({
   onAddKeyframe,
   onToggleFpsMenu,
   onSelectFps,
+  authoring,
 }: TimelineToolbarProps) {
   return (
     <div
@@ -201,9 +207,12 @@ export function TimelineToolbar({
             e.currentTarget.style.color = MUTED_ICON
           }}
           title={selectedTrack ? `Add keyframe to "${selectedTrack}"` : 'Select a track to add a keyframe'}
+          data-timeline-add-keyframe="true"
         >
           <KeyRound size={13} />
         </button>
+
+        {authoring && <TimelineAuthoringControls {...authoring} />}
       </div>
 
       <div className="flex items-center gap-3">

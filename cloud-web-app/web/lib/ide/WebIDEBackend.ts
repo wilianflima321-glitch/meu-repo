@@ -21,6 +21,7 @@ import type {
   IDERenderJobStatus,
   IDESceneNode,
   IDESceneNodeTransformPatch,
+  IDETimelineAuthorResult,
   IDETimelineHydrateResult,
   IDETimelinePersistResult,
   IDETimelineSnapshot,
@@ -35,13 +36,25 @@ import type {
   IViewportService,
 } from '../../../packages/ide-ui/backend/types';
 import {
+  createEmptyProjectTimeline,
+  ensureProjectTimelineBound,
   getProjectTimelineBinding,
   subscribeProjectTimeline,
+  updateProjectTimeline,
 } from '@/lib/sequencer/project-timeline-store';
 import {
   hydrateProjectTimelineFromFile,
   persistProjectTimelineToFile,
 } from '@/lib/sequencer/timeline-project-persist';
+import {
+  addAuthoringKeyframe,
+  addAuthoringLane,
+  AUTHORABLE_TIMELINE_LANES,
+  listAvailableAuthoringLanes,
+  removeAuthoringKeyframe,
+  removeAuthoringLane,
+  type TimelineAuthorResult,
+} from '@/lib/sequencer/timeline-authoring';
 import { bindingToIDETimelineSnapshot } from '@/lib/sequencer/timeline-ui-adapter';
 
 const log = createComponentLogger('WebIDEBackend');
@@ -283,6 +296,77 @@ class WebTimelineService implements ITimelineService {
       return { ok: false, reason: result.reason, message: result.message };
     }
     return { ok: true, path: result.path };
+  }
+
+  ensureBound(options?: { durationSec?: number }): IDETimelineSnapshot {
+    const binding = getProjectTimelineBinding(this.projectId);
+    if (binding?.isDemo) {
+      return bindingToIDETimelineSnapshot(binding);
+    }
+    ensureProjectTimelineBound(this.projectId, options);
+    return this.getSnapshot();
+  }
+
+  listAvailableTracks(): string[] {
+    const binding = getProjectTimelineBinding(this.projectId);
+    if (!binding) return [...AUTHORABLE_TIMELINE_LANES];
+    if (binding.isDemo) return [];
+    return listAvailableAuthoringLanes(binding.timeline);
+  }
+
+  private async commitAuthor(
+    mutate: (timeline: NonNullable<ReturnType<typeof getProjectTimelineBinding>>['timeline']) => TimelineAuthorResult,
+  ): Promise<IDETimelineAuthorResult> {
+    const binding = getProjectTimelineBinding(this.projectId);
+    if (binding?.isDemo) {
+      return {
+        ok: false,
+        reason: 'demo_blocked',
+        message: 'Demo/fixture timelines are read-only — authoring is blocked.',
+      };
+    }
+    const base = binding?.timeline ?? createEmptyProjectTimeline(this.projectId);
+    const result = mutate(base);
+    if (!result.ok) {
+      return { ok: false, reason: result.reason, message: result.message };
+    }
+    updateProjectTimeline(this.projectId, result.timeline, { isDemo: false });
+    const snapshot = this.getSnapshot();
+    let persist: IDETimelinePersistResult | undefined;
+    try {
+      persist = await this.persistToProject();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      log.warn('timeline_author_persist_failed', { projectId: this.projectId, err: message });
+      persist = { ok: false, reason: 'io_error', message };
+    }
+    return { ok: true, snapshot, persist };
+  }
+
+  addTrack(laneId: string): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor((timeline) => addAuthoringLane(timeline, laneId));
+  }
+
+  addKeyframe(input: {
+    track: string;
+    time: number;
+    value?: number;
+  }): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor((timeline) =>
+      addAuthoringKeyframe(timeline, {
+        lane: input.track,
+        timeSec: input.time,
+        value: input.value,
+      }),
+    );
+  }
+
+  removeKeyframe(keyframeId: string): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor((timeline) => removeAuthoringKeyframe(timeline, keyframeId));
+  }
+
+  removeTrack(laneId: string): Promise<IDETimelineAuthorResult> {
+    return this.commitAuthor((timeline) => removeAuthoringLane(timeline, laneId));
   }
 }
 
