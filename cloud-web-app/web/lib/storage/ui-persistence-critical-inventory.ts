@@ -134,17 +134,25 @@ export const CW4_HELD_RAW_LOCALSTORAGE_DEBT: readonly Cw4HeldDebtEntry[] = [
   },
   {
     keyPattern: 'multi-tab LWW / lock',
-    reason: 'Cross-tab invalidate lite shipped; full lock/LWW HELD',
+    reason:
+      'CLOSED (2026-08-08) — Web Locks exclusive RMW + per-namespace entryMeta (updatedAt/writeSeq/tabId) + durable pending-delta drain; cross-tab invalidate remains notify-only (not CRDT). Kept as resolved-history. Remaining CW4 PARTIAL = global exception-only + legacy mirror compat window.',
     criticalIdeStudioPath: false,
     disposition: 'non-critical-debt',
   },
 ] as const
 
 /**
+ * Multi-tab LWW production path status (Web Locks + entryMeta + pending delta).
+ * Not CRDT/Yjs for chrome persistence — last-writer-wins only.
+ */
+export const CW4_LWW_STATUS = 'DONE' as const
+
+/**
  * Critical IDE/Studio path — DONE: zero remaining `criticalIdeStudioPath: true`
  * entries (the dock dual-write blocker is closed, see the module doc comment
  * above). Non-critical debt below is explicitly out of scope for this gate —
  * do not claim it means "zero raw localStorage anywhere in the app".
+ * Overall CW4 stays PARTIAL until global exception-only + legacy mirror prune.
  */
 export const CW4_CRITICAL_PATH_STATUS = 'DONE' as const
 

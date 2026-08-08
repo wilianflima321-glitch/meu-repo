@@ -73,6 +73,7 @@ describe('CW1 consolidation truth matrix', () => {
     expect(spine?.status).toBe('PARTIAL')
     expect(spine?.lastEvidence).toMatch(/criticalPath=PARTIAL/)
     expect(spine?.lastEvidence).not.toMatch(/criticalPath=DONE/)
+    expect(spine?.lastEvidence).toMatch(/lockLWW=DONE/)
     expect(spine?.marketingAllowed).toBe(false)
     expect(spine?.heldReason).toMatch(/cw4_/)
   })

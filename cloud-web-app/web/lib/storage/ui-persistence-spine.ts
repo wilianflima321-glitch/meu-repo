@@ -5,13 +5,22 @@
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
-import { AethelStorageAdapter } from '@/lib/storage/aethel-storage-adapter'
 import {
   readClientJson,
   removeClientStorageItem,
   writeClientJson,
 } from '@/lib/storage/safe-client-storage'
 import { notifyUiPersistenceLocalWrite } from '@/lib/storage/ui-persistence-cross-tab'
+import {
+  applyLwwWrites,
+  isUiPersistenceEntryMeta,
+  mergeVersionedWriteMaps,
+  nextUiPersistenceWriteMeta,
+  uiPersistenceWriteWins,
+  type UiPersistenceEntryMeta,
+  type UiPersistenceVersionedWrite,
+  __resetUiPersistenceLwwForTests,
+} from '@/lib/storage/ui-persistence-lww'
 
 const log = createComponentLogger('UiPersistenceSpine')
 
@@ -19,6 +28,11 @@ const log = createComponentLogger('UiPersistenceSpine')
 export const UI_PERSISTENCE_SPINE_VERSION = 1 as const
 
 export const UI_PERSISTENCE_BAG_KEY = 'aethel.ui.persistence.v1'
+
+/** Durable cross-tab pending writes drained under Web Locks (pagehide-safe). */
+export const UI_PERSISTENCE_PENDING_DELTA_KEY = 'aethel.ui.persistence.pending.v1'
+
+export const UI_PERSISTENCE_LOCK_NAME = 'aethel.ui.persistence.lock'
 
 export type UiPersistenceNamespace =
   | 'ide.dock'
@@ -84,6 +98,13 @@ export type UiPersistenceBag = {
   v: typeof UI_PERSISTENCE_SPINE_VERSION
   updatedAt: string
   entries: Partial<Record<UiPersistenceNamespace, unknown>>
+  /** Per-namespace LWW metadata (absent for pre-LWW migrated bare entries). */
+  entryMeta?: Partial<Record<UiPersistenceNamespace, UiPersistenceEntryMeta>>
+}
+
+type UiPersistencePendingDelta = {
+  v: 1
+  writes: Partial<Record<UiPersistenceNamespace, UiPersistenceVersionedWrite>>
 }
 
 function emptyBag(): UiPersistenceBag {
@@ -91,13 +112,31 @@ function emptyBag(): UiPersistenceBag {
     v: UI_PERSISTENCE_SPINE_VERSION,
     updatedAt: new Date(0).toISOString(),
     entries: {},
+    entryMeta: {},
   }
+}
+
+function emptyPendingDelta(): UiPersistencePendingDelta {
+  return { v: 1, writes: {} }
 }
 
 function isEnvelope(value: unknown): value is UiPersistenceEnvelope<unknown> {
   if (!value || typeof value !== 'object') return false
   const candidate = value as Partial<UiPersistenceEnvelope<unknown>>
   return candidate.v === UI_PERSISTENCE_SPINE_VERSION && 'data' in candidate
+}
+
+function normalizeEntryMeta(
+  raw: unknown,
+): Partial<Record<UiPersistenceNamespace, UiPersistenceEntryMeta>> {
+  if (!raw || typeof raw !== 'object') return {}
+  const out: Partial<Record<UiPersistenceNamespace, UiPersistenceEntryMeta>> = {}
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (isUiPersistenceEntryMeta(value)) {
+      out[key as UiPersistenceNamespace] = value
+    }
+  }
+  return out
 }
 
 function readBag(): UiPersistenceBag {
@@ -112,90 +151,152 @@ function readBag(): UiPersistenceBag {
     v: UI_PERSISTENCE_SPINE_VERSION,
     updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : new Date(0).toISOString(),
     entries: raw.entries && typeof raw.entries === 'object' ? { ...raw.entries } : {},
+    entryMeta: normalizeEntryMeta(raw.entryMeta),
   }
 }
 
-let _writeQueue: Partial<Record<UiPersistenceNamespace, unknown>> = {}
+function readPendingDelta(): UiPersistencePendingDelta {
+  const raw = readClientJson<Partial<UiPersistencePendingDelta> | null>(
+    UI_PERSISTENCE_PENDING_DELTA_KEY,
+    null,
+  )
+  if (!raw || raw.v !== 1 || !raw.writes || typeof raw.writes !== 'object') {
+    return emptyPendingDelta()
+  }
+  const writes: UiPersistencePendingDelta['writes'] = {}
+  for (const [key, value] of Object.entries(raw.writes)) {
+    if (!value || typeof value !== 'object') continue
+    const candidate = value as Partial<UiPersistenceVersionedWrite>
+    if (!isUiPersistenceEntryMeta(candidate.meta) || !('data' in candidate)) continue
+    writes[key as UiPersistenceNamespace] = {
+      data: candidate.data,
+      meta: candidate.meta,
+    }
+  }
+  return { v: 1, writes }
+}
+
+function writePendingDelta(delta: UiPersistencePendingDelta): boolean {
+  if (Object.keys(delta.writes).length === 0) {
+    removeClientStorageItem(UI_PERSISTENCE_PENDING_DELTA_KEY)
+    return true
+  }
+  return writeClientJson(UI_PERSISTENCE_PENDING_DELTA_KEY, delta)
+}
+
+function upsertPendingDelta(
+  writes: Partial<Record<UiPersistenceNamespace, UiPersistenceVersionedWrite>>,
+): void {
+  const current = readPendingDelta()
+  const merged = mergeVersionedWriteMaps(current.writes, writes)
+  writePendingDelta({ v: 1, writes: merged as UiPersistencePendingDelta['writes'] })
+}
+
+function clearPendingDeltaKeys(keys: string[]): void {
+  if (keys.length === 0) return
+  const current = readPendingDelta()
+  let changed = false
+  for (const key of keys) {
+    if (current.writes[key as UiPersistenceNamespace] !== undefined) {
+      delete current.writes[key as UiPersistenceNamespace]
+      changed = true
+    }
+  }
+  if (changed) writePendingDelta(current)
+}
+
+/** In-memory queue (versioned) — read-through for get before async lock flush. */
+let _writeQueue: Partial<Record<UiPersistenceNamespace, UiPersistenceVersionedWrite>> = {}
 let _writeLockActive = false
+
+function collectPendingWrites(): Partial<
+  Record<UiPersistenceNamespace, UiPersistenceVersionedWrite>
+> {
+  const durable = readPendingDelta().writes
+  return mergeVersionedWriteMaps(durable, _writeQueue) as Partial<
+    Record<UiPersistenceNamespace, UiPersistenceVersionedWrite>
+  >
+}
+
+/**
+ * Merge in-memory + durable pending into bag with per-namespace LWW, then persist.
+ * Called under Web Locks when available; sync path is best-effort LWW (no exclusive lock).
+ */
+function commitPendingToBag(): boolean {
+  const pending = collectPendingWrites()
+  _writeQueue = {}
+
+  const bag = readBag()
+  const slice = {
+    entries: { ...bag.entries } as Partial<Record<string, unknown>>,
+    entryMeta: { ...(bag.entryMeta ?? {}) } as Partial<Record<string, UiPersistenceEntryMeta>>,
+  }
+  const applied = applyLwwWrites(slice, pending)
+
+  const next: UiPersistenceBag = {
+    v: UI_PERSISTENCE_SPINE_VERSION,
+    updatedAt: new Date().toISOString(),
+    entries: slice.entries as UiPersistenceBag['entries'],
+    entryMeta: slice.entryMeta as UiPersistenceBag['entryMeta'],
+  }
+
+  const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
+  if (!ok) {
+    log.warn('ui_persistence_bag_write_failed', { key: UI_PERSISTENCE_BAG_KEY })
+    // Re-queue memory so pagehide / next flush can retry.
+    _writeQueue = mergeVersionedWriteMaps(_writeQueue, pending) as typeof _writeQueue
+    return false
+  }
+
+  clearPendingDeltaKeys(applied)
+  // Stale pending that lost LWW should also be dropped so they do not resurrect.
+  const lost = Object.keys(pending).filter((k) => !applied.includes(k))
+  clearPendingDeltaKeys(lost)
+  notifyUiPersistenceLocalWrite()
+  return true
+}
 
 async function flushWriteQueue() {
   if (typeof navigator === 'undefined' || !navigator.locks) {
-    // Fallback if Web Locks API is unavailable
     flushWriteQueueSync()
     return
   }
-  
+
   if (_writeLockActive) return
   _writeLockActive = true
-  
+
   try {
-    await navigator.locks.request('aethel.ui.persistence.lock', async () => {
-      const pending = { ..._writeQueue }
-      _writeQueue = {}
-      
-      const bag = readBag()
-      for (const [key, value] of Object.entries(pending)) {
-        bag.entries[key as UiPersistenceNamespace] = value
-      }
-      
-      const next: UiPersistenceBag = {
-        ...bag,
-        v: UI_PERSISTENCE_SPINE_VERSION,
-        updatedAt: new Date().toISOString(),
-      }
-      
-      const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
-      if (!ok) {
-        log.warn('ui_persistence_bag_write_failed', { key: UI_PERSISTENCE_BAG_KEY })
-      } else {
-        notifyUiPersistenceLocalWrite()
-      }
+    await navigator.locks.request(UI_PERSISTENCE_LOCK_NAME, async () => {
+      commitPendingToBag()
     })
   } catch (error) {
-    log.warn('ui_persistence_lock_failed', { error })
+    log.warn('ui_persistence_lock_failed', {
+      error: error instanceof Error ? error.message : 'unknown',
+    })
     flushWriteQueueSync()
   } finally {
     _writeLockActive = false
-    if (Object.keys(_writeQueue).length > 0) {
-      flushWriteQueue()
+    if (Object.keys(_writeQueue).length > 0 || Object.keys(readPendingDelta().writes).length > 0) {
+      void flushWriteQueue()
     }
   }
 }
 
 function flushWriteQueueSync() {
-  const pending = { ..._writeQueue }
-  _writeQueue = {}
-  
-  const bag = readBag()
-  for (const [key, value] of Object.entries(pending)) {
-    bag.entries[key as UiPersistenceNamespace] = value
-  }
-  
-  const next: UiPersistenceBag = {
-    ...bag,
-    v: UI_PERSISTENCE_SPINE_VERSION,
-    updatedAt: new Date().toISOString(),
-  }
-  
-  const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
-  if (!ok) {
-    log.warn('ui_persistence_bag_write_failed', { key: UI_PERSISTENCE_BAG_KEY })
-  } else {
-    notifyUiPersistenceLocalWrite()
-  }
+  commitPendingToBag()
 }
 
 // Safety net for CW4-002: `flushWriteQueue()` above defers the canonical
 // bag write behind `navigator.locks.request`, a microtask/macrotask hop. If
-// the tab is closed, navigated away from, or backgrounded (mobile OS
-// suspend) before that callback runs, the queued write is silently lost —
-// `mirrorLegacy()` still lands synchronously, but the legacy key is
-// intentionally never read back into the bag (see `ensureMigrated` doc
-// above), so the loss is permanent. Force a synchronous flush of any
-// still-pending entries on the last reliable lifecycle signals.
+// the tab is closed/navigated/backgrounded before that callback runs, the
+// in-memory queue would be lost — durable pending-delta + sync flush close
+// that window. Legacy mirror remains one-way (never read back into bag).
 if (typeof window !== 'undefined') {
   const flushPendingSync = () => {
-    if (Object.keys(_writeQueue).length > 0) {
+    if (
+      Object.keys(_writeQueue).length > 0 ||
+      Object.keys(readPendingDelta().writes).length > 0
+    ) {
       flushWriteQueueSync()
     }
   }
@@ -207,11 +308,12 @@ if (typeof window !== 'undefined') {
 }
 
 function writeBag(bag: UiPersistenceBag): boolean {
-  // Sync fallback (should only be used in tests or early bootstrap)
+  // Sync fallback (migrate / remove — not the multi-tab write path)
   const next: UiPersistenceBag = {
     ...bag,
     v: UI_PERSISTENCE_SPINE_VERSION,
     updatedAt: new Date().toISOString(),
+    entryMeta: bag.entryMeta ?? {},
   }
   const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
   if (!ok) {
@@ -393,14 +495,50 @@ export function __resetUiPersistenceMigrateGateForTests(): void {
   // intentionally empty
 }
 
+/** Test-only: clear in-memory queue + LWW tab/seq + durable pending delta. */
+export function __resetUiPersistenceWriteStateForTests(): void {
+  _writeQueue = {}
+  _writeLockActive = false
+  removeClientStorageItem(UI_PERSISTENCE_PENDING_DELTA_KEY)
+  __resetUiPersistenceLwwForTests()
+}
+
+/**
+ * Resolve the effective value for a namespace via LWW across memory pending,
+ * durable pending-delta, and bag entryMeta (stale pending cannot shadow bag).
+ */
+function resolveNamespaceValue(namespace: UiPersistenceNamespace): unknown {
+  const bag = ensureMigrated()
+  const candidates: UiPersistenceVersionedWrite[] = []
+  const memory = _writeQueue[namespace]
+  if (memory) candidates.push(memory)
+  const durable = readPendingDelta().writes[namespace]
+  if (durable) candidates.push(durable)
+
+  const bagValue = bag.entries[namespace]
+  const bagMeta = bag.entryMeta?.[namespace]
+  if (bagValue !== undefined && bagMeta) {
+    candidates.push({ data: bagValue, meta: bagMeta })
+  }
+
+  if (candidates.length === 0) return bagValue
+
+  let winner = candidates[0]!
+  for (let i = 1; i < candidates.length; i++) {
+    const next = candidates[i]!
+    if (uiPersistenceWriteWins(next.meta, winner.meta)) winner = next
+  }
+  return winner.data
+}
+
 export function getUiPersistence<T>(
   namespace: UiPersistenceNamespace,
   fallback: T,
   validate?: (value: unknown) => value is T,
 ): T {
   try {
-    const bag = ensureMigrated()
-    const value = bag.entries[namespace]
+    ensureMigrated()
+    const value = resolveNamespaceValue(namespace)
     if (value === undefined || value === null) return fallback
     if (validate) {
       return validate(value) ? value : fallback
@@ -417,11 +555,16 @@ export function getUiPersistence<T>(
 
 export function setUiPersistence<T>(namespace: UiPersistenceNamespace, value: T): boolean {
   try {
-    // 1. Queue the write for the async lock flusher (real multi-tab LWW)
-    _writeQueue[namespace] = value as unknown
-    flushWriteQueue()
-    
-    // 2. Also write legacy compat synchronously (since they don't share the bag)
+    const write: UiPersistenceVersionedWrite = {
+      data: value as unknown,
+      meta: nextUiPersistenceWriteMeta(),
+    }
+    // 1. Durable pending + memory queue (survive pagehide before lock hop)
+    _writeQueue[namespace] = write
+    upsertPendingDelta({ [namespace]: write })
+    // 2. Async exclusive RMW under Web Locks (multi-tab LWW) when available
+    void flushWriteQueue()
+    // 3. One-way legacy mirror (compat window; never read back into bag)
     mirrorLegacy(namespace, value)
     return true
   } catch (error) {
@@ -435,8 +578,11 @@ export function setUiPersistence<T>(namespace: UiPersistenceNamespace, value: T)
 
 export function removeUiPersistence(namespace: UiPersistenceNamespace): void {
   try {
+    delete _writeQueue[namespace]
+    clearPendingDeltaKeys([namespace])
     const bag = ensureMigrated()
     delete bag.entries[namespace]
+    if (bag.entryMeta) delete bag.entryMeta[namespace]
     writeBag(bag)
     removeLegacy(namespace)
   } catch (error) {
@@ -445,6 +591,11 @@ export function removeUiPersistence(namespace: UiPersistenceNamespace): void {
       error: error instanceof Error ? error.message : 'unknown',
     })
   }
+}
+
+/** Expose sync flush for tests / pagehide simulation. */
+export function __flushUiPersistenceForTests(): void {
+  flushWriteQueueSync()
 }
 
 function mirrorLegacy(namespace: UiPersistenceNamespace, value: unknown): void {

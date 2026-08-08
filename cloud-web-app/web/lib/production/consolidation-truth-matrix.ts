@@ -12,7 +12,7 @@ import {
   evaluateNexusTaskGraphCompleteness,
 } from '@/lib/production/agents-receipt-completeness'
 import {
-  CW4_HELD_RAW_LOCALSTORAGE_DEBT,
+  CW4_LWW_STATUS,
   listCw4CriticalPathBlockers,
 } from '@/lib/storage/ui-persistence-critical-inventory'
 import {
@@ -155,11 +155,9 @@ export function buildConsolidationTruthMatrix(
   const emptyReceipt = evaluateEvidenceReceiptCompleteness(null)
   const emptyNexus = evaluateNexusTaskGraphCompleteness(null)
   const cw4CriticalBlockers = listCw4CriticalPathBlockers()
-  const cw4LwwHeld = CW4_HELD_RAW_LOCALSTORAGE_DEBT.some((entry) =>
-    entry.keyPattern.includes('LWW'),
-  )
+  const cw4LwwDone = CW4_LWW_STATUS === 'DONE'
   const cw4SpineStatus: ConsolidationTruthStatus =
-    cw4CriticalBlockers.length > 0 || cw4LwwHeld ? 'PARTIAL' : 'PARTIAL'
+    cw4CriticalBlockers.length > 0 ? 'PARTIAL' : 'PARTIAL'
 
   const rows: ConsolidationTruthRow[] = [
     {
@@ -265,13 +263,13 @@ export function buildConsolidationTruthMatrix(
     {
       id: 'ui.persistence.spine',
       claim:
-        'CW4/CW5 critical IDE/Studio path on spine — LWW WebLocks + CW1 bench [PARTIAL]',
+        'CW4/CW5 critical IDE/Studio path on spine — LWW WebLocks DONE; exception-only + CW1 bench [PARTIAL]',
       path: 'lib/storage/ui-persistence-critical-inventory.ts',
       status: cw4SpineStatus,
       marketingAllowed: false,
-      heldReason: cw4LwwHeld ? 'cw4_lww_locks_held' : 'cw4_spine_partial',
-      note: 'Critical dock dual-write closed; multi-tab LWW HELD; CW1 15-panel bench OPEN',
-      lastEvidence: `criticalPath=PARTIAL;blockers=${cw4CriticalBlockers.length};lockLWW=${cw4LwwHeld ? 'HELD' : 'PARTIAL'};cw1Bench=OPEN`,
+      heldReason: 'cw4_exception_only_partial',
+      note: 'Critical dock dual-write closed; multi-tab LWW (WebLocks+entryMeta+pending-delta) DONE; global exception-only + legacy mirror + CW1 bench remain',
+      lastEvidence: `criticalPath=PARTIAL;blockers=${cw4CriticalBlockers.length};lockLWW=${cw4LwwDone ? 'DONE' : 'HELD'};cw1Bench=OPEN;exceptionOnly=OPEN`,
       gatedNames: ['BYOK', 'token vault'],
     },
     {

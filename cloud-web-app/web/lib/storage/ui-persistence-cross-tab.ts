@@ -1,6 +1,7 @@
 /**
- * CW4 lite multi-tab invalidate — BroadcastChannel + storage event.
- * Full multi-tab lock / last-writer-wins authority remains HELD.
+ * CW4 multi-tab invalidate — BroadcastChannel + storage event.
+ * Authority for concurrent bag writes lives in ui-persistence-spine
+ * (Web Locks + per-entry LWW). This module only notifies peers to reload.
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'

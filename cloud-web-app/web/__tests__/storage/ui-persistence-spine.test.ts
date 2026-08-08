@@ -4,6 +4,7 @@ import {
   UI_PERSISTENCE_BAG_KEY,
   UI_PERSISTENCE_LEGACY_KEYS,
   __resetUiPersistenceMigrateGateForTests,
+  __resetUiPersistenceWriteStateForTests,
   clearStudioSessionId,
   getAgentsOpsMemory,
   getStudioSessionId,
@@ -37,7 +38,9 @@ import {
 describe('ui-persistence-spine (CW4)', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    window.sessionStorage?.clear?.()
     __resetUiPersistenceMigrateGateForTests()
+    __resetUiPersistenceWriteStateForTests()
     __resetUiPersistenceCrossTabForTests()
   })
 

@@ -9,6 +9,7 @@ import {
   CW4_CRITICAL_PATH_STATUS,
   CW4_CRITICAL_SPINE_NAMESPACES,
   CW4_HELD_RAW_LOCALSTORAGE_DEBT,
+  CW4_LWW_STATUS,
   listCw4CriticalPathBlockers,
 } from '@/lib/storage/ui-persistence-critical-inventory'
 
@@ -40,6 +41,13 @@ describe('CW4 critical persistence inventory', () => {
     expect(
       CW4_HELD_RAW_LOCALSTORAGE_DEBT.some((e) => e.disposition === 'exception-secret'),
     ).toBe(true)
+  })
+
+  it('marks multi-tab LWW production path DONE (not HELD forever)', () => {
+    expect(CW4_LWW_STATUS).toBe('DONE')
+    const lww = CW4_HELD_RAW_LOCALSTORAGE_DEBT.find((e) => e.keyPattern.includes('LWW'))
+    expect(lww?.reason).toMatch(/CLOSED/)
+    expect(lww?.reason).not.toMatch(/full lock\/LWW HELD/)
   })
 
   it('routes viewport dock keys through spine adapter (not raw-only bypass)', () => {
