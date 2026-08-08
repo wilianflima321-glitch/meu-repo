@@ -12,6 +12,16 @@ import {
 } from '@/components/preview/previewRuntimeState';
 import { usePreviewRuntimeHealthMonitor } from '@/components/preview/usePreviewRuntimeHealthMonitor';
 import { usePreviewRuntimeHmrBridge } from '@/components/preview/usePreviewRuntimeHmrBridge';
+import { requestPreviewHotUpdate } from '@/lib/preview/runtime-manager';
+import {
+  forcePreviewIframeReload,
+  PREVIEW_APPLY_SUCCESS_EVENT,
+  publishPreviewHotUpdateResult,
+  type PreviewApplySuccessDetail,
+} from '@/lib/preview/preview-hot-update';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const log = createComponentLogger('usePreviewRuntime');
 
 function isPreviewRuntimePayload(value: unknown): value is PreviewRuntimePayload {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -24,8 +34,17 @@ function getPayloadText(value: unknown): string | null {
 export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const [runtime, setRuntime] = useState<PreviewRuntimeInfo>(INITIAL_PREVIEW_RUNTIME);
   const sandboxIdRef = useRef<string | null>(null);
+  const hmrConnectedRef = useRef(false);
   const { clearHealthPolling, startHealthPolling } = usePreviewRuntimeHealthMonitor(setRuntime);
   const { clearHmrBridge, connectHMR } = usePreviewRuntimeHmrBridge(setRuntime);
+
+  useEffect(() => {
+    hmrConnectedRef.current = runtime.hmrConnected;
+  }, [runtime.hmrConnected]);
+
+  useEffect(() => {
+    sandboxIdRef.current = runtime.sandboxId;
+  }, [runtime.sandboxId]);
 
   const teardownSession = useCallback(async (sandboxId: string | null) => {
     if (!sandboxId) return;
@@ -202,6 +221,93 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       connectHMR(runtime.runtimeUrl);
     }
   }, [runtime.state, runtime.runtimeUrl, connectHMR]);
+
+  /**
+   * L.8 — after governed apply success, sync into the live session and refresh honestly.
+   * Fail-closed when no sandboxId; never claim HMR unless the server returns hmr:true.
+   */
+  useEffect(() => {
+    const onApplySuccess = (event: Event) => {
+      const detail = (event as CustomEvent<PreviewApplySuccessDetail>).detail;
+      const paths = Array.isArray(detail?.paths) ? detail.paths.filter(Boolean) : [];
+      if (paths.length === 0) return;
+
+      const sandboxId = sandboxIdRef.current;
+      void (async () => {
+        setRuntime((prev) => ({
+          ...prev,
+          state: sandboxId ? 'syncing' : prev.state,
+          guidance: sandboxId
+            ? 'Syncing applied files into the live preview session...'
+            : 'Apply succeeded, but no live preview session — provision preview to enable hot-update.',
+        }));
+
+        const preferHmr = Boolean(detail?.preferHmr);
+        const finalResult = await requestPreviewHotUpdate({
+          projectId: detail?.projectId ?? projectId ?? null,
+          sandboxId,
+          paths,
+          clientHmrConnected: preferHmr ? hmrConnectedRef.current : false,
+          preferHmr,
+        });
+
+        publishPreviewHotUpdateResult(finalResult);
+
+        if (!finalResult.ok) {
+          log.warn('preview_hot_update_denied', {
+            message: finalResult.message,
+            sandboxId,
+            paths: paths.length,
+          });
+          setRuntime((prev) => ({
+            ...prev,
+            state: prev.runtimeUrl ? 'degraded' : prev.state,
+            guidance:
+              finalResult.message ||
+              'Preview hot-update denied — no live session or sync failed (fail-closed).',
+            recommendedAction: sandboxId
+              ? 'Retry apply sync or reprovision preview.'
+              : 'Provision a preview session before expecting multi-file hot refresh.',
+          }));
+          return;
+        }
+
+        setRuntime((prev) => ({
+          ...prev,
+          state: finalResult.hmr ? 'healthy' : 'syncing',
+          filesInSync: prev.filesInSync + finalResult.filesSynced,
+          lastSyncAt: Date.now(),
+          guidance: finalResult.message || null,
+          error: null,
+          // Honesty: only mark HMR connected when server claimed hmr — reload path keeps prior bridge state.
+          hmrConnected: finalResult.hmr ? true : prev.hmrConnected,
+        }));
+
+        if (finalResult.reload) {
+          forcePreviewIframeReload();
+          window.setTimeout(() => {
+            setRuntime((prev) => ({
+              ...prev,
+              state: prev.runtimeUrl ? 'healthy' : prev.state,
+            }));
+          }, 900);
+        }
+
+        log.info('preview_hot_update', {
+          hmr: finalResult.hmr,
+          reload: finalResult.reload,
+          mode: finalResult.mode,
+          filesSynced: finalResult.filesSynced,
+          reusedSession: finalResult.reusedSession,
+        });
+      })();
+    };
+
+    window.addEventListener(PREVIEW_APPLY_SUCCESS_EVENT, onApplySuccess as EventListener);
+    return () => {
+      window.removeEventListener(PREVIEW_APPLY_SUCCESS_EVENT, onApplySuccess as EventListener);
+    };
+  }, [projectId]);
 
   useEffect(() => {
     const onPageHide = () => {

@@ -6,9 +6,8 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
-import Codicon from './Codicon'
 import { analytics } from '../../web/lib/analytics'
-import { Monitor, Smartphone, Tablet, RotateCw, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { Monitor, Smartphone, Tablet, RotateCw } from 'lucide-react'
 import { useInlinePreviewInspector } from './PreviewPanel.inspect'
 import {
   MAX_INLINE_PREVIEW_CHARS,
@@ -43,8 +42,18 @@ export default function PreviewPanel({
 }: PreviewPanelProps) {
   const [mediaLoadError, setMediaLoadError] = useState<string | null>(null)
   const [runtimeReloadTick, setRuntimeReloadTick] = useState(0)
+  const [deviceMode, setDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
   const runtimeTelemetryRef = useRef<string>('')
   const inlineFrameRef = useRef<HTMLIFrameElement | null>(null)
+
+  // L.8 — full iframe reload after session file sync when HMR is not confirmed.
+  useEffect(() => {
+    const onForceReload = () => {
+      setRuntimeReloadTick((prev) => prev + 1)
+    }
+    window.addEventListener('aethel.preview.force-reload', onForceReload)
+    return () => window.removeEventListener('aethel.preview.force-reload', onForceReload)
+  }, [])
   const ext = getExtension(filePath)
   const mode = useMemo(() => resolvePreviewMode(filePath), [filePath])
   const textContent = typeof content === 'string' ? content : typeof html === 'string' ? html : ''
@@ -90,6 +99,15 @@ export default function PreviewPanel({
   }, [runtimeReloadTick, runtimeUrl])
   const showText = !isLargeTextPreview && (mode === 'json' || mode === 'text')
   const showMedia = mode === 'image' || mode === 'audio' || mode === 'video'
+
+  // Responsive device preview widths — only applies to iframe modes.
+  const DEVICE_CONFIG = {
+    desktop: { label: 'Desktop', Icon: Monitor, maxWidth: '100%' },
+    tablet:  { label: 'Tablet',  Icon: Tablet,  maxWidth: '768px' },
+    mobile:  { label: 'Mobile',  Icon: Smartphone, maxWidth: '390px' },
+  } as const
+  const canSwitchDevice = canUseDevRuntime || showIframeRuntime
+  const deviceMaxWidth = DEVICE_CONFIG[deviceMode].maxWidth
   const previewStatusLabel = canUseDevRuntime
     ? 'Live'
     : forceInlineFallback && runtimeUrl
@@ -160,29 +178,67 @@ export default function PreviewPanel({
             className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-text-secondary)]"
             title={previewStatusTitle}
           >
-            Preview · {previewStatusLabel}
+            {previewStatusLabel}
           </span>
           {isStale && (
-            <span className="ml-2 px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px] normal-case">
-              Preview out of sync
+            <span className="ml-2 px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] text-[10px] normal-case">
+              Out of sync
             </span>
           )}
         </div>
-        <button type="button" aria-label={canUseDevRuntime ? 'Refresh development runtime preview' : 'Refresh preview'}
-          onClick={() => {
-            if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
-            onRefresh?.()
-          }}
-          disabled={!onRefresh && !canUseDevRuntime}
-          className="flex items-center gap-1 rounded px-2 py-1 text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
-          title="Refresh preview"
-        >
-          <Codicon name="refresh" />
-          Reload
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Device viewport switcher — activates the Monitor/Tablet/Smartphone icons */}
+          {canSwitchDevice && (
+            <div
+              className="flex items-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-0.5 mr-1"
+              role="group"
+              aria-label="Preview device size"
+            >
+              {(['desktop', 'tablet', 'mobile'] as const).map((d) => {
+                const cfg = DEVICE_CONFIG[d]
+                const Icon = cfg.Icon
+                const isActive = deviceMode === d
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-label={`Preview as ${cfg.label}`}
+                    aria-pressed={isActive}
+                    title={cfg.label}
+                    onClick={() => setDeviceMode(d)}
+                    className={[
+                      'flex items-center justify-center rounded p-1 transition',
+                      isActive
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] text-[var(--aethel-primary-light)]'
+                        : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]',
+                    ].join(' ')}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          <button type="button" aria-label={canUseDevRuntime ? 'Refresh development runtime preview' : 'Refresh preview'}
+            onClick={() => {
+              if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
+              onRefresh?.()
+            }}
+            disabled={!onRefresh && !canUseDevRuntime}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
+            title="Refresh preview"
+          >
+            <RotateCw className="h-3.5 w-3.5" />
+            Reload
+          </button>
+        </div>
       </div>
 
-      <div className="flex-1 bg-[var(--aethel-surface-secondary)]">
+      <div className="flex flex-1 overflow-hidden bg-[var(--aethel-surface-secondary)] items-center justify-center">
+        <div
+          className="h-full transition-all duration-200 overflow-hidden"
+          style={{ width: '100%', maxWidth: canSwitchDevice ? deviceMaxWidth : '100%' }}
+        >
         {forceInlineFallback && runtimeUrl && (
           <div className={PREVIEW_NOTICE_CLASS} role="status" aria-live="polite">
             Live runtime unavailable. Local preview is active.
@@ -311,6 +367,7 @@ export default function PreviewPanel({
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   )

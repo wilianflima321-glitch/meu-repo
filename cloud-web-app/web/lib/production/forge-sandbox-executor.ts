@@ -23,6 +23,8 @@
 
 import { execFile, spawn, type ChildProcess } from 'child_process'
 import { randomUUID } from 'crypto'
+import fs from 'fs/promises'
+import path from 'path'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
   reserveCreativeCost,
@@ -752,6 +754,213 @@ export function resolveForgeSandboxE2BPreviewUrl(
     return `https://${normalized}`
   } catch {
     return null
+  }
+}
+
+export type ForgeSandboxWriteFile = {
+  path: string
+  content: string
+}
+
+export type ForgeSandboxWriteResult =
+  | {
+      ok: true
+      sessionId: string
+      provider: ForgeSandboxProvider
+      filesWritten: number
+      projectRootPath: string
+    }
+  | {
+      ok: false
+      reason: 'session_not_found' | 'session_torn_down' | 'path_escape' | 'write_failed' | 'e2b_handle_missing'
+      message: string
+      filesWritten: number
+    }
+
+/**
+ * L.8 — write multi-file contents into a live Forge sandbox session.
+ * - local-isolated: path-guarded writes under projectRootPath (same FS the dev server watches)
+ * - e2b: writes via the live sandbox files API (fail-closed if handle missing)
+ * Never invents success when the session is gone.
+ */
+export async function writeFilesToForgeSandbox(input: {
+  sessionId: string
+  files: ForgeSandboxWriteFile[]
+}): Promise<ForgeSandboxWriteResult> {
+  const state = RUNTIME_SESSIONS.get(input.sessionId)
+  if (!state) {
+    return {
+      ok: false,
+      reason: 'session_not_found',
+      message: `No live Forge sandbox session: ${input.sessionId}`,
+      filesWritten: 0,
+    }
+  }
+  if (state.session.teardownAt) {
+    return {
+      ok: false,
+      reason: 'session_torn_down',
+      message: `Sandbox session already torn down: ${input.sessionId}`,
+      filesWritten: 0,
+    }
+  }
+
+  const files = input.files.filter((f) => typeof f.path === 'string' && f.path.trim().length > 0)
+  if (files.length === 0) {
+    return {
+      ok: true,
+      sessionId: input.sessionId,
+      provider: state.session.provider,
+      filesWritten: 0,
+      projectRootPath: state.projectRootPath,
+    }
+  }
+
+  let written = 0
+  try {
+    if (state.session.provider === 'e2b') {
+      if (!state.e2bHandle) {
+        return {
+          ok: false,
+          reason: 'e2b_handle_missing',
+          message: 'E2B session has no live files handle — cannot sync without reprovision.',
+          filesWritten: 0,
+        }
+      }
+      const workdir = String(process.env.AETHEL_PREVIEW_E2B_WORKDIR || '/workspace').trim() || '/workspace'
+      const normalizedWorkdir = workdir.startsWith('/') ? workdir : `/${workdir}`
+      const batch: Array<{ path: string; data: string }> = []
+      for (const file of files) {
+        const guard = confinePathToProjectRoot(state.projectRootPath, file.path)
+        if (!guard.ok) {
+          return {
+            ok: false,
+            reason: 'path_escape',
+            message: guard.message,
+            filesWritten: written,
+          }
+        }
+        const relative = path.relative(state.projectRootPath, guard.resolved).replace(/\\/g, '/')
+        batch.push({
+          path: path.posix.join(normalizedWorkdir, relative),
+          data: file.content,
+        })
+      }
+      await state.e2bHandle.files.writeFiles(batch)
+      written = batch.length
+    } else {
+      for (const file of files) {
+        const guard = confinePathToProjectRoot(state.projectRootPath, file.path)
+        if (!guard.ok) {
+          return {
+            ok: false,
+            reason: 'path_escape',
+            message: guard.message,
+            filesWritten: written,
+          }
+        }
+        await fs.mkdir(path.dirname(guard.resolved), { recursive: true })
+        await fs.writeFile(guard.resolved, file.content, 'utf8')
+        written += 1
+      }
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    appendExecEvidence(input.sessionId, 'failed', 'writeFiles', [], `Sandbox file sync failed: ${message}`)
+    return {
+      ok: false,
+      reason: 'write_failed',
+      message: `Sandbox file sync failed: ${message}`,
+      filesWritten: written,
+    }
+  }
+
+  appendExecEvidence(
+    input.sessionId,
+    'ok',
+    'writeFiles',
+    [],
+    `Synced ${written} file(s) into ${state.session.provider} sandbox for preview hot-update.`,
+  )
+  log.info('forge_sandbox_files_written', {
+    sessionId: input.sessionId,
+    provider: state.session.provider,
+    filesWritten: written,
+  })
+  return {
+    ok: true,
+    sessionId: input.sessionId,
+    provider: state.session.provider,
+    filesWritten: written,
+    projectRootPath: state.projectRootPath,
+  }
+}
+
+/**
+ * L.8 — verify relative paths exist inside a live session project root (local apply already on disk).
+ * Fail-closed on missing session / path escape / missing file.
+ */
+export async function verifyFilesInForgeSandbox(input: {
+  sessionId: string
+  paths: string[]
+}): Promise<ForgeSandboxWriteResult> {
+  const state = RUNTIME_SESSIONS.get(input.sessionId)
+  if (!state) {
+    return {
+      ok: false,
+      reason: 'session_not_found',
+      message: `No live Forge sandbox session: ${input.sessionId}`,
+      filesWritten: 0,
+    }
+  }
+  if (state.session.teardownAt) {
+    return {
+      ok: false,
+      reason: 'session_torn_down',
+      message: `Sandbox session already torn down: ${input.sessionId}`,
+      filesWritten: 0,
+    }
+  }
+
+  let verified = 0
+  for (const rawPath of input.paths) {
+    if (!rawPath || !rawPath.trim()) continue
+    const guard = confinePathToProjectRoot(state.projectRootPath, rawPath)
+    if (!guard.ok) {
+      return {
+        ok: false,
+        reason: 'path_escape',
+        message: guard.message,
+        filesWritten: verified,
+      }
+    }
+    try {
+      const stat = await fs.stat(guard.resolved)
+      if (!stat.isFile()) {
+        return {
+          ok: false,
+          reason: 'write_failed',
+          message: `Path is not a file in sandbox root: ${rawPath}`,
+          filesWritten: verified,
+        }
+      }
+      verified += 1
+    } catch {
+      return {
+        ok: false,
+        reason: 'write_failed',
+        message: `Applied path missing from sandbox root: ${rawPath}`,
+        filesWritten: verified,
+      }
+    }
+  }
+
+  return {
+    ok: true,
+    sessionId: input.sessionId,
+    provider: state.session.provider,
+    filesWritten: verified,
+    projectRootPath: state.projectRootPath,
   }
 }
 

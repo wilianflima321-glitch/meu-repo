@@ -318,6 +318,112 @@ export async function syncPreviewRuntimeFile(projectId: string | null, sandboxId
   }
 }
 
+export type PreviewHotUpdateResponse = {
+  ok: boolean
+  success?: boolean
+  hmr: boolean
+  reload: boolean
+  mode: 'hmr' | 'reload' | 'denied'
+  reusedSession: boolean
+  filesSynced: number
+  message?: string
+  sandboxSessionId?: string
+  strategy?: string
+  error?: string
+}
+
+/**
+ * L.8 — sync applied files into a live preview session and return honesty flags.
+ * Fail-closed when sandboxId is missing (caller must not invent HMR).
+ */
+export async function requestPreviewHotUpdate(input: {
+  projectId?: string | null
+  sandboxId: string | null
+  paths?: string[]
+  files?: Array<{ path: string; content: string }>
+  clientHmrConnected?: boolean
+  preferHmr?: boolean
+}): Promise<PreviewHotUpdateResponse> {
+  if (!input.sandboxId) {
+    return {
+      ok: false,
+      hmr: false,
+      reload: false,
+      mode: 'denied',
+      reusedSession: false,
+      filesSynced: 0,
+      message: 'No live preview sandboxId — hot-update fail-closed (provision first).',
+      error: 'RUNTIME_HOT_UPDATE_MISSING_SESSION',
+    }
+  }
+
+  const response = await fetch('/api/preview/runtime-hot-update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getRuntimeAuthHeaders(),
+    },
+    body: JSON.stringify({
+      projectId: input.projectId,
+      sandboxSessionId: input.sandboxId,
+      sandboxId: input.sandboxId,
+      paths: input.paths,
+      files: input.files,
+      clientHmrConnected: Boolean(input.clientHmrConnected),
+      preferHmr: Boolean(input.preferHmr),
+    }),
+  })
+
+  const payload = (await response.json().catch(() => null)) as
+    | (PreviewHotUpdateResponse & {
+        metadata?: Partial<PreviewHotUpdateResponse>
+      })
+    | null
+
+  const meta = payload?.metadata
+  const hmr = Boolean(payload?.hmr ?? meta?.hmr)
+  const reload = Boolean(payload?.reload ?? meta?.reload)
+  const mode =
+    payload?.mode === 'hmr' || payload?.mode === 'reload' || payload?.mode === 'denied'
+      ? payload.mode
+      : meta?.mode === 'hmr' || meta?.mode === 'reload' || meta?.mode === 'denied'
+        ? meta.mode
+        : 'denied'
+  const filesSynced =
+    typeof payload?.filesSynced === 'number'
+      ? payload.filesSynced
+      : typeof meta?.filesSynced === 'number'
+        ? meta.filesSynced
+        : 0
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      hmr: false,
+      reload: false,
+      mode: 'denied',
+      reusedSession: Boolean(payload?.reusedSession ?? meta?.reusedSession),
+      filesSynced,
+      message: payload?.message || payload?.error || `HTTP ${response.status}`,
+      sandboxSessionId: payload?.sandboxSessionId ?? meta?.sandboxSessionId,
+      strategy: payload?.strategy ?? meta?.strategy,
+      error: payload?.error || 'RUNTIME_HOT_UPDATE_DENIED',
+    }
+  }
+
+  return {
+    ok: Boolean(payload?.ok ?? payload?.success),
+    hmr,
+    reload,
+    mode,
+    reusedSession: Boolean(payload?.reusedSession ?? meta?.reusedSession ?? true),
+    filesSynced,
+    message: payload?.message,
+    sandboxSessionId: payload?.sandboxSessionId ?? meta?.sandboxSessionId,
+    strategy: payload?.strategy ?? meta?.strategy,
+  }
+}
+
 export async function checkPreviewRuntimeHealth(runtimeUrl: string | null): Promise<PreviewRuntimeHealthState> {
   if (!runtimeUrl) {
     return { status: 'idle' };

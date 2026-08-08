@@ -9,6 +9,7 @@ import {
   toGovernedApplyReceipt,
   type GovernedApplyReceipt,
 } from '@/lib/production/agents-merge-governance'
+import { notifyPreviewApplySuccess } from '@/lib/preview/preview-hot-update'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('useAIChatOpsState')
@@ -88,7 +89,8 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
 
       let hasError = false
       let errorMessage = ''
-      
+      const appliedPaths: string[] = []
+
       const targets = targetPath 
         ? pendingList.filter(p => p.path === targetPath)
         : pendingList
@@ -105,6 +107,8 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
             filePath,
             original,
             modified: finalModified,
+            // Batch L.8 preview notify once after all files succeed.
+            notifyPreview: false,
           })
 
           if (!governed.ok) {
@@ -127,6 +131,7 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
 
           const applied = toGovernedApplyReceipt(filePath, governed)
           pushReceipt(applied)
+          appliedPaths.push(filePath)
           log.info('chat_diff_apply_receipt', {
             outcome: applied.outcome,
             runId: applied.runId,
@@ -171,6 +176,10 @@ export function useAIChatOpsState({ editorBridge }: UseAIChatOpsStateParams) {
           editorBridge.clearPendingDiffs()
         }
         setLastApplyDeny(null)
+        // L.8 — notify live preview session (fail-closed if none); honesty flags from server.
+        if (appliedPaths.length > 0) {
+          notifyPreviewApplySuccess({ paths: appliedPaths })
+        }
       } else {
         setLastApplyDeny(errorMessage)
       }

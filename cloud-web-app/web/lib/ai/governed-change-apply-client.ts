@@ -10,6 +10,7 @@ import {
   mapApplyPreflightDeny,
   type ApplyPreflightUserCopy,
 } from '@/lib/ai/apply-preflight-user-copy'
+import { notifyPreviewApplySuccess } from '@/lib/preview/preview-hot-update'
 
 export type GovernedApplyInput = {
   filePath: string
@@ -18,6 +19,11 @@ export type GovernedApplyInput = {
   language?: string
   approvedHighRisk?: boolean
   runSource?: 'production' | 'rehearsal'
+  /**
+   * L.8 — notify live preview after success. Default true.
+   * Set false when the caller batches multi-file notify once at the end.
+   */
+  notifyPreview?: boolean
 }
 
 export type GovernedApplyResult =
@@ -135,6 +141,10 @@ export async function runGovernedChangeApply(
       filePath: normalizedPath,
       runSource: input.runSource || 'production',
     })
+  }
+
+  if (input.notifyPreview !== false) {
+    notifyPreviewApplySuccess({ paths: [normalizedPath] })
   }
 
   return {

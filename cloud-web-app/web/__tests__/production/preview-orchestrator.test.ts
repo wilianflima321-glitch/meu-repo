@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import {
   orchestratePreviewSession,
+  syncAndRefreshPreviewSession,
   teardownPreviewSession,
 } from '@/lib/production/preview-orchestrator'
 import * as forgeSandbox from '@/lib/production/forge-sandbox-executor'
@@ -257,5 +258,108 @@ describe('PreviewOrchestrator (L.8)', () => {
     const result = await teardownPreviewSession('sess-tear')
     expect(result.ok).toBe(true)
     expect(teardownSpy).toHaveBeenCalledWith('sess-tear', 1)
+  })
+
+  it('hot-update fails closed when no live session (no HMR theater)', async () => {
+    vi.spyOn(forgeSandbox, 'getForgeSandboxSession').mockReturnValue(undefined)
+
+    const result = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'missing',
+      paths: ['src/App.tsx'],
+    })
+
+    expect(result.ok).toBe(false)
+    expect(result.hmr).toBe(false)
+    expect(result.reload).toBe(false)
+    expect(result.mode).toBe('denied')
+    expect(result.reusedSession).toBe(false)
+    expect(result.message).toMatch(/No live preview session/)
+  })
+
+  it('hot-update fails closed when sandboxSessionId is empty', async () => {
+    const result = await syncAndRefreshPreviewSession({
+      sandboxSessionId: '   ',
+      paths: ['src/App.tsx'],
+    })
+    expect(result.ok).toBe(false)
+    expect(result.hmr).toBe(false)
+    expect(result.reload).toBe(false)
+    expect(result.mode).toBe('denied')
+  })
+
+  it('hot-update syncs paths and returns honesty reload flags (hmr:false)', async () => {
+    vi.spyOn(forgeSandbox, 'getForgeSandboxSession').mockReturnValue({
+      sessionId: 'sess-hot',
+      provider: 'local-isolated',
+      projectId: 'p1',
+      agentMode: 'Builder',
+      networkPolicy: 'none',
+      costGuardReservationId: 'res-1',
+      evidenceLedgerId: 'ledger-1',
+      createdAt: 'now',
+    })
+    vi.spyOn(forgeSandbox, 'verifyFilesInForgeSandbox').mockResolvedValue({
+      ok: true,
+      sessionId: 'sess-hot',
+      provider: 'local-isolated',
+      filesWritten: 2,
+      projectRootPath: '/mock',
+    })
+
+    const result = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-hot',
+      paths: ['src/a.tsx', 'src/b.tsx'],
+    })
+
+    expect(result.ok).toBe(true)
+    expect(result.filesSynced).toBe(2)
+    expect(result.hmr).toBe(false)
+    expect(result.reload).toBe(true)
+    expect(result.mode).toBe('reload')
+    expect(result.reusedSession).toBe(true)
+    expect(result.strategy).toBe('local-dev-server')
+    expect(result.message).toMatch(/full preview reload required/)
+  })
+
+  it('hot-update claims hmr only when client bridge is connected and preferHmr', async () => {
+    vi.spyOn(forgeSandbox, 'getForgeSandboxSession').mockReturnValue({
+      sessionId: 'sess-hmr',
+      provider: 'local-isolated',
+      projectId: 'p1',
+      agentMode: 'Builder',
+      networkPolicy: 'none',
+      costGuardReservationId: 'res-1',
+      evidenceLedgerId: 'ledger-1',
+      createdAt: 'now',
+    })
+    vi.spyOn(forgeSandbox, 'writeFilesToForgeSandbox').mockResolvedValue({
+      ok: true,
+      sessionId: 'sess-hmr',
+      provider: 'local-isolated',
+      filesWritten: 1,
+      projectRootPath: '/mock',
+    })
+
+    const denied = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-hmr',
+      files: [{ path: 'src/a.tsx', content: 'export const a = 1\n' }],
+      preferHmr: true,
+      clientHmrConnected: false,
+    })
+    expect(denied.hmr).toBe(false)
+    expect(denied.reload).toBe(true)
+    expect(denied.mode).toBe('reload')
+
+    const claimed = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-hmr',
+      files: [{ path: 'src/a.tsx', content: 'export const a = 1\n' }],
+      preferHmr: true,
+      clientHmrConnected: true,
+    })
+    expect(claimed.ok).toBe(true)
+    expect(claimed.hmr).toBe(true)
+    expect(claimed.reload).toBe(false)
+    expect(claimed.mode).toBe('hmr')
+    expect(claimed.message).toMatch(/HMR bridge connected/)
   })
 })
