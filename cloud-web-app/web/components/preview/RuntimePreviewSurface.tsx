@@ -50,19 +50,56 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
   const { magicWandState, openMagicWand, openMagicWandAt, closeMagicWand, handleSendMessage } = useMagicWand(
     (message, context) => {
       const elementInfo = context.elementInfo ?? (context as { element?: typeof context.elementInfo }).element;
-      window.dispatchEvent(
-        new CustomEvent('aethel.preview.inspectRequest', {
-          detail: {
-            message,
-            elementInfo,
-            projectId,
-            filePath,
-            title,
-            source: 'preview-inspector',
-          },
-        }),
-      );
-      log.info('Magic Wand message:', message, context);
+      void (async () => {
+        // L.7: mutating MagicWand intents must stage FusionTx before chat dispatch.
+        if (projectId) {
+          try {
+            const {
+              applyMagicWandMutationViaFusionTx,
+              isMutatingMagicWandCommand,
+              MAGIC_WAND_FUSION_DENIED_EVENT,
+            } = await import('@/lib/production/magic-wand-fusion-apply');
+            const { ensureProjectFusionYjsStore } = await import(
+              '@/lib/production/fusion-scope-registry'
+            );
+            if (isMutatingMagicWandCommand(message)) {
+              ensureProjectFusionYjsStore(projectId);
+              const gated = await applyMagicWandMutationViaFusionTx({
+                projectId,
+                command: message,
+                elementInfo: elementInfo ?? null,
+              });
+              if (!gated.ok) {
+                window.dispatchEvent(
+                  new CustomEvent(MAGIC_WAND_FUSION_DENIED_EVENT, { detail: gated }),
+                );
+                log.warn('magic_wand_fusion_denied', { reason: gated.reason });
+                return;
+              }
+            }
+          } catch (err) {
+            log.warn('magic_wand_fusion_gate_error', {
+              err: err instanceof Error ? err.message : String(err),
+            });
+            return;
+          }
+        }
+
+        window.dispatchEvent(
+          new CustomEvent('aethel.preview.inspectRequest', {
+            detail: {
+              message,
+              elementInfo,
+              projectId,
+              filePath,
+              title,
+              source: 'preview-inspector',
+              fusionGoverned: Boolean(projectId),
+            },
+          }),
+        );
+        log.info('Magic Wand message:', message, context);
+      })();
     },
   );
 
@@ -236,9 +273,9 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           isStale={isStale}
           inspectArmed={inspectArmed}
           onRefresh={onRefresh}
-          onInlineElementInspect={({ position, elementInfo }) => {
+          onInlineElementInspect={(payload: any) => {
             setInspectArmed(false);
-            openMagicWandAt(position, elementInfo);
+            openMagicWandAt(payload.position, payload.elementInfo);
           }}
         />
         {useInline && (

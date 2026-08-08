@@ -497,6 +497,25 @@ export function useAIChatController({
           fusionUndoHint: undoHint,
         }
 
+        // J.9: after APPLY, auto-capture viewport WebM/PNG into evidence path (honest HELD in Node/headless).
+        if (
+          apexMission &&
+          typeof apexMission === 'object' &&
+          (apexMission as { verdict?: string }).verdict === 'APPLY' &&
+          typeof window !== 'undefined'
+        ) {
+          void import('@/lib/production/visual-evidence-auto-attach').then(
+            ({ autoAttachViewportVisualEvidenceAfterApply }) =>
+              autoAttachViewportVisualEvidenceAfterApply({
+                label: String((apexMission as { missionId?: string }).missionId ?? 'apply'),
+                afterPatch:
+                  typeof (apexMission as { supremePatch?: unknown }).supremePatch === 'string'
+                    ? String((apexMission as { supremePatch: string }).supremePatch)
+                    : assistantMessage.content,
+              }),
+          )
+        }
+
         analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
           surface: 'ide',
           status: 'success',

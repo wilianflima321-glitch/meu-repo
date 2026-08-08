@@ -56,6 +56,20 @@ export function FusionTransactionUndoBanner({
           transactionId: applied.transactionId,
           projectId,
         })
+        // J.9: auto-attach viewport WebM/PNG after FusionTx client handoff (honest HELD if unavailable).
+        void import('@/lib/production/visual-evidence-auto-attach').then(({ autoAttachViewportVisualEvidenceAfterApply }) =>
+          autoAttachViewportVisualEvidenceAfterApply({
+            label: applied.transactionId,
+            afterPatch: handoff.afterPayload,
+          }).then((attach) => {
+            log.info('fusion_banner_visual_evidence', {
+              status: attach.visual.status,
+              kind: attach.visual.kind,
+              webmHeld: attach.visual.webmHeld,
+              attachedImplemented: attach.attachedImplemented,
+            })
+          }),
+        )
       } else {
         log.warn('fusion_banner_handoff_arm_fail', { reason: applied.reason, projectId })
       }

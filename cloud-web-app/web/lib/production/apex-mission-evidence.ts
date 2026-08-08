@@ -9,7 +9,10 @@ import {
 } from '@/lib/production/task-evidence-ledger'
 import type { ApexMissionResult } from '@/lib/production/apex-mission-orchestrator'
 import type { NexusMissionUiPayload } from '@/lib/production/nexus-mission-phases'
-import { capturePatchHashEvidence } from '@/lib/production/visual-evidence-capture'
+import {
+  capturePatchHashEvidence,
+  resolveVisualEvidenceCascade,
+} from '@/lib/production/visual-evidence-capture'
 
 export function attachVisualEvidence(
   ledger: TaskEvidenceLedger,
@@ -74,24 +77,44 @@ export function buildApexMissionEvidenceLedger(input: {
     })
   }
 
-  if (mission.supremePatch) {
-    const visual = capturePatchHashEvidence({
-      after: mission.supremePatch,
+  if (mission.supremePatch || nexus?.visualEvidence) {
+    // J.9: prefer Nexus browser WebM/PNG when already attached; else patch-hash HELD.
+    const visual = resolveVisualEvidenceCascade({
+      afterPatch: mission.supremePatch,
       label: mission.missionId,
+      browserCapture:
+        nexus?.visualEvidence && nexus.visualEvidence.refs.length > 0
+          ? {
+              status: nexus.visualEvidence.status,
+              kind: nexus.visualEvidence.kind as 'png_frames' | 'webm' | 'patch_hash',
+              refs: nexus.visualEvidence.refs,
+              message: nexus.visualEvidence.message,
+              contentHash:
+                nexus.visualEvidence.refs.find((r) => r.startsWith('sha256:'))?.slice(7) ??
+                nexus.visualEvidence.refs[0] ??
+                capturePatchHashEvidence({
+                  after: mission.supremePatch ?? '',
+                  label: mission.missionId,
+                }).contentHash,
+            }
+          : null,
     })
     ledger = attachVisualEvidence(ledger, {
       contentHash: visual.contentHash,
       status: visual.status,
       kind: visual.kind,
       summary: visual.message,
+      frameCount: visual.kind === 'png_frames' ? visual.refs.length : undefined,
     })
-    ledger = appendTaskEvidence(ledger, {
-      kind: 'diff',
-      title: 'Supreme patch candidate',
-      summary: `Patch length ${mission.supremePatch.length} chars; verdict=${mission.verdict}`,
-      refs: [`sha256:${visual.contentHash}`],
-      actor: 'synthesizer',
-    })
+    if (mission.supremePatch) {
+      ledger = appendTaskEvidence(ledger, {
+        kind: 'diff',
+        title: 'Supreme patch candidate',
+        summary: `Patch length ${mission.supremePatch.length} chars; verdict=${mission.verdict}`,
+        refs: [`sha256:${visual.contentHash}`],
+        actor: 'synthesizer',
+      })
+    }
   }
 
   ledger = appendTaskEvidence(ledger, {
