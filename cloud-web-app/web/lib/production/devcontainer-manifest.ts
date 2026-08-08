@@ -14,6 +14,16 @@ import path from 'node:path'
 import { z } from 'zod'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { confinePathToProjectRoot } from '@/lib/production/forge-sandbox-path-guard'
+import type { SupportedDevContainerTemplate } from '@/lib/production/devcontainer-template-catalog'
+
+export type { SupportedDevContainerTemplate } from '@/lib/production/devcontainer-template-catalog'
+export {
+  DEVCONTAINER_TEMPLATE_CATALOG,
+  SUPPORTED_DEVCONTAINER_TEMPLATES,
+  findDevContainerTemplateCatalogEntry,
+  isSupportedDevContainerTemplate,
+  listDevContainerTemplateCatalog,
+} from '@/lib/production/devcontainer-template-catalog'
 
 const log = createComponentLogger('devcontainer-manifest')
 
@@ -41,8 +51,6 @@ export const DevContainerManifestSchema = z.object({
 })
 
 export type DevContainerManifest = z.infer<typeof DevContainerManifestSchema>
-
-export type SupportedDevContainerTemplate = 'node-typescript' | 'python-ml' | 'rust-aethel' | 'nextjs-14' | 'vite-react'
 
 export interface DevContainerTemplateDefinition {
   id: SupportedDevContainerTemplate

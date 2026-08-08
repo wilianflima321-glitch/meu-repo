@@ -8,15 +8,16 @@ import type { ActiveTab, SessionFilter, ToastType } from './aethel-dashboard-mod
 import { AethelDashboardSidebar } from './AethelDashboardSidebar'
 import { DashboardMainContent } from './DashboardMainContent'
 import { DashboardTopBar } from './DashboardTopBar'
-import OnboardingWizard from '../onboarding/OnboardingWizard'
+import { ForgeScaffoldWizard } from '@/components/studio/ForgeScaffoldWizard'
+import { getAuthHeaders } from './aethel-dashboard-location-utils'
 import { DashboardToast } from './DashboardToast'
 import { resolveDashboardEntryLane } from './aethel-dashboard-entry-triage'
 import { DashboardIntentRail } from './DashboardIntentRail'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 import { useBrowserPathname, useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
-type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
-type OnboardingSkipHandler = ComponentProps<typeof OnboardingWizard>['onSkip']
+type OnboardingCompleteHandler = NonNullable<ComponentProps<typeof ForgeScaffoldWizard>['onSuccess']>
+type OnboardingSkipHandler = NonNullable<ComponentProps<typeof ForgeScaffoldWizard>['onSkip']>
 
 export type DashboardShellProps = {
   theme: 'dark' | 'light'
@@ -236,7 +237,12 @@ export function DashboardShell({
         <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative has-mobile-nav">
           {showOnboardingWizard ? (
             <div className="p-6">
-              <OnboardingWizard onComplete={onOnboardingComplete} onSkip={onOnboardingSkip} />
+              <ForgeScaffoldWizard
+                authHeaders={getAuthHeaders()}
+                onSuccess={onOnboardingComplete}
+                onSkip={onOnboardingSkip}
+                autoNavigate
+              />
             </div>
           ) : (
             <DashboardMainContent {...dashboardMainProps} />

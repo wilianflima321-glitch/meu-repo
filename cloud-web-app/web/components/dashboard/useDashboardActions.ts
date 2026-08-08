@@ -210,6 +210,7 @@ export function useDashboardActions({
     setProjects,
     setNewProjectName,
     setFirstValueOpenedIde,
+    setShowOnboardingWizard,
   })
 
   const {

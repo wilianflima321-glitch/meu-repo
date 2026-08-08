@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 
 import { getAuthHeaders } from './aethel-dashboard-location-utils'
 import { ONBOARDING_WIZARD_DISMISSED_KEY } from './aethel-dashboard-constants'
-import { scaffoldProjectFromTemplate } from '@/lib/onboarding/scaffold-client'
+import type { ForgeScaffoldUxResult } from '@/lib/production/forge-scaffold-client'
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>
 
@@ -62,36 +62,29 @@ export function useDashboardOnboardingActions({
     trackEvent('onboarding', 'wizard_dismiss', { reason })
   }, [setShowOnboardingWizard, trackEvent])
 
-  const handleOnboardingComplete = useCallback((data: { template: string; name: string; description: string }) => {
-    handleDismissOnboardingWizard('complete')
-    persistOnboardingProgress('complete_step', 'welcome')
-    if (data?.name?.trim()) {
-      setNewProjectName(data.name.trim())
-    }
-    if (!hasToken || !data?.template) {
-      if (data?.template) handleTemplateSelect(data.template)
-      return
-    }
-
-    void (async () => {
-      const result = await scaffoldProjectFromTemplate({
-        templateId: data.template,
-        name: data.name,
-        description: data.description,
-        headers: getAuthHeaders(),
+  /** L.9 ForgeScaffoldWizard success — evidence-backed only (client already fail-closed). */
+  const handleOnboardingComplete = useCallback(
+    (result: Extract<ForgeScaffoldUxResult, { ok: true }>) => {
+      handleDismissOnboardingWizard('complete')
+      persistOnboardingProgress('complete_step', 'welcome')
+      persistOnboardingProgress('complete_step', 'first_project')
+      setNewProjectName('')
+      trackEvent('onboarding', 'forge_scaffold_ok', {
+        projectId: result.projectId,
+        templateId: result.templateId,
+        hasPreview: Boolean(result.previewUrl),
       })
-
-      if (result.ok) {
-        persistOnboardingProgress('complete_step', 'first_project')
-        if (result.openUrl && typeof window !== 'undefined') {
-          window.location.assign(result.openUrl)
-          return
-        }
-      }
-
-      handleTemplateSelect(data.template)
-    })()
-  }, [handleDismissOnboardingWizard, handleTemplateSelect, hasToken, persistOnboardingProgress, setNewProjectName])
+      handleTemplateSelect(result.templateId)
+      // Navigation is owned by ForgeScaffoldWizard (autoNavigate).
+    },
+    [
+      handleDismissOnboardingWizard,
+      persistOnboardingProgress,
+      setNewProjectName,
+      trackEvent,
+      handleTemplateSelect,
+    ],
+  )
 
   const handleOnboardingSkip = useCallback(() => {
     handleDismissOnboardingWizard('skip')

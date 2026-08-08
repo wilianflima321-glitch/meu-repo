@@ -21,6 +21,12 @@ interface AgenticUIStudioProps extends CanonicalRuntimeProps {
   onAgentMutationRequest?: (command: string, elementInfo?: ElementInspectData | null) => void
   /** When false, skip FusionTx staging (tests only). Default true. */
   governMutationsViaFusionTx?: boolean
+  /**
+   * L.9 — when true (default if no projectId), show Forge scaffold entry strip.
+   * Deepens AgenticUIStudio without a new AAA panel empire.
+   */
+  showScaffoldEntry?: boolean
+  onOpenForgeScaffold?: () => void
 }
 
 export function AgenticUIStudio(props: AgenticUIStudioProps) {
@@ -31,12 +37,15 @@ export function AgenticUIStudio(props: AgenticUIStudioProps) {
     onAgentMutationRequest,
     governMutationsViaFusionTx,
     autoProvision,
+    showScaffoldEntry,
+    onOpenForgeScaffold,
   } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const previewFrameRef = useRef<HTMLIFrameElement>(null)
   const govern = governMutationsViaFusionTx !== false
   // L.8: when a project is bound, default to managed provision (fail-closed if unreachable).
   const effectiveAutoProvision = autoProvision ?? Boolean(projectId)
+  const scaffoldEntryVisible = showScaffoldEntry ?? !projectId
 
   const { domTree, selectedElementId, hoveredElementId, selectElement, highlightElement } =
     usePreviewDomSync(previewFrameRef)
@@ -204,6 +213,32 @@ export function AgenticUIStudio(props: AgenticUIStudioProps) {
       </div>
 
       <div className="flex-1 flex flex-col relative z-0">
+        {scaffoldEntryVisible && (
+          <div
+            className="shrink-0 flex items-center justify-between gap-3 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2"
+            data-aethel-l9="scaffold-entry"
+          >
+            <p className="text-[11px] text-[var(--aethel-text-secondary)]">
+              No project bound — scaffold a DevContainer workspace via L.9 FullStackScaffold (fail-closed).
+            </p>
+            <button
+              type="button"
+              data-aethel-l9="scaffold-entry-open"
+              onClick={() => {
+                if (onOpenForgeScaffold) {
+                  onOpenForgeScaffold()
+                  return
+                }
+                if (typeof window !== 'undefined') {
+                  window.location.assign('/dashboard?onboarding=1')
+                }
+              }}
+              className="shrink-0 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-text-inverse)]"
+            >
+              Open Forge scaffold
+            </button>
+          </div>
+        )}
         {fusionGateError && (
           <div
             role="alert"

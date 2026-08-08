@@ -11,7 +11,7 @@ import type {
   ToastType,
 } from './aethel-dashboard-model'
 import { clearStoredDashboardState, persistDashboardActiveTab } from './aethel-dashboard-model'
-import { createProjectEntry, removeProjectEntry } from './aethel-dashboard-project-utils'
+import { removeProjectEntry } from './aethel-dashboard-project-utils'
 import { DEFAULT_PROJECTS } from './aethel-dashboard-defaults'
 import { createInitialSessionEntry } from './aethel-dashboard-session-utils'
 import { hasRestorableWorkspaceSession } from '@/lib/ide/workspace-session-resume'
@@ -41,6 +41,8 @@ type DashboardWorkspaceActionsInput = {
   setProjects: SetState<Project[]>
   setNewProjectName: SetState<string>
   setFirstValueOpenedIde: SetState<boolean>
+  /** Opens L.9 ForgeScaffoldWizard (dashboard entry). */
+  setShowOnboardingWizard: SetState<boolean>
 }
 
 export function useDashboardWorkspaceActions({
@@ -66,6 +68,7 @@ export function useDashboardWorkspaceActions({
   setProjects,
   setNewProjectName,
   setFirstValueOpenedIde,
+  setShowOnboardingWizard,
 }: DashboardWorkspaceActionsInput) {
   const handleOpenIdeLivePreview = useCallback(() => {
     setFirstValueOpenedIde(true)
@@ -151,18 +154,14 @@ export function useDashboardWorkspaceActions({
   ])
 
   const handleCreateProject = useCallback(() => {
-    const value = newProjectName.trim()
-    if (!value) {
-      showToastMessage('Set a project name before creating it.', 'error')
-      return
-    }
-
-    const project = createProjectEntry(projects, value, newProjectType)
-    setProjects((prev) => [project, ...prev])
-    setNewProjectName('')
-    showToastMessage('Project created successfully.', 'success')
-    trackEvent('project', 'project_create', { type: newProjectType })
-  }, [newProjectName, newProjectType, projects, setProjects, setNewProjectName, showToastMessage, trackEvent])
+    // L.9 — open interactive Forge scaffold UX (fail-closed API). No local fake "created".
+    setShowOnboardingWizard(true)
+    trackEvent('project', 'forge_scaffold_open', {
+      source: 'dashboard_create_workspace',
+      draftName: newProjectName.trim() || null,
+      type: newProjectType,
+    })
+  }, [newProjectName, newProjectType, setShowOnboardingWizard, trackEvent])
 
   const handleDeleteProject = useCallback((id: number) => {
     setProjects((prev) => removeProjectEntry(prev, id))

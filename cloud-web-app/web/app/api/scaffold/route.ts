@@ -3,7 +3,10 @@ import { z } from 'zod'
 import { requireAuth, verifyProjectOwnership } from '@/lib/auth-server'
 import { resolveScopedWorkspacePath } from '@/lib/server/workspace-scope'
 import { scaffoldAndPreviewProject } from '@/lib/production/fullstack-scaffold-engine'
-import type { SupportedDevContainerTemplate } from '@/lib/production/devcontainer-manifest'
+import {
+  SUPPORTED_DEVCONTAINER_TEMPLATES,
+  isSupportedDevContainerTemplate,
+} from '@/lib/production/devcontainer-template-catalog'
 import { createCreativeWalletCostGuardAdapter } from '@/lib/production/creative-cost-guard-creative-wallet-adapter'
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -11,9 +14,18 @@ const log = createComponentLogger('api/scaffold')
 
 const ScaffoldRequestSchema = z.object({
   projectId: z.string().uuid(),
-  templateId: z.string(), // We will cast this to SupportedDevContainerTemplate
-  preferredStrategy: z.enum(['inline', 'local-dev-server', 'e2b']).optional()
+  templateId: z.enum(SUPPORTED_DEVCONTAINER_TEMPLATES),
+  preferredStrategy: z.enum(['inline', 'local-dev-server', 'e2b']).optional(),
 })
+
+export async function GET() {
+  return NextResponse.json({
+    capability: 'forge.scaffold',
+    route: '/api/scaffold',
+    templates: SUPPORTED_DEVCONTAINER_TEMPLATES,
+    post: 'POST { projectId, templateId, preferredStrategy? } — L.9 FullStackScaffold + L.2 persist + L.8 preview + commit gate',
+  })
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,12 +36,27 @@ export async function POST(req: NextRequest) {
 
     const json = await req.json()
     const parseResult = ScaffoldRequestSchema.safeParse(json)
-    
+
     if (!parseResult.success) {
-      return NextResponse.json({ ok: false, error: 'Invalid payload' }, { status: 400 })
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'Invalid payload',
+          details: parseResult.error.flatten(),
+          templates: SUPPORTED_DEVCONTAINER_TEMPLATES,
+        },
+        { status: 400 },
+      )
     }
 
     const { projectId, templateId, preferredStrategy } = parseResult.data
+
+    if (!isSupportedDevContainerTemplate(templateId)) {
+      return NextResponse.json(
+        { ok: false, error: `Unsupported DevContainer template: ${templateId}` },
+        { status: 400 },
+      )
+    }
 
     // 1. Verify access to project workspace
     const isOwner = await verifyProjectOwnership(projectId, payload.userId)
@@ -51,17 +78,33 @@ export async function POST(req: NextRequest) {
       userId: payload.userId,
       projectId,
       projectRootPath,
-      templateId: templateId as SupportedDevContainerTemplate,
+      templateId,
       preferredStrategy,
-      costAdapter
+      costAdapter,
     })
 
     if (!scaffoldResult.ok) {
-      return NextResponse.json({ ok: false, error: scaffoldResult.message }, { status: 500 })
+      return NextResponse.json(
+        {
+          ok: false,
+          error: scaffoldResult.message || 'Scaffold failed',
+          commitGate: scaffoldResult.commitGate,
+          blockedReasons: scaffoldResult.commitGate?.blockedReasons,
+          preview: scaffoldResult.preview,
+          devContainerPersist: scaffoldResult.devContainerPersist,
+          marketingAllowed: false,
+        },
+        { status: 422 },
+      )
     }
 
-    return NextResponse.json(scaffoldResult)
-    
+    return NextResponse.json({
+      ok: true,
+      preview: scaffoldResult.preview,
+      commitGate: scaffoldResult.commitGate,
+      devContainerPersist: scaffoldResult.devContainerPersist,
+      marketingAllowed: false,
+    })
   } catch (error) {
     log.error('scaffold_route_unhandled', {
       error: error instanceof Error ? error.message : String(error),

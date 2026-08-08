@@ -142,8 +142,8 @@ function WorkspaceComposer({
           })}
         </div>
 
-        <button type="button" onClick={onCreateProject} aria-label="Create workspace" className={`${PRIMARY_BUTTON_CLASS} w-full`}>
-          Create workspace
+        <button type="button" onClick={onCreateProject} aria-label="Scaffold workspace with Forge" className={`${PRIMARY_BUTTON_CLASS} w-full`}>
+          Scaffold with Forge
         </button>
       </div>
     </div>
@@ -239,7 +239,7 @@ export function DashboardProjectsTab({
             <DirectorNotePanel
               projectId={String(projects[0].id)}
               position="floating"
-              onApplyFix={async (note) => onApplyDirectorNote(note.title)}
+              onApplyFix={async (note: any) => onApplyDirectorNote(note.title)}
             />
           </div>
 
