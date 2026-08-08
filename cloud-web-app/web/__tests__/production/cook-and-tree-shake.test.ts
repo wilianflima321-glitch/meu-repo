@@ -8,6 +8,8 @@ import {
 } from '@/lib/production/publish-pipeline-orchestrator'
 import {
   DEMO_WEB_SLICE_HOST_HELD_REASON,
+  DEMO_WEB_SLICE_SHIPPED_STAGES,
+  DEMO_WEB_SLICE_STAGE_CATALOG,
   DEMO_WEB_SLICE_UNHOLD_BLOCKERS,
   evaluateDemoWebSliceStage,
 } from '@/lib/production/demo-web-slice'
@@ -76,12 +78,18 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
     expect(held.shipStatus).toBe('HELD')
     expect(held.demoPlayUrl).toBeNull()
     expect(held.reason).toBe(DEMO_WEB_SLICE_HOST_HELD_REASON)
-    expect(DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => b.id)).toEqual([
+    // Code stages shipped — remaining product blockers list is empty; cook still
+    // fail-closes until a hosted HTML URL is stamped ready.
+    expect(DEMO_WEB_SLICE_UNHOLD_BLOCKERS).toEqual([])
+    expect(DEMO_WEB_SLICE_STAGE_CATALOG.map((b) => b.id)).toEqual([
       'browser-packer',
       'game-scripts-registry',
       'html-emitter',
       'html-host',
     ])
+    expect([...DEMO_WEB_SLICE_SHIPPED_STAGES].sort()).toEqual(
+      ['browser-packer', 'game-scripts-registry', 'html-emitter', 'html-host'].sort(),
+    )
 
     const ready = evaluateDemoWebSliceStage({
       target: 'web-static',

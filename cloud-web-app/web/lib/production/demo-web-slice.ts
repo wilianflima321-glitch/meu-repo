@@ -2,48 +2,62 @@
  * XIV.3 / I.3 — Instant Play `demo-web-slice` honesty.
  *
  * Hub Instant Play iframes require a hosted HTML entry (index.html / .html),
- * not a cook/export zip download URL. The web-static cook today emits a
- * measured zip + AethelPack only — browser host + runtime-main bundle for
- * Instant Play remain HELD. Never invent a playable demoPlayUrl from zip.
+ * not a cook/export zip download URL. Cook stamps ready only when packer →
+ * registry → html-emitter → html-host all complete with real bootable bytes.
  *
- * Unhold requires ALL of `DEMO_WEB_SLICE_UNHOLD_BLOCKERS` (see below). Do not
- * reuse build-queue `addWebTemplate` theater HTML as Instant Play readiness.
+ * Do not reuse build-queue `addWebTemplate` theater HTML as Instant Play readiness.
  */
 
 import type { PublishTarget } from '@/lib/production/publish-pipeline-orchestrator'
 
 /**
- * Exact missing steps that keep Instant Play HELD (investigation 2026-08-08).
- * Unhold only when cook emits + hosts a real bootable slice — never placeholder.html.
+ * Full Instant Play stage catalog (XIV.3). Used for receipts + partial-hold reasons.
  */
-export const DEMO_WEB_SLICE_UNHOLD_BLOCKERS = [
+export const DEMO_WEB_SLICE_STAGE_CATALOG = [
   {
     id: 'browser-packer',
     summary:
-      'No cook stage bundles packages/engine/runtime-main.ts + transpiled generated/scripts into browser-loadable JS (esbuild not a web dep; no Instant Play packer module).',
+      'Bundles packages/engine/runtime-main.ts + transpiled generated/scripts into browser-loadable JS via monorepo esbuild.',
   },
   {
     id: 'game-scripts-registry',
     summary:
-      'Transpile emits per-script .ts files only — never the generated/game-scripts registry + GeneratedGameManifest constructors runtime-main expects at bundle/boot time.',
+      'Emits generated/game-scripts registry + GeneratedGameManifest constructors runtime-main expects at bundle/boot time.',
   },
   {
     id: 'html-emitter',
     summary:
-      'Cook never writes Instant Play index.html that mounts #aethel-root and calls bootAethelRuntime (build-queue addWebTemplate is a separate theater stub — forbidden for ready).',
+      'Writes Instant Play index.html that mounts #aethel-root and loads packed module calling bootAethelRuntime (not addWebTemplate theater).',
   },
   {
     id: 'html-host',
     summary:
-      'Cook uploads application/zip only; no text/html (+ JS) object with a stable iframeable URL (signed zip download intentionally rejected by isInstantPlayHtmlUrl).',
+      'Hosts text/html (+ JS) under a stable iframeable URL (/api/hub/instant-play/.../index.html); zip downloads stay rejected.',
   },
 ] as const
 
-export type DemoWebSliceUnholdBlockerId = (typeof DEMO_WEB_SLICE_UNHOLD_BLOCKERS)[number]['id']
+export type DemoWebSliceUnholdBlockerId = (typeof DEMO_WEB_SLICE_STAGE_CATALOG)[number]['id']
 
-/** Honest Instant Play HTML host + runtime-main browser bundle are not wired yet. */
+/**
+ * Stages still missing from the product code path.
+ * Empty when all four Instant Play stages are implemented and wired into cook.
+ */
+export const DEMO_WEB_SLICE_UNHOLD_BLOCKERS: ReadonlyArray<{
+  id: DemoWebSliceUnholdBlockerId
+  summary: string
+}> = []
+
+/** Stages implemented in `lib/production/instant-play/*` and cook wiring. */
+export const DEMO_WEB_SLICE_SHIPPED_STAGES: readonly DemoWebSliceUnholdBlockerId[] = [
+  'game-scripts-registry',
+  'browser-packer',
+  'html-emitter',
+  'html-host',
+]
+
+/** Honest Instant Play HTML host + runtime-main browser bundle gate reason (zip-only). */
 export const DEMO_WEB_SLICE_HOST_HELD_REASON =
-  'demo_web_slice_held — Instant Play needs hosted HTML slice that boots runtime-main; web-static cook emits measured zip only (no iframe target). Missing: browser-packer + game-scripts-registry + html-emitter + html-host. Placeholder index.html theater forbidden (Zero-MVP).'
+  'demo_web_slice_held — Instant Play needs hosted HTML slice that boots runtime-main; web-static cook zip alone is not an iframe target. Placeholder index.html / addWebTemplate theater forbidden (Zero-MVP).'
 
 export type DemoWebSliceShipStatus = 'IMPLEMENTED' | 'HELD'
 

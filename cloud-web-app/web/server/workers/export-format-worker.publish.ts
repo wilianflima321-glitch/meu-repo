@@ -23,10 +23,12 @@ import { ensureZstdEncoder } from '@/lib/immunity/aethel-pack-compress';
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement';
 import {
   DEMO_WEB_SLICE_HOST_HELD_REASON,
-  DEMO_WEB_SLICE_UNHOLD_BLOCKERS,
+  DEMO_WEB_SLICE_SHIPPED_STAGES,
+  DEMO_WEB_SLICE_STAGE_CATALOG,
   evaluateDemoWebSliceStage,
   type DemoWebSliceStageResult,
 } from '@/lib/production/demo-web-slice';
+import { buildInstantPlaySlice } from '@/lib/production/instant-play/build-instant-play-slice';
 
 const log = createComponentLogger('worker.export-format.publish');
 
@@ -352,23 +354,27 @@ export async function runPublishPackagingStage(
     zip.addFile('native-tauri-build.json', Buffer.from(JSON.stringify(nativeBuild, null, 2), 'utf8'));
   }
 
-  // XIV.3 — Instant Play HTML host + runtime-main browser bundle are not wired.
-  // Never emit placeholder index.html claiming playable (Zero-MVP). Cook zip stays measured.
-  // Unhold blockers (all required): browser-packer, game-scripts-registry, html-emitter, html-host.
-  const demoWebSlice = evaluateDemoWebSliceStage({
+  // XIV.3 — Instant Play: packer → registry → html-emitter → html-host.
+  // Ready only when hosted HTML boots runtime-main (never addWebTemplate theater).
+  let demoWebSlice: DemoWebSliceStageResult = evaluateDemoWebSliceStage({
     target: plan.target,
     demoWebSliceReady: false,
     instantPlayHtmlUrl: null,
   });
   if (plan.target === 'web-static') {
-    log.warn('publish.demo_web_slice_held', {
+    await reportProgress(jobId, 92, 'Building Instant Play HTML slice');
+    const publicBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const slice = await buildInstantPlaySlice({
       jobId,
       projectId,
-      reason: demoWebSlice.reason || DEMO_WEB_SLICE_HOST_HELD_REASON,
-      shipStatus: demoWebSlice.shipStatus,
-      allowed: demoWebSlice.allowed,
-      unholdBlockers: DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => b.id),
+      plan,
+      transpile: transpileResult,
+      publicBaseUrl,
     });
+    demoWebSlice = slice.demoWebSlice;
+    for (const file of slice.files) {
+      zip.addFile(file.path, Buffer.from(file.content, 'utf8'));
+    }
     zip.addFile(
       'demo-web-slice.json',
       Buffer.from(
@@ -377,10 +383,13 @@ export async function runPublishPackagingStage(
             stageId: demoWebSlice.stageId,
             status: demoWebSlice.status,
             shipStatus: demoWebSlice.shipStatus,
-            demoPlayUrl: null,
+            demoPlayUrl: demoWebSlice.demoPlayUrl,
             reason: demoWebSlice.reason,
             placeholderHtmlForbidden: true,
-            unholdBlockers: DEMO_WEB_SLICE_UNHOLD_BLOCKERS.map((b) => ({
+            shippedStages: DEMO_WEB_SLICE_SHIPPED_STAGES,
+            completedStages: slice.completedStages,
+            remainingBlockers: slice.remainingBlockers,
+            stageCatalog: DEMO_WEB_SLICE_STAGE_CATALOG.map((b) => ({
               id: b.id,
               summary: b.summary,
             })),
@@ -392,6 +401,24 @@ export async function runPublishPackagingStage(
         'utf8',
       ),
     );
+    if (demoWebSlice.status === 'ready' && demoWebSlice.demoPlayUrl) {
+      log.info('publish.demo_web_slice_ready', {
+        jobId,
+        projectId,
+        demoPlayUrl: demoWebSlice.demoPlayUrl,
+        completedStages: slice.completedStages,
+      });
+    } else {
+      log.warn('publish.demo_web_slice_held', {
+        jobId,
+        projectId,
+        reason: demoWebSlice.reason || DEMO_WEB_SLICE_HOST_HELD_REASON,
+        shipStatus: demoWebSlice.shipStatus,
+        allowed: demoWebSlice.allowed,
+        completedStages: slice.completedStages,
+        remainingBlockers: slice.remainingBlockers.map((b) => b.id),
+      });
+    }
   }
 
   const body = zip.toBuffer();

@@ -129,8 +129,8 @@ describe('RTv1 demo-web-slice Instant Play honesty', () => {
     expect(stage.shipStatus).toBe('HELD')
     expect(stage.demoPlayUrl).toBeNull()
     expect(stage.reason).toBe(DEMO_WEB_SLICE_HOST_HELD_REASON)
-    expect(stage.reason).toMatch(/browser-packer/)
-    expect(stage.reason).toMatch(/html-host/)
+    expect(stage.reason).toMatch(/runtime-main/)
+    expect(stage.reason).toMatch(/Placeholder index\.html|addWebTemplate/i)
   })
 
   it('listing: slice present → demoPlayUrl; zip-only → fail-closed Instant Play; noWebDemo honest', () => {
