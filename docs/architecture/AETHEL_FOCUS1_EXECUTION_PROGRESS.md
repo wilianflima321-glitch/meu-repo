@@ -643,8 +643,8 @@ Founder pivot 2026-07-25 + this audit **reconfirm**: these remain **STOPPED / HE
 
 | Gate | Result |
 |------|--------|
-| `npx vitest run __tests__/production` | **521 / 536 passed** (15 failed) |
-| `npm run typecheck` | **BLOCKED** — `typescript/bin/tsc` missing in `node_modules` (deps repair needed) |
+| `npx vitest run __tests__/production` | **521 / 536 passed** (15 failed) at audit time → **536 / 538 passed** (2 failed, unrelated `focus1-focus2-spend-l5.test.ts` renderer-honesty pre-existing gap) after item #10 fix (2026-08-08, commit `65f2f0503`) |
+| `npm run typecheck` | **BLOCKED** — `typescript/bin/tsc` missing in `node_modules` (deps repair needed) — still reproduces 2026-08-08, not touched (out of scope for item #10) |
 
 **Veredicto comercial:** **NÃO** pronto para vender como "Universal IDE" / "AI-native IDE" — claim honesto = DX criativo governado + web demos (alinhado Wedge #1).
 
@@ -658,7 +658,7 @@ Founder pivot 2026-07-25 + this audit **reconfirm**: these remain **STOPPED / HE
 | 4 | J.11/J.12 dual bus, OrchestratorProd orphan | OPEN (J.11/J.12 STOPPED) |
 | 5–6 | L.13 LSP farm, L.4 terminal bridge | GAP |
 | 7 | L.5 CI timeouts + typecheck blocked | OPEN |
-| 10 | Free tier `byok_missing` vs `free_tier_platform_pay_forbidden` drift | OPEN |
+| 10 | Free tier `byok_missing` vs `free_tier_platform_pay_forbidden` drift | **DONE** (2026-08-08) — `reserveCreativeCost()` free-tier-no-BYOK denial now emits `free_tier_platform_pay_forbidden` (policy refusal) instead of `byok_missing` (reserved for technical BYOK-required-but-missing on paid plans, no current call site); commit `65f2f0503` |
 | 11 | J.7 `USD_BROWSER_VIEWER_SHIP_STATUS` IMPLEMENTED vs HELD | **DONE** (2026-08-08) — reverted to `HELD` per ASSET-001 |
 | 15 | consolidation-truth-matrix marketing drift | **IN FIX** — [Fix consolidation-truth-matrix BLOCKERs 7-9](086ba43b-d005-42be-ba44-204b09f7af85) |
 
@@ -975,6 +975,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 p2f-10 | **P2f item #10 DONE — creative-cost-guard reason-code drift** — `reserveCreativeCost()` (Law XVI Trava I) was returning `byok_missing` for the free-tier-without-BYOK denial path, but that path is a platform *policy* refusal (zero platform-funded pay on free tier), while the `CostGuardBlockReason` type already declared `free_tier_platform_pay_forbidden` specifically for it — never emitted. Root-cause fix: the free-tier-no-BYOK branch in `cloud-web-app/web/lib/production/creative-cost-guard.ts` now returns `free_tier_platform_pay_forbidden`; `byok_missing` is documented (JSDoc) as reserved for a paid-plan BYOK-technically-required-but-missing case (no call site currently triggers it — none exists in the codebase). Downstream consumers (`creative-bridge-http-dispatch.ts` → 402, `discovery-moderation-engine.ts` → `BYOK_REQUIRED`) already treat both codes equivalently, so no other behavior changed. Evidence: `npx vitest run __tests__/production/law-xvi-focus1a.test.ts __tests__/production/forge-sandbox-executor-l1.test.ts` **28/28 PASS** (both previously-failing reason-code assertions now green); full `npx vitest run __tests__/production` sweep **536/538 passed** (up from 521/536 at P2f audit time — remaining 2 failures are the pre-existing, unrelated `focus1-focus2-spend-l5.test.ts` renderer-honesty gap, confirmed untouched by this change). `npx eslint`/`next lint` clean on the touched file (project-wide `next lint` run shows zero findings in `creative-cost-guard.ts`). `npm run typecheck` still blocked — `node_modules/typescript/bin/tsc` not found on this workstation, pre-existing and out of scope (not touched, per explicit instruction not to repair the `node_modules` install). Commit: `65f2f0503` |
 | 2026-08-08 p2d-b7-9 | **P2d item #1 DONE — consolidation-truth-matrix BLOCKERs 7–9** — `marketingAllowed: false` + `heldReason` for `agents.receipt.completeness` (J.9 WebM HELD), `agents.nexus.task-graph` (J.11/J.12 Founder STOP), `ui.persistence.spine` (CW4 PARTIAL / LWW HELD), `master-ux.hero-panels` (CW1 15-panel bench OPEN). Root-cause guard: `applyConsolidationMarketingFailClosed()` + supremacy gate list. Evidence: `npx vitest run __tests__/production/consolidation-truth-matrix-cw1.test.ts` **6/6 PASS**; touched files clean in IDE linter. Commit: `a15f64efa` |
 | 2026-08-08 rust-audit | **P2g desktop Rust kernel deep audit recorded** — [Auditoria profunda kernel Rust desktop G](1bccc11b-6558-40eb-ad06-5e81df8747cc): cargo check PASS, kernel 613/613 tests PASS, clippy not run. Confirmed **no unified frame loop** (present via secondary winit probe only, `GpuCullingPipeline::dispatch` dead code), **IPC regression** (~91 wires compiled, only ~25 in `generate_handler!`), **`rendering/` tree entirely untracked and not compiled** (no `pub mod rendering`). 16-salto honest average **~9–11%** vs UE5.5 production. Flagged **P0 data-loss risk** on ~80+ uncommitted `.rs` files — hygiene-only commit pass queued (no feature wiring, Onda G stays deferred per P2e). |
 | 2026-08-08 jl-audit | **P2f web J/L deep audit recorded** — [Auditoria profunda cloud-web-app web J/L](d8c10da3-0de0-475d-a567-7e5f7a22f434): **521/536** production tests; typecheck blocked (missing tsc). Veredicto: **not** sellable as Universal IDE yet. Corrected P1b L.2/L.7–L.10/L.12 from stale "0% GAP" to **PARTIAL scaffolds** (exist, largely uncommitted). Top blockers logged; J.6 export fix delegated; consolidation-truth-matrix fix in flight. |
