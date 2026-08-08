@@ -142,6 +142,25 @@ mod tests {
     }
 
     #[test]
+    fn terminal_acl_refuses_agent_callers_with_law_48_evidence() {
+        let agent = TerminalCallerMeta {
+            caller_kind: Some("agent".into()),
+            ..Default::default()
+        };
+        let err = enforce_human_terminal_acl(&agent).expect_err("agent denied");
+        let ipc = err.to_ipc_error();
+        assert!(ipc.starts_with(AGENT_HOST_PTY_DENY_CODE));
+        assert!(ipc.contains("\"law\":48"));
+        assert!(ipc.contains("desktop-native-pty"));
+
+        let user = TerminalCallerMeta {
+            caller_kind: Some("user".into()),
+            ..Default::default()
+        };
+        assert!(enforce_human_terminal_acl(&user).is_ok());
+    }
+
+    #[test]
     fn ai_completion_stays_provider_unavailable_until_sidecar_exists() {
         let response = ai_complete(
             "draft a plan".to_string(),

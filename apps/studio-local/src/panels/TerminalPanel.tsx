@@ -103,9 +103,9 @@ export function TerminalPanel({ backend }: TerminalPanelProps) {
               color: sessionId ? 'var(--aethel-text-tertiary)' : 'var(--aethel-error-light)',
               fontSize: 11,
             }}
-            title="Law #48: agents must use sandbox only — never this host PTY"
+            title="Law #48: terminal_* IPC ACL refuses agent callers with AGENT_HOST_PTY_DENIED evidence"
           >
-            {sessionId ? `${sessionId} · human-only` : error ?? 'connecting…'}
+            {sessionId ? `${sessionId} · human-only · ACL` : error ?? 'connecting…'}
           </strong>
           <button type="button" onClick={() => void openPanelWindow('terminal')} title="Open this panel in its own window">
             Undock ↗

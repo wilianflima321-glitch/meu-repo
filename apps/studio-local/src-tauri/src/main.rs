@@ -434,6 +434,12 @@ fn main() {
             lsp_farm::lsp_farm_list,
             lsp_farm::lsp_farm_stop,
             lsp_farm::lsp_farm_ipc_probe,
+            // R22 — human host PTY + Law #48 agent ACL (deny evidence on agent callers)
+            desktop_commands::terminal_create,
+            desktop_commands::terminal_write,
+            desktop_commands::terminal_resize,
+            desktop_commands::terminal_close,
+            desktop_commands::terminal_acl_probe,
             aethel_studio_local::plugin_sandbox::execute_sandbox_plugin,
             aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
             aethel_studio_local::plugin_sandbox::export_vibe_embedding,

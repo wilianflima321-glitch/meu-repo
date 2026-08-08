@@ -3,6 +3,7 @@
 //! Honesty / Law #48 (AgentShellPolicy):
 //! - These commands are the **human-operator** host PTY lane (Studio Local UI).
 //! - Agent / Fusion tools MUST NOT invoke `terminal_*` — sandbox-only after L.1.
+//! - IPC ACL: `enforce_human_terminal_acl` refuses agent callers with deny evidence.
 //! - Cwd is confined to the locked project root when set (`ensure_allowed_existing_path`).
 
 use std::collections::BTreeMap;
@@ -11,6 +12,7 @@ use std::sync::{Arc, Mutex};
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use serde::Serialize;
 
+use super::agent_shell_acl::{enforce_human_terminal_acl, TerminalCallerMeta};
 use super::security::{ensure_allowed_existing_path, locked_project_root, ProjectRootState, MAX_TERMINAL_INPUT_BYTES};
 use super::window_commands::NativeCommandStatus;
 
@@ -146,13 +148,31 @@ impl TerminalSessionStore {
     }
 }
 
+fn acl_or_deny(
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), String> {
+    let meta = TerminalCallerMeta {
+        caller_kind,
+        agent_tool,
+        agent_id,
+    };
+    enforce_human_terminal_acl(&meta).map_err(|evidence| evidence.to_ipc_error())
+}
+
 #[tauri::command]
 pub fn terminal_create(
     cwd: Option<String>,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
     project_root: tauri::State<'_, ProjectRootState>,
     app_handle: tauri::AppHandle,
 ) -> Result<TerminalSessionResponse, String> {
+    acl_or_deny(caller_kind, agent_tool, agent_id)?;
+
     let root = locked_project_root(&project_root)?;
     let cwd = match cwd {
         Some(path) if !path.trim().is_empty() => {
@@ -175,8 +195,12 @@ pub fn terminal_create(
 pub fn terminal_write(
     session_id: String,
     input: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
 ) -> Result<NativeCommandStatus, String> {
+    acl_or_deny(caller_kind, agent_tool, agent_id)?;
     if input.len() > MAX_TERMINAL_INPUT_BYTES {
         return Err(format!(
             "Studio Local refuses terminal payloads larger than {MAX_TERMINAL_INPUT_BYTES} bytes."
@@ -193,8 +217,12 @@ pub fn terminal_resize(
     session_id: String,
     rows: u16,
     cols: u16,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
 ) -> Result<NativeCommandStatus, String> {
+    acl_or_deny(caller_kind, agent_tool, agent_id)?;
     let mut store = store
         .lock()
         .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
@@ -204,10 +232,42 @@ pub fn terminal_resize(
 #[tauri::command]
 pub fn terminal_close(
     session_id: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     store: tauri::State<'_, std::sync::Mutex<TerminalSessionStore>>,
 ) -> Result<NativeCommandStatus, String> {
+    acl_or_deny(caller_kind, agent_tool, agent_id)?;
     let mut store = store
         .lock()
         .map_err(|_| "Studio Local terminal store lock is poisoned.".to_string())?;
     store.close(&session_id)
+}
+
+/// Honesty / CI probe — proves agent ACL denies without spawning a PTY.
+#[tauri::command]
+pub fn terminal_acl_probe(
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let meta = TerminalCallerMeta {
+        caller_kind,
+        agent_tool,
+        agent_id,
+    };
+    match enforce_human_terminal_acl(&meta) {
+        Ok(()) => Ok(serde_json::json!({
+            "allowed": true,
+            "status": "allowed",
+            "law": 48,
+            "callerKind": "user",
+            "requestedTarget": "desktop-native-pty",
+            "executionLane": "user-terminal",
+            "reason": "User-initiated terminal is outside AgentShellPolicy host ban.",
+            "claim": "User terminal allowed",
+            "placeboForbidden": true,
+        })),
+        Err(evidence) => Err(evidence.to_ipc_error()),
+    }
 }

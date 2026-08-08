@@ -46,9 +46,12 @@ export function createDesktopAdapter(invoke: TauriInvoke = unavailableInvoke): R
       getProjectRoot: () => invoke<string | null>('get_project_root'),
     },
     terminal: {
-      createSession: (cwd) => invoke<{ id: string }>('terminal_create', { cwd }),
-      write: (sessionId, input) => invoke<void>('terminal_write', { sessionId, input }),
-      close: (sessionId) => invoke<void>('terminal_close', { sessionId }),
+      createSession: (cwd) =>
+        invoke<{ id: string }>('terminal_create', { cwd, callerKind: 'user' }),
+      write: (sessionId, input) =>
+        invoke<void>('terminal_write', { sessionId, input, callerKind: 'user' }),
+      close: (sessionId) =>
+        invoke<void>('terminal_close', { sessionId, callerKind: 'user' }),
     },
     runtime: {
       probe: () => invoke<RuntimeProbe>('local_runtime_probe'),

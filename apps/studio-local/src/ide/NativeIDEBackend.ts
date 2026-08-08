@@ -318,23 +318,34 @@ type NativeTerminalCreateResponse = {
  * desktop-only capability on `NativeIDEBackend` rather than a fake shared
  * contract. `TerminalPanel.tsx` is the xterm.js UI consuming it.
  */
+/** Human UI lane — Law #48 requires callerKind=user on every terminal_* IPC. */
+const HUMAN_TERMINAL_CALLER = { callerKind: 'user' as const }
+
 class NativeTerminalService {
   constructor(private readonly invoke: TauriInvoke) {}
 
   async create(cwd?: string): Promise<NativeTerminalCreateResponse> {
-    return this.invoke<NativeTerminalCreateResponse>('terminal_create', { cwd })
+    return this.invoke<NativeTerminalCreateResponse>('terminal_create', {
+      cwd,
+      ...HUMAN_TERMINAL_CALLER,
+    })
   }
 
   async write(sessionId: string, input: string): Promise<void> {
-    await this.invoke('terminal_write', { sessionId, input })
+    await this.invoke('terminal_write', { sessionId, input, ...HUMAN_TERMINAL_CALLER })
   }
 
   async resize(sessionId: string, rows: number, cols: number): Promise<void> {
-    await this.invoke('terminal_resize', { sessionId, rows, cols })
+    await this.invoke('terminal_resize', {
+      sessionId,
+      rows,
+      cols,
+      ...HUMAN_TERMINAL_CALLER,
+    })
   }
 
   async close(sessionId: string): Promise<void> {
-    await this.invoke('terminal_close', { sessionId })
+    await this.invoke('terminal_close', { sessionId, ...HUMAN_TERMINAL_CALLER })
   }
 
   /** Raw PTY output bytes for one session, straight off `terminal_data_<id>` (emitted as a `number[]` byte array from the Rust reader thread). */

@@ -21,6 +21,7 @@ import { TelepathicArchitectDronePanel } from './panels/TelepathicArchitectDrone
 import { SentinelHardwareMonitorPanel } from './panels/SentinelHardwareMonitorPanel'
 import { FpsOverlayBadge } from './panels/FpsOverlayBadge'
 import { LspFarmStatusPanel } from './panels/LspFarmStatusPanel'
+import { MonacoCodeEditorPanel } from './panels/MonacoCodeEditorPanel'
 
 // P4: Canonical AssetBrowser shared from web (same component, no duplication)
 import { AssetBrowserPanel } from '../../../cloud-web-app/web/components/studio/AssetBrowserPanel'
@@ -220,7 +221,8 @@ export function StudioLocalApp() {
           )}
           {activeTab === 'editor' && (
             <div className="grid grid-cols-2 gap-4 h-full">
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 min-h-0">
+                <MonacoCodeEditorPanel />
                 <div className="relative">
                   <FpsOverlayBadge probe={probe} />
                   <ScenePanel backend={ideBackend} />

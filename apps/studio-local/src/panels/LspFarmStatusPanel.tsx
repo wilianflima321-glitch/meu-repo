@@ -20,8 +20,8 @@ type LspBinaryProbe = {
 
 /**
  * L.13 honesty surface for Studio Local — probes real `lsp_farm` IPC.
- * Never claims Universal IDE / live marketing; Monaco hover lives in the web
- * editor when `__TAURI__` is present (desktop shell has no Monaco mount yet).
+ * Never claims Universal IDE / live marketing. Monaco is mounted in the shell
+ * (`MonacoCodeEditorPanel`); hover/definition stay fail-closed when farm HELD.
  */
 export function LspFarmStatusPanel() {
   const [honesty, setHonesty] = useState<LspFarmHonestyReport | null>(null)
@@ -89,7 +89,7 @@ export function LspFarmStatusPanel() {
             </div>
             <div>
               <dt>Desktop shell Monaco mount</dt>
-              <dd>HELD — use web IDE under Tauri for live markers</dd>
+              <dd>mounted — LSP wire fail-closed when farm HELD</dd>
             </div>
           </dl>
         </>
