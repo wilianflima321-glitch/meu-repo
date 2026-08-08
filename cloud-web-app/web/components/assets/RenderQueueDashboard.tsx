@@ -260,9 +260,9 @@ export function RenderQueueDashboard({ projectId }: { projectId?: string }) {
       <div
         className="relative flex items-center gap-3 flex-wrap rounded-xl px-4 py-3 overflow-hidden aethel-neon-topline-cyan"
         style={{
-          background: 'rgba(8,12,22,0.88)',
-          border: '1px solid rgba(34,211,238,.16)',
-          boxShadow: 'inset 0 0 32px rgba(34,211,238,.03)',
+          background: 'var(--aethel-processing-card-bg)',
+          border: '1px solid var(--aethel-processing-card-border)',
+          boxShadow: 'var(--aethel-processing-card-inset)',
         }}
       >
         <div className="pointer-events-none absolute inset-0 aethel-grid-overlay opacity-40" />

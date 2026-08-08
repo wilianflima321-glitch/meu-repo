@@ -1,4 +1,5 @@
 import { type ClipData, type CutsceneDefinition, type EasingType, type Track, type TrackType } from './types';
+import { DOMAIN_SCENE_DEFAULTS } from '@/lib/design-system/domain-color-presets'
 
 export class CutsceneBuilder {
   private definition: Partial<CutsceneDefinition> = {
@@ -215,7 +216,7 @@ export class CutsceneBuilder {
   
   // Fade clips
   
-  fadeIn(startTime: number, endTime: number, color = '#000000'): this {
+  fadeIn(startTime: number, endTime: number, color = DOMAIN_SCENE_DEFAULTS.fade): this {
     return this.clip(startTime, endTime, {
       type: 'fade',
       fadeType: 'in',
@@ -223,7 +224,7 @@ export class CutsceneBuilder {
     });
   }
   
-  fadeOut(startTime: number, endTime: number, color = '#000000'): this {
+  fadeOut(startTime: number, endTime: number, color = DOMAIN_SCENE_DEFAULTS.fade): this {
     return this.clip(startTime, endTime, {
       type: 'fade',
       fadeType: 'out',

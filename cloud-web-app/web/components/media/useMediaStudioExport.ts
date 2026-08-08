@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
@@ -199,7 +200,7 @@ export function useMediaStudioExport({ project }: UseMediaStudioExportOptions) {
           ctx.save()
           ctx.filter = 'none'
           ctx.globalAlpha = 1
-          ctx.fillStyle = 'rgb(0 0 0)'
+          ctx.fillStyle = tokenColor('--aethel-brand-pure-black')
           ctx.fillRect(0, 0, width, height)
 
           const active = project.clips

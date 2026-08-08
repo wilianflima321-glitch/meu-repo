@@ -248,6 +248,48 @@
     --aethel-scene-material-black: #1a1a1a;
     --aethel-scene-material-gray: #6b7280;
 
+    /* Browser / partner brand literals (meta + Stripe Connect) */
+    --aethel-browser-theme-light: #2563eb;
+    --aethel-browser-theme-dark: #0b0d12;
+    --aethel-stripe-brand: #635BFF;
+    --aethel-indigo: #6366f1;
+    --aethel-surface-ink: #16161d;
+    --aethel-video-white-10: rgba(255, 255, 255, 0.1);
+    --aethel-video-white-05: rgba(255, 255, 255, 0.05);
+    --aethel-video-white-03: rgba(255, 255, 255, 0.03);
+    --aethel-editor-overlay-bg-soft: rgba(15, 15, 20, 0.8);
+    --aethel-editor-diff-pill-bg: rgba(7, 12, 20, 0.78);
+    --aethel-panel-deep: rgba(8, 10, 16, 0.84);
+    --aethel-processing-card-bg: rgba(8, 12, 22, 0.88);
+    --aethel-processing-card-border: rgba(34, 211, 238, 0.16);
+    --aethel-processing-card-inset: inset 0 0 32px rgba(34, 211, 238, 0.03);
+    --aethel-deploy-radial: radial-gradient(circle at top, rgba(0, 170, 255, 0.12), transparent 40%);
+    --aethel-shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.24);
+    --aethel-shadow-panel: 0 26px 80px rgba(2, 6, 23, 0.28);
+    --aethel-terms-nav-glow: 0 0 0 1px rgba(56, 189, 248, 0.18), 0 0 24px rgba(56, 189, 248, 0.12), 0 0 48px rgba(56, 189, 248, 0.05);
+    --aethel-terms-header-shadow: 0 1px 0 rgba(56, 189, 248, 0.07), 0 4px 16px rgba(0, 0, 0, 0.18);
+    --aethel-landing-proof-bg: linear-gradient(180deg, rgba(2, 6, 23, 0.74), rgba(15, 23, 42, 0.64));
+    --aethel-water-deep: #0891b2;
+    --aethel-foliage-terrain: #4a5a3a;
+    --aethel-terrain-mesh: #4a7c59;
+    --aethel-character-skin: #e2a98f;
+    --aethel-character-skin-soft: #e8d5c4;
+    --aethel-hair-light: #fff5e6;
+    --aethel-grid-major: #1f2933;
+    --aethel-grid-minor: #141a24;
+    --aethel-vr-panel: #333333;
+    --aethel-vr-panel-border: #666666;
+    --aethel-vr-highlight: #4488ff;
+    --aethel-viewport-film-stop-0: #09111f;
+    --aethel-viewport-film-stop-50: #101a2b;
+    --aethel-viewport-film-stop-100: #061014;
+    --aethel-viewport-game-accent: #80ff9f;
+    --aethel-reference-pane-bg: #0b1220;
+    --aethel-mesh-label-bg: rgba(6, 10, 18, 0.84);
+    --aethel-hmr-error: #ff6b6b;
+    --aethel-hmr-pre-bg: #1a1a1a;
+    --aethel-hmr-btn-bg: #333333;
+
     /*
      * ── Terminal / xterm ANSI palettes (L.10) ──
      * Hex lives here only. TS wrappers reference var(--aethel-terminal-*)

@@ -300,7 +300,7 @@ export function SceneObjectMesh({
         ) : null}
         {isSelected ? (
           <DreiHtml position={[0, 0.95, 0]} center>
-            <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[var(--aethel-mesh-label-bg)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
               {object.name}
               {object.asset ? <span className="ml-1 text-[var(--aethel-text-tertiary)]">.{object.asset.format}</span> : null}
             </div>

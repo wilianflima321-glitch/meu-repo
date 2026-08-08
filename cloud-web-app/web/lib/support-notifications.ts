@@ -1,5 +1,6 @@
 import { logger } from '@/lib/observability/logger';
 import { Resend } from 'resend';
+import { EMAIL_BRAND } from './email-brand-colors';
 import { formatCategory, formatPriority } from './support-formatters';
 import type { SupportTicket } from './support-types';
 
@@ -30,13 +31,13 @@ export async function sendTicketConfirmation(ticket: SupportTicket): Promise<voi
         <html>
         <head>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: ${EMAIL_BRAND.textBody}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+            .header { background: linear-gradient(135deg, ${EMAIL_BRAND.supportGradFrom} 0%, ${EMAIL_BRAND.supportGradTo} 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+            .content { background: ${EMAIL_BRAND.footerBg}; padding: 30px; border: 1px solid ${EMAIL_BRAND.border}; }
             .ticket-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
-            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
-            .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+            .footer { text-align: center; padding: 20px; color: ${EMAIL_BRAND.footerText}; font-size: 14px; }
+            .button { display: inline-block; background: ${EMAIL_BRAND.supportCta}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
           </style>
         </head>
         <body>
@@ -57,7 +58,7 @@ export async function sendTicketConfirmation(ticket: SupportTicket): Promise<voi
               </div>
               
               <p><strong>Sua mensagem:</strong></p>
-              <div style="background: white; padding: 15px; border-left: 4px solid #667eea; margin: 10px 0;">
+              <div style="background: white; padding: 15px; border-left: 4px solid ${EMAIL_BRAND.supportCta}; margin: 10px 0;">
                 ${ticket.message}
               </div>
               
@@ -100,11 +101,11 @@ export async function sendReplyNotificationToUser(
         <html>
         <head>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: ${EMAIL_BRAND.textBody}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .content { background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-radius: 8px; }
+            .content { background: ${EMAIL_BRAND.footerBg}; padding: 30px; border: 1px solid ${EMAIL_BRAND.border}; border-radius: 8px; }
             .reply { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
-            .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; }
+            .button { display: inline-block; background: ${EMAIL_BRAND.supportCta}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; }
           </style>
         </head>
         <body>
@@ -121,7 +122,7 @@ export async function sendReplyNotificationToUser(
                 Responder
               </a>
               
-              <p style="margin-top: 20px; color: #6b7280;">
+              <p style="margin-top: 20px; color: ${EMAIL_BRAND.footerText};">
                 Você também pode responder diretamente a este email.
               </p>
             </div>
@@ -151,23 +152,23 @@ export async function sendResolutionNotification(ticket: SupportTicket): Promise
         <html>
         <head>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: ${EMAIL_BRAND.textBody}; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .content { background: #f0fdf4; padding: 30px; border: 1px solid #86efac; border-radius: 8px; }
+            .content { background: ${EMAIL_BRAND.resolvedBg}; padding: 30px; border: 1px solid ${EMAIL_BRAND.resolvedBorder}; border-radius: 8px; }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="content">
-              <h2 style="color: #166534;">✓ Ticket Resolvido</h2>
+              <h2 style="color: ${EMAIL_BRAND.resolvedTitle};">✓ Ticket Resolvido</h2>
               <p>Seu ticket #${ticket.id.slice(-6)} foi marcado como resolvido.</p>
               <p><strong>Assunto:</strong> ${ticket.subject}</p>
               
               <p>Se você ainda precisar de ajuda, pode reabrir este ticket respondendo este email ou criando um novo.</p>
               
-              <hr style="border: none; border-top: 1px solid #86efac; margin: 20px 0;">
+              <hr style="border: none; border-top: 1px solid ${EMAIL_BRAND.resolvedBorder}; margin: 20px 0;">
               
-              <p style="color: #6b7280;">
+              <p style="color: ${EMAIL_BRAND.footerText};">
                 <strong>Ficamos felizes em ajudar!</strong><br>
                 Se tiver um momento, avalie nosso atendimento.
               </p>

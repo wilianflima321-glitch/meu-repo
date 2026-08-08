@@ -1,3 +1,4 @@
+import { DOMAIN_SCENE_DEFAULTS } from '@/lib/design-system/domain-color-presets'
 /**
  * Procedural PBR map generation from a single dropped albedo/base-color image
  * (CLAUDE_MASTER_EXECUTION_PLAN_V8 R2 — "Drag-and-Drop Multimodal PBR").
@@ -223,7 +224,7 @@ export function buildViewportPBRPlaneObject({
     name: `${baseName} (PBR)`,
     type: 'mesh',
     geometry: 'plane',
-    color: 'rgb(255, 255, 255)',
+    color: DOMAIN_SCENE_DEFAULTS.pbrWhite,
     position,
     rotation: [0, 0, 0],
     scale: [1, 1, 1],

@@ -1,4 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
+import { DOMAIN_MATERIAL_SWATCHES } from '@/lib/design-system/domain-color-presets'
 
 // ============================================================================
 // TIPOS
@@ -75,7 +76,7 @@ export const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
     inputs: [],
     outputs: [{ name: 'Color', type: 'color' }],
     defaultProperties: [
-      { name: 'Color', type: 'color', value: '#ffffff' },
+      { name: 'Color', type: 'color', value: DOMAIN_MATERIAL_SWATCHES.white },
     ],
   },
   'constant_float': {
@@ -304,8 +305,8 @@ export const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
       { name: 'Color', type: 'color' },
     ],
     defaultProperties: [
-      { name: 'Color A', type: 'color', value: '#000000' },
-      { name: 'Color B', type: 'color', value: '#ffffff' },
+      { name: 'Color A', type: 'color', value: DOMAIN_MATERIAL_SWATCHES.black },
+      { name: 'Color B', type: 'color', value: DOMAIN_MATERIAL_SWATCHES.white },
       { name: 'Type', type: 'string' as 'float', value: 'Linear' },
     ],
   },

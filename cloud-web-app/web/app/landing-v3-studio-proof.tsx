@@ -24,7 +24,7 @@ function statusTone(tone: (typeof STUDIO_PANELS)[number]['tone']) {
 
 export default function LandingStudioProof() {
   return (
-    <div className="mt-4 overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(2,6,23,0.74),rgba(15,23,42,0.64))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <div className="mt-4 overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[var(--aethel-landing-proof-bg)] shadow-[inset_0_1px_0_var(--aethel-video-white-05)]">
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-[var(--aethel-error)]" />
@@ -37,7 +37,7 @@ export default function LandingStudioProof() {
       </div>
 
       <div className="grid md:grid-cols-[116px_minmax(0,1fr)]">
-        <div className="border-b border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.24)] p-3 md:border-b-0 md:border-r">
+        <div className="border-b border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.24)] p-3 md:border-b-0 md:border-r">
           <div className="space-y-2">
             {['Plan', 'Code', 'Preview', 'Ship'].map((item, index) => (
               <div
@@ -64,7 +64,7 @@ export default function LandingStudioProof() {
             ))}
           </div>
 
-          <div className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(8,10,16,0.46)] p-3">
+          <div className="mt-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb),0.46)] p-3">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">Agent action timeline</p>
@@ -76,7 +76,7 @@ export default function LandingStudioProof() {
             </div>
             <div className="mt-3 space-y-2">
               {ACTIVITY.map((item) => (
-                <div key={item} className="flex items-center gap-2 rounded-xl bg-[rgba(15,23,42,0.52)] px-3 py-2">
+                <div key={item} className="flex items-center gap-2 rounded-xl bg-[rgba(var(--aethel-slate-900-rgb),0.52)] px-3 py-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[var(--aethel-info)]" />
                   <span className="text-[11px] text-[var(--aethel-text-secondary)]">{item}</span>
                 </div>

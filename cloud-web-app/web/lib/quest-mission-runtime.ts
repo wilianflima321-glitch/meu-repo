@@ -1,3 +1,4 @@
+import { DOMAIN_QUEST_MARKERS } from '@/lib/design-system/domain-color-presets'
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 import * as THREE from 'three'
 
@@ -31,7 +32,7 @@ export function createQuestFromJSON(json: QuestJSON): Quest {
     chainOrder: json.chainOrder,
     nextQuestId: json.nextQuestId,
     icon: json.icon,
-    markerColor: json.markerColor || '#ffcc00',
+    markerColor: json.markerColor || DOMAIN_QUEST_MARKERS.marker,
     priority: json.priority || 0,
     isTracked: false,
     questGiverId: json.questGiverId,
@@ -61,7 +62,7 @@ export function createQuestMarkers(quest: Quest): QuestMarker[] {
       position: new THREE.Vector3(),
       type: 'quest_giver',
       icon: '!',
-      color: quest.markerColor || '#ffcc00',
+      color: quest.markerColor || DOMAIN_QUEST_MARKERS.marker,
     })
   }
   if (quest.state === QuestState.ACTIVE) {
@@ -73,7 +74,7 @@ export function createQuestMarkers(quest: Quest): QuestMarker[] {
         position: obj.targetLocation,
         type: 'objective',
         icon: '◆',
-        color: quest.markerColor || '#ffcc00',
+        color: quest.markerColor || DOMAIN_QUEST_MARKERS.marker,
       })
     }
   }
@@ -83,7 +84,7 @@ export function createQuestMarkers(quest: Quest): QuestMarker[] {
       position: new THREE.Vector3(),
       type: 'turn_in',
       icon: '?',
-      color: '#00ff00',
+      color: DOMAIN_QUEST_MARKERS.complete,
     })
   }
   return markers

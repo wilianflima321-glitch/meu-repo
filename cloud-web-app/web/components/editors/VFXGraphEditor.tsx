@@ -1,3 +1,4 @@
+import { DOMAIN_VFX_GRADIENT } from '@/lib/design-system/domain-color-presets'
 'use client';
 
 /**
@@ -63,7 +64,7 @@ const NODE_TEMPLATES: Record<string, Omit<VFXNode, 'id' | 'position'>> = {
       { id: 'gradient', name: 'Gradient', type: 'gradient' }
     ],
     outputs: [{ id: 'out', name: 'Output', type: 'particle-stream' }],
-    properties: { gradient: [{ t: 0, color: 'rgb(255 255 255)' }, { t: 1, color: 'rgb(255 0 0)' }] }
+    properties: { gradient: [{ t: 0, color: DOMAIN_VFX_GRADIENT.white }, { t: 1, color: DOMAIN_VFX_GRADIENT.red }] }
   },
   'size-over-life': {
     type: 'module',
@@ -425,7 +426,7 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
           style={{
             backgroundImage: `
               linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+              linear-gradient(90deg, var(--aethel-video-white-05) 1px, transparent 1px)
             `,
             backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
             backgroundPosition: `${pan.x}px ${pan.y}px`

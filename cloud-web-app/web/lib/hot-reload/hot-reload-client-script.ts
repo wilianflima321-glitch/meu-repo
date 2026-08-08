@@ -1,6 +1,13 @@
 // Browser client shipped by the local hot reload server.
 // Kept separate so the Node server stays focused on transport and file watching.
+import { tokenColor, tokenRgba } from '@/lib/design-system/DesignTokenSync'
+
 export function createHotReloadClientScript(port: number): string {
+  const overlayBg = tokenRgba('--aethel-brand-pure-black', 0.85)
+  const errorColor = tokenColor('--aethel-hmr-error')
+  const preBg = tokenColor('--aethel-hmr-pre-bg')
+  const btnBg = tokenColor('--aethel-hmr-btn-bg')
+  const btnFg = tokenColor('--aethel-text-inverse')
   return `
 (function() {
   'use strict';
@@ -143,10 +150,10 @@ export function createHotReloadClientScript(port: number): string {
       this.hideErrorOverlay();
       const overlay = document.createElement('div');
       overlay.id = 'hmr-error-overlay';
-      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);color:#ff6b6b;font-family:monospace;font-size:14px;padding:40px;z-index:999999;overflow:auto;';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:${overlayBg};color:${errorColor};font-family:monospace;font-size:14px;padding:40px;z-index:999999;overflow:auto;';
       let html = '<div style="max-width:900px;margin:0 auto;">';
-      html += '<h2 style="color:#ff6b6b;margin:0 0 20px;">Build Error</h2>';
-      html += '<pre style="background:#1a1a1a;padding:20px;border-radius:8px;overflow:auto;white-space:pre-wrap;word-wrap:break-word;">';
+      html += '<h2 style="color:${errorColor};margin:0 0 20px;">Build Error</h2>';
+      html += '<pre style="background:${preBg};padding:20px;border-radius:8px;overflow:auto;white-space:pre-wrap;word-wrap:break-word;">';
       html += this.escapeHtml(error.message);
       if (error.file) {
         html += '\\n\\nFile: ' + this.escapeHtml(error.file);
@@ -160,7 +167,7 @@ export function createHotReloadClientScript(port: number): string {
         html += '\\n\\nStack:\\n' + this.escapeHtml(error.stack);
       }
       html += '</pre>';
-      html += '<button type="button" onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
+      html += '<button type="button" onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:${btnBg};color:${btnFg};border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
       html += '</div>';
       overlay.innerHTML = html;
       document.body.appendChild(overlay);

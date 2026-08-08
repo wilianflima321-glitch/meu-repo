@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary: transitive runtime chunk loaded through HairFurEditor.
@@ -69,7 +70,7 @@ export function HeadMesh() {
   return (
     <mesh position={[0, 0.3, 0]}>
       <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial color="rgb(232 213 196)" roughness={0.8} metalness={0.1} />
+      <meshStandardMaterial color={tokenColor("--aethel-character-skin-soft")} roughness={0.8} metalness={0.1} />
     </mesh>
   );
 }
@@ -94,10 +95,10 @@ export function BrushPreview({ brush, active }: BrushPreviewProps) {
   });
   if (!active) return null;
   const brushColors: Record<BrushTool, string> = {
-    comb: 'rgb(59 130 246)',
-    cut: 'rgb(239 68 68)',
-    add: 'rgb(34 197 94)',
-    length: 'rgb(245 158 11)',
+    comb: tokenColor('--aethel-primary'),
+    cut: tokenColor('--aethel-error'),
+    add: tokenColor('--aethel-success'),
+    length: tokenColor('--aethel-warning'),
   };
   return (
     <mesh ref={meshRef} position={position}>

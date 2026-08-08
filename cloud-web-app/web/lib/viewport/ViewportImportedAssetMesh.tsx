@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client'
 
 // @aethel-heavy-async-boundary: mounted only through ViewportSceneObjectMesh when meshUrl is set.
@@ -121,7 +122,7 @@ function HonestyWireframePlaceholder({
     <mesh castShadow receiveShadow>
       <boxGeometry args={[1.4, 1, 1]} />
       <meshStandardMaterial
-        color="rgb(56, 189, 248)"
+        color={tokenColor("--aethel-info")}
         wireframe
         transparent={failed}
         opacity={failed ? 0.55 : 1}

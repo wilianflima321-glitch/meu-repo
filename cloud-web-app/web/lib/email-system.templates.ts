@@ -2,6 +2,7 @@
  * Transactional email templates for the Aethel email runtime.
  */
 
+import { EMAIL_BRAND } from './email-brand-colors';
 import type { EmailTemplate } from './email-system.types';
 
 // ============================================================================
@@ -15,15 +16,15 @@ interface TemplateConfig {
 }
 
 const BaseStyles = `
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: ${EMAIL_BRAND.textBody}; }
   .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-  .header { background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+  .header { background: linear-gradient(135deg, ${EMAIL_BRAND.headerFrom}, ${EMAIL_BRAND.headerTo}); padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
   .header h1 { color: white; margin: 0; font-size: 24px; }
-  .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; }
-  .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 8px 8px; }
-  .button { display: inline-block; background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
-  .button:hover { background: #4f46e5; }
-  .highlight { background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0; }
+  .content { background: ${EMAIL_BRAND.contentBg}; padding: 30px; border: 1px solid ${EMAIL_BRAND.border}; }
+  .footer { background: ${EMAIL_BRAND.footerBg}; padding: 20px; text-align: center; font-size: 12px; color: ${EMAIL_BRAND.footerText}; border-radius: 0 0 8px 8px; }
+  .button { display: inline-block; background: ${EMAIL_BRAND.cta}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+  .button:hover { background: ${EMAIL_BRAND.ctaHover}; }
+  .highlight { background: ${EMAIL_BRAND.highlightBg}; padding: 15px; border-radius: 6px; margin: 15px 0; }
 `;
 
 const wrapInLayout = (content: string, data?: Record<string, unknown>) => `
@@ -212,7 +213,7 @@ export const EmailTemplates: Record<EmailTemplate, TemplateConfig> = {
       <div class="highlight">
         <p><strong>Arquivo:</strong> ${data.fileName}</p>
         <p><strong>Comentário:</strong></p>
-        <blockquote style="border-left: 3px solid #6366f1; padding-left: 15px; margin: 10px 0;">
+        <blockquote style="border-left: 3px solid ${EMAIL_BRAND.cta}; padding-left: 15px; margin: 10px 0;">
           ${data.comment}
         </blockquote>
       </div>

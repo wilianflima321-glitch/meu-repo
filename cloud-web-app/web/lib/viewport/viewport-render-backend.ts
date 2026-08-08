@@ -1,3 +1,4 @@
+import { tokenColor, tokenRgba } from '@/lib/design-system/DesignTokenSync'
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -324,15 +325,22 @@ function buildScenePreviewSvg(payload: ViewportRenderQueuePayload, variant: 'thu
   const assetFormats = contract.scene.assetFormats.length > 0 ? contract.scene.assetFormats.join(', ') : 'none'
   const width = variant === 'thumbnail' ? 960 : 1280
   const height = variant === 'thumbnail' ? 540 : 720
-  const accent = contract.mode === 'film' ? '#61dafb' : '#80ff9f'
+  const accent = contract.mode === 'film' ? tokenColor('--aethel-file-icon-jsx') : tokenColor('--aethel-viewport-game-accent')
   const gridOpacity = variant === 'thumbnail' ? '0.16' : '0.24'
+  const stop0 = tokenColor('--aethel-viewport-film-stop-0')
+  const stop50 = tokenColor('--aethel-viewport-film-stop-50')
+  const stop100 = tokenColor('--aethel-viewport-film-stop-100')
+  const textPrimary = tokenColor('--aethel-text-primary')
+  const textSecondary = tokenColor('--aethel-text-secondary')
+  const textTertiary = tokenColor('--aethel-text-tertiary')
+  const panelTint = tokenRgba('--aethel-text-inverse', 0.045)
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)} viewport preview">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#09111f"/>
-      <stop offset="50%" stop-color="#101a2b"/>
-      <stop offset="100%" stop-color="#061014"/>
+      <stop offset="0%" stop-color="${stop0}"/>
+      <stop offset="50%" stop-color="${stop50}"/>
+      <stop offset="100%" stop-color="${stop100}"/>
     </linearGradient>
     <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
       <path d="M 48 0 L 0 0 0 48" fill="none" stroke="${accent}" stroke-width="1" opacity="${gridOpacity}"/>
@@ -340,14 +348,14 @@ function buildScenePreviewSvg(payload: ViewportRenderQueuePayload, variant: 'thu
   </defs>
   <rect width="100%" height="100%" fill="url(#bg)"/>
   <rect width="100%" height="100%" fill="url(#grid)"/>
-  <rect x="72" y="72" width="${width - 144}" height="${height - 144}" rx="28" fill="rgba(255,255,255,0.045)" stroke="${accent}" stroke-width="2" opacity="0.92"/>
+  <rect x="72" y="72" width="${width - 144}" height="${height - 144}" rx="28" fill="${panelTint}" stroke="${accent}" stroke-width="2" opacity="0.92"/>
   <circle cx="${width / 2}" cy="${height / 2}" r="${Math.min(width, height) * 0.18}" fill="${accent}" opacity="0.12"/>
   <path d="M ${width * 0.34} ${height * 0.6} L ${width * 0.5} ${height * 0.32} L ${width * 0.66} ${height * 0.6} Z" fill="none" stroke="${accent}" stroke-width="5" stroke-linejoin="round"/>
   <text x="96" y="126" fill="${accent}" font-family="Inter, ui-sans-serif, system-ui" font-size="26" font-weight="700">${escapeXml(title)}</text>
-  <text x="96" y="164" fill="#dbeafe" font-family="Inter, ui-sans-serif, system-ui" font-size="18">${escapeXml(selected)}</text>
-  <text x="96" y="${height - 136}" fill="#a7b7d4" font-family="Inter, ui-sans-serif, system-ui" font-size="16">objects ${contract.scene.objectCount} / assets ${contract.scene.assetCount} / duration ${contract.timeline.duration}s / ${contract.profile.resolution}@${contract.profile.fps}</text>
-  <text x="96" y="${height - 100}" fill="#7f8ea8" font-family="Inter, ui-sans-serif, system-ui" font-size="14">formats: ${escapeXml(assetFormats)}</text>
-  <text x="96" y="${height - 68}" fill="#7f8ea8" font-family="Inter, ui-sans-serif, system-ui" font-size="14">Aethel internal scene preview - not a final cinematic export</text>
+  <text x="96" y="164" fill="${textPrimary}" font-family="Inter, ui-sans-serif, system-ui" font-size="18">${escapeXml(selected)}</text>
+  <text x="96" y="${height - 136}" fill="${textSecondary}" font-family="Inter, ui-sans-serif, system-ui" font-size="16">objects ${contract.scene.objectCount} / assets ${contract.scene.assetCount} / duration ${contract.timeline.duration}s / ${contract.profile.resolution}@${contract.profile.fps}</text>
+  <text x="96" y="${height - 100}" fill="${textTertiary}" font-family="Inter, ui-sans-serif, system-ui" font-size="14">formats: ${escapeXml(assetFormats)}</text>
+  <text x="96" y="${height - 68}" fill="${textTertiary}" font-family="Inter, ui-sans-serif, system-ui" font-size="14">Aethel internal scene preview - not a final cinematic export</text>
 </svg>
 `
 }

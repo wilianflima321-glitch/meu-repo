@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary
@@ -115,11 +116,11 @@ export function WaterSurface({ params }: WaterSurfaceProps) {
   const timeRef = useRef(0);
   const originalPositionsRef = useRef<Float32Array | null>(null);
   const shallowColorValue = useMemo(
-    () => resolveCssVarValue(params.shallowColor, 'rgb(34, 211, 238)'),
+    () => resolveCssVarValue(params.shallowColor, tokenColor('--aethel-neon-cyan')),
     [params.shallowColor]
   );
   const deepColorValue = useMemo(
-    () => resolveCssVarValue(params.deepColor, 'rgb(8, 145, 178)'),
+    () => resolveCssVarValue(params.deepColor, tokenColor('--aethel-water-deep')),
     [params.deepColor]
   );
 
@@ -316,7 +317,7 @@ export function FoamOverlay({ params }: FoamOverlayProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const timeRef = useRef(0);
   const foamColor = useMemo(
-    () => resolveCssVarValue(params.foamColor, 'rgb(248, 250, 252)'),
+    () => resolveCssVarValue(params.foamColor, tokenColor('--aethel-text-primary')),
     [params.foamColor]
   );
 
@@ -357,7 +358,7 @@ export function CausticsProjector({ params }: CausticsProjectorProps) {
   const lightRef = useRef<THREE.SpotLight>(null);
   const timeRef = useRef(0);
   const causticsColor = useMemo(
-    () => resolveCssVarColor('--aethel-info-light', 'rgb(34, 211, 238)'),
+    () => resolveCssVarColor('--aethel-neon-cyan', tokenColor('--aethel-neon-cyan')),
     []
   );
 

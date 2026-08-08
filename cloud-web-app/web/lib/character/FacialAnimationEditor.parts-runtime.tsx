@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client'
 
 // @aethel-heavy-async-boundary
@@ -535,7 +536,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   return (
     <mesh ref={meshRef} geometry={geometry}>
       <meshStandardMaterial
-        color="rgb(226 169 143)"
+        color={tokenColor("--aethel-character-skin")}
         roughness={0.7}
         metalness={0.1}
       />

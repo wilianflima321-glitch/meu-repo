@@ -1,4 +1,5 @@
 import type { Plugin } from './plugin-system-types';
+import { DOMAIN_MATERIAL_SWATCHES } from '@/lib/design-system/domain-color-presets'
 
 // ============================================================================
 // BUILT-IN PLUGINS
@@ -119,7 +120,7 @@ export const BUILTIN_PLUGINS: Plugin[] = [
           icon: '🖼️',
           properties: {
             sprite: { type: 'asset:sprite', default: null, description: 'Sprite asset' },
-            color: { type: 'color', default: '#ffffff', description: 'Tint color' },
+            color: { type: 'color', default: DOMAIN_MATERIAL_SWATCHES.white, description: 'Tint color' },
             flipX: { type: 'boolean', default: false, description: 'Flip horizontally' },
             flipY: { type: 'boolean', default: false, description: 'Flip vertically' },
           },

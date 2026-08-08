@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
@@ -12,8 +13,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#2563eb' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0d12' },
+    { media: '(prefers-color-scheme: light)', color: tokenColor('--aethel-browser-theme-light') },
+    { media: '(prefers-color-scheme: dark)', color: tokenColor('--aethel-browser-theme-dark') },
   ],
 }
 
@@ -79,7 +80,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <CoreUiProviders>
           <ProductTelemetry />
-          <GlobalCommandSurface>{children}</GlobalCommandSurface>
+          <GlobalCommandSurface>{children as any}</GlobalCommandSurface>
         </CoreUiProviders>
       </body>
     </html>

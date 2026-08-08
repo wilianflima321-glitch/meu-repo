@@ -1,3 +1,4 @@
+import { tokenRgba } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 /**
@@ -209,7 +210,7 @@ export function ImageEditor({
       ctx.lineTo(x, y);
       ctx.lineWidth = brush.size;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = tool === 'brush' ? brush.color : 'rgba(0,0,0,1)';
+      ctx.strokeStyle = tool === 'brush' ? brush.color : tokenRgba('--aethel-brand-pure-black', 1);
       ctx.stroke();
     }
 

@@ -1,3 +1,4 @@
+import { DOMAIN_HAIR_GRADIENT } from '@/lib/design-system/domain-color-presets'
 export interface HairData {
   strandCount: number;
   regions: HairRegion[];
@@ -82,9 +83,9 @@ export const DEFAULT_REGIONS: HairRegion[] = [
   { id: 'nape', name: 'Nuca', length: 0.4, density: 0.8, enabled: true },
 ];
 export const DEFAULT_GRADIENT: GradientStop[] = [
-  { position: 0, color: '#2d1810' },
-  { position: 0.5, color: '#4a2c1a' },
-  { position: 1, color: '#6b3d22' },
+  { position: DOMAIN_HAIR_GRADIENT[0].position, color: DOMAIN_HAIR_GRADIENT[0].color },
+  { position: DOMAIN_HAIR_GRADIENT[1].position, color: DOMAIN_HAIR_GRADIENT[1].color },
+  { position: DOMAIN_HAIR_GRADIENT[2].position, color: DOMAIN_HAIR_GRADIENT[2].color },
 ];
 export function generateHairStrands(
   strandCount: number,

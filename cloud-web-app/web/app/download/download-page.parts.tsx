@@ -77,7 +77,7 @@ export function DownloadHero() {
               <h2 className="mt-3 text-sm font-semibold">{publicRuntimeCopy(target.label)}</h2>
               <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{publicRuntimeCopy(target.detail)}</p>
               {target.fallbackReason && (
-                <p className="mt-2 border-l border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.28)] px-3 py-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                <p className="mt-2 border-l border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.28)] px-3 py-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
                   Fallback: {publicRuntimeCopy(target.fallbackReason)}
                 </p>
               )}
@@ -102,7 +102,7 @@ export function DesktopTargetPanel({
   const current = PLATFORMS[selectedPlatform]
 
   return (
-      <aside className="rounded-xl border border-[var(--aethel-border-primary)] bg-[rgba(8,10,16,0.84)] p-5 shadow-[0_26px_80px_rgba(2,6,23,0.28)]">
+      <aside className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-panel-deep)] p-5 shadow-[var(--aethel-shadow-panel)]">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Release channel</p>
@@ -138,7 +138,7 @@ export function DesktopTargetPanel({
         <p className="mt-3 text-xs leading-5 text-[var(--aethel-text-tertiary)]">
           {publicRuntimeCopy(current.readiness)}
         </p>
-        <code className="mt-3 block overflow-x-auto border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.62)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
+        <code className="mt-3 block overflow-x-auto border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.62)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
           {current.command}
         </code>
       </details>

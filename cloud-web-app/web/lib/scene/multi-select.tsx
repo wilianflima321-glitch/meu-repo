@@ -254,8 +254,8 @@ export function BoxSelectionOverlay({ isSelecting, start, end }: BoxSelectionOve
         top,
         width,
         height,
-        border: '1px dashed #6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        border: '1px dashed var(--aethel-indigo)',
+        backgroundColor: 'rgba(var(--aethel-indigo-rgb), 0.1)',
       }}
     />
   );

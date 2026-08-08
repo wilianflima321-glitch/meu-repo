@@ -103,7 +103,7 @@ function SceneObjectMesh({
           scale={0.75}
           activeAxes={[true, true, true]}
           depthTest={false}
-          onDrag={(matrix) => {
+          onDrag={(matrix: THREE.Matrix4) => {
             const position = new THREE.Vector3();
             const quaternion = new THREE.Quaternion();
             const scale = new THREE.Vector3();
@@ -258,7 +258,7 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
         <DreiHtml position={[0, 0.4, 0]}>
           <div
             style={{
-              background: "rgba(0,0,0,0.8)",
+              background: "var(--aethel-anim-overlay)",
               color: "var(--aethel-text-primary)",
               padding: "4px 8px",
               borderRadius: "4px",
@@ -295,7 +295,7 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
         <DreiHtml position={[0, 0.5, 0]}>
           <div
             style={{
-              background: "rgba(0,0,0,0.7)",
+              background: "var(--aethel-video-black-70)",
               color: "var(--aethel-text-primary)",
               padding: "4px 8px",
               borderRadius: "4px",

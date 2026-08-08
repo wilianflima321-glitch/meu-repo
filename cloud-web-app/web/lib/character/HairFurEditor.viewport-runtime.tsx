@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 // @aethel-heavy-async-boundary
 import { Canvas } from '@react-three/fiber';
@@ -59,7 +60,7 @@ export function HairFurViewport({
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
         <directionalLight position={[-3, 3, -3]} intensity={0.3} />
-        <pointLight position={[0, 2, 0]} intensity={0.5} color="rgb(255 245 230)" />
+        <pointLight position={[0, 2, 0]} intensity={0.5} color={tokenColor("--aethel-hair-light")} />
         <HeadMesh />
         <HairStrands3D
           strandCount={strandCount}
@@ -76,13 +77,13 @@ export function HairFurViewport({
           enableZoom={true}
           minDistance={1}
           maxDistance={10}
-          onChange={(event) => {
+          onChange={(event: any) => {
             if (event?.target) {
               onCameraDistanceChange(readOrbitDistance(event.target));
             }
           }}
         />
-        <gridHelper args={[10, 10, 'rgb(31 41 51)', 'rgb(20 26 36)']} position={[0, -0.5, 0]} />
+        <gridHelper args={[10, 10, tokenColor('--aethel-grid-major'), tokenColor('--aethel-grid-minor')]} position={[0, -0.5, 0]} />
       </Canvas>
       <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] backdrop-blur-sm rounded-lg p-3 text-sm space-y-1">
         <div className="text-[var(--aethel-text-tertiary)]">

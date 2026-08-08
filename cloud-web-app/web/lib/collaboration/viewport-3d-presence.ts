@@ -1,3 +1,4 @@
+import { DOMAIN_COLLAB_TEST } from '@/lib/design-system/domain-color-presets'
 /**
  * Letter cg — Yjs viewport 3D presence (deepen Block 2A).
  * Conflict-free awareness cursors for co-edit in 3D viewport.
@@ -89,7 +90,7 @@ export function collectViewport3dPeers(
       clientId,
       userId: String(user.id ?? clientId),
       name: String(user.name ?? 'Guest'),
-      color: String(user.color ?? '#6b8cae'),
+      color: String(user.color ?? DOMAIN_COLLAB_TEST.presenceFallback),
       cursor,
     })
   })
@@ -120,10 +121,10 @@ export function proveViewport3dPresence(): {
   const a = buildViewport3dCursor({ x: 1, y: 2, z: 3, entityId: 'mesh-1' })
   const b = buildViewport3dCursor({ x: 4, y: 5, z: 6 })
   const mapA = new Map<number, Viewport3dPeerCursor>([
-    [1, { clientId: 1, userId: 'u1', name: 'A', color: '#f00', cursor: a }],
+    [1, { clientId: 1, userId: 'u1', name: 'A', color: DOMAIN_COLLAB_TEST.red, cursor: a }],
   ])
   const mapB = new Map<number, Viewport3dPeerCursor>([
-    [2, { clientId: 2, userId: 'u2', name: 'B', color: '#0f0', cursor: b }],
+    [2, { clientId: 2, userId: 'u2', name: 'B', color: DOMAIN_COLLAB_TEST.green, cursor: b }],
   ])
   const merged = mergeViewportPresenceMaps([mapA, mapB])
   return {

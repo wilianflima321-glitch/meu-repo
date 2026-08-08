@@ -1,3 +1,4 @@
+import { DOMAIN_QR } from '@/lib/design-system/domain-color-presets'
 /**
  * Two-Factor Authentication (2FA/TOTP) System
  * 
@@ -262,8 +263,8 @@ export class TwoFactorService {
       width: 256,
       margin: 2,
       color: {
-        dark: '#000000',
-        light: '#ffffff',
+        dark: DOMAIN_QR.dark,
+        light: DOMAIN_QR.light,
       },
     });
 

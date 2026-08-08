@@ -63,7 +63,7 @@ export function EvidenceResearchMeshPanel({
           </div>
         ))}
       </div>
-      <details className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-3">
+      <details className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.16)] p-3">
         <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--aethel-text-secondary)]">
           Show sources and limits
         </summary>

@@ -128,7 +128,7 @@ export default function PayoutSetupPage() {
             <button
               onClick={startStripeOnboarding}
               disabled={loading}
-              className="w-full rounded-xl bg-[#635BFF] px-4 py-3 text-sm font-bold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
+              className="w-full rounded-xl bg-[var(--aethel-stripe-brand)] px-4 py-3 text-sm font-bold text-white transition-opacity disabled:opacity-50 hover:opacity-90"
             >
               {loading ? 'Redirecting to Stripe…' : 'Continue with Stripe →'}
             </button>
@@ -145,7 +145,7 @@ export default function PayoutSetupPage() {
               Your bank account is set up through the Stripe dashboard. Return here after completing setup.
             </p>
             {stripeUrl && (
-              <a href={stripeUrl} className="block w-full rounded-xl bg-[#635BFF] px-4 py-3 text-center text-sm font-bold text-white hover:opacity-90">
+              <a href={stripeUrl} className="block w-full rounded-xl bg-[var(--aethel-stripe-brand)] px-4 py-3 text-center text-sm font-bold text-white hover:opacity-90">
                 Return to Stripe Setup →
               </a>
             )}

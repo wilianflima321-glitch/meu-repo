@@ -9,6 +9,7 @@ const log = createComponentLogger('statusbar/statusbar-manager')
  */
 
 export type StatusBarAlignment = 'left' | 'right';
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 
 export interface StatusBarItem {
   id: string;
@@ -226,8 +227,8 @@ export class StatusBarManager {
       this.problemsItem.visible = true;
       
       if (errors > 0) {
-        this.problemsItem.backgroundColor = '#f14c4c';
-        this.problemsItem.color = '#ffffff';
+        this.problemsItem.backgroundColor = tokenColor('--aethel-terminal-dark-plus-bright-red');
+        this.problemsItem.color = tokenColor('--aethel-text-inverse');
       } else {
         this.problemsItem.backgroundColor = undefined;
         this.problemsItem.color = undefined;

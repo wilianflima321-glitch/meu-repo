@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary
@@ -68,7 +69,7 @@ export default function FoliagePintarer({
   void onFoliageUpdate;
 
   const backgroundColor = useMemo(
-    () => resolveCssVarColor('--aethel-surface-primary', 'rgb(15, 23, 42)'),
+    () => resolveCssVarColor('--aethel-surface-primary', tokenColor('--aethel-surface-primary')),
     []
   );
   const [foliageTypes, setFoliageTypes] = useState<FoliageType[]>(DEFAULT_FOLIAGE_TYPES);

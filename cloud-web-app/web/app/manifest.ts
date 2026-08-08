@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 /**
  * PWA Manifest for Aethel Engine.
  *
@@ -13,8 +14,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Mission-first AI workspace for apps, research, previews, evidence, and governed creative runtimes.',
     start_url: '/ide',
     display: 'standalone',
-    background_color: '#0a0a0f',
-    theme_color: '#2563eb',
+    background_color: tokenColor('--aethel-surface-primary'),
+    theme_color: tokenColor('--aethel-browser-theme-light'),
     orientation: 'landscape',
     categories: ['games', 'productivity', 'developer tools'],
     icons: [

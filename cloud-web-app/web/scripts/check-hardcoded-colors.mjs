@@ -13,13 +13,17 @@ const EXTRA_TARGET_DIRS = [path.resolve(WEB_ROOT, '../packages/ide-ui')]
 // Excluded directories (Canvas/WebGL often need raw hex for THREE.Color)
 const EXCLUDED_DIRS = ['canvas', 'engine', 'three', 'webgpu', 'destruction', 'simulation', 'world-forge']
 
-// Excluded files:
+// Excluded files (narrow SoT only — do not widen to whole feature dirs):
 // - globals.css / DesignTokenSync.ts = token sources of truth (hex allowed)
 // - design-tokens.ts = legacy JS token table SoT (do not circular-map into CSS vars)
+// - email-brand-colors.ts = email HTML palette (clients cannot resolve CSS vars)
+// - domain-color-presets.ts = sim/material/schema presets (not UI chrome)
 const EXCLUDED_FILES = [
   'globals.css',
   'DesignTokenSync.ts',
   'design-tokens.ts',
+  'email-brand-colors.ts',
+  'domain-color-presets.ts',
   'check-hardcoded-colors.mjs',
 ]
 

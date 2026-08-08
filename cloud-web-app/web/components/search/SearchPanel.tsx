@@ -256,7 +256,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
         }
 
         .close-button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--aethel-video-white-10);
         }
 
         .search-input-container {
@@ -296,7 +296,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
         }
 
         .option-button:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--aethel-video-white-10);
         }
 
         .option-button.active {
@@ -369,7 +369,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
           display: flex;
           justify-content: space-between;
           padding: 8px 16px;
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--aethel-video-white-05);
           font-size: 12px;
           font-weight: 600;
         }
@@ -387,7 +387,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
         }
 
         .result-item:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--aethel-video-white-05);
         }
 
         .result-item.selected {

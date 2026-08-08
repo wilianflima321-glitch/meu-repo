@@ -130,7 +130,7 @@ export default function GenerateGameReadyCharacterPanel() {
             fontSize: 11,
             fontFamily: 'ui-monospace, monospace',
             opacity: 0.8,
-            borderTop: '1px solid rgba(128,128,128,0.25)',
+            borderTop: '1px solid color-mix(in srgb, var(--aethel-scene-material-gray) 25%, transparent)',
             paddingTop: 8,
           }}
         >

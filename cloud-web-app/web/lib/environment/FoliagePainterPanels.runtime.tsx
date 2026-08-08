@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary: transitive runtime chunk loaded through FoliagePainter.
@@ -98,11 +99,11 @@ export function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const [isPintaring, setIsPintaring] = useState(false);
   const terrainColor = useMemo(
-    () => resolveCssVarColor('--aethel-surface-tertiary', 'rgb(74, 90, 58)'),
+    () => resolveCssVarColor('--aethel-foliage-terrain', tokenColor('--aethel-foliage-terrain')),
     []
   );
   const brushColor = useMemo(
-    () => resolveCssVarColor('--aethel-success', 'rgb(16, 185, 129)'),
+    () => resolveCssVarColor('--aethel-success', tokenColor('--aethel-success')),
     []
   );
 
@@ -198,12 +199,12 @@ interface FoliageInstances3DProps {
 export function FoliageInstances3D({ instancias, types, windTime, windDirectionDeg }: FoliageInstances3DProps) {
   const palette = useMemo(
     () => ({
-      tree: resolveCssVarColor('--aethel-success-dark', 'rgb(5, 150, 105)'),
-      bush: resolveCssVarColor('--aethel-success', 'rgb(16, 185, 129)'),
-      grass: resolveCssVarColor('--aethel-success-light', 'rgb(52, 211, 153)'),
-      flower: resolveCssVarColor('--aethel-error', 'rgb(239, 68, 68)'),
-      rock: resolveCssVarColor('--aethel-text-quaternary', 'rgb(100, 116, 139)'),
-      fallback: resolveCssVarColor('--aethel-text-muted', 'rgb(148, 163, 184)'),
+      tree: resolveCssVarColor('--aethel-success-dark', tokenColor('--aethel-success-dark')),
+      bush: resolveCssVarColor('--aethel-success', tokenColor('--aethel-success')),
+      grass: resolveCssVarColor('--aethel-success-light', tokenColor('--aethel-success-light')),
+      flower: resolveCssVarColor('--aethel-error', tokenColor('--aethel-error')),
+      rock: resolveCssVarColor('--aethel-text-quaternary', tokenColor('--aethel-text-quaternary')),
+      fallback: resolveCssVarColor('--aethel-text-muted', tokenColor('--aethel-text-muted')),
     }),
     []
   );

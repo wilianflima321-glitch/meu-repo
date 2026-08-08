@@ -61,7 +61,7 @@ export function DirectorModePreviewStage({
           <meshStandardMaterial color={0xf59e0b} metalness={0.2} roughness={0.5} />
         </mesh>
       </Canvas>
-      <span className="pointer-events-none absolute left-2 top-2 rounded bg-[rgba(7,12,20,0.78)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+      <span className="pointer-events-none absolute left-2 top-2 rounded bg-[var(--aethel-editor-diff-pill-bg)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
         Previz — engine shoot (final footage held)
       </span>
     </div>

@@ -1,3 +1,4 @@
+import { tokenColor } from "@/lib/design-system/DesignTokenSync"
 "use client";
 
 // @aethel-heavy-async-boundary: Three.js terrain runtime loaded through TerrainSculptingEditor only.
@@ -79,7 +80,7 @@ function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const [isPainting, setIsPainting] = useState(false);
   const terrainColor = useMemo(
-    () => resolveCssVarColor("--aethel-success", "rgb(74, 124, 89)"),
+    () => resolveCssVarColor("--aethel-terrain-mesh", tokenColor("--aethel-terrain-mesh")),
     [],
   );
 
@@ -185,22 +186,22 @@ export function ViewportScene({
     null,
   );
   const gridCellColor = useMemo(
-    () => resolveCssVarColor("--aethel-border-primary", "rgb(55, 65, 81)"),
+    () => resolveCssVarColor("--aethel-border-primary", tokenColor("--aethel-border-primary")),
     [],
   );
   const gridSectionColor = useMemo(
-    () => resolveCssVarColor("--aethel-border-secondary", "rgb(71, 85, 105)"),
+    () => resolveCssVarColor("--aethel-border-secondary", tokenColor("--aethel-border-secondary")),
     [],
   );
   const brushPalette = useMemo(
     () => ({
-      success: resolveCssVarColor("--aethel-success", "rgb(34, 197, 94)"),
-      error: resolveCssVarColor("--aethel-error", "rgb(239, 68, 68)"),
-      primary: resolveCssVarColor("--aethel-primary", "rgb(59, 130, 246)"),
-      warning: resolveCssVarColor("--aethel-warning", "rgb(245, 158, 11)"),
+      success: resolveCssVarColor("--aethel-success", tokenColor("--aethel-success")),
+      error: resolveCssVarColor("--aethel-error", tokenColor("--aethel-error")),
+      primary: resolveCssVarColor("--aethel-primary", tokenColor("--aethel-primary")),
+      warning: resolveCssVarColor("--aethel-warning", tokenColor("--aethel-warning")),
       muted: resolveCssVarColor(
         "--aethel-text-quaternary",
-        "rgb(100, 116, 139)",
+        tokenColor("--aethel-text-muted"),
       ),
     }),
     [],

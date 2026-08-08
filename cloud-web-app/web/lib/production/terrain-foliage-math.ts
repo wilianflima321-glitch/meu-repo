@@ -1,3 +1,4 @@
+import { DOMAIN_FOLIAGE } from '@/lib/design-system/domain-color-presets'
 /**
  * Landscape foliage brush — pure placement math (no fs / Node).
  * Shared by server authority + LandscapeEditor client so strokes match disk.
@@ -77,7 +78,7 @@ export function defaultFoliageTypes(): FoliageTypeMeta[] {
       id: 'tree-1',
       name: 'Pine',
       category: 'tree',
-      color: 'rgb(34, 139, 34)',
+      color: DOMAIN_FOLIAGE.tree,
       minScale: 0.85,
       maxScale: 1.25,
     },
@@ -85,7 +86,7 @@ export function defaultFoliageTypes(): FoliageTypeMeta[] {
       id: 'bush-1',
       name: 'Bush',
       category: 'bush',
-      color: 'rgb(46, 125, 50)',
+      color: DOMAIN_FOLIAGE.bush,
       minScale: 0.7,
       maxScale: 1.1,
     },
@@ -93,7 +94,7 @@ export function defaultFoliageTypes(): FoliageTypeMeta[] {
       id: 'grass-1',
       name: 'Grass clump',
       category: 'grass',
-      color: 'rgb(76, 175, 80)',
+      color: DOMAIN_FOLIAGE.grass,
       minScale: 0.8,
       maxScale: 1.2,
     },

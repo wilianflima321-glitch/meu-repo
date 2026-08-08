@@ -435,7 +435,7 @@ function PlanCard({ plan }: { plan: PlanTier }) {
       }`}
       style={
         isPro
-          ? { boxShadow: '0 0 0 1px rgba(56,189,248,0.18), 0 0 24px rgba(56,189,248,0.12), 0 0 48px rgba(56,189,248,0.05)' }
+          ? { boxShadow: 'var(--aethel-terms-nav-glow)' }
           : undefined
       }
     >
@@ -703,7 +703,7 @@ export function TermsHubClient({ lastUpdated }: { lastUpdated: string }) {
       </header>
 
       {/* Tab navigation */}
-      <div className="sticky top-0 z-20 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] backdrop-blur-lg px-6" style={{ boxShadow: '0 1px 0 rgba(56,189,248,0.07), 0 4px 16px rgba(0,0,0,0.18)' }}>
+      <div className="sticky top-0 z-20 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] backdrop-blur-lg px-6" style={{ boxShadow: 'var(--aethel-terms-header-shadow)' }}>
         <div className="mx-auto max-w-5xl">
           <nav className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Terms sections">
             {TABS.map((tab) => {

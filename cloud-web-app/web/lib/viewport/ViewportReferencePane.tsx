@@ -47,10 +47,10 @@ export function ViewportReferencePane({
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden rounded-lg border border-[var(--aethel-border-subtle)] bg-[#0b1220]"
+      className="relative h-full w-full overflow-hidden rounded-lg border border-[var(--aethel-border-subtle)] bg-[var(--aethel-reference-pane-bg)]"
       data-viewport-quad-pane={preset}
     >
-      <span className="pointer-events-none absolute left-2 top-2 z-10 rounded bg-[rgba(7,12,20,0.78)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+      <span className="pointer-events-none absolute left-2 top-2 z-10 rounded bg-[var(--aethel-editor-diff-pill-bg)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
         {label}
       </span>
       <Canvas

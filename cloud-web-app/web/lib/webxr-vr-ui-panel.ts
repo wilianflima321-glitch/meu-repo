@@ -1,3 +1,4 @@
+import { tokenColor, tokenRgba } from '@/lib/design-system/DesignTokenSync'
 // @aethel-heavy-async-boundary Studio/engine runtime module; never import from public/dashboard/admin route shells.
 import THREE from './webxr-vr-runtime';
 
@@ -30,7 +31,7 @@ export class VRUIPanel {
     });
     this.mesh = new THREE.Mesh(geometry, material);
   }
-  clear(color: string = 'rgba(0, 0, 0, 0.8)'): void {
+  clear(color: string = tokenRgba('--aethel-brand-pure-black', 0.8)): void {
     this.context.fillStyle = color;
     this.context.fillRect(0, 0, this.pixelWidth, this.pixelHeight);
   }
@@ -47,7 +48,7 @@ export class VRUIPanel {
   ): void {
     const {
       font = '32px Arial',
-      color = '#ffffff',
+      color = tokenColor('--aethel-text-inverse'),
       align = 'left',
       baseline = 'top',
     } = options;
@@ -62,7 +63,7 @@ export class VRUIPanel {
     y: number,
     width: number,
     height: number,
-    color: string = '#ffffff',
+    color: string = tokenColor('--aethel-text-inverse'),
     fill: boolean = true
   ): void {
     if (fill) {
@@ -91,8 +92,8 @@ export class VRUIPanel {
     label: string,
     highlighted: boolean = false
   ): void {
-    const bgColor = highlighted ? '#4488ff' : '#333333';
-    const borderColor = highlighted ? '#66aaff' : '#666666';
+    const bgColor = highlighted ? tokenColor('--aethel-vr-highlight') : tokenColor('--aethel-vr-panel');
+    const borderColor = highlighted ? tokenColor('--aethel-dialogue-speaker') : tokenColor('--aethel-vr-panel-border');
     this.drawRect(x, y, width, height, bgColor, true);
     this.drawRect(x, y, width, height, borderColor, false);
     this.drawText(label, x + width / 2, y + height / 2, {

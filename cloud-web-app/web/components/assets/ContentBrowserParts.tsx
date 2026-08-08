@@ -352,7 +352,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, asset, onClose, 
           padding: '4px',
           minWidth: '160px',
           zIndex: 1000,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          boxShadow: 'var(--aethel-shadow-lg)',
         }}
       >
         <MenuButton icon={<Eye size={14} />} label="Preview" onClick={() => onAction('preview')} />

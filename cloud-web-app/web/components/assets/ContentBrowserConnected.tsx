@@ -89,7 +89,7 @@ function AssetPreviewModal({
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'rgba(6, 6, 10, 0.7)',
+      background: 'rgba(var(--aethel-surface-primary-rgb), 0.7)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -104,7 +104,7 @@ function AssetPreviewModal({
         borderRadius: '12px',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.45)',
+        boxShadow: 'var(--aethel-shadow-xl)',
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{
           display: 'flex',
@@ -566,7 +566,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
           borderRadius: '8px',
           padding: '12px',
           minWidth: '280px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          boxShadow: 'var(--aethel-shadow-lg)',
           zIndex: 100,
         }}>
           <div style={{ fontWeight: 600, marginBottom: '12px', color: 'var(--aethel-text-primary)' }}>
@@ -636,7 +636,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
           position: 'absolute',
           top: '8px',
           right: '8px',
-          background: 'rgba(99, 102, 241, 0.1)',
+          background: 'rgba(var(--aethel-indigo-rgb), 0.1)',
           padding: '4px 8px',
           borderRadius: '4px',
           display: 'flex',

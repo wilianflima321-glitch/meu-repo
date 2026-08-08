@@ -1,3 +1,4 @@
+import { DOMAIN_INSTANT_PLAY_BG } from '@/lib/design-system/domain-color-presets'
 /**
  * Instant Play — html-emitter stage.
  *
@@ -43,7 +44,7 @@ export function emitInstantPlayHtml(input: InstantPlayHtmlEmitInput): InstantPla
     `  <meta name="aethel-job-id" content="${escapeAttr(input.jobId)}" />`,
     `  <title>${escapeHtml(title)}</title>`,
     '  <style>',
-    '    html, body, #aethel-root { margin: 0; width: 100%; height: 100%; background: #0a0e18; }',
+    `    html, body, #aethel-root { margin: 0; width: 100%; height: 100%; background: ${DOMAIN_INSTANT_PLAY_BG}; }`,
     '  </style>',
     '</head>',
     '<body>',

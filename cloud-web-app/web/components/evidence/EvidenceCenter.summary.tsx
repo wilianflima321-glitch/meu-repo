@@ -56,7 +56,7 @@ export function EvidenceCenterHero({
             Project evidence, blockers, review status, and next action in one protected view.
           </p>
         </div>
-        <div className="min-w-[260px] rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.34)] p-4">
+        <div className="min-w-[260px] rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.34)] p-4">
           <label
             className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]"
             htmlFor="evidence-project"

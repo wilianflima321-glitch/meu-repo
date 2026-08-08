@@ -1,4 +1,5 @@
 import type { FluidParams } from '@/lib/physics/fluid-simulation-core';
+import { DOMAIN_FLUID_COLORS } from '@/lib/design-system/domain-color-presets'
 
 export function createDefaultFluidParams(initialParams?: Partial<FluidParams>): FluidParams {
   return {
@@ -9,7 +10,7 @@ export function createDefaultFluidParams(initialParams?: Partial<FluidParams>): 
     stiffness: 200,
     particleRadius: 0.05,
     smoothingRadius: 0.2,
-    color: 'rgb(59 130 246)',
+    color: DOMAIN_FLUID_COLORS.default,
     opacity: 0.7,
     gravity: { x: 0, y: -9.81, z: 0 },
     boundarySize: { x: 3, y: 3, z: 3 },

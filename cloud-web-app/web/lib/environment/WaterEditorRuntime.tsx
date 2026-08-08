@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary
@@ -76,11 +77,11 @@ export default function WaterEditor({
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [showCaustics, setShowCaustics] = useState(true);
   const backgroundColor = useMemo(
-    () => resolveCssVarColor('--aethel-surface-primary', 'rgb(15, 23, 42)'),
+    () => resolveCssVarColor('--aethel-surface-primary', tokenColor('--aethel-surface-primary')),
     []
   );
   const underwaterColor = useMemo(
-    () => resolveCssVarColor('--aethel-warning-dark', 'rgb(217, 119, 6)'),
+    () => resolveCssVarColor('--aethel-warning-dark', tokenColor('--aethel-warning-dark')),
     []
   );
 

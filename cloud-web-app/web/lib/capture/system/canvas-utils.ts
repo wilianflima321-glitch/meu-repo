@@ -1,4 +1,5 @@
 import { type CapturedMedia, type WatermarkConfig } from './types';
+import { tokenRgba } from '@/lib/design-system/DesignTokenSync'
 
 export function applyVignette(ctx: CanvasRenderingContext2D, width: number, height: number, intensity: number): void {
   const gradient = ctx.createRadialGradient(
@@ -6,8 +7,8 @@ export function applyVignette(ctx: CanvasRenderingContext2D, width: number, heig
     width / 2, height / 2, Math.max(width, height) / 2
   );
 
-  gradient.addColorStop(0, 'rgba(0,0,0,0)');
-  gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+  gradient.addColorStop(0, tokenRgba('--aethel-brand-pure-black', 0));
+  gradient.addColorStop(0.5, tokenRgba('--aethel-brand-pure-black', 0));
   gradient.addColorStop(1, `rgba(0,0,0,${intensity})`);
 
   ctx.fillStyle = gradient;

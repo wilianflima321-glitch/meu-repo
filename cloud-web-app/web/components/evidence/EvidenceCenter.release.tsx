@@ -128,7 +128,7 @@ export function EvidenceReleaseReceiptsPanel({
 
       {releaseManifest ? (
         <div
-          className="mt-3 flex flex-col gap-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-3 lg:flex-row lg:items-center lg:justify-between"
+          className="mt-3 flex flex-col gap-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.18)] p-3 lg:flex-row lg:items-center lg:justify-between"
           data-evidence-source="release-evidence-package-manifest"
         >
           <div>
@@ -156,7 +156,7 @@ export function EvidenceReleaseReceiptsPanel({
         </div>
       ) : null}
 
-      <details className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-3">
+      <details className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.16)] p-3">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-semibold text-[var(--aethel-text-secondary)]">
           <span>Show review checks</span>
           <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">

@@ -36,7 +36,7 @@ export function DeployPageFrame({ children }: { children: ReactNode }) {
     <main
       style={{
         minHeight: "100vh",
-        background: "radial-gradient(circle at top, rgba(0, 170, 255, 0.12), transparent 40%), var(--aethel-surface-primary)",
+        background: "var(--aethel-deploy-radial), var(--aethel-surface-primary)",
         color: "var(--aethel-text-primary)",
         padding: tokens.spacing["8"],
       }}
@@ -362,7 +362,7 @@ const cardStyle: CSSProperties = {
   borderRadius: tokens.radius.xl,
   border: "1px solid var(--aethel-border-secondary)",
   background: gradients.glassStrong,
-  boxShadow: "0 24px 80px rgba(0, 0, 0, 0.24)",
+  boxShadow: "var(--aethel-shadow-modal)",
 };
 
 const secondaryButtonStyle: CSSProperties = {

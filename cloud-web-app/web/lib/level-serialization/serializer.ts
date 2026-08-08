@@ -15,6 +15,7 @@ import type {
   SerializedVector3,
 } from './types';
 import { quaternion, toComponentData, vector3 } from './utils';
+import { DOMAIN_SCENE_DEFAULTS } from '@/lib/design-system/domain-color-presets'
 
 const log = createComponentLogger('level-serializer');
 
@@ -172,10 +173,10 @@ export class LevelSerializer {
     return {
       skybox: {
         type: 'color',
-        color: '#87CEEB',
+        color: DOMAIN_SCENE_DEFAULTS.sky,
       },
       lighting: {
-        ambientColor: '#404040',
+        ambientColor: DOMAIN_SCENE_DEFAULTS.ambient,
         ambientIntensity: 0.5,
         shadowsEnabled: true,
         shadowQuality: 'medium',
@@ -193,7 +194,7 @@ export class LevelSerializer {
       fog: {
         enabled: false,
         type: 'linear',
-        color: '#CCCCCC',
+        color: DOMAIN_SCENE_DEFAULTS.light,
         near: 10,
         far: 100,
       },

@@ -1,3 +1,4 @@
+import { DOMAIN_SCENE_DEFAULTS } from '@/lib/design-system/domain-color-presets'
 // @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 import * as THREE from 'three';
 import { EventEmitter } from 'events';
@@ -410,7 +411,7 @@ export class CutscenePlayer extends EventEmitter {
       active: true,
       type: data.fadeType,
       progress: fadeProgress,
-      color: data.color || '#000000',
+      color: data.color || DOMAIN_SCENE_DEFAULTS.fade,
     };
   }
 

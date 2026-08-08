@@ -63,7 +63,7 @@ export function RemoteCursorLayer({
               viewBox="0 0 18 18"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' }}
+              style={{ filter: 'drop-shadow(0 1px 2px rgba(var(--aethel-brand-pure-black-rgb),0.35))' }}
             >
               <path
                 d="M2 2 L2 14 L6 10 L9 16 L11 15 L8 9 L14 8 Z"
@@ -75,7 +75,7 @@ export function RemoteCursorLayer({
             </svg>
             <span
               className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium shadow-sm ml-3 -mt-1"
-              style={{ background: peer.color, color: 'rgb(255 255 255)' }}
+              style={{ background: peer.color, color: 'var(--aethel-text-inverse)' }}
             >
               {peer.name}
             </span>

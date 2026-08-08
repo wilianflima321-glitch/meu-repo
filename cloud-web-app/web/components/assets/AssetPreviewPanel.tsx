@@ -132,7 +132,7 @@ export default function AssetPreviewPanel({ asset, lowPoly }: AssetPreviewPanelP
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'rgba(15, 15, 20, 0.8)',
+              background: 'var(--aethel-editor-overlay-bg-soft)',
               color: 'var(--aethel-text-tertiary)',
               fontSize: '12px',
               zIndex: 2,

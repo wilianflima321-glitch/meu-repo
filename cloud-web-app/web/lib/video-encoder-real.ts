@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 /**
  * Video Encoder REAL - WebCodecs encoding runtime.
  *
@@ -72,7 +73,7 @@ export class VideoRenderer {
       const time = frameIndex / this.fps;
 
       // Clear canvas
-      this.ctx.fillStyle = '#000000';
+      this.ctx.fillStyle = tokenColor('--aethel-brand-pure-black');
       this.ctx.fillRect(0, 0, this.width, this.height);
 
       // Get clips at this time

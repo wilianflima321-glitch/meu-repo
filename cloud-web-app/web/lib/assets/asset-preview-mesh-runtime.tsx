@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
 
 // @aethel-heavy-async-boundary Asset mesh preview runtime; import only through dynamic preview boundaries.
@@ -30,7 +31,7 @@ function getLoaderByExtension(ext: string) {
 }
 
 function applyLowPolyStyle(object: THREE.Object3D) {
-  const baseColor = resolveCssVarColor('--aethel-accent', 'rgb(124, 131, 255)');
+  const baseColor = resolveCssVarColor('--aethel-accent', tokenColor('--aethel-accent'));
   object.traverse((child) => {
     if ((child as THREE.Mesh).isMesh) {
       const mesh = child as THREE.Mesh;

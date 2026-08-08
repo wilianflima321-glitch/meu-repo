@@ -47,7 +47,7 @@ export function EvidenceProjectReceiptsPanel({
         <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-secondary)]">
           {objective}
         </p>
-        <details className="mt-5 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-3">
+        <details className="mt-5 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.16)] p-3">
           <summary className="cursor-pointer list-none text-xs font-semibold text-[var(--aethel-text-secondary)]">
             Project rules
           </summary>
@@ -89,7 +89,7 @@ export function EvidenceProjectReceiptsPanel({
             <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">
               {productionBiblePlan.uxDisclosure}
             </p>
-            <details className="mt-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.16)] p-2">
+            <details className="mt-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.16)] p-2">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
                 <span>Open production plan details</span>
                 <span className="rounded-full border border-[var(--aethel-border-subtle)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
@@ -149,7 +149,7 @@ export function EvidenceProjectReceiptsPanel({
                   .map((graph) => (
                     <div
                       key={graph.id}
-                      className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(2,6,23,0.18)] p-2"
+                      className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-overlay-ink-rgb),0.18)] p-2"
                     >
                       <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">
                         {graph.id}

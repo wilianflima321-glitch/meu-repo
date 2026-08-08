@@ -127,7 +127,7 @@ export function useAssetDrop(
     
     // Visual feedback
     if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.outline = '2px solid #6366f1';
+      e.currentTarget.style.outline = '2px solid var(--aethel-indigo)';
       e.currentTarget.style.outlineOffset = '-2px';
     }
   }, []);
@@ -256,13 +256,13 @@ export function useAssetDrag() {
     const ghost = document.createElement('div');
     ghost.style.cssText = `
       padding: 8px 12px;
-      background: #16161d;
-      border: 1px solid #6366f1;
+      background: var(--aethel-surface-ink);
+      border: 1px solid var(--aethel-indigo);
       border-radius: 6px;
-      color: #e4e4eb;
+      color: var(--aethel-dialog-text);
       font-size: 12px;
       font-family: system-ui;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: var(--aethel-anim-menu-shadow);
       position: absolute;
       top: -1000px;
     `;

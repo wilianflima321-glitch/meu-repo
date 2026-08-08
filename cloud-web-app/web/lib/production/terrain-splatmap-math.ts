@@ -1,3 +1,4 @@
+import { DOMAIN_TERRAIN_SPLAT } from '@/lib/design-system/domain-color-presets'
 /**
  * Landscape paint / layer brush — pure splat (weight-map) math (no fs / Node).
  * Shared by server authority + LandscapeEditor client so strokes match disk.
@@ -68,9 +69,9 @@ export function createFlatSplatmap(input: {
   layers?: SplatLayerMeta[]
 }): SplatmapDocument {
   const layers = (input.layers?.length ? input.layers : [
-    { id: '1', name: 'Grass', color: 'rgb(74 124 79)' },
-    { id: '2', name: 'Rock', color: 'rgb(107 107 107)' },
-    { id: '3', name: 'Snow', color: 'rgb(232 232 232)' },
+    { id: '1', name: 'Grass', color: DOMAIN_TERRAIN_SPLAT.grass },
+    { id: '2', name: 'Rock', color: DOMAIN_TERRAIN_SPLAT.rock },
+    { id: '3', name: 'Snow', color: DOMAIN_TERRAIN_SPLAT.snow },
   ]).slice(0, 8)
   const resolution = Math.max(8, Math.min(1025, Math.floor(input.resolution ?? 129)))
   const layerCount = layers.length
@@ -163,7 +164,7 @@ export function sampleSplatColor(
   let b = 0
   for (let c = 0; c < layerCount; c++) {
     const w = doc.weights[base + c] ?? 0
-    const parsed = parseCssColor(layers[c]?.color ?? 'rgb(128,128,128)')
+    const parsed = parseCssColor(layers[c]?.color ?? DOMAIN_TERRAIN_SPLAT.fallback)
     r += parsed.r * w
     g += parsed.g * w
     b += parsed.b * w

@@ -82,7 +82,7 @@ export default function OnboardingWorldPage() {
         {/* Viewport Simulation */}
         <div className="relative flex h-[500px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-[var(--aethel-border-primary)] bg-gradient-to-br from-[var(--aethel-bg)] to-[var(--aethel-surface-secondary)] shadow-2xl">
           {/* Simulated 3D Grid & Gizmo */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] bg-center" />
+          <div className="absolute inset-0 bg-[linear-gradient(var(--aethel-video-white-03)_1px,transparent_1px),linear-gradient(90deg,var(--aethel-video-white-03)_1px,transparent_1px)] bg-[size:40px_40px] bg-center" />
           
           <div className={`absolute transition-transform duration-1000 flex flex-col items-center ${cameraRotated ? 'rotate-12 scale-95' : ''}`}>
             {/* Terrain box */}

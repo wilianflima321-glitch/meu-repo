@@ -1,5 +1,6 @@
 import type { RuntimeComponentData } from './types';
 import { toComponentData } from './utils';
+import { DOMAIN_SCENE_DEFAULTS } from '@/lib/design-system/domain-color-presets'
 
 export type ComponentSerializer = {
   serialize: (component: RuntimeComponentData) => Record<string, unknown>;
@@ -41,7 +42,7 @@ registerComponentSerializer('Light', {
   }),
   deserialize: (data) => ({
     type: data.type || 'point',
-    color: data.color || '#ffffff',
+    color: data.color || DOMAIN_SCENE_DEFAULTS.mesh,
     intensity: data.intensity ?? 1,
     range: data.range ?? 10,
     angle: data.angle ?? Math.PI / 4,

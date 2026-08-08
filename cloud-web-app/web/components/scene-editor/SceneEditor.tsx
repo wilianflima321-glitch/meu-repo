@@ -58,7 +58,7 @@ function HierarchyPanel({
             }}
             aria-label="Remove object from scene"
             style={{
-              background: 'rgba(255,0,0,0.3)',
+              background: 'rgba(var(--aethel-error-rgb),0.3)',
               border: 'none',
               borderRadius: '3px',
               color: 'var(--aethel-text-primary)',

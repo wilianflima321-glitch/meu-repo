@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
 import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
 import { resolveUsdBrowserFormatSupport } from '@/lib/production/usd-integrator'
@@ -175,7 +176,7 @@ export function buildViewportImportedObject({
     name: baseName,
     type: 'mesh',
     geometry: FORMAT_GEOMETRY[format],
-    color: 'rgb(56, 189, 248)',
+    color: tokenColor('--aethel-info'),
     position,
     rotation: [0, 0, 0],
     scale: [1, 1, 1],

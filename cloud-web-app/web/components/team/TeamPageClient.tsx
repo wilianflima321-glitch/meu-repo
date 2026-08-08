@@ -83,7 +83,7 @@ function MemberCard({ member }: { member: TeamMember }) {
       {/* Subtle top-right glow on hover */}
       <div
         className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: 'radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(var(--aethel-neon-cyan-rgb),0.12) 0%, transparent 70%)' }}
         aria-hidden
       />
 
@@ -173,7 +173,7 @@ export default function TeamPageClient() {
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(0,229,255,0.08)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(var(--aethel-neon-cyan-rgb),0.08)]">
               <Users className="h-5 w-5 text-[var(--aethel-neon-cyan)]" />
             </div>
             <div>

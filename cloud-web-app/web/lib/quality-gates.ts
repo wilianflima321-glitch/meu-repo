@@ -1,3 +1,4 @@
+import { DOMAIN_QUALITY_GATE_LEGACY_HEX } from '@/lib/design-system/domain-color-presets'
 /**
  * ============================================
  * AETHEL QUALITY GATES: Verificação de Padrões AAA
@@ -198,12 +199,10 @@ export class QualityGates {
       suggestions: !usesDesignSystem ? ['Import styles from globals.css and use aethel-* classes'] : undefined,
     });
 
-    // Check 2: Cores do manifesto
-    const usesManifestoColors = !componentCode.includes('color:') || (
-      componentCode.includes('#0a0e27') || // Deep Space Dark
-      componentCode.includes('#00ff88') || // Neon Green
-      componentCode.includes('#1a1f3a')    // Dark Blue
-    );
+    // Check 2: Cores do manifesto (legacy hex list lives in domain-color-presets SoT)
+    const usesManifestoColors =
+      !componentCode.includes('color:') ||
+      DOMAIN_QUALITY_GATE_LEGACY_HEX.some((hex) => componentCode.includes(hex));
 
     results.push({
       name: 'Color Palette Compliance',

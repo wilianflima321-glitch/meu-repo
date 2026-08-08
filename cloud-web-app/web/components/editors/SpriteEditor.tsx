@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client'
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
@@ -89,9 +90,9 @@ export default function SpriteEditor() {
       return `rgba(255, 255, 255, ${alpha})`
     }
 
-    const gridDark = getVar('--aethel-surface-tertiary', 'rgb(42 42 42)')
-    const gridLight = getVar('--aethel-surface-quaternary', 'rgb(58 58 58)')
-    const gridStroke = getVar('--aethel-text-primary', 'rgb(255 255 255)')
+    const gridDark = getVar('--aethel-surface-tertiary', tokenColor('--aethel-surface-tertiary'))
+    const gridLight = getVar('--aethel-surface-quaternary', tokenColor('--aethel-surface-quaternary'))
+    const gridStroke = getVar('--aethel-text-primary', tokenColor('--aethel-text-primary'))
 
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height)
