@@ -12,6 +12,10 @@ import {
   evaluateNexusTaskGraphCompleteness,
 } from '@/lib/production/agents-receipt-completeness'
 import {
+  CW4_HELD_RAW_LOCALSTORAGE_DEBT,
+  listCw4CriticalPathBlockers,
+} from '@/lib/storage/ui-persistence-critical-inventory'
+import {
   RENDER_PATH_CATALOG,
   resolveLiveRenderPathHonesty,
   type LiveRenderPathInput,
@@ -37,6 +41,10 @@ export type ConsolidationTruthRow = {
   marketingAllowed: boolean
   lastEvidence: string
   gatedNames: string[]
+  /** Fail-closed gate id when marketing is blocked by law / Founder STOP. */
+  heldReason?: string
+  /** Operator-facing honesty note (not marketing copy). */
+  note?: string
 }
 
 export type ConsolidationTruthMatrix = {
@@ -71,6 +79,54 @@ const AAA_GATED = [
   'Niagara AAA',
 ] as const
 
+/** Gates that block supremacy / AI-native marketing per CLAUDE.md + .cursorrules. */
+const SUPREMACY_MARKETING_GATES = [
+  'AI-native IDE',
+  'J.11 ACP',
+  'J.12 OrchestratorProd',
+  'Cursor Composer surpass',
+  'VisualEvidence',
+  'VisualEvidence WebM',
+  'parity exceeded',
+] as const
+
+/** Row ids that must never flip marketing true from static defaults alone. */
+const FAIL_CLOSED_MARKETING_ROW_IDS = new Set<string>([
+  'agents.receipt.completeness',
+  'agents.nexus.task-graph',
+  'ui.persistence.spine',
+  'master-ux.hero-panels',
+])
+
+function rowTouchesSupremacyMarketingGate(gatedNames: readonly string[]): boolean {
+  return gatedNames.some((name) =>
+    SUPREMACY_MARKETING_GATES.some(
+      (gate) => name === gate || name.includes(gate) || gate.includes(name),
+    ),
+  )
+}
+
+/** Apply fail-closed marketing gates — root cause guard after row assembly. */
+export function applyConsolidationMarketingFailClosed(rows: ConsolidationTruthRow[]): void {
+  for (const row of rows) {
+    if (row.status !== 'IMPLEMENTED') {
+      row.marketingAllowed = false
+    }
+    if (row.heldReason) {
+      row.marketingAllowed = false
+    }
+    if (FAIL_CLOSED_MARKETING_ROW_IDS.has(row.id)) {
+      row.marketingAllowed = false
+    }
+    if (row.gatedNames.some((name) => AAA_GATED.includes(name as (typeof AAA_GATED)[number]))) {
+      row.marketingAllowed = false
+    }
+    if (rowTouchesSupremacyMarketingGate(row.gatedNames)) {
+      row.marketingAllowed = false
+    }
+  }
+}
+
 function mapRendererStatus(
   status: 'live' | 'held' | 'fallback',
   capability: 'IMPLEMENTED' | 'PARTIAL' | 'NOT_IMPLEMENTED',
@@ -98,6 +154,12 @@ export function buildConsolidationTruthMatrix(
   const kernel = probeKernelRustFoundationHonesty()
   const emptyReceipt = evaluateEvidenceReceiptCompleteness(null)
   const emptyNexus = evaluateNexusTaskGraphCompleteness(null)
+  const cw4CriticalBlockers = listCw4CriticalPathBlockers()
+  const cw4LwwHeld = CW4_HELD_RAW_LOCALSTORAGE_DEBT.some((entry) =>
+    entry.keyPattern.includes('LWW'),
+  )
+  const cw4SpineStatus: ConsolidationTruthStatus =
+    cw4CriticalBlockers.length > 0 || cw4LwwHeld ? 'PARTIAL' : 'PARTIAL'
 
   const rows: ConsolidationTruthRow[] = [
     {
@@ -178,31 +240,38 @@ export function buildConsolidationTruthMatrix(
     {
       id: 'agents.receipt.completeness',
       claim:
-        'Agents receipt completeness — held fields (VisualEvidence WebM) block complete; apply-deny wired',
+        'Agents receipt completeness — apply-deny wired; VisualEvidence WebM [HELD per J.9]',
       path: 'lib/production/agents-receipt-completeness.ts',
-      status: 'PARTIAL',
-      marketingAllowed: false,
-      lastEvidence: `emptyFailClosed=${!emptyReceipt.complete};marketing=${emptyReceipt.marketingAllowed}`,
+      status:
+        emptyReceipt.heldCount > 0 || !emptyReceipt.complete ? 'PARTIAL' : 'PARTIAL',
+      marketingAllowed: emptyReceipt.marketingAllowed,
+      heldReason: 'j9_visual_evidence_webm_held',
+      note: 'Patch-hash receipt only — WebM visual diff not shipped (J.9 HELD)',
+      lastEvidence: `emptyFailClosed=${!emptyReceipt.complete};held=${emptyReceipt.heldCount};j9WebM=HELD;marketing=false`,
       gatedNames: ['AI-native IDE', 'VisualEvidence WebM'],
     },
     {
       id: 'agents.nexus.task-graph',
       claim:
-        'Nexus task-graph + governed apply receipts + AST/L.5 multi-file swarm — full Composer editor HELD; J.11/J.12 STOPPED',
+        'Nexus task-graph + governed apply receipts — J.11/J.12 [STOPPED Founder Pacto 2026-07-11ak]',
       path: 'lib/production/multi-file-apply-swarm.ts',
       status: 'PARTIAL',
-      marketingAllowed: false,
-      lastEvidence: `emptyFailClosed=${!emptyNexus.complete};swarm=runMultiFileApplySwarm;astEngine=typescript-parser;treeSitterWeb=false;composerSurpass=false;j11j12=STOPPED`,
-      gatedNames: ['J.11 ACP', 'J.12 OrchestratorProd', 'Cursor Composer surpass'],
+      marketingAllowed: emptyNexus.marketingAllowed,
+      heldReason: 'j11_j12_founder_stop',
+      note: 'AI-native IDE marketing blocked until J.1+J.2+J.12 or Founder lifts STOP',
+      lastEvidence: `emptyFailClosed=${!emptyNexus.complete};j11j12=STOPPED;composerSurpass=HELD;marketing=false`,
+      gatedNames: ['J.11 ACP', 'J.12 OrchestratorProd', 'Cursor Composer surpass', 'AI-native IDE'],
     },
     {
       id: 'ui.persistence.spine',
       claim:
-        'CW4 critical IDE/Studio path on spine (preview + dock adapter) — dual-write debt blocks DONE; global exception-only + multi-tab LWW HELD',
+        'CW4/CW5 critical IDE/Studio path on spine — LWW WebLocks + CW1 bench [PARTIAL]',
       path: 'lib/storage/ui-persistence-critical-inventory.ts',
-      status: 'PARTIAL',
+      status: cw4SpineStatus,
       marketingAllowed: false,
-      lastEvidence: 'criticalPath=PARTIAL;legacyDualWrite;cross-tab-lite;lockLWW=HELD',
+      heldReason: cw4LwwHeld ? 'cw4_lww_locks_held' : 'cw4_spine_partial',
+      note: 'Critical dock dual-write closed; multi-tab LWW HELD; CW1 15-panel bench OPEN',
+      lastEvidence: `criticalPath=PARTIAL;blockers=${cw4CriticalBlockers.length};lockLWW=${cw4LwwHeld ? 'HELD' : 'PARTIAL'};cw1Bench=OPEN`,
       gatedNames: ['BYOK', 'token vault'],
     },
     {
@@ -225,24 +294,18 @@ export function buildConsolidationTruthMatrix(
     },
     {
       id: 'master-ux.hero-panels',
-      claim: 'Master UX Spec §0 hero *Panel.tsx names are vision — not ship certificate',
+      claim: 'Master UX Spec 15-panel ship matrix — CW1 bench columns OPEN',
       path: 'docs/architecture/AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md',
-      status: 'HELD',
+      status: 'PARTIAL',
       marketingAllowed: false,
-      lastEvidence: 'CW0 freeze — deepen existing shells; no new hero panels; 15-panel ship matrix incomplete',
+      heldReason: 'cw1_15_panel_bench_open',
+      note: 'CW1 freeze active — full 15-panel bench verification not DONE',
+      lastEvidence: 'cw1Bench=OPEN;panelMatrix=PARTIAL;marketingBlocked=true',
       gatedNames: [...AAA_GATED, 'parity exceeded'],
     },
   ]
 
-  // Hard gate: any AAA gated name on a non-IMPLEMENTED row blocks marketing.
-  for (const row of rows) {
-    if (row.status !== 'IMPLEMENTED') {
-      row.marketingAllowed = false
-    }
-    if (row.gatedNames.some((name) => AAA_GATED.includes(name as (typeof AAA_GATED)[number]))) {
-      row.marketingAllowed = false
-    }
-  }
+  applyConsolidationMarketingFailClosed(rows)
 
   const summary = {
     implemented: rows.filter((r) => r.status === 'IMPLEMENTED').length,

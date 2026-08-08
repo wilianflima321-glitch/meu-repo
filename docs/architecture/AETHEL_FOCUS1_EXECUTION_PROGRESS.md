@@ -560,14 +560,14 @@ Two independent audits recorded here (documentation alignment only this round �
 |---|-----------|-------|
 | 1–2 | `usd-gltf-exporter.ts:23-47` | `success: true` + empty `entityPayload` / `ArrayBuffer(0)` |
 | 3–6 | `discovery-feed-engine.ts:576-631`, `arcade/page.tsx:72-74` | `marketingDiscoveryAllowed: true` / probe hardcodes without IA mod + compression |
-| 7–9 | `consolidation-truth-matrix.ts:184-231` | `marketingAllowed: true` for J.11/J.12 / 15-panel / VisualEvidence before gates |
+| 7–9 | `consolidation-truth-matrix.ts:184-231` | ~~`marketingAllowed: true` for J.11/J.12 / 15-panel / VisualEvidence before gates~~ **DONE** (2026-08-08 P2d item #1 — commit `b5b817774`) |
 | 10 | `email-system.ts:51` | mock email provider default in prod path |
 | 11 | `dap-adapter-base.ts:456-470` | mock DAP fallback + `success: true` |
 | 12 | `plugin_sandbox.rs:78-104` | fake telemetry + synthetic embedding shipped |
 
 **Positive fail-closed (keep):** `NATIVE_ONNX_READY=false`, anti-capsule in `usd-integrator.ts`, Hub honesty badges default false, majority `*_aaa_ready: false`.
 
-**Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → BLOCKERs 7–9 (consolidation-truth-matrix) → 1–2 (USD export) → 3–6 (discovery probes) → L.5 Rust wire via L.1 → RTv1 operational wires (P1c).
+**Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → ~~BLOCKERs 7–9 (consolidation-truth-matrix)~~ **DONE** → 1–2 (USD export) → 3–6 (discovery probes) → L.5 Rust wire via L.1 → RTv1 operational wires (P1c).
 
 #### P2c — Git-verified work (synthesizer 2026-08-08)
 
@@ -612,7 +612,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 | Phase | Window | Priority items (sequential) |
 |-------|--------|----------------------------|
-| **P0 — Honesty + wedge loop** | Days 1–21 | (1) Fix P2b BLOCKERs 7–9 `consolidation-truth-matrix.ts` false marketing flags. (2) BLOCKERs 1–2 USD export empty payload. (3) BLOCKERs 3–6 discovery/compression probes. (4) RTv1 operational: wire `playtime-client` into Arcade/runtime. (5) Publish pipeline stamp `compressionMandatePassed` + `demoPlayUrl`. |
+| **P0 — Honesty + wedge loop** | Days 1–21 | ~~(1) Fix P2b BLOCKERs 7–9 `consolidation-truth-matrix.ts` false marketing flags.~~ **DONE** (2026-08-08 — `applyConsolidationMarketingFailClosed` + vitest `consolidation-truth-matrix-cw1.test.ts` 6/6; commit hash in changelog). (2) BLOCKERs 1–2 USD export empty payload. (3) BLOCKERs 3–6 discovery/compression probes. (4) RTv1 operational: wire `playtime-client` into Arcade/runtime. (5) Publish pipeline stamp `compressionMandatePassed` + `demoPlayUrl`. |
 | **P1 — Onda J closure** | Days 22–45 | (6) J.7 USD in-app viewer (honest preview, not capsule). (7) J.9 WebM/visual diff evidence on FusionTx. (8) J.4 sqlite-vec + BYOK embed path (semantic recall). (9) **Only if Founder lifts STOP:** J.11 ACP + J.12 OrchestratorProd commit series with CostGuard + ledger + Vitest — else skip. |
 | **P2 — Onda L Forge** | Days 46–75 | (10) Commit + gate L.2/L.8/L.9/L.12 scaffolds (vitest). (11) L.5 wire `execInForgeSandbox` → `cargo check/clippy/test` for `.rs` apply path. (12) L.4 ForgeTerminalBridge streaming exec. (13) L.7 AgenticUIStudio MVP on existing preview surfaces (no new hero panel file). (14) L.10 DesignTokenSync automate CW5 debt reduction. |
 | **P3 — RTv1 + Commerce depth** | Days 76–90 | (15) H.1+ Treasury audit trail + `hubCheckoutAudited` flip criteria. (16) I.1 discovery feed eligibility with real compression + catalog. (17) I.2 verified reviews with live playtime. (18) Block 6B.12 org pool when schema exists (else stay HELD). (19) CW4 persistence spine exception-only + LWW locks production. (20) CW1 bench columns for 15 UX panels. |
@@ -663,6 +663,22 @@ Founder pivot 2026-07-25 + this audit **reconfirm**: these remain **STOPPED / HE
 | 15 | consolidation-truth-matrix marketing drift | **IN FIX** — [Fix consolidation-truth-matrix BLOCKERs 7-9](086ba43b-d005-42be-ba44-204b09f7af85) |
 
 **P1b L-table correction (scaffolds exist but were uncommitted / stale in round 3):** audit confirms real code for **L.2** (`devcontainer-manifest.ts`, 7/7 tests), **L.7** (`AgenticUIStudio.tsx` PARTIAL), **L.8** (`preview-orchestrator.ts`), **L.9** (`fullstack-scaffold-engine.ts`), **L.10** (`DesignTokenSync.ts`), **L.12** (`repo-graph-rag.ts`) — treat as **PARTIAL / uncommitted scaffold**, not "0% GAP", until committed + CI green. **L.4** and **L.13** remain genuine GAP.
+
+#### P2g — Desktop Rust kernel deep audit ([Auditoria profunda kernel Rust desktop G](1bccc11b-6558-40eb-ad06-5e81df8747cc), 2026-08-08)
+
+**Gates:** `cargo check` (studio-local) **PASS** (~153 warnings); kernel `cargo test --lib` **613/613 PASS**; studio-local test harness **crashes on Windows** (`STATUS_ENTRYPOINT_NOT_FOUND`, known manifest issue, documented, pre-existing — not a regression). **`cargo clippy` was not run this session.**
+
+**Architectural findings (confirms + sharpens P2c's uncommitted-WIP flag):**
+
+1. **No unified frame/render loop exists.** `WgpuRenderer::mount_on_window` inits device/surface; present only happens through a **secondary winit probe window**, not the product Tauri WebView viewport. `GpuCullingPipeline::dispatch` is never called on any hot path (dead code, confirmed by comment in `gpu_culling.rs` itself).
+2. **IPC registration regression:** `lib.rs` declares **~91** `kernel_*_wire` modules; `main.rs`'s `generate_handler!` registers only **~25** commands. Radiance, VSM, World Partition, PBD, acoustic, atmospheric probes are **compiled but unreachable from the frontend** — 143 "never used" warnings confirm this.
+3. **`src/rendering/` (PBR forward, Nanite compute, bindless RT, shadow, skybox) is entirely untracked and not even compiled** — no `pub mod rendering` in `lib.rs`. Same for `src/physics/xpbd_native_compute.rs` + its WGSL, `kernel_virtual_shadow_maps_vsm_wire.rs`, `kernel_openvdb_bridge_wire.rs`. **~80+ modified/untracked/deleted files** in `apps/studio-local/src-tauri/src/` with zero commits protecting them.
+
+**16 saltos AAA — honest completion vs UE5.5 production (not vs planning docs):** weighted average **~9–11%** (graphics pillars ~5–8%: Nanite ~5%, Lumen ~8%, VSM ~6%, OpenVDB ~3%, MaterialX ~5%; physics/audio/math probes higher at ~12–18%: XPBD ~18%, Atmospheric ~15%, Rollback netcode ~15%). Entropy GPU (bonus, not one of the 16) is the strongest at **~20%** vs Niagara — real GPU compute, 100k+ particles, soak-tested, but still not wired to the render graph. **All checked `*_aaa_ready` flags remain honestly `false`** with HELD comments — no marketing violation found in kernel flags themselves, but Progress header phrasing ("RHI Unification pure WebGPU", "Physics N=100k scale") risks overstating probe/soak work as product-ready; see header honesty note already added 2026-08-08.
+
+**P0 risk (data loss, not feature gap):** ~80+ uncommitted `.rs` changes including 6 deleted wire files, plus the entire orphaned `rendering/` tree, sitting in the working tree with no protective commit. This is a **hygiene risk independent of the Onda G deferral** — losing this WIP (e.g. accidental `git clean`/checkout) would erase real, cargo-check-green work.
+
+**Action taken this round:** none of the AAA feature gaps above are being worked (Onda G remains deferred per P2e — Founder order stands). A separate **hygiene-only** pass (clippy + commit, no new wiring, no `generate_handler!` restoration) was queued to protect the WIP from loss without advancing deferred scope — see changelog.
 
 ### P0 ? Block 2A collaboration
 
@@ -959,6 +975,8 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 p2d-b7-9 | **P2d item #1 DONE — consolidation-truth-matrix BLOCKERs 7–9** — `marketingAllowed: false` + `heldReason` for `agents.receipt.completeness` (J.9 WebM HELD), `agents.nexus.task-graph` (J.11/J.12 Founder STOP), `ui.persistence.spine` (CW4 PARTIAL / LWW HELD), `master-ux.hero-panels` (CW1 15-panel bench OPEN). Root-cause guard: `applyConsolidationMarketingFailClosed()` + supremacy gate list. Evidence: `npx vitest run __tests__/production/consolidation-truth-matrix-cw1.test.ts` **6/6 PASS**; touched files clean in IDE linter. Commit: `b5b817774` |
+| 2026-08-08 rust-audit | **P2g desktop Rust kernel deep audit recorded** — [Auditoria profunda kernel Rust desktop G](1bccc11b-6558-40eb-ad06-5e81df8747cc): cargo check PASS, kernel 613/613 tests PASS, clippy not run. Confirmed **no unified frame loop** (present via secondary winit probe only, `GpuCullingPipeline::dispatch` dead code), **IPC regression** (~91 wires compiled, only ~25 in `generate_handler!`), **`rendering/` tree entirely untracked and not compiled** (no `pub mod rendering`). 16-salto honest average **~9–11%** vs UE5.5 production. Flagged **P0 data-loss risk** on ~80+ uncommitted `.rs` files — hygiene-only commit pass queued (no feature wiring, Onda G stays deferred per P2e). |
 | 2026-08-08 jl-audit | **P2f web J/L deep audit recorded** — [Auditoria profunda cloud-web-app web J/L](d8c10da3-0de0-475d-a567-7e5f7a22f434): **521/536** production tests; typecheck blocked (missing tsc). Veredicto: **not** sellable as Universal IDE yet. Corrected P1b L.2/L.7–L.10/L.12 from stale "0% GAP" to **PARTIAL scaffolds** (exist, largely uncommitted). Top blockers logged; J.6 export fix delegated; consolidation-truth-matrix fix in flight. |
 | 2026-08-08 p2-synth | **P2 synthesizer pass (git-verified)** — added **P2c** (commit `bc8dd1627` anchor vs ~500-file working tree; Antigravity 2026-08-02 header flagged UNCOMMITTED), **P2d** (90-day platform-first plan J→L→RTv1→G→M), **P2e** (explicit AAA deferrals). Master Map §0c + Index changelog synced. **No product code this entry.** |
 | 2026-08-08 doc-sync | **P2 end-to-end audit synthesis + canonical MD alignment** — recorded P2a (66-MD corpus audit: 5 critical doc×doc contradictions, Progress authority) + P2b (Anti-MOCK sweep: 12 BLOCKER / 18 HIGH / 17 MEDIUM). Synced **Master Map** §0c ledger (CW6 apply-path DONE not Composer-surpass certificate; CW4 PARTIAL; F.1-b marketing HELD), **Studio Index** §Execution order + scorecard (J+L ~25–55%) + MaterialX/OpenVDB draft spec links, **Planning Completeness** registry (MaterialX/OpenVDB draft v1.0 hygiene). Header honesty note added — do not read Antigravity header as G.3 AAA or 15-panel ship certificate. **No BLOCKER code fixes this entry** — execution queue in P2b. |

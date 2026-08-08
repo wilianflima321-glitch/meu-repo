@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  applyConsolidationMarketingFailClosed,
   buildConsolidationTruthMatrix,
   isConsolidationMarketingAllowedForClaim,
 } from '@/lib/production/consolidation-truth-matrix'
@@ -73,5 +74,55 @@ describe('CW1 consolidation truth matrix', () => {
     expect(spine?.lastEvidence).toMatch(/criticalPath=PARTIAL/)
     expect(spine?.lastEvidence).not.toMatch(/criticalPath=DONE/)
     expect(spine?.marketingAllowed).toBe(false)
+    expect(spine?.heldReason).toMatch(/cw4_/)
+  })
+
+  it('blocks marketing for P2b BLOCKER rows 7–9 (J.9 / J.11–J.12 / CW1 15-panel)', () => {
+    const matrix = buildConsolidationTruthMatrix()
+    const blockedIds = [
+      'agents.receipt.completeness',
+      'agents.nexus.task-graph',
+      'ui.persistence.spine',
+      'master-ux.hero-panels',
+    ] as const
+
+    for (const id of blockedIds) {
+      const row = matrix.rows.find((r) => r.id === id)
+      expect(row, `missing row ${id}`).toBeDefined()
+      expect(row?.marketingAllowed, `${id} marketing must be false`).toBe(false)
+      expect(row?.heldReason, `${id} must cite heldReason`).toBeTruthy()
+      expect(row?.status, `${id} must not claim IMPLEMENTED`).not.toBe('IMPLEMENTED')
+    }
+
+    const receipt = matrix.rows.find((r) => r.id === 'agents.receipt.completeness')
+    expect(receipt?.heldReason).toBe('j9_visual_evidence_webm_held')
+    expect(receipt?.lastEvidence).toMatch(/j9WebM=HELD/)
+
+    const nexus = matrix.rows.find((r) => r.id === 'agents.nexus.task-graph')
+    expect(nexus?.heldReason).toBe('j11_j12_founder_stop')
+    expect(nexus?.lastEvidence).toMatch(/j11j12=STOPPED/)
+
+    const hero = matrix.rows.find((r) => r.id === 'master-ux.hero-panels')
+    expect(hero?.heldReason).toBe('cw1_15_panel_bench_open')
+    expect(hero?.lastEvidence).toMatch(/cw1Bench=OPEN/)
+  })
+
+  it('applyConsolidationMarketingFailClosed cannot re-enable blocked rows', () => {
+    const rows = buildConsolidationTruthMatrix().rows.map((row) => ({
+      ...row,
+      marketingAllowed: true,
+      status: 'IMPLEMENTED' as const,
+    }))
+    applyConsolidationMarketingFailClosed(rows)
+
+    const blockedIds = [
+      'agents.receipt.completeness',
+      'agents.nexus.task-graph',
+      'ui.persistence.spine',
+      'master-ux.hero-panels',
+    ]
+    for (const id of blockedIds) {
+      expect(rows.find((r) => r.id === id)?.marketingAllowed).toBe(false)
+    }
   })
 })
