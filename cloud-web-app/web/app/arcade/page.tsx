@@ -16,6 +16,7 @@ import {
   getHubPrimaryTab,
   type HubPrimaryTabId,
 } from '@/lib/hub/taxonomy'
+import { isDiscoveryFeedUiUnlocked } from '@/lib/hub/discovery-feed-engine'
 import { ArcadeCard } from './ArcadeCard'
 import { ArcadeCreatorPanel } from './ArcadeCreatorPanel'
 import type { ArcadeGame } from './arcade.types'
@@ -66,13 +67,14 @@ export default function ArcadePage() {
         if (!res.ok) return
         const data = (await res.json()) as {
           report?: { marketingDiscoveryAllowed?: boolean }
-          f2?: { discoveryFeedReady?: boolean }
         }
         if (cancelled) return
-        const ready =
-          data.report?.marketingDiscoveryAllowed === true ||
-          data.f2?.discoveryFeedReady === true
-        setDiscoveryFeedReady(ready)
+        // Fail-closed: marketing honesty only — never OR-bypass with raw f2.discoveryFeedReady.
+        setDiscoveryFeedReady(
+          isDiscoveryFeedUiUnlocked({
+            marketingDiscoveryAllowed: data.report?.marketingDiscoveryAllowed,
+          }),
+        )
       } catch {
         // Fail-closed: keep discoveryFeedReady false.
       }

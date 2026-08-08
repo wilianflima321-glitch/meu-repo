@@ -14,7 +14,10 @@ import {
   evaluateDiscoveryEligibility,
   evaluateDiscoveryFeedCapability,
   evaluateLaunchWindowGate,
+  isDiscoveryFeedUiUnlocked,
   probeDiscoveryFeedEngine,
+  smokeCompressionMandateGate,
+  smokeLaunchWindowGate,
   type DiscoveryCandidate,
 } from '@/lib/hub/discovery-feed-engine'
 import { scoreRetention } from '@/lib/hub/retention-scorer'
@@ -227,24 +230,96 @@ describe('I.1 discovery feed engine', () => {
 })
 
 describe('I.1 honesty probes flip discovery readiness', () => {
-  it('probeDiscoveryFeedEngine reports ready with impression ledger live; AI-mod flips only when moderation writable', () => {
-    const probe = probeDiscoveryFeedEngine()
-    expect(probe.ready).toBe(true)
-    expect(probe.aiModerationReady).toBe(false)
-    expect(probe.impressionLedgerReady).toBe(true)
-    expect(probe.promotedLaneReady).toBe(false)
+  it('probeDiscoveryFeedEngine reports ready from gate smokes; ledger + AI-mod stay opt-in fail-closed', () => {
+    const bare = probeDiscoveryFeedEngine()
+    expect(bare.ready).toBe(true)
+    expect(bare.compressionGateReady).toBe(true)
+    expect(bare.aiModerationReady).toBe(false)
+    // 2k ledger claim must not default true without a writable probe.
+    expect(bare.impressionLedgerReady).toBe(false)
+    expect(bare.promotedLaneReady).toBe(false)
 
-    const cap = evaluateDiscoveryFeedCapability(probe)
-    expect(cap.discoveryFeedReady).toBe(true)
-    expect(cap.marketingDiscoveryAllowed).toBe(true)
-    expect(cap.marketingLaunchImpressionsAllowed).toBe(true)
-    expect(cap.marketingAiModeratedDiscoveryAllowed).toBe(false)
+    const bareCap = evaluateDiscoveryFeedCapability(bare)
+    expect(bareCap.discoveryFeedReady).toBe(true)
+    expect(bareCap.marketingDiscoveryAllowed).toBe(true)
+    expect(bareCap.marketingLaunchImpressionsAllowed).toBe(false)
+    expect(bareCap.marketingAiModeratedDiscoveryAllowed).toBe(false)
 
-    const withMod = probeDiscoveryFeedEngine({ discoveryModerationWritable: true })
+    const withLedger = probeDiscoveryFeedEngine({ impressionLedgerWritable: true })
+    expect(withLedger.impressionLedgerReady).toBe(true)
+    expect(evaluateDiscoveryFeedCapability(withLedger).marketingLaunchImpressionsAllowed).toBe(
+      true,
+    )
+
+    const withMod = probeDiscoveryFeedEngine({
+      impressionLedgerWritable: true,
+      discoveryModerationWritable: true,
+    })
     expect(withMod.aiModerationReady).toBe(true)
     expect(evaluateDiscoveryFeedCapability(withMod).marketingAiModeratedDiscoveryAllowed).toBe(
       true,
     )
+  })
+
+  it('smoke gates prove fail-closed contracts at runtime (not hardcoded literals)', () => {
+    expect(smokeCompressionMandateGate()).toBe(true)
+    expect(smokeLaunchWindowGate()).toBe(true)
+  })
+
+  it('fails closed end-to-end when Compression Mandate smoke fails — BLOCKER 3-6 regression guard', () => {
+    const brokenProbe = probeDiscoveryFeedEngine({ compressionGateSmokePassed: false })
+    expect(brokenProbe.ready).toBe(false)
+    expect(brokenProbe.compressionGateReady).toBe(false)
+
+    const cap = evaluateDiscoveryFeedCapability(brokenProbe)
+    expect(cap.status).toBe('HELD')
+    expect(cap.connectable).toBe(false)
+    expect(cap.marketingDiscoveryAllowed).toBe(false)
+    expect(cap.marketingLaunchImpressionsAllowed).toBe(false)
+    expect(cap.marketingAiModeratedDiscoveryAllowed).toBe(false)
+
+    const hub = evaluateHubHonesty({
+      arcadeCatalogAvailable: true,
+      hasPublishedGames: true,
+      discoveryFeedReady: brokenProbe.ready,
+      impressionLedgerReady: true,
+      playtimeTelemetryReady: true,
+      reviewsStoreReady: true,
+    })
+    expect(hub.discovery.status).toBe('HELD')
+    expect(hub.marketingDiscoveryAllowed).toBe(false)
+  })
+
+  it('fails closed end-to-end when 30-day launch window smoke fails — BLOCKER 3-6 regression guard', () => {
+    const brokenProbe = probeDiscoveryFeedEngine({ launchWindowSmokePassed: false })
+    expect(brokenProbe.ready).toBe(false)
+    // Compression smoke may still pass; overall readiness must stay HELD.
+    expect(brokenProbe.compressionGateReady).toBe(true)
+
+    const cap = evaluateDiscoveryFeedCapability(brokenProbe)
+    expect(cap.status).toBe('HELD')
+    expect(cap.marketingDiscoveryAllowed).toBe(false)
+    expect(isDiscoveryFeedUiUnlocked({ marketingDiscoveryAllowed: cap.marketingDiscoveryAllowed })).toBe(
+      false,
+    )
+  })
+
+  it('Arcade UI unlock never OR-bypasses marketing honesty with raw discoveryFeedReady — BLOCKER 3-6', () => {
+    expect(
+      isDiscoveryFeedUiUnlocked({
+        marketingDiscoveryAllowed: false,
+      }),
+    ).toBe(false)
+    expect(
+      isDiscoveryFeedUiUnlocked({
+        marketingDiscoveryAllowed: undefined,
+      }),
+    ).toBe(false)
+    expect(
+      isDiscoveryFeedUiUnlocked({
+        marketingDiscoveryAllowed: true,
+      }),
+    ).toBe(true)
   })
 
   it('hub honesty unlocks marketingDiscoveryAllowed when discoveryFeedReady', () => {

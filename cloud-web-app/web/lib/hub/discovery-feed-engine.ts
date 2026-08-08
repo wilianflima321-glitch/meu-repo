@@ -118,10 +118,16 @@ export interface DiscoveryFeedResult {
 }
 
 export interface DiscoveryFeedEngineProbe {
+  /**
+   * True only when the deterministic Compression Mandate gate smoke-verifies
+   * fail-closed (see `smokeCompressionMandateGate`). Never a bare literal —
+   * a regression in the gate correctly flips discovery HELD.
+   */
   ready: boolean
   aiModerationReady: boolean
   impressionLedgerReady: boolean
   promotedLaneReady: boolean
+  /** Same smoke-verified value as `ready` — kept as a distinct field for readability at call sites. */
   compressionGateReady: boolean
   launchWindowDays: number
   claim: string
@@ -259,6 +265,67 @@ export function evaluateDiscoveryAiModerationGate(input: {
     code: 'AI_MODERATION_BLOCK',
     reason: `AI moderation status=${input.aiModerationStatus ?? 'missing'} — not approved`,
   }
+}
+
+/**
+ * Real smoke check for the Compression Mandate gate — not a hardcoded literal.
+ * Verifies the deterministic fail-closed contract still holds at runtime:
+ * missing/false evidence must reject, oversize bundles must reject, valid
+ * evidence must pass. `compressionGateReady` on the probe is derived from
+ * this so a code regression correctly flips discovery HELD instead of
+ * silently keeping a stale "true".
+ */
+export function smokeCompressionMandateGate(): boolean {
+  const missing = evaluateCompressionMandateGate({})
+  const explicitFalse = evaluateCompressionMandateGate({ compressionMandatePassed: false })
+  const oversize = evaluateCompressionMandateGate({
+    compressionMandatePassed: true,
+    demoBundleBytes: DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1,
+  })
+  const clean = evaluateCompressionMandateGate({
+    compressionMandatePassed: true,
+    demoBundleBytes: 12 * 1024 * 1024,
+  })
+  return (
+    missing.passed === false &&
+    explicitFalse.passed === false &&
+    oversize.passed === false &&
+    clean.passed === true
+  )
+}
+
+/**
+ * Real smoke check for the 30-day launch window gate — not a hardcoded literal.
+ * Binding: Discovery 2k requires DISCOVERY_LAUNCH_WINDOW_DAYS === 30 plus
+ * fail-closed reject for missing/expired publish dates.
+ */
+export function smokeLaunchWindowGate(): boolean {
+  if (DISCOVERY_LAUNCH_WINDOW_DAYS !== 30) return false
+  const nowMs = Date.parse('2026-07-13T12:00:00.000Z')
+  const inWindow = evaluateLaunchWindowGate({
+    publishedAt: '2026-07-01T12:00:00.000Z',
+    nowMs,
+  })
+  const expired = evaluateLaunchWindowGate({
+    publishedAt: '2026-05-01T12:00:00.000Z',
+    nowMs,
+  })
+  const missing = evaluateLaunchWindowGate({ publishedAt: null, nowMs })
+  return (
+    inWindow.inWindow === true &&
+    expired.inWindow === false &&
+    missing.inWindow === false
+  )
+}
+
+/**
+ * Arcade / Hub UI unlock — fail-closed.
+ * Never OR-bypass marketing honesty with a raw engine-ready flag.
+ */
+export function isDiscoveryFeedUiUnlocked(input: {
+  marketingDiscoveryAllowed?: boolean
+}): boolean {
+  return input.marketingDiscoveryAllowed === true
 }
 
 function isListable(candidate: DiscoveryCandidate): boolean {
@@ -567,20 +634,45 @@ export function buildDiscoveryFeed(
 /**
  * Server probe — engine CORE + impression ledger + AI moderation when substrates ready.
  * Promoted stays fail-closed honest.
+ *
+ * Fail-closed defaults (never hardcoded true):
+ * - `ready` / `compressionGateReady` from real gate smokes (30d + Compression Mandate)
+ * - `impressionLedgerReady` only when caller proves writable ledger
+ * - `aiModerationReady` only when durable moderation path is proven
  */
 export function probeDiscoveryFeedEngine(input: {
   impressionLedgerWritable?: boolean
   /** Durable discovery-moderation root writable + pipeline smoke (capability). */
   discoveryModerationWritable?: boolean
+  /**
+   * Injection point for tests only — production always runs the real
+   * `smokeCompressionMandateGate()` check rather than trusting a literal.
+   */
+  compressionGateSmokePassed?: boolean
+  /**
+   * Injection point for tests only — production always runs the real
+   * `smokeLaunchWindowGate()` check rather than trusting a literal.
+   */
+  launchWindowSmokePassed?: boolean
 } = {}): DiscoveryFeedEngineProbe {
-  const impressionLedgerReady = input.impressionLedgerWritable !== false
+  // Opt-in only — never default the 2k ledger claim to true.
+  const impressionLedgerReady = input.impressionLedgerWritable === true
   const aiModerationReady = input.discoveryModerationWritable === true
+  const compressionGateReady =
+    typeof input.compressionGateSmokePassed === 'boolean'
+      ? input.compressionGateSmokePassed
+      : smokeCompressionMandateGate()
+  const launchWindowReady =
+    typeof input.launchWindowSmokePassed === 'boolean'
+      ? input.launchWindowSmokePassed
+      : smokeLaunchWindowGate()
+  const ready = compressionGateReady && launchWindowReady
   return {
-    ready: true,
+    ready,
     aiModerationReady,
     impressionLedgerReady,
     promotedLaneReady: false,
-    compressionGateReady: true,
+    compressionGateReady,
     launchWindowDays: DISCOVERY_LAUNCH_WINDOW_DAYS,
     claim: aiModerationReady
       ? impressionLedgerReady
@@ -619,18 +711,23 @@ export function evaluateDiscoveryFeedCapability(
       marketingDiscoveryAllowed: false,
       marketingLaunchImpressionsAllowed: false,
       marketingAiModeratedDiscoveryAllowed: false,
-      notes: ['Discovery feed engine not ready'],
+      notes: ['Discovery feed engine not ready — 30d launch window + Compression Mandate smoke required'],
       heldReason: 'discovery_feed_held',
     }
   }
+
+  // Ranking may ship with AI-mod [HELD]; AI-moderated *marketing* stays a separate flag.
+  // Never hardcode marketingDiscoveryAllowed — only derived from smoke-verified probe.ready
+  // (Compression Mandate + 30-day launch window gates).
+  const marketingDiscoveryAllowed = probe.ready === true
 
   return {
     status: 'IMPLEMENTED',
     connectable: true,
     discoveryFeedReady: true,
-    marketingDiscoveryAllowed: true,
-    marketingLaunchImpressionsAllowed: probe.impressionLedgerReady,
-    marketingAiModeratedDiscoveryAllowed: probe.aiModerationReady,
+    marketingDiscoveryAllowed,
+    marketingLaunchImpressionsAllowed: probe.impressionLedgerReady === true,
+    marketingAiModeratedDiscoveryAllowed: probe.aiModerationReady === true,
     notes: [
       'Deterministic 30-day + Compression Mandate ranking live',
       probe.aiModerationReady
