@@ -9,7 +9,8 @@
 
 **Status of this document:** **VISION / ACCEPTANCE TARGET** — not a ship certificate.  
 **Law XI / Anti-Hype:** Claims of “parity exceeded” vs Unreal / Cursor / Figma are **marketing-forbidden** until the acceptance matrix below is green with evidence (tests, soak, golden, budget).  
-**UI discipline:** Prefer deepen existing Studio/IDE surfaces (`CreativeWorkbenchShell`, workbench docks, Agents, Landscape, Sequencer). Do **not** invent 15 new hero panel files solely to match names in §2.
+**UI discipline:** Prefer deepen existing Studio/IDE surfaces (`CreativeWorkbenchShell`, workbench docks, Agents, Landscape, Sequencer). Do **not** invent 15 new hero panel files solely to match names in §2.  
+**CW1 bench (2026-08-08):** Executable 15-slot honesty matrix **CLOSED** in `cloud-web-app/web/lib/production/master-ux-hero-panel-bench.ts` (claim × path × status × bench × marketing). Maps Spec names → **real** ship surfaces only; Spec-named mock heroes must stay absent. **Not** a 15/15 product-ship certificate — product depth remains PARTIAL / HELD per rows below.
 
 | Spec panel file | Reality (2026-07-23) | Product depth | Marketing allowed |
 |---|---|---|---|
