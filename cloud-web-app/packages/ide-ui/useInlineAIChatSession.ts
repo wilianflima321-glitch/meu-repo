@@ -7,7 +7,11 @@ import {
   fetchAiProviderStatus,
   type AiProviderStatusResponse,
 } from '../../web/lib/ai-provider-status-client'
-import { inferAdvancedProfile, requestAdvancedChat } from '../../web/lib/ai-chat-advanced-client'
+import {
+  inferAdvancedProfile,
+  requestAdvancedChat,
+  streamPlainChat,
+} from '../../web/lib/ai-chat-advanced-client'
 
 import {
   buildInlineAIRequestMessage,
@@ -76,9 +80,9 @@ export function useInlineAIChatSession(
 
     const previousPath = lastActivePathRef.current
     lastActivePathRef.current = nextPath
-      setMessages((previousMessages) => [
-        ...previousMessages,
-        buildContextShiftMessage(activeFile, previousPath),
+    setMessages((previousMessages) => [
+      ...previousMessages,
+      buildContextShiftMessage(activeFile, previousPath),
     ])
   }, [activeFile])
 
@@ -100,6 +104,8 @@ export function useInlineAIChatSession(
       setIsLoading(true)
 
       void (async () => {
+        let streamingMessageId: string | null = null
+
         try {
           let status = providerStatus
           if (!status) {
@@ -114,12 +120,10 @@ export function useInlineAIChatSession(
             projectContext,
           })
 
-          let responseContent = ''
-          let traceArtifact: InlineAIMessage['traceArtifact'] = null
-
+          // Local demo path — no provider; still renders as a single complete bubble.
           if (!status?.configured && !status?.demoModeEnabled) {
             const usage = consumeLocalDemoUsage(status?.demoDailyLimit)
-            responseContent = usage.allowed
+            const responseContent = usage.allowed
               ? buildLocalDemoChatContent({
                   message: nextPrompt,
                   qualityMode: profile.qualityMode,
@@ -129,10 +133,60 @@ export function useInlineAIChatSession(
                   limit: usage.limit,
                 })
               : `DEMO_LIMIT_REACHED: local demo daily limit reached (${usage.used}/${usage.limit}). Configure a provider at /settings?tab=api or try again at ${usage.resetAt}.`
-          } else {
-            const controller = new AbortController()
-            requestAbortRef.current = controller
 
+            setMessages((previousMessages) => [
+              ...previousMessages,
+              createInlineAIMessage('assistant', responseContent || 'No response from AI.', {
+                codeBlocks: extractCodeBlocks(responseContent),
+              }),
+            ])
+            return
+          }
+
+          const controller = new AbortController()
+          requestAbortRef.current = controller
+
+          const streamingMessage = createInlineAIMessage('assistant', '')
+          streamingMessageId = streamingMessage.id
+          setMessages((previousMessages) => [...previousMessages, streamingMessage])
+
+          const patchStreaming = (content: string, extras?: Partial<InlineAIMessage>) => {
+            setMessages((previousMessages) =>
+              previousMessages.map((message) =>
+                message.id === streamingMessage.id
+                  ? {
+                      ...message,
+                      content,
+                      codeBlocks: extractCodeBlocks(content),
+                      ...extras,
+                    }
+                  : message,
+              ),
+            )
+          }
+
+          let responseContent = ''
+          let traceArtifact: InlineAIMessage['traceArtifact'] = null
+
+          try {
+            // Prefer real token stream from /api/ai/stream (not a post-hoc typewriter).
+            let accumulated = ''
+            const streamed = await streamPlainChat({
+              messages: [{ role: 'user', content: requestMessage }],
+              model: DEFAULT_OPENROUTER_MODEL_ID,
+              signal: controller.signal,
+              onDelta: (chunk) => {
+                accumulated += chunk
+                patchStreaming(accumulated)
+              },
+            })
+            responseContent = streamed.content || accumulated
+          } catch (streamError) {
+            if (streamError instanceof Error && streamError.name === 'AbortError') {
+              throw streamError
+            }
+
+            // Fail open to advanced chat (non-stream) — still better than a silent empty bubble.
             const result = await requestAdvancedChat({
               message: requestMessage,
               model: DEFAULT_OPENROUTER_MODEL_ID,
@@ -140,20 +194,20 @@ export function useInlineAIChatSession(
               profileOverride: profile,
               signal: controller.signal,
             })
-
             responseContent = extractAdvancedResponseContent(result.raw)
             traceArtifact = extractAdvancedTraceArtifact(result.raw)
+            patchStreaming(responseContent || 'No response from AI.', { traceArtifact })
+            return
           }
 
-          setMessages((previousMessages) => [
-            ...previousMessages,
-            createInlineAIMessage('assistant', responseContent || 'No response from AI.', {
-              codeBlocks: extractCodeBlocks(responseContent),
-              traceArtifact,
-            }),
-          ])
+          patchStreaming(responseContent || 'No response from AI.', { traceArtifact })
         } catch (error) {
           if (error instanceof Error && error.name === 'AbortError') {
+            if (streamingMessageId) {
+              setMessages((previousMessages) =>
+                previousMessages.filter((message) => message.id !== streamingMessageId),
+              )
+            }
             return
           }
 
@@ -164,7 +218,15 @@ export function useInlineAIChatSession(
               : 'I could not reach AI right now. Try again in a moment or open a file so I can answer with stronger context.',
           )
 
-          setMessages((previousMessages) => [...previousMessages, fallbackContent])
+          if (streamingMessageId) {
+            setMessages((previousMessages) =>
+              previousMessages.map((message) =>
+                message.id === streamingMessageId ? fallbackContent : message,
+              ),
+            )
+          } else {
+            setMessages((previousMessages) => [...previousMessages, fallbackContent])
+          }
         } finally {
           requestAbortRef.current = null
           setIsLoading(false)

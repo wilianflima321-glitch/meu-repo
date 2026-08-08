@@ -100,7 +100,7 @@ export default function CanvasViewportSurface({
       bottom={
         <>
           <DockPanel id="timeline" title="Timeline" icon={Film} defaultRegion="bottomBar">
-            <Timeline3D duration={8} />
+            <Timeline3D duration={8} demoMode />
           </DockPanel>
           <DockPanel id="console" title="Console" icon={TerminalIcon} defaultRegion="bottomBar">
             <ConsoleIntegration />

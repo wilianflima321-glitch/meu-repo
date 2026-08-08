@@ -119,7 +119,7 @@ function parseAdvancedChatError(raw: string, status: number): AdvancedChatReques
     const metadata =
       typeof data?.metadata === 'object' && data.metadata !== null
         ? { ...(data.metadata as Record<string, unknown>), quotaBody: data }
-        : { quotaBody: data }
+        : ({ quotaBody: data } as Record<string, any>)
     const setupUrl =
       typeof data?.setupUrl === 'string'
         ? data.setupUrl
@@ -223,4 +223,60 @@ export async function requestAdvancedChat(options: {
   }
 
   throw parseAdvancedChatError(second.raw, second.response.status)
+}
+
+/**
+ * Token streaming for Inline AI (Cursor-class UX).
+ * Uses `/api/ai/stream` — plain text chunks from `aiService.chatStream`.
+ * Do not fake a typewriter over a completed JSON fetch.
+ */
+export async function streamPlainChat(options: {
+  messages: ChatAdvancedMessage[]
+  model: string
+  signal?: AbortSignal
+  headers?: Record<string, string>
+  onDelta: (chunk: string) => void
+}): Promise<{ content: string }> {
+  const byokHeaders = getByokHeaders()
+  const response = await fetch('/api/ai/stream', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...byokHeaders,
+      ...(options.headers || {}),
+    },
+    body: JSON.stringify({
+      model: options.model,
+      messages: options.messages,
+    }),
+    signal: options.signal,
+  })
+
+  if (!response.ok) {
+    const raw = await response.text()
+    throw parseAdvancedChatError(raw, response.status)
+  }
+
+  if (!response.body) {
+    throw new AdvancedChatRequestError({
+      code: 'AI_STREAM_UNAVAILABLE',
+      message: 'Streaming response body missing.',
+      status: 502,
+    })
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let content = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    const chunk = decoder.decode(value, { stream: true })
+    if (!chunk) continue
+    content += chunk
+    options.onDelta(chunk)
+  }
+
+  return { content }
 }
