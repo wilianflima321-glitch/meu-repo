@@ -9,20 +9,20 @@ interface EditorScaleReadinessBadgeProps {
 const STATUS_TONE: Record<EditorScaleReadiness['status'], { label: string; border: string; background: string; color: string }> = {
   ready: {
     label: 'Ready',
-    border: 'rgba(52, 211, 153, 0.45)',
-    background: 'rgba(6, 78, 59, 0.22)',
+    border: 'rgba(var(--aethel-neon-emerald-rgb), 0.45)',
+    background: 'color-mix(in srgb, var(--aethel-success-dark) 22%, transparent)',
     color: 'var(--aethel-success-light)',
   },
   watch: {
     label: 'Watch',
-    border: 'rgba(251, 191, 36, 0.48)',
-    background: 'rgba(120, 53, 15, 0.24)',
+    border: 'rgba(var(--aethel-neon-amber-rgb), 0.48)',
+    background: 'color-mix(in srgb, var(--aethel-warning-dark) 24%, transparent)',
     color: 'var(--aethel-neon-amber)',
   },
   guarded: {
     label: 'Guarded',
-    border: 'rgba(248, 113, 113, 0.5)',
-    background: 'rgba(127, 29, 29, 0.24)',
+    border: 'rgba(var(--aethel-error-rgb), 0.5)',
+    background: 'color-mix(in srgb, var(--aethel-error-dark) 24%, transparent)',
     color: 'var(--aethel-error-light)',
   },
 };

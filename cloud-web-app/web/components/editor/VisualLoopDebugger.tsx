@@ -86,7 +86,7 @@ function TimingBar({
       </div>
       <div
         className="h-1.5 rounded-full overflow-hidden"
-        style={{ background: 'rgba(255,255,255,0.06)' }}
+        style={{ background: 'rgba(var(--aethel-text-inverse-rgb), 0.06)' }}
       >
         <div
           className="h-full rounded-full transition-all duration-100"
@@ -114,7 +114,7 @@ function FPSSparkline({ samples }: { samples: number[] }) {
       viewBox={`0 0 ${GRAPH_SAMPLES} 32`}
       preserveAspectRatio="none"
       className="rounded overflow-hidden"
-      style={{ background: 'rgba(255,255,255,0.04)' }}
+      style={{ background: 'rgba(var(--aethel-text-inverse-rgb), 0.04)' }}
     >
       <polyline
         points={samples
@@ -129,7 +129,7 @@ function FPSSparkline({ samples }: { samples: number[] }) {
       <line
         x1={0} y1={32 - (60 / max) * 30}
         x2={GRAPH_SAMPLES} y2={32 - (60 / max) * 30}
-        stroke="rgba(255,255,255,0.15)"
+        stroke="rgba(var(--aethel-text-inverse-rgb), 0.15)"
         strokeWidth="0.4"
         strokeDasharray="2,2"
       />
@@ -188,7 +188,7 @@ export function VisualLoopDebugger({
       <div
         className="flex items-center justify-between px-3 py-1.5 rounded-t-xl cursor-pointer"
         style={{
-          background: 'rgba(8,10,20,0.85)',
+          background: 'var(--aethel-editor-overlay-bg)',
           backdropFilter: 'blur(16px)',
           borderBottom: `1px solid ${budgetColor}30`,
           boxShadow: `0 0 12px ${budgetColor}22`,
@@ -227,9 +227,9 @@ export function VisualLoopDebugger({
         <div
           className="px-3 py-2 flex flex-col gap-2 rounded-b-xl"
           style={{
-            background: 'rgba(8,10,20,0.82)',
+            background: 'var(--aethel-editor-overlay-bg-soft)',
             backdropFilter: 'blur(16px)',
-            border: `1px solid rgba(255,255,255,0.06)`,
+            border: '1px solid rgba(var(--aethel-text-inverse-rgb), 0.06)',
             borderTop: 'none',
           }}
         >
@@ -251,7 +251,7 @@ export function VisualLoopDebugger({
           </div>
 
           {/* Separator */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} />
+          <div style={{ borderTop: '1px solid rgba(var(--aethel-text-inverse-rgb), 0.06)' }} />
 
           {/* Scene stats */}
           <div className="grid grid-cols-3 gap-x-2 text-[10px]" style={{ color: 'var(--aethel-text-muted)' }}>
@@ -271,7 +271,10 @@ export function VisualLoopDebugger({
           {stats.deferredBacklog > 0 && (
             <div
               className="text-[10px] flex items-center gap-1.5 rounded px-2 py-1"
-              style={{ background: 'rgba(255,170,0,0.08)', border: '1px solid rgba(255,170,0,0.2)' }}
+              style={{
+                background: 'rgba(var(--aethel-warning-rgb), 0.08)',
+                border: '1px solid rgba(var(--aethel-warning-rgb), 0.2)',
+              }}
             >
               <span style={{ color: 'var(--aethel-warning)' }}>⏳</span>
               <span style={{ color: 'var(--aethel-text-secondary)' }}>

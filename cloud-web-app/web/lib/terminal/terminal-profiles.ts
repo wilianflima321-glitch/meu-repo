@@ -55,7 +55,7 @@ export class TerminalProfileManager {
         shellPath: '/bin/bash',
         shellArgs: ['--login'],
         icon: 'SH',
-        color: '#4EAA25',
+        color: 'var(--aethel-terminal-profile-bash)',
         isDefault: true,
       });
 
@@ -66,7 +66,7 @@ export class TerminalProfileManager {
         shellPath: '/bin/zsh',
         shellArgs: ['--login'],
         icon: 'SH',
-        color: '#89E051',
+        color: 'var(--aethel-terminal-profile-zsh)',
       });
 
       // Fish profile
@@ -75,7 +75,7 @@ export class TerminalProfileManager {
         name: 'Fish',
         shellPath: '/usr/bin/fish',
         icon: 'SH',
-        color: '#00D0D0',
+        color: 'var(--aethel-terminal-profile-fish)',
       });
 
       // PowerShell profile
@@ -84,7 +84,7 @@ export class TerminalProfileManager {
         name: 'PowerShell',
         shellPath: 'pwsh',
         icon: 'PS',
-        color: '#012456',
+        color: 'var(--aethel-terminal-profile-powershell)',
       });
 
       // Node.js profile
@@ -93,7 +93,7 @@ export class TerminalProfileManager {
         name: 'Node.js',
         shellPath: 'node',
         icon: 'NODE',
-        color: '#68A063',
+        color: 'var(--aethel-terminal-profile-node)',
       });
 
       // Python profile
@@ -103,7 +103,7 @@ export class TerminalProfileManager {
         shellPath: 'python3',
         shellArgs: ['-i'],
         icon: 'PY',
-        color: '#3776AB',
+        color: 'var(--aethel-terminal-profile-python)',
       });
     }
   }

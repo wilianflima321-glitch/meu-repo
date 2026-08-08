@@ -1,4 +1,5 @@
 import {createComponentLogger, logger} from '@/lib/observability/logger'
+import { cssVarRef, resolveCssColor } from '@/lib/design-system/resolveCssColor'
 import {
   getIconThemePreferenceId,
   getThemePreferenceId,
@@ -77,136 +78,67 @@ export interface IconTheme {
   icons: Record<string, string>;
 }
 
+const THEME_COLOR_KEYS: Array<keyof ColorTheme['colors']> = [
+  'editor.background',
+  'editor.foreground',
+  'editor.lineHighlightBackground',
+  'editor.selectionBackground',
+  'editorCursor.foreground',
+  'editorLineNumber.foreground',
+  'editorLineNumber.activeForeground',
+  'sideBar.background',
+  'sideBar.foreground',
+  'sideBar.border',
+  'activityBar.background',
+  'activityBar.foreground',
+  'activityBar.activeBorder',
+  'statusBar.background',
+  'statusBar.foreground',
+  'statusBar.debuggingBackground',
+  'panel.background',
+  'panel.border',
+  'terminal.background',
+  'terminal.foreground',
+  'terminal.ansiBlack',
+  'terminal.ansiRed',
+  'terminal.ansiGreen',
+  'terminal.ansiYellow',
+  'terminal.ansiBlue',
+  'terminal.ansiMagenta',
+  'terminal.ansiCyan',
+  'terminal.ansiWhite',
+  'syntax.keyword',
+  'syntax.string',
+  'syntax.number',
+  'syntax.comment',
+  'syntax.function',
+  'syntax.variable',
+  'syntax.type',
+  'syntax.operator',
+];
+
+/** Map workbench color id → CSS custom property under `--aethel-theme-<id>-*`. */
+function themeCssVar(themeId: string, colorKey: keyof ColorTheme['colors']): string {
+  return cssVarRef(`--aethel-theme-${themeId}-${colorKey.replace(/\./g, '-')}`);
+}
+
+function buildBuiltinTheme(
+  id: string,
+  name: string,
+  type: ColorTheme['type'],
+): ColorTheme {
+  const colors = {} as ColorTheme['colors'];
+  for (const key of THEME_COLOR_KEYS) {
+    colors[key] = themeCssVar(id, key);
+  }
+  return { id, name, type, colors };
+}
+
+/** Builtin catalogs — concrete hex lives in globals.css `--aethel-theme-*`. */
 const BUILTIN_THEMES: ColorTheme[] = [
-  {
-    id: 'dark-plus',
-    name: 'Dark+',
-    type: 'dark',
-    colors: {
-      'editor.background': '#1e1e1e',
-      'editor.foreground': '#d4d4d4',
-      'editor.lineHighlightBackground': '#2a2a2a',
-      'editor.selectionBackground': '#264f78',
-      'editorCursor.foreground': '#aeafad',
-      'editorLineNumber.foreground': '#858585',
-      'editorLineNumber.activeForeground': '#c6c6c6',
-      'sideBar.background': '#252526',
-      'sideBar.foreground': '#cccccc',
-      'sideBar.border': '#2b2b2b',
-      'activityBar.background': '#333333',
-      'activityBar.foreground': '#ffffff',
-      'activityBar.activeBorder': '#007acc',
-      'statusBar.background': '#007acc',
-      'statusBar.foreground': '#ffffff',
-      'statusBar.debuggingBackground': '#cc6633',
-      'panel.background': '#1e1e1e',
-      'panel.border': '#2b2b2b',
-      'terminal.background': '#1e1e1e',
-      'terminal.foreground': '#cccccc',
-      'terminal.ansiBlack': '#000000',
-      'terminal.ansiRed': '#cd3131',
-      'terminal.ansiGreen': '#0dbc79',
-      'terminal.ansiYellow': '#e5e510',
-      'terminal.ansiBlue': '#2472c8',
-      'terminal.ansiMagenta': '#bc3fbc',
-      'terminal.ansiCyan': '#11a8cd',
-      'terminal.ansiWhite': '#e5e5e5',
-      'syntax.keyword': '#569cd6',
-      'syntax.string': '#ce9178',
-      'syntax.number': '#b5cea8',
-      'syntax.comment': '#6a9955',
-      'syntax.function': '#dcdcaa',
-      'syntax.variable': '#9cdcfe',
-      'syntax.type': '#4ec9b0',
-      'syntax.operator': '#d4d4d4',
-    },
-  },
-  {
-    id: 'light-plus',
-    name: 'Light+',
-    type: 'light',
-    colors: {
-      'editor.background': '#ffffff',
-      'editor.foreground': '#000000',
-      'editor.lineHighlightBackground': '#f0f0f0',
-      'editor.selectionBackground': '#add6ff',
-      'editorCursor.foreground': '#000000',
-      'editorLineNumber.foreground': '#237893',
-      'editorLineNumber.activeForeground': '#0b216f',
-      'sideBar.background': '#f3f3f3',
-      'sideBar.foreground': '#383838',
-      'sideBar.border': '#e5e5e5',
-      'activityBar.background': '#2c2c2c',
-      'activityBar.foreground': '#ffffff',
-      'activityBar.activeBorder': '#007acc',
-      'statusBar.background': '#007acc',
-      'statusBar.foreground': '#ffffff',
-      'statusBar.debuggingBackground': '#cc6633',
-      'panel.background': '#ffffff',
-      'panel.border': '#e5e5e5',
-      'terminal.background': '#ffffff',
-      'terminal.foreground': '#333333',
-      'terminal.ansiBlack': '#000000',
-      'terminal.ansiRed': '#cd3131',
-      'terminal.ansiGreen': '#00bc00',
-      'terminal.ansiYellow': '#949800',
-      'terminal.ansiBlue': '#0451a5',
-      'terminal.ansiMagenta': '#bc05bc',
-      'terminal.ansiCyan': '#0598bc',
-      'terminal.ansiWhite': '#555555',
-      'syntax.keyword': '#0000ff',
-      'syntax.string': '#a31515',
-      'syntax.number': '#098658',
-      'syntax.comment': '#008000',
-      'syntax.function': '#795e26',
-      'syntax.variable': '#001080',
-      'syntax.type': '#267f99',
-      'syntax.operator': '#000000',
-    },
-  },
-  {
-    id: 'high-contrast',
-    name: 'High Contrast',
-    type: 'high-contrast',
-    colors: {
-      'editor.background': '#000000',
-      'editor.foreground': '#ffffff',
-      'editor.lineHighlightBackground': '#1a1a1a',
-      'editor.selectionBackground': '#ffffff33',
-      'editorCursor.foreground': '#ffff00',
-      'editorLineNumber.foreground': '#ffffff',
-      'editorLineNumber.activeForeground': '#ffff00',
-      'sideBar.background': '#000000',
-      'sideBar.foreground': '#ffffff',
-      'sideBar.border': '#6fc3df',
-      'activityBar.background': '#000000',
-      'activityBar.foreground': '#ffffff',
-      'activityBar.activeBorder': '#ffff00',
-      'statusBar.background': '#000000',
-      'statusBar.foreground': '#ffffff',
-      'statusBar.debuggingBackground': '#ff0000',
-      'panel.background': '#000000',
-      'panel.border': '#6fc3df',
-      'terminal.background': '#000000',
-      'terminal.foreground': '#ffffff',
-      'terminal.ansiBlack': '#000000',
-      'terminal.ansiRed': '#ff0000',
-      'terminal.ansiGreen': '#00ff00',
-      'terminal.ansiYellow': '#ffff00',
-      'terminal.ansiBlue': '#0000ff',
-      'terminal.ansiMagenta': '#ff00ff',
-      'terminal.ansiCyan': '#00ffff',
-      'terminal.ansiWhite': '#ffffff',
-      'syntax.keyword': '#00ffff',
-      'syntax.string': '#00ff00',
-      'syntax.number': '#00ff00',
-      'syntax.comment': '#7ca668',
-      'syntax.function': '#ffff00',
-      'syntax.variable': '#ffffff',
-      'syntax.type': '#00ffff',
-      'syntax.operator': '#ffffff',
-    },
-  },
+  buildBuiltinTheme('dark-plus', 'Dark+', 'dark'),
+  buildBuiltinTheme('light-plus', 'Light+', 'light'),
+  buildBuiltinTheme('high-contrast', 'High Contrast', 'high-contrast'),
 ];
 
 const BUILTIN_ICON_THEMES: IconTheme[] = [
@@ -404,29 +336,30 @@ export class ThemeManager {
   private applyTheme(): void {
     const root = document.documentElement;
     const colors = this.currentTheme.colors;
+    const paint = (value: string) => resolveCssColor(value);
 
-    // Apply CSS variables
-    root.style.setProperty('--editor-bg', colors['editor.background']);
-    root.style.setProperty('--editor-fg', colors['editor.foreground']);
-    root.style.setProperty('--editor-line-highlight', colors['editor.lineHighlightBackground']);
-    root.style.setProperty('--editor-selection', colors['editor.selectionBackground']);
-    root.style.setProperty('--editor-cursor', colors['editorCursor.foreground']);
+    // Apply CSS variables (resolve var(--aethel-theme-*) catalogs to concrete paint values)
+    root.style.setProperty('--editor-bg', paint(colors['editor.background']));
+    root.style.setProperty('--editor-fg', paint(colors['editor.foreground']));
+    root.style.setProperty('--editor-line-highlight', paint(colors['editor.lineHighlightBackground']));
+    root.style.setProperty('--editor-selection', paint(colors['editor.selectionBackground']));
+    root.style.setProperty('--editor-cursor', paint(colors['editorCursor.foreground']));
     
-    root.style.setProperty('--sidebar-bg', colors['sideBar.background']);
-    root.style.setProperty('--sidebar-fg', colors['sideBar.foreground']);
-    root.style.setProperty('--sidebar-border', colors['sideBar.border']);
+    root.style.setProperty('--sidebar-bg', paint(colors['sideBar.background']));
+    root.style.setProperty('--sidebar-fg', paint(colors['sideBar.foreground']));
+    root.style.setProperty('--sidebar-border', paint(colors['sideBar.border']));
     
-    root.style.setProperty('--activitybar-bg', colors['activityBar.background']);
-    root.style.setProperty('--activitybar-fg', colors['activityBar.foreground']);
+    root.style.setProperty('--activitybar-bg', paint(colors['activityBar.background']));
+    root.style.setProperty('--activitybar-fg', paint(colors['activityBar.foreground']));
     
-    root.style.setProperty('--statusbar-bg', colors['statusBar.background']);
-    root.style.setProperty('--statusbar-fg', colors['statusBar.foreground']);
+    root.style.setProperty('--statusbar-bg', paint(colors['statusBar.background']));
+    root.style.setProperty('--statusbar-fg', paint(colors['statusBar.foreground']));
     
-    root.style.setProperty('--panel-bg', colors['panel.background']);
-    root.style.setProperty('--panel-border', colors['panel.border']);
+    root.style.setProperty('--panel-bg', paint(colors['panel.background']));
+    root.style.setProperty('--panel-border', paint(colors['panel.border']));
     
-    root.style.setProperty('--terminal-bg', colors['terminal.background']);
-    root.style.setProperty('--terminal-fg', colors['terminal.foreground']);
+    root.style.setProperty('--terminal-bg', paint(colors['terminal.background']));
+    root.style.setProperty('--terminal-fg', paint(colors['terminal.foreground']));
 
     // Set theme type class
     root.classList.remove('theme-dark', 'theme-light', 'theme-high-contrast');

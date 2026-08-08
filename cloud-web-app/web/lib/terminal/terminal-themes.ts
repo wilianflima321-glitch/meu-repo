@@ -1,3 +1,5 @@
+import { cssVarRef } from '@/lib/design-system/resolveCssColor';
+
 export interface XtermPalette {
   background: string;
   foreground: string;
@@ -22,101 +24,71 @@ export interface XtermPalette {
   brightWhite: string;
 }
 
-// Terminal emulator palettes are ANSI color data, not component styling.
-// Keep them outside TSX so UI files stay token-driven and easy to audit.
+const PALETTE_SLOTS = [
+  'background',
+  'foreground',
+  'cursor',
+  'cursor-accent',
+  'selection',
+  'black',
+  'red',
+  'green',
+  'yellow',
+  'blue',
+  'magenta',
+  'cyan',
+  'white',
+  'bright-black',
+  'bright-red',
+  'bright-green',
+  'bright-yellow',
+  'bright-blue',
+  'bright-magenta',
+  'bright-cyan',
+  'bright-white',
+] as const;
+
+type PaletteSlot = (typeof PALETTE_SLOTS)[number];
+
+const SLOT_TO_KEY: Record<PaletteSlot, keyof XtermPalette> = {
+  background: 'background',
+  foreground: 'foreground',
+  cursor: 'cursor',
+  'cursor-accent': 'cursorAccent',
+  selection: 'selection',
+  black: 'black',
+  red: 'red',
+  green: 'green',
+  yellow: 'yellow',
+  blue: 'blue',
+  magenta: 'magenta',
+  cyan: 'cyan',
+  white: 'white',
+  'bright-black': 'brightBlack',
+  'bright-red': 'brightRed',
+  'bright-green': 'brightGreen',
+  'bright-yellow': 'brightYellow',
+  'bright-blue': 'brightBlue',
+  'bright-magenta': 'brightMagenta',
+  'bright-cyan': 'brightCyan',
+  'bright-white': 'brightWhite',
+};
+
+function buildPalette(themeId: string, selectionSlot: PaletteSlot = 'selection'): XtermPalette {
+  const palette = {} as XtermPalette;
+  for (const slot of PALETTE_SLOTS) {
+    const cssSlot = slot === 'selection' ? selectionSlot : slot;
+    palette[SLOT_TO_KEY[slot]] = cssVarRef(`--aethel-terminal-${themeId}-${cssSlot}`);
+  }
+  return palette;
+}
+
+// Terminal emulator palettes — CSS vars in globals.css are the source of truth.
 export const TERMINAL_THEMES: Record<string, XtermPalette> = {
-  catppuccinMocha: {
-    background: '#1e1e2e',
-    foreground: '#cdd6f4',
-    cursor: '#f5e0dc',
-    cursorAccent: '#1e1e2e',
-    selection: 'rgba(137, 180, 250, 0.3)',
-    black: '#45475a',
-    red: '#f38ba8',
-    green: '#a6e3a1',
-    yellow: '#f9e2af',
-    blue: '#89b4fa',
-    magenta: '#f5c2e7',
-    cyan: '#94e2d5',
-    white: '#bac2de',
-    brightBlack: '#585b70',
-    brightRed: '#f38ba8',
-    brightGreen: '#a6e3a1',
-    brightYellow: '#f9e2af',
-    brightBlue: '#89b4fa',
-    brightMagenta: '#f5c2e7',
-    brightCyan: '#94e2d5',
-    brightWhite: '#a6adc8',
-  },
-  dracula: {
-    background: '#282a36',
-    foreground: '#f8f8f2',
-    cursor: '#f8f8f2',
-    cursorAccent: '#282a36',
-    selection: 'rgba(68, 71, 90, 0.5)',
-    black: '#21222c',
-    red: '#ff5555',
-    green: '#50fa7b',
-    yellow: '#f1fa8c',
-    blue: '#bd93f9',
-    magenta: '#ff79c6',
-    cyan: '#8be9fd',
-    white: '#f8f8f2',
-    brightBlack: '#6272a4',
-    brightRed: '#ff6e6e',
-    brightGreen: '#69ff94',
-    brightYellow: '#ffffa5',
-    brightBlue: '#d6acff',
-    brightMagenta: '#ff92df',
-    brightCyan: '#a4ffff',
-    brightWhite: '#ffffff',
-  },
-  tokyoNight: {
-    background: '#1a1b26',
-    foreground: '#c0caf5',
-    cursor: '#c0caf5',
-    cursorAccent: '#1a1b26',
-    selection: 'rgba(51, 59, 91, 0.5)',
-    black: '#15161e',
-    red: '#f7768e',
-    green: '#9ece6a',
-    yellow: '#e0af68',
-    blue: '#7aa2f7',
-    magenta: '#bb9af7',
-    cyan: '#7dcfff',
-    white: '#a9b1d6',
-    brightBlack: '#414868',
-    brightRed: '#f7768e',
-    brightGreen: '#9ece6a',
-    brightYellow: '#e0af68',
-    brightBlue: '#7aa2f7',
-    brightMagenta: '#bb9af7',
-    brightCyan: '#7dcfff',
-    brightWhite: '#c0caf5',
-  },
-  vscodeDark: {
-    background: '#1e1e1e',
-    foreground: '#d4d4d4',
-    cursor: '#aeafad',
-    cursorAccent: '#1e1e1e',
-    selection: 'rgba(38, 79, 120, 0.5)',
-    black: '#000000',
-    red: '#cd3131',
-    green: '#0dbc79',
-    yellow: '#e5e510',
-    blue: '#2472c8',
-    magenta: '#bc3fbc',
-    cyan: '#11a8cd',
-    white: '#e5e5e5',
-    brightBlack: '#666666',
-    brightRed: '#f14c4c',
-    brightGreen: '#23d18b',
-    brightYellow: '#f5f543',
-    brightBlue: '#3b8eea',
-    brightMagenta: '#d670d6',
-    brightCyan: '#29b8db',
-    brightWhite: '#ffffff',
-  },
+  catppuccinMocha: buildPalette('catppuccin-mocha'),
+  dracula: buildPalette('dracula', 'selection-soft'),
+  tokyoNight: buildPalette('tokyo-night'),
+  vscodeDark: buildPalette('vscode-dark'),
 };
 
 const catppuccinMocha = TERMINAL_THEMES.catppuccinMocha;

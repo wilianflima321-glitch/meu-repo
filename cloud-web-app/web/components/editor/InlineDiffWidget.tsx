@@ -40,9 +40,9 @@ export function InlineDiffWidget({
       className={cn(
         // Frosted glass pill
         'inline-flex items-center gap-px overflow-hidden rounded-full',
-        'border border-[color-mix(in_srgb,#00e5ff_30%,transparent)]',
-        'bg-[rgba(7,13,25,0.72)]',
-        'shadow-[0_0_20px_rgba(0,229,255,0.12),0_4px_24px_rgba(0,0,0,0.56)]',
+        'border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_30%,transparent)]',
+        'bg-[var(--aethel-editor-diff-pill-bg)]',
+        'shadow-[0_0_20px_rgba(var(--aethel-neon-cyan-rgb),0.12),0_4px_24px_rgba(var(--aethel-brand-pure-black-rgb),0.56)]',
         '[backdrop-filter:blur(12px)]',
         'select-none',
         className,

@@ -342,7 +342,7 @@ export function TabBar({ className }: { className?: string }) {
   return (
     <div
       ref={tabBarRef}
-      className={`flex items-center border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(14,17,24,0.98),rgba(10,12,17,0.98))] ${className || ''}`}
+      className={`flex items-center border-b border-[var(--aethel-border-subtle)] bg-[image:var(--aethel-editor-tabbar-bg)] ${className || ''}`}
       onDragEnd={handleDragEnd}
     >
       {/* Tabs */}
@@ -377,7 +377,7 @@ export function TabBar({ className }: { className?: string }) {
           </button>
 
           {showOverflowMenu && (
-            <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+            <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(var(--aethel-brand-pure-black-rgb),0.5)]">
               {overflowTabs.map(tab => {
                 const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : getFileIcon(tab.path).icon;
                 return (

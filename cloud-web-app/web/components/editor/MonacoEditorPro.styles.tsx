@@ -2,11 +2,11 @@ export function MonacoEditorDecorationsStyle() {
   return (
     <style jsx global>{`
         .editor-error-decoration {
-          background-color: rgba(243, 139, 168, 0.2);
+          background-color: var(--aethel-editor-decoration-error-bg);
           text-decoration: wavy underline var(--aethel-error-light);
         }
         .editor-warning-decoration {
-          background-color: rgba(249, 226, 175, 0.1);
+          background-color: var(--aethel-editor-decoration-warning-bg);
           text-decoration: wavy underline var(--aethel-warning-light);
         }
         .editor-info-decoration {

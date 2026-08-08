@@ -31,7 +31,7 @@ export const Minimap: React.FC<MinimapProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const getVar = (name: string, fallback: string) => {
+    const getVar = (name: string, fallback = '') => {
       if (typeof window === 'undefined') return fallback;
       const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
       return value || fallback;
@@ -52,7 +52,8 @@ export const Minimap: React.FC<MinimapProps> = ({
       if (trimmed.startsWith('rgb')) {
         return trimmed.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`);
       }
-      return `rgba(255, 255, 255, ${alpha})`;
+      const inverseRgb = getVar('--aethel-text-inverse-rgb', '255, 255, 255');
+      return `rgba(${inverseRgb}, ${alpha})`;
     };
 
     const width = canvas.width;
@@ -60,9 +61,9 @@ export const Minimap: React.FC<MinimapProps> = ({
     const lineHeight = height / totalLines;
 
     // Clear canvas
-    const surface = getVar('--aethel-surface-tertiary', 'rgb(30 30 30)');
-    const textPrimary = getVar('--aethel-text-primary', 'rgb(255 255 255)');
-    const textSecondary = getVar('--aethel-text-secondary', 'rgb(212 212 212)');
+    const surface = getVar('--aethel-surface-tertiary');
+    const textPrimary = getVar('--aethel-text-primary');
+    const textSecondary = getVar('--aethel-text-secondary');
 
     ctx.fillStyle = surface;
     ctx.fillRect(0, 0, width, height);

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import type { ITerminalOptions } from 'xterm';
+import { resolveCssColor } from '@/lib/design-system/resolveCssColor';
 import type { TerminalTheme } from './terminalModels';
 
 type UseTerminalOptionsParams = {
@@ -9,6 +10,10 @@ type UseTerminalOptionsParams = {
   fontSize: number;
   theme: TerminalTheme;
 };
+
+function paint(color: string): string {
+  return resolveCssColor(color);
+}
 
 export function useTerminalOptions({
   fontFamily,
@@ -28,27 +33,27 @@ export function useTerminalOptions({
       allowTransparency: true,
       convertEol: true,
       theme: {
-        background: theme.colors.background,
-        foreground: theme.colors.foreground,
-        cursor: theme.colors.cursor,
-        cursorAccent: theme.colors.cursorAccent,
-        selectionBackground: theme.colors.selection,
-        black: theme.colors.black,
-        red: theme.colors.red,
-        green: theme.colors.green,
-        yellow: theme.colors.yellow,
-        blue: theme.colors.blue,
-        magenta: theme.colors.magenta,
-        cyan: theme.colors.cyan,
-        white: theme.colors.white,
-        brightBlack: theme.colors.brightBlack,
-        brightRed: theme.colors.brightRed,
-        brightGreen: theme.colors.brightGreen,
-        brightYellow: theme.colors.brightYellow,
-        brightBlue: theme.colors.brightBlue,
-        brightMagenta: theme.colors.brightMagenta,
-        brightCyan: theme.colors.brightCyan,
-        brightWhite: theme.colors.brightWhite,
+        background: paint(theme.colors.background),
+        foreground: paint(theme.colors.foreground),
+        cursor: paint(theme.colors.cursor),
+        cursorAccent: paint(theme.colors.cursorAccent),
+        selectionBackground: paint(theme.colors.selection),
+        black: paint(theme.colors.black),
+        red: paint(theme.colors.red),
+        green: paint(theme.colors.green),
+        yellow: paint(theme.colors.yellow),
+        blue: paint(theme.colors.blue),
+        magenta: paint(theme.colors.magenta),
+        cyan: paint(theme.colors.cyan),
+        white: paint(theme.colors.white),
+        brightBlack: paint(theme.colors.brightBlack),
+        brightRed: paint(theme.colors.brightRed),
+        brightGreen: paint(theme.colors.brightGreen),
+        brightYellow: paint(theme.colors.brightYellow),
+        brightBlue: paint(theme.colors.brightBlue),
+        brightMagenta: paint(theme.colors.brightMagenta),
+        brightCyan: paint(theme.colors.brightCyan),
+        brightWhite: paint(theme.colors.brightWhite),
       },
     }),
     [fontFamily, fontSize, theme]

@@ -31,7 +31,7 @@ export function MonacoInlineCommentDialog({
 }: MonacoInlineCommentDialogProps) {
   return (
     <div
-      className="absolute right-4 top-14 z-40 w-[min(360px,calc(100%-2rem))] rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
+      className="absolute right-4 top-14 z-40 w-[min(360px,calc(100%-2rem))] rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-3 shadow-[0_24px_80px_rgba(var(--aethel-brand-pure-black-rgb),0.45)]"
       role="dialog"
       aria-label="Inline code comment"
     >

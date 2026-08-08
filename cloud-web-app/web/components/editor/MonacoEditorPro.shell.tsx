@@ -113,7 +113,7 @@ export function InlineChatPopover({
 }) {
   return (
     <div
-      className="absolute z-50 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[var(--aethel-surface-primary)] shadow-[0_12px_48px_rgba(0,0,0,0.65),0_0_0_1px_rgba(255,255,255,0.05)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="absolute z-50 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[var(--aethel-surface-primary)] shadow-[0_12px_48px_rgba(var(--aethel-brand-pure-black-rgb),0.65),0_0_0_1px_rgba(var(--aethel-text-inverse-rgb),0.05)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         top: position ? `${position.top}px` : 'auto',
         bottom: position ? 'auto' : '1rem',

@@ -1,6 +1,11 @@
 /**
  * Aethel Design System - Unified Tokens v2.1
- * Centralized design tokens for consistent UX across all interfaces
+ * Centralized design tokens for consistent UX across all interfaces.
+ *
+ * L.10 scanner note: this file IS a token source of truth (legacy JS table).
+ * Hex/rgba literals here are intentional and excluded by `check-hardcoded-colors.mjs`.
+ * Prefer `var(--aethel-*)` from globals.css for new UI; do not re-export these
+ * hexes into CSS variables (avoids circular token graphs).
  */
 
 export const tokens = {

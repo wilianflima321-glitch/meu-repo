@@ -5,8 +5,10 @@ import type { Terminal as XTermType } from 'xterm';
 import type { SearchAddon } from 'xterm-addon-search';
 import type { TerminalSocketHandle } from './terminalModels';
 
+import { resolveCssColor } from '@/lib/design-system/resolveCssColor';
+
 const SEARCH_DECORATIONS = {
-  decorations: { matchOverviewRuler: '#FF0' },
+  decorations: { matchOverviewRuler: resolveCssColor('var(--aethel-editor-search-match)') },
 };
 
 type UseTerminalSelectionOptions = {

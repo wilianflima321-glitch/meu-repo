@@ -13,8 +13,15 @@ const EXTRA_TARGET_DIRS = [path.resolve(WEB_ROOT, '../packages/ide-ui')]
 // Excluded directories (Canvas/WebGL often need raw hex for THREE.Color)
 const EXCLUDED_DIRS = ['canvas', 'engine', 'three', 'webgpu', 'destruction', 'simulation', 'world-forge']
 
-// Excluded files
-const EXCLUDED_FILES = ['globals.css', 'DesignTokenSync.ts', 'check-hardcoded-colors.mjs']
+// Excluded files:
+// - globals.css / DesignTokenSync.ts = token sources of truth (hex allowed)
+// - design-tokens.ts = legacy JS token table SoT (do not circular-map into CSS vars)
+const EXCLUDED_FILES = [
+  'globals.css',
+  'DesignTokenSync.ts',
+  'design-tokens.ts',
+  'check-hardcoded-colors.mjs',
+]
 
 // The strict regex for hardcoded CSS colors:
 // Looks for hex (#FFFFFF) or rgb() or rgba()

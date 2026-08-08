@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cssVarRef } from '@/lib/design-system/resolveCssColor';
 
 /** L.4 lane split — human host PTY vs Forge sandbox (agents never host PTY). */
 export type TerminalExecutionLane = 'human-host-pty' | 'forge-sandbox';
@@ -96,111 +97,70 @@ export interface ShellOption {
   icon?: ReactNode;
 }
 
+const TERMINAL_COLOR_SLOTS = [
+  'background',
+  'foreground',
+  'cursor',
+  'cursor-accent',
+  'selection',
+  'black',
+  'red',
+  'green',
+  'yellow',
+  'blue',
+  'magenta',
+  'cyan',
+  'white',
+  'bright-black',
+  'bright-red',
+  'bright-green',
+  'bright-yellow',
+  'bright-blue',
+  'bright-magenta',
+  'bright-cyan',
+  'bright-white',
+] as const;
+
+type TerminalColorSlot = (typeof TERMINAL_COLOR_SLOTS)[number];
+
+const TERMINAL_SLOT_TO_KEY: Record<TerminalColorSlot, keyof TerminalTheme['colors']> = {
+  background: 'background',
+  foreground: 'foreground',
+  cursor: 'cursor',
+  'cursor-accent': 'cursorAccent',
+  selection: 'selection',
+  black: 'black',
+  red: 'red',
+  green: 'green',
+  yellow: 'yellow',
+  blue: 'blue',
+  magenta: 'magenta',
+  cyan: 'cyan',
+  white: 'white',
+  'bright-black': 'brightBlack',
+  'bright-red': 'brightRed',
+  'bright-green': 'brightGreen',
+  'bright-yellow': 'brightYellow',
+  'bright-blue': 'brightBlue',
+  'bright-magenta': 'brightMagenta',
+  'bright-cyan': 'brightCyan',
+  'bright-white': 'brightWhite',
+};
+
+function buildTerminalTheme(id: string, name: string): TerminalTheme {
+  const colors = {} as TerminalTheme['colors'];
+  for (const slot of TERMINAL_COLOR_SLOTS) {
+    colors[TERMINAL_SLOT_TO_KEY[slot]] = cssVarRef(`--aethel-terminal-${id}-${slot}`);
+  }
+  return { name, colors };
+}
+
+/** ANSI palettes — concrete hex lives in globals.css `--aethel-terminal-*`. */
 export const TERMINAL_THEMES: Record<string, TerminalTheme> = {
-  'dark-plus': {
-    name: 'Dark+',
-    colors: {
-      background: '#1e1e1e',
-      foreground: '#cccccc',
-      cursor: '#ffffff',
-      cursorAccent: '#000000',
-      selection: 'rgba(255, 255, 255, 0.3)',
-      black: '#000000',
-      red: '#cd3131',
-      green: '#0dbc79',
-      yellow: '#e5e510',
-      blue: '#2472c8',
-      magenta: '#bc3fbc',
-      cyan: '#11a8cd',
-      white: '#e5e5e5',
-      brightBlack: '#666666',
-      brightRed: '#f14c4c',
-      brightGreen: '#23d18b',
-      brightYellow: '#f5f543',
-      brightBlue: '#3b8eea',
-      brightMagenta: '#d670d6',
-      brightCyan: '#29b8db',
-      brightWhite: '#ffffff',
-    },
-  },
-  monokai: {
-    name: 'Monokai',
-    colors: {
-      background: '#272822',
-      foreground: '#f8f8f2',
-      cursor: '#f8f8f0',
-      cursorAccent: '#272822',
-      selection: 'rgba(73, 72, 62, 0.75)',
-      black: '#272822',
-      red: '#f92672',
-      green: '#a6e22e',
-      yellow: '#f4bf75',
-      blue: '#66d9ef',
-      magenta: '#ae81ff',
-      cyan: '#a1efe4',
-      white: '#f8f8f2',
-      brightBlack: '#75715e',
-      brightRed: '#f92672',
-      brightGreen: '#a6e22e',
-      brightYellow: '#f4bf75',
-      brightBlue: '#66d9ef',
-      brightMagenta: '#ae81ff',
-      brightCyan: '#a1efe4',
-      brightWhite: '#f9f8f5',
-    },
-  },
-  dracula: {
-    name: 'Dracula',
-    colors: {
-      background: '#282a36',
-      foreground: '#f8f8f2',
-      cursor: '#f8f8f2',
-      cursorAccent: '#282a36',
-      selection: 'rgba(68, 71, 90, 0.75)',
-      black: '#21222c',
-      red: '#ff5555',
-      green: '#50fa7b',
-      yellow: '#f1fa8c',
-      blue: '#bd93f9',
-      magenta: '#ff79c6',
-      cyan: '#8be9fd',
-      white: '#f8f8f2',
-      brightBlack: '#6272a4',
-      brightRed: '#ff6e6e',
-      brightGreen: '#69ff94',
-      brightYellow: '#ffffa5',
-      brightBlue: '#d6acff',
-      brightMagenta: '#ff92df',
-      brightCyan: '#a4ffff',
-      brightWhite: '#ffffff',
-    },
-  },
-  nord: {
-    name: 'Nord',
-    colors: {
-      background: '#2e3440',
-      foreground: '#d8dee9',
-      cursor: '#d8dee9',
-      cursorAccent: '#2e3440',
-      selection: 'rgba(67, 76, 94, 0.75)',
-      black: '#3b4252',
-      red: '#bf616a',
-      green: '#a3be8c',
-      yellow: '#ebcb8b',
-      blue: '#81a1c1',
-      magenta: '#b48ead',
-      cyan: '#88c0d0',
-      white: '#e5e9f0',
-      brightBlack: '#4c566a',
-      brightRed: '#bf616a',
-      brightGreen: '#a3be8c',
-      brightYellow: '#ebcb8b',
-      brightBlue: '#81a1c1',
-      brightMagenta: '#b48ead',
-      brightCyan: '#8fbcbb',
-      brightWhite: '#eceff4',
-    },
-  },
+  'dark-plus': buildTerminalTheme('dark-plus', 'Dark+'),
+  monokai: buildTerminalTheme('monokai', 'Monokai'),
+  dracula: buildTerminalTheme('dracula', 'Dracula'),
+  nord: buildTerminalTheme('nord', 'Nord'),
 };
 
 export const SHELL_OPTIONS: ShellOption[] = [

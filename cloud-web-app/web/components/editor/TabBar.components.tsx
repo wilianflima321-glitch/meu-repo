@@ -221,7 +221,7 @@ export function Tab({
         group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer
         transition-all select-none
         ${isActive
-          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
+          ? 'bg-[image:var(--aethel-editor-tab-active-bg)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(var(--aethel-text-inverse-rgb),0.05)]'
           : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
         }
         ${tab.isPreview ? 'italic' : ''}
