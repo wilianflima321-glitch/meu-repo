@@ -22,7 +22,7 @@ pub struct KernelNaniteMicropolygonComputeRasterizerProbeWireReport {
     pub letter: String,
     pub note: String,
     pub nanite_micropolygon_compute_rasterizer_ue5_parity_ready: bool,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -36,7 +36,7 @@ pub struct KernelNaniteMicropolygonComputeRasterizerSoakWireReport {
     pub letter: String,
     pub note: String,
     pub nanite_micropolygon_compute_rasterizer_ue5_parity_ready: bool,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 fn probe_to_wire(
@@ -86,7 +86,6 @@ fn soak_to_wire(
 #[tauri::command]
 pub fn probe_nanite_micropolygon_compute_rasterizer_cmd() -> KernelNaniteMicropolygonComputeRasterizerProbeWireReport {
     probe_to_wire(kernel_probe())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Soak — Tauri IPC.
@@ -94,7 +93,6 @@ pub fn probe_nanite_micropolygon_compute_rasterizer_cmd() -> KernelNaniteMicropo
 pub fn run_kernel_nanite_micropolygon_compute_rasterizer_soak_cmd(
 ) -> KernelNaniteMicropolygonComputeRasterizerSoakWireReport {
     soak_to_wire(kernel_soak())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 use std::sync::Mutex;

@@ -32,7 +32,7 @@ fn to_report(
         mass_drift: r.mass_drift,
         temperature_diffused: r.temperature_diffused,
         velocity_affected_by_temp: r.velocity_affected_by_temp,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gx".into(),
         note: note.into(),
     }

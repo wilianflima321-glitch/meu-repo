@@ -57,7 +57,7 @@ fn to_report(
         fingerprint: r.fingerprint,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fk".into(),
         note: note.into(),
         quic_network_aaa_ready: r.quic_network_aaa_ready,

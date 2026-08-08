@@ -64,7 +64,7 @@ fn to_report(
         cascade_levels: r.cascade_levels,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gm".into(),
         note: note.into(),
         lumen_radiance_cascades_aaa_ready: r.lumen_radiance_cascades_aaa_ready,

@@ -53,7 +53,7 @@ fn to_report(r: MmapEcsPagerSoakReport, note: impl Into<String>) -> KernelMmapEc
         offset_pos_x: r.offset_pos_x,
         offset_timescale: r.offset_timescale,
         path: r.path,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "di".into(),
         note: note.into(),
         chaos_parity_ready: r.chaos_parity_ready,

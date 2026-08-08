@@ -67,7 +67,7 @@ fn to_report(
         mean_fixture_luminance: r.mean_fixture_luminance,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gk".into(),
         note: note.into(),
         full_forward_plus_ready: r.full_forward_plus_ready,

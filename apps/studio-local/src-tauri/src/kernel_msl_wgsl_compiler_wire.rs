@@ -52,7 +52,7 @@ fn to_report(
         state_mutated: r.state_mutated,
         wgsl_len: r.wgsl_len,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gp".into(),
         note: note.into(),
         full_metal_spirv_compiler_aaa_ready: r.full_metal_spirv_compiler_aaa_ready,

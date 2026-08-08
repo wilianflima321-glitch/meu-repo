@@ -66,7 +66,7 @@ fn to_report(
         velocity_field_delta: r.velocity_field_delta,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "hm".into(),
         note: note.into(),
         chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,

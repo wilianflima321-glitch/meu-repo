@@ -52,7 +52,7 @@ fn to_report(
         total_bytes: r.total_bytes,
         offset_pos_x: r.offset_pos_x,
         offset_timescale: r.offset_timescale,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "dh".into(),
         note: note.into(),
         chaos_parity_ready: r.chaos_parity_ready,

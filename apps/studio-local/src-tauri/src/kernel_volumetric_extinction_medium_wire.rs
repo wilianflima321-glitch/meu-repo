@@ -52,7 +52,7 @@ fn to_report(
         spectral_red_darker_than_blue: r.spectral_red_darker_than_blue,
         eu_density_couple_works: r.eu_density_couple_works,
         audio_damps_with_depth: r.audio_damps_with_depth,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         outputs_finite: r.outputs_finite,
         tau_short: r.tau_short,
         tau_long: r.tau_long,

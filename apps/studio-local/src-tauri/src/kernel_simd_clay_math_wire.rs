@@ -46,7 +46,7 @@ fn to_report(r: SimdClayMathSoakReport, note: impl Into<String>) -> KernelSimdCl
         sdf_batch_match: r.sdf_batch_match,
         entity_count: r.entity_count,
         max_abs_err: r.max_abs_err,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "dj".into(),
         note: note.into(),
         chaos_parity_ready: r.chaos_parity_ready,

@@ -18,7 +18,7 @@ pub struct KernelAnisotropicNeuralMicrofacetsProbeWireReport {
     pub specular_max: f32,
     pub letter: String,
     pub note: String,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -30,7 +30,7 @@ pub struct KernelAnisotropicNeuralMicrofacetsSoakWireReport {
     pub total_ticks: u32,
     pub letter: String,
     pub note: String,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 fn probe_to_wire(
@@ -74,12 +74,10 @@ fn soak_to_wire(
 #[tauri::command]
 pub fn probe_anisotropic_neural_microfacets_cmd() -> KernelAnisotropicNeuralMicrofacetsProbeWireReport {
     probe_to_wire(kernel_probe())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Soak — Tauri IPC.
 #[tauri::command]
 pub fn run_kernel_anisotropic_neural_microfacets_soak_cmd() -> KernelAnisotropicNeuralMicrofacetsSoakWireReport {
     soak_to_wire(kernel_soak())
-        distinct_from_peers_note: "distinct".into(),
 }

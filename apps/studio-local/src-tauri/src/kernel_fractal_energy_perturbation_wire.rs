@@ -58,7 +58,7 @@ fn to_report(
         final_stress: r.final_stress,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ds".into(),
         note: note.into(),
         chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,

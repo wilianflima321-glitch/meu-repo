@@ -72,7 +72,7 @@ fn to_report(
         max_rt60_absorb_delta: r.max_rt60_absorb_delta,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ei".into(),
         note: note.into(),
         metasounds_hrtf_aaa_ready: r.metasounds_hrtf_aaa_ready,

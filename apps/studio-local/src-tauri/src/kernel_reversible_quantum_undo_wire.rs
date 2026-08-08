@@ -55,7 +55,7 @@ fn to_report(
         original_fingerprint: r.original_fingerprint,
         restored_fingerprint: r.restored_fingerprint,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fs".into(),
         note: note.into(),
         editor_undo_aaa_ready: r.editor_undo_aaa_ready,

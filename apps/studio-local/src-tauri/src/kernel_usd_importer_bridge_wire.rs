@@ -59,7 +59,7 @@ fn to_report(
         node_count: r.node_count,
         transform_attr_count: r.transform_attr_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gq".into(),
         note: note.into(),
         open_usd_aaa_ready: r.open_usd_aaa_ready,

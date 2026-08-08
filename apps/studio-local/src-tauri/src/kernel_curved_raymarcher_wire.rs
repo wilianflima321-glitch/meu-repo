@@ -56,7 +56,7 @@ fn to_report(
         final_vector_delta: r.final_vector_delta,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "dt".into(),
         note: note.into(),
         full_gr_geodesic_ready: r.full_gr_geodesic_ready,

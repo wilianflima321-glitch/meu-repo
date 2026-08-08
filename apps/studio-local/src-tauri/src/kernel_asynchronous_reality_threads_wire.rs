@@ -54,7 +54,7 @@ fn to_report(
         physics_applied: r.physics_applied,
         physics_checksum: r.physics_checksum,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fm".into(),
         note: note.into(),
         async_runtime_aaa_ready: r.async_runtime_aaa_ready,

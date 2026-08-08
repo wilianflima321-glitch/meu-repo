@@ -53,7 +53,7 @@ fn to_report(
         max_sharp_smooth_delta: r.max_sharp_smooth_delta,
         max_dihedral_rad: r.max_dihedral_rad,
         sample_count: r.sample_count,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "el".into(),
         note: note.into(),
         instant_meshes_parity_ready: r.instant_meshes_parity_ready,

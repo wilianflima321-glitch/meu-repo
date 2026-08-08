@@ -73,7 +73,7 @@ fn to_report(
         flesh_thin_t: r.flesh_thin_t,
         flesh_thick_t: r.flesh_thick_t,
         sample_count: r.sample_count,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "go".into(),
         note: note.into(),
         spectral_path_tracer_aaa_ready: r.spectral_path_tracer_aaa_ready,

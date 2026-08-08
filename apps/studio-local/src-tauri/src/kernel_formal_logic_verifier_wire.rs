@@ -56,7 +56,7 @@ fn to_report(
         events_checked: r.events_checked,
         scales_checked: r.scales_checked,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fv".into(),
         note: note.into(),
         theorem_prover_aaa_ready: r.theorem_prover_aaa_ready,

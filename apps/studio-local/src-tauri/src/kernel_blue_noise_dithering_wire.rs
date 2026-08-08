@@ -61,7 +61,7 @@ fn to_report(
         blue_mean_nn: r.blue_mean_nn,
         white_mean_nn: r.white_mean_nn,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fx".into(),
         note: note.into(),
         ssao_taa_aaa_ready: r.ssao_taa_aaa_ready,

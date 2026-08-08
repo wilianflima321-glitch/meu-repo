@@ -66,7 +66,7 @@ fn to_report(
         relative_residual: r.relative_residual,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "eh".into(),
         note: note.into(),
         ansys_fea_parity_ready: r.ansys_fea_parity_ready,

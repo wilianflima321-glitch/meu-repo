@@ -61,7 +61,7 @@ fn to_report(
         rest_whitening: r.rest_whitening,
         stretch_whitening: r.stretch_whitening,
         sample_count: r.sample_count,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gs".into(),
         note: note.into(),
         cloth_skin_strain_aaa_ready: r.cloth_skin_strain_aaa_ready,

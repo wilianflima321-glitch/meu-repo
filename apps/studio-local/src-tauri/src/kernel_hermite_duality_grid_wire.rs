@@ -54,7 +54,7 @@ fn to_report(
         max_vertex_delta: r.max_vertex_delta,
         max_residual_improvement: r.max_residual_improvement,
         sample_count: r.sample_count,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ek".into(),
         note: note.into(),
         instant_meshes_parity_ready: r.instant_meshes_parity_ready,

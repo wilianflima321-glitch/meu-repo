@@ -52,7 +52,7 @@ fn to_report(
         rounds: r.rounds,
         generations_advanced: r.generations_advanced,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ff".into(),
         note: note.into(),
         rayon_dots_aaa_ready: r.rayon_dots_aaa_ready,

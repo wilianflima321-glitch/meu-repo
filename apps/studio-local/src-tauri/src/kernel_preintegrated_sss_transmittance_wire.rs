@@ -63,7 +63,7 @@ fn to_report(
         sample_b: r.sample_b,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ge".into(),
         note: note.into(),
         full_skin_sss_aaa_ready: r.full_skin_sss_aaa_ready,

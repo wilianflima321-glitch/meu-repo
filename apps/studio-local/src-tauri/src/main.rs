@@ -366,11 +366,13 @@ fn main() {
                     );
                 }
 
-                // [Onda M] Spawn the Zero-Copy Binary WebSocket Gateway
-                println!("[Aethel] Spawning Zero-Copy WebSocket Gateway on port 4040...");
-                tauri::async_runtime::spawn(async {
-                    aethel_kernel_rust::ipc_zero_copy_ws::start_zero_copy_ws_server(4040).await;
-                });
+                // [Onda M] Zero-Copy Binary WebSocket Gateway — HELD.
+                // `ipc_zero_copy_ws` exists on disk but is not `pub mod` in aethel-kernel-rust
+                // (no tokio_tungstenite/futures_util deps). Do not spawn a missing surface;
+                // Law XI compile honesty — not Onda M feature completion.
+                println!(
+                    "[Aethel] Zero-Copy WS Gateway HELD — ipc_zero_copy_ws not exported/deps missing."
+                );
 
                 println!("[Aethel] Runtime init complete.");
             });

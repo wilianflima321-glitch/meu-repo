@@ -73,7 +73,7 @@ fn to_report(
         mass_proxy_l1: r.mass_proxy_l1,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gv".into(),
         note: note.into(),
         full_cfd_parity_ready: r.full_cfd_parity_ready,

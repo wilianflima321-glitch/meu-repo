@@ -40,7 +40,7 @@ fn to_report(
         max_energy_joules: r.max_energy_joules,
         evidence_kind: r.evidence_kind.clone(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note.clone(),
+        distinct_from_peers_note: "distinct".into(),
         letter: "ha".into(),
         note: note.into(),
         full_radiance_aaa_ready: false,
@@ -61,7 +61,6 @@ pub fn run_kernel_thermal_spectral_gi_soak() -> KernelThermalSpectralGiWireRepor
         "Desktop soak: Planckian locus integration into SoA grid -> deterministic spectral radiance; full_radiance_aaa_ready false; distinct from gt gazeFoveatedReprojectionReady and prior probes"
     };
     to_report(r, note)
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Honesty probe — soak-gated `thermalSpectralGiReady` (letter ha).
@@ -70,19 +69,16 @@ pub fn probe_thermal_spectral_gi() -> KernelThermalSpectralGiWireReport {
         kernel_probe(),
         "Thermal Spectral GI probe (letter ha) — distinct from gazeFoveatedReprojectionReady and prior probes; full_radiance_aaa_ready HELD",
     )
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Tauri IPC — thermal spectral GI honesty.
 #[tauri::command]
 pub fn probe_thermal_spectral_gi_cmd() -> KernelThermalSpectralGiWireReport {
     probe_thermal_spectral_gi()
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Tauri IPC — run thermal spectral GI soak.
 #[tauri::command]
 pub fn run_kernel_thermal_spectral_gi_soak_cmd() -> KernelThermalSpectralGiWireReport {
     run_kernel_thermal_spectral_gi_soak()
-        distinct_from_peers_note: "distinct".into(),
 }

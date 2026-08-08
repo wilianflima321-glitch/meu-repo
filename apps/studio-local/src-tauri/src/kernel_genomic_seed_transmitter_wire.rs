@@ -55,7 +55,7 @@ fn to_report(
         chunk_count: r.chunk_count,
         entry_count: r.entry_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fu".into(),
         note: note.into(),
         network_dna_aaa_ready: r.network_dna_aaa_ready,

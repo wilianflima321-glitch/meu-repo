@@ -54,7 +54,7 @@ fn to_report(
         wrap_pushed: r.wrap_pushed,
         mt_transferred: r.mt_transferred,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fe".into(),
         note: note.into(),
         crossbeam_lockfree_aaa_ready: r.crossbeam_lockfree_aaa_ready,

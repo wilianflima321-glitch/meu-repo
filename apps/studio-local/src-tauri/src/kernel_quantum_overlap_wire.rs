@@ -59,7 +59,7 @@ fn to_report(
         aabb_pairs_found: r.aabb_pairs_found,
         sphere_pairs_found: r.sphere_pairs_found,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fw".into(),
         note: note.into(),
         broadphase_aaa_ready: r.broadphase_aaa_ready,

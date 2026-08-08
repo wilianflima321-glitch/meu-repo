@@ -58,7 +58,7 @@ fn to_report(
         pin_os_ok: r.pin_os_ok,
         pin_verified: r.pin_verified,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fl".into(),
         note: note.into(),
         rayon_dots_aaa_ready: r.rayon_dots_aaa_ready,

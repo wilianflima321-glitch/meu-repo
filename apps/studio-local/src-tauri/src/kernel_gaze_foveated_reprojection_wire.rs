@@ -60,7 +60,7 @@ fn to_report(
         periph_mean: r.periph_mean,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gt".into(),
         note: note.into(),
         vr_foveated_aaa_ready: r.vr_foveated_aaa_ready,

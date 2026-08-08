@@ -50,7 +50,7 @@ fn to_report(
         capacity_eviction_ok: r.capacity_eviction_ok,
         hit_after_put_ok: r.hit_after_put_ok,
         state_mutated: r.state_mutated,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fo".into(),
         note: note.into(),
         cdn_asset_cache_aaa_ready: r.cdn_asset_cache_aaa_ready,

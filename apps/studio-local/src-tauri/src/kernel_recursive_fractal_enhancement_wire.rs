@@ -66,7 +66,7 @@ fn to_report(
         filled_depth0: r.filled_depth0,
         filled_deep: r.filled_deep,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fy".into(),
         note: note.into(),
         nanite_lumen_terrain_aaa_ready: r.nanite_lumen_terrain_aaa_ready,

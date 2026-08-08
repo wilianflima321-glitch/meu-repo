@@ -40,7 +40,7 @@ fn to_report(
         total_occlusion_volume: r.total_occlusion_volume,
         evidence_kind: r.evidence_kind.clone(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note.clone(),
+        distinct_from_peers_note: "distinct".into(),
         letter: "hb".into(),
         note: note.into(),
         full_radiance_aaa_ready: false,
@@ -61,7 +61,6 @@ pub fn run_kernel_semantic_light_leak_soak() -> KernelSemanticLightLeakWireRepor
         "Desktop soak: SoA bounds deterministic occlusion -> ambient light leak factor; full_radiance_aaa_ready false; distinct from ha thermalSpectralGiReady and prior probes"
     };
     to_report(r, note)
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Honesty probe — soak-gated `semanticLightLeakReady` (letter hb).
@@ -70,19 +69,16 @@ pub fn probe_semantic_light_leak() -> KernelSemanticLightLeakWireReport {
         kernel_probe(),
         "Semantic Light Leak probe (letter hb) — distinct from thermalSpectralGiReady and prior probes; full_radiance_aaa_ready HELD",
     )
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Tauri IPC — semantic light leak honesty.
 #[tauri::command]
 pub fn probe_semantic_light_leak_cmd() -> KernelSemanticLightLeakWireReport {
     probe_semantic_light_leak()
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Tauri IPC — run semantic light leak soak.
 #[tauri::command]
 pub fn run_kernel_semantic_light_leak_soak_cmd() -> KernelSemanticLightLeakWireReport {
     run_kernel_semantic_light_leak_soak()
-        distinct_from_peers_note: "distinct".into(),
 }

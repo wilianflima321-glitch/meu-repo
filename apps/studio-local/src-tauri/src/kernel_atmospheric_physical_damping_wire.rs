@@ -81,7 +81,7 @@ fn to_report(
         water_pitch_shift: r.water_pitch_shift,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "hl".into(),
         note: note.into(),
         chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,

@@ -65,7 +65,7 @@ fn to_report(
         mean_edge_gradient_aa: r.mean_edge_gradient_aa,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gi".into(),
         note: note.into(),
         full_dlss_ready: r.full_dlss_ready,

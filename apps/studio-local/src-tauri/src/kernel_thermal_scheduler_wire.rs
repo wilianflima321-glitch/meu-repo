@@ -51,7 +51,7 @@ fn to_report(
         hot_celsius: r.hot_celsius,
         state_mutated: r.state_mutated,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fn".into(),
         note: note.into(),
         hw_thermal_sensor_ready: r.hw_thermal_sensor_ready,

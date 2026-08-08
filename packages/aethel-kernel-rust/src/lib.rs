@@ -115,6 +115,7 @@ pub mod wasm_shared_memory_buffer;
 pub mod wasm_logic_node_compiler;
 pub mod svo_terrain_world_partition;
 pub mod nanite_micropolygon_compute_rasterizer;
+pub mod gpu_culling_compute;
 pub mod rollback_netcode_engine;
 pub mod virtual_shadow_maps_vsm;
 pub mod volumetric_softbody_muscle_pbd;

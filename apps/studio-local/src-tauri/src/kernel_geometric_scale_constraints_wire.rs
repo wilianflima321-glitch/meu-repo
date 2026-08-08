@@ -61,7 +61,7 @@ fn to_report(
         scale_child_after: r.scale_child_after,
         scale_in_range_after: r.scale_in_range_after,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fb".into(),
         note: note.into(),
         ue_constraint_aaa_ready: r.ue_constraint_aaa_ready,

@@ -21,7 +21,7 @@ pub struct KernelVirtualShadowMapsVsmProbeWireReport {
     pub letter: String,
     pub note: String,
     pub virtual_shadow_maps_vsm_ue5_parity_ready: bool,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -37,7 +37,7 @@ pub struct KernelVirtualShadowMapsVsmSoakWireReport {
     pub letter: String,
     pub note: String,
     pub virtual_shadow_maps_vsm_ue5_parity_ready: bool,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 fn probe_to_wire(
@@ -88,7 +88,6 @@ fn soak_to_wire(
 #[tauri::command]
 pub fn probe_virtual_shadow_maps_vsm_cmd() -> KernelVirtualShadowMapsVsmProbeWireReport {
     probe_to_wire(kernel_probe())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Soak — Tauri IPC.
@@ -96,7 +95,6 @@ pub fn probe_virtual_shadow_maps_vsm_cmd() -> KernelVirtualShadowMapsVsmProbeWir
 pub fn run_kernel_virtual_shadow_maps_vsm_soak_cmd(
 ) -> KernelVirtualShadowMapsVsmSoakWireReport {
     soak_to_wire(kernel_soak())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 use std::sync::Mutex;

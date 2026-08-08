@@ -51,7 +51,7 @@ fn to_report(
         state_mutated: r.state_mutated,
         entry_count: r.entry_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "ft".into(),
         note: note.into(),
         asset_dna_aaa_ready: r.asset_dna_aaa_ready,

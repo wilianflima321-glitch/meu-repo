@@ -57,7 +57,7 @@ fn to_report(
         rebase_count: r.rebase_count,
         absolute_origin_x: r.absolute_origin_x,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fc".into(),
         note: note.into(),
         star_citizen_cosmos_aaa_ready: r.star_citizen_cosmos_aaa_ready,

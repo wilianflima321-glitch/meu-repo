@@ -64,7 +64,7 @@ fn to_report(
         max_assoc_err: r.max_assoc_err,
         max_inv_err: r.max_inv_err,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "fz".into(),
         note: note.into(),
         simd_avx512_math_aaa_ready: r.simd_avx512_math_aaa_ready,

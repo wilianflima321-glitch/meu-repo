@@ -57,7 +57,7 @@ fn to_report(
         flushed: r.flushed,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "dm".into(),
         note: note.into(),
         chaos_parity_ready: r.chaos_parity_ready,

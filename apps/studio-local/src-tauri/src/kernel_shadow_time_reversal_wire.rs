@@ -56,7 +56,7 @@ fn to_report(
         final_position_delta: r.final_position_delta,
         evidence_kind: r.evidence_kind.into(),
         evidence_fingerprint: r.evidence_fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "du".into(),
         note: note.into(),
         chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,

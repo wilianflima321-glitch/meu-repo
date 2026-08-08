@@ -48,7 +48,7 @@ fn to_report(r: SdfSculptorSoakReport, note: impl Into<String>) -> KernelSdfScul
         max_mean_abs_delta: r.max_mean_abs_delta,
         max_touched_voxels: r.max_touched_voxels,
         sample_count: r.sample_count,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "em".into(),
         note: note.into(),
         magica_csg_parity_ready: r.magica_csg_parity_ready,

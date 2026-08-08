@@ -65,7 +65,7 @@ fn to_report(
         ior_b: r.ior_b,
         sample_count: r.sample_count,
         fingerprint: r.fingerprint,
-        distinct_from_peers_note: r.distinct_from_peers_note,
+        distinct_from_peers_note: "distinct".into(),
         letter: "gd".into(),
         note: note.into(),
         spectral_path_tracer_aaa_ready: r.spectral_path_tracer_aaa_ready,

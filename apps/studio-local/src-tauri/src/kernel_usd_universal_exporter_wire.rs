@@ -20,7 +20,7 @@ pub struct KernelUsdUniversalExporterProbeWireReport {
     pub buffer_bytes: usize,
     pub letter: String,
     pub note: String,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -32,7 +32,7 @@ pub struct KernelUsdUniversalExporterSoakWireReport {
     pub total_ticks: u32,
     pub letter: String,
     pub note: String,
-        distinct_from_peers_note: "distinct".into(),
+    pub distinct_from_peers_note: String,
 }
 
 fn probe_to_wire(
@@ -76,14 +76,12 @@ fn soak_to_wire(
 #[tauri::command]
 pub fn probe_usd_universal_exporter_cmd() -> KernelUsdUniversalExporterProbeWireReport {
     probe_to_wire(kernel_probe())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Soak — Tauri IPC.
 #[tauri::command]
 pub fn run_kernel_usd_universal_exporter_soak_cmd() -> KernelUsdUniversalExporterSoakWireReport {
     soak_to_wire(kernel_soak())
-        distinct_from_peers_note: "distinct".into(),
 }
 
 /// Export Cmd - Tauri IPC
