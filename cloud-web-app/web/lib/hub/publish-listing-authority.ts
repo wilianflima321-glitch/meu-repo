@@ -300,3 +300,56 @@ export function resolveHubDemoListingLabel(input: {
   if (url) return 'web_demo'
   return 'build_pending'
 }
+
+/** DB row fields persisted at publish (R18) — optional until migrate deploy. */
+export type PublishedGameListingDbFields = {
+  demoPlayUrl?: string | null
+  noWebDemo?: boolean | null
+  demoBundleBytes?: number | null
+  compressionMandatePassed?: boolean | null
+  playUrl?: string | null
+}
+
+/**
+ * Merge Prisma PublishedGame honesty columns with disk listing evidence.
+ * Prefer non-null DB Instant Play / compression stamps; disk fills gaps for
+ * pre-migration rows. Never invents demoPlayUrl or Compression Mandate PASS.
+ */
+export function mergePublishedGameListingHonesty(
+  db: PublishedGameListingDbFields | null | undefined,
+  disk: PublishListingEvidence | null | undefined,
+): {
+  demoPlayUrl: string | null
+  noWebDemo: boolean
+  demoBundleBytes: number | null
+  compressionMandatePassed: boolean
+  playUrl: string | null
+} {
+  const dbDemo =
+    typeof db?.demoPlayUrl === 'string' && db.demoPlayUrl.trim() ? db.demoPlayUrl.trim() : null
+  const diskDemo =
+    typeof disk?.demoPlayUrl === 'string' && disk.demoPlayUrl.trim()
+      ? disk.demoPlayUrl.trim()
+      : null
+  const demoPlayUrl = dbDemo ?? diskDemo
+  const noWebDemo = db?.noWebDemo === true || disk?.noWebDemo === true
+  const dbBytes =
+    typeof db?.demoBundleBytes === 'number' && Number.isFinite(db.demoBundleBytes) && db.demoBundleBytes > 0
+      ? Math.floor(db.demoBundleBytes)
+      : null
+  const diskBytes =
+    typeof disk?.demoBundleBytes === 'number' && Number.isFinite(disk.demoBundleBytes)
+      ? disk.demoBundleBytes
+      : null
+  const demoBundleBytes = dbBytes ?? diskBytes
+  const compressionMandatePassed =
+    db?.compressionMandatePassed === true || disk?.compressionMandatePassed === true
+  const playUrl = demoPlayUrl ?? (typeof db?.playUrl === 'string' && db.playUrl.trim() ? db.playUrl.trim() : null)
+  return {
+    demoPlayUrl: noWebDemo ? null : demoPlayUrl,
+    noWebDemo,
+    demoBundleBytes,
+    compressionMandatePassed: noWebDemo ? false : compressionMandatePassed,
+    playUrl: noWebDemo ? null : playUrl,
+  }
+}

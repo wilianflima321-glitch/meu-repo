@@ -15,8 +15,10 @@ import {
   recordFeedLaunchImpressions,
 } from '@/lib/hub/impression-ledger-authority'
 import {
+  mergePublishedGameListingHonesty,
   readPublishListingEvidenceBatch,
   type PublishListingEvidence,
+  type PublishedGameListingDbFields,
 } from '@/lib/hub/publish-listing-authority'
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -41,13 +43,11 @@ function toCandidate(
     visibility: string
     plays: number
     publishedAt: Date | null
-    playUrl: string | null
-  },
+  } & PublishedGameListingDbFields,
   listing: PublishListingEvidence | null,
   aiModerationStatus: DiscoveryCandidate['aiModerationStatus'] = null,
 ): DiscoveryCandidate {
-  const demoPlayUrl = listing?.demoPlayUrl ?? null
-  const playUrl = demoPlayUrl ?? row.playUrl
+  const honesty = mergePublishedGameListingHonesty(row, listing)
   return {
     gameId: row.slug,
     title: row.title,
@@ -56,10 +56,10 @@ function toCandidate(
     visibility: row.visibility,
     plays: row.plays,
     publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
-    playUrl,
-    // Fail-closed unless publish stamped measured Compression Mandate evidence.
-    compressionMandatePassed: listing?.compressionMandatePassed === true,
-    demoBundleBytes: listing?.demoBundleBytes ?? null,
+    playUrl: honesty.playUrl,
+    // Fail-closed unless publish stamped measured Compression Mandate evidence (DB and/or disk).
+    compressionMandatePassed: honesty.compressionMandatePassed,
+    demoBundleBytes: honesty.demoBundleBytes,
     aiModerationStatus,
   }
 }
@@ -136,6 +136,10 @@ export async function GET(req: NextRequest) {
           plays: true,
           publishedAt: true,
           playUrl: true,
+          demoPlayUrl: true,
+          noWebDemo: true,
+          demoBundleBytes: true,
+          compressionMandatePassed: true,
         },
       })
 
@@ -153,10 +157,13 @@ export async function GET(req: NextRequest) {
       const listingByGame = await readPublishListingEvidenceBatch(rows.map((row) => row.slug))
       candidates = rows
         .filter((row) => {
-          const listing = listingByGame.get(row.slug)
+          const honesty = mergePublishedGameListingHonesty(
+            row,
+            listingByGame.get(row.slug) ?? null,
+          )
           // Instant Play discovery requires stamped HTML demoPlayUrl — zip-only / noWebDemo excluded.
-          if (listing?.noWebDemo === true) return false
-          if (!listing?.demoPlayUrl) return false
+          if (honesty.noWebDemo) return false
+          if (!honesty.demoPlayUrl) return false
           return true
         })
         .map((row) =>

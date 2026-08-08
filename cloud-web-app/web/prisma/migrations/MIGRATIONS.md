@@ -49,6 +49,23 @@ npx prisma migrate dev --name add_collaborator_permissions
 git add prisma/migrations
 ```
 
+### R18 — PublishedGame Instant Play honesty (2026-08-08)
+
+Migration folder: `20260808160000_published_game_demo_play_url`
+
+Adds nullable/boolean honesty columns on `PublishedGame`: `demoPlayUrl`, `noWebDemo`, `demoBundleBytes`, `compressionMandatePassed`.
+
+```bash
+cd cloud-web-app/web
+npx prisma generate
+# Requires DATABASE_URL:
+npx prisma migrate deploy
+# or locally:
+npx prisma migrate dev
+```
+
+Publish route writes these from listing evidence only (fail-closed). Until migrate is applied, Arcade list degrades empty-honest if the select hits missing columns.
+
 ## CI / Production
 
 `scripts/ci-prisma-migrate.sh` is the canonical deployment entry point. It runs

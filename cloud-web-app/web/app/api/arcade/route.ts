@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { apiInternalError } from '@/lib/api-errors'
 import {
+  mergePublishedGameListingHonesty,
   readPublishListingEvidenceBatch,
   resolveHubDemoListingLabel,
 } from '@/lib/hub/publish-listing-authority'
@@ -42,6 +43,11 @@ export async function GET(req: NextRequest) {
       status: string
       plays: number
       publishedAt: Date | null
+      playUrl: string | null
+      demoPlayUrl: string | null
+      noWebDemo: boolean
+      demoBundleBytes: number | null
+      compressionMandatePassed: boolean
       author: { name: string | null } | null
     }> = []
 
@@ -62,24 +68,27 @@ export async function GET(req: NextRequest) {
           status: true,
           plays: true,
           publishedAt: true,
+          playUrl: true,
+          demoPlayUrl: true,
+          noWebDemo: true,
+          demoBundleBytes: true,
+          compressionMandatePassed: true,
           author: { select: { name: true } },
         },
       })
     } catch (dbError) {
-      // Table may not be migrated yet — serve an honest empty arcade.
+      // Table / R18 columns may not be migrated yet — serve an honest empty arcade.
       routeLogger.warn('arcade.list.unavailable', dbError)
       return NextResponse.json({ games: [], available: false })
     }
 
     const listingByGame = await readPublishListingEvidenceBatch(rows.map((row) => row.slug))
     let games: ArcadeListItem[] = rows.map((row) => {
-      const listing = listingByGame.get(row.slug) ?? null
-      const noWebDemo = listing?.noWebDemo === true
-      const demoPlayUrl = listing?.demoPlayUrl ?? null
+      const honesty = mergePublishedGameListingHonesty(row, listingByGame.get(row.slug) ?? null)
       const listingLabel = resolveHubDemoListingLabel({
-        noWebDemo,
-        demoPlayUrl,
-        playable: row.status === 'playable' && Boolean(demoPlayUrl),
+        noWebDemo: honesty.noWebDemo,
+        demoPlayUrl: honesty.demoPlayUrl,
+        playable: row.status === 'playable' && Boolean(honesty.demoPlayUrl),
       })
       return {
         slug: row.slug,
@@ -91,7 +100,7 @@ export async function GET(req: NextRequest) {
         plays: row.plays,
         authorName: row.author?.name ?? 'Aethel creator',
         publishedAt: row.publishedAt ? row.publishedAt.toISOString() : null,
-        noWebDemo,
+        noWebDemo: honesty.noWebDemo,
         listingLabel,
       }
     })

@@ -24,7 +24,14 @@ export function saveToken(value: unknown): void {
 		else if (typeof v.accessToken === 'string') token = v.accessToken;
 	}
 
-	if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
+	if (token) {
+		localStorage.setItem(TOKEN_STORAGE_KEY, token);
+		// F.2 — merge anonymous Arcade playtime spool into authenticated ledger (R18).
+		// Dynamic import avoids auth ↔ playtime circular deps at module load.
+		void import('@/lib/liveops/playtime-auth-handoff')
+			.then((m) => m.schedulePlaytimeAuthHandoff())
+			.catch(() => undefined);
+	}
 }
 
 export function getToken(): string | null {

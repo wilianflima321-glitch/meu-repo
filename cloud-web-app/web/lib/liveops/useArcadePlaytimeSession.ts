@@ -2,6 +2,7 @@
  * F.2 — Arcade runtime playtime emission.
  * Ticks real session deltas into TelemetrySpool and flushes to /api/liveops/playtime.
  * Unauthenticated / offline flushes leave rows unsynced (Law II store-and-forward).
+ * On auth (token present), flushes unsynced guest events into the user ledger.
  * Never invents playtime counters — only wall-clock while the session is active.
  */
 
@@ -9,6 +10,7 @@
 
 import { useEffect, useRef } from 'react'
 
+import { handoffAnonymousPlaytimeAfterAuth } from '@/lib/liveops/playtime-auth-handoff'
 import {
   enqueueSessionPlaytime,
   flushPlaytimeSpool,
@@ -59,6 +61,7 @@ async function emitDelta(input: {
 
 /**
  * While `active`, samples wall-clock playtime for `gameId` and spools/flushes F.2 events.
+ * Also attempts anon→auth handoff whenever a token is present (OAuth return / late login).
  */
 export function useArcadePlaytimeSession(input: {
   gameId: string | null | undefined
@@ -71,6 +74,11 @@ export function useArcadePlaytimeSession(input: {
 
   const sessionIdRef = useRef<string>('')
   const lastSampleRef = useRef<number>(0)
+
+  // Cookie/Bearer may appear after OAuth redirect — attempt guest spool merge once per mount.
+  useEffect(() => {
+    void handoffAnonymousPlaytimeAfterAuth()
+  }, [])
 
   useEffect(() => {
     if (!active) {

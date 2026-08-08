@@ -1501,6 +1501,15 @@ model PublishedGame {
   exportJobId  String?  // ExportJob (platform: web) producing the playable bundle
   playUrl      String?  // public HTML5 play URL when the web build is ready
 
+  /// Instant Play HTML URL — Law XV bake + demo-web-slice ready only (never zip theater).
+  demoPlayUrl              String?
+  /// Creator / catalog: no browser demo → Hub Desktop Exclusive.
+  noWebDemo                Boolean  @default(false)
+  /// Measured demo/cook bundle bytes for Compression Mandate (null = unknown / fail-closed).
+  demoBundleBytes          Int?
+  /// True only when measured ≤150MB evidence was stamped at publish (never invented).
+  compressionMandatePassed Boolean  @default(false)
+
   // pending = published, web build not ready yet (honest "build pending" state)
   // building = export in progress; playable = play URL live; failed; unpublished
   status       String   @default("pending")

@@ -131,6 +131,16 @@ export async function POST(
     // Law XV bake + hosted slice required for demoPlayUrl; Compression Mandate still gates discovery.
     const playable = Boolean(listingEvidence.demoPlayUrl) && !listingEvidence.noWebDemo
 
+    // Persist Instant Play honesty on PublishedGame (R18) — same fail-closed
+    // values as disk listing evidence; never invent demoPlayUrl / Compression PASS.
+    const demoPlayUrl = playable ? listingEvidence.demoPlayUrl : null
+    const demoBundleBytes =
+      typeof listingEvidence.demoBundleBytes === 'number' &&
+      Number.isFinite(listingEvidence.demoBundleBytes) &&
+      listingEvidence.demoBundleBytes > 0
+        ? Math.floor(listingEvidence.demoBundleBytes)
+        : null
+
     const game = await prisma.publishedGame.upsert({
       where: { projectId },
       update: {
@@ -139,7 +149,11 @@ export async function POST(
         tags,
         visibility,
         exportJobId: webExport?.id ?? null,
-        playUrl: playable ? listingEvidence.demoPlayUrl : null,
+        playUrl: demoPlayUrl,
+        demoPlayUrl,
+        noWebDemo: listingEvidence.noWebDemo,
+        demoBundleBytes,
+        compressionMandatePassed: listingEvidence.compressionMandatePassed === true,
         status: playable ? 'playable' : 'pending',
         publishedAt: new Date(),
       },
@@ -152,7 +166,11 @@ export async function POST(
         tags,
         visibility,
         exportJobId: webExport?.id ?? null,
-        playUrl: playable ? listingEvidence.demoPlayUrl : null,
+        playUrl: demoPlayUrl,
+        demoPlayUrl,
+        noWebDemo: listingEvidence.noWebDemo,
+        demoBundleBytes,
+        compressionMandatePassed: listingEvidence.compressionMandatePassed === true,
         status: playable ? 'playable' : 'pending',
         publishedAt: new Date(),
       },
@@ -235,6 +253,10 @@ export async function GET(
         status: true,
         visibility: true,
         playUrl: true,
+        demoPlayUrl: true,
+        noWebDemo: true,
+        demoBundleBytes: true,
+        compressionMandatePassed: true,
         plays: true,
         publishedAt: true,
       },

@@ -14,6 +14,7 @@ import {
 } from '@/lib/hub/discovery-feed-engine'
 import {
   evaluatePublishListingEvidence,
+  mergePublishedGameListingHonesty,
   readPublishListingEvidence,
   resolveHubDemoListingLabel,
   stampPublishListingEvidence,
@@ -29,6 +30,7 @@ import {
   resolveDemoPlayUrlFromExportEvidence,
 } from '@/lib/production/demo-web-slice'
 import { createMemoryTelemetrySpool } from '@/lib/liveops/telemetry-spool'
+import { handoffAnonymousPlaytimeAfterAuth } from '@/lib/liveops/playtime-auth-handoff'
 import {
   enqueueSessionPlaytime,
   flushPlaytimeSpool,
@@ -364,6 +366,103 @@ describe('RTv1 Arcade playtime client emission path', () => {
     expect(result.ok).toBe(false)
     expect(result.marked).toBe(0)
     expect(await spool.peekUnsynced()).toHaveLength(1)
+  })
+
+  it('merges unsynced anonymous playtime into auth ledger on handoff (R18)', async () => {
+    const spool = createMemoryTelemetrySpool(`arcade_handoff_${Date.now()}`)
+    await spool.clearAll()
+    const row = await enqueueSessionPlaytime({
+      spool,
+      gameId: 'guest-then-auth',
+      sessionId: 'sess-guest-2',
+      deltaSeconds: 90,
+    })
+
+    // Guest flush fails closed — spool retained (Law II).
+    const guest = await flushPlaytimeSpool({
+      spool,
+      fetchImpl: async () => new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }),
+    })
+    expect(guest.ok).toBe(false)
+    expect(await spool.peekUnsynced()).toHaveLength(1)
+
+    const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
+      const headers = new Headers(init?.headers)
+      expect(headers.get('Content-Type')).toBe('application/json')
+      const body = JSON.parse(String(init?.body ?? '{}')) as {
+        events?: Array<{ id?: string; gameId?: string; deltaSeconds?: number }>
+      }
+      expect(body.events?.[0]?.id).toBe(row.id)
+      expect(body.events?.[0]?.gameId).toBe('guest-then-auth')
+      expect(body.events?.[0]?.deltaSeconds).toBe(90)
+      return new Response(JSON.stringify({ acceptedIds: [row.id], rejected: 0 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    const handoff = await handoffAnonymousPlaytimeAfterAuth({ spool, fetchImpl })
+    expect(handoff.attempted).toBe(true)
+    expect(handoff.ok).toBe(true)
+    expect(handoff.marked).toBe(1)
+    expect(handoff.reason).toBe('MERGED')
+    expect(await spool.peekUnsynced()).toHaveLength(0)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('R18 PublishedGame listing honesty merge (DB + disk)', () => {
+  it('prefers DB demoPlayUrl / compression stamps and never invents PASS', () => {
+    const fromDb = mergePublishedGameListingHonesty(
+      {
+        demoPlayUrl: 'https://cdn.example/db/index.html',
+        noWebDemo: false,
+        demoBundleBytes: 12_000,
+        compressionMandatePassed: true,
+        playUrl: 'https://cdn.example/db/index.html',
+      },
+      {
+        gameId: 'slug',
+        demoPlayUrl: 'https://cdn.example/disk/index.html',
+        noWebDemo: false,
+        demoBundleBytes: 99_000,
+        compressionMandatePassed: false,
+        evidenceRef: null,
+        stampedAt: new Date().toISOString(),
+        reason: 'disk',
+      },
+    )
+    expect(fromDb.demoPlayUrl).toBe('https://cdn.example/db/index.html')
+    expect(fromDb.compressionMandatePassed).toBe(true)
+    expect(fromDb.demoBundleBytes).toBe(12_000)
+
+    const diskFallback = mergePublishedGameListingHonesty(
+      { demoPlayUrl: null, noWebDemo: false, compressionMandatePassed: false },
+      {
+        gameId: 'legacy',
+        demoPlayUrl: 'https://cdn.example/legacy/index.html',
+        noWebDemo: false,
+        demoBundleBytes: 8_000,
+        compressionMandatePassed: true,
+        evidenceRef: 'exportJob:x',
+        stampedAt: new Date().toISOString(),
+        reason: 'disk',
+      },
+    )
+    expect(diskFallback.demoPlayUrl).toBe('https://cdn.example/legacy/index.html')
+    expect(diskFallback.compressionMandatePassed).toBe(true)
+
+    const desktop = mergePublishedGameListingHonesty(
+      { demoPlayUrl: 'https://cdn.example/should-clear.html', noWebDemo: true },
+      null,
+    )
+    expect(desktop.noWebDemo).toBe(true)
+    expect(desktop.demoPlayUrl).toBeNull()
+    expect(desktop.compressionMandatePassed).toBe(false)
+
+    const empty = mergePublishedGameListingHonesty({}, null)
+    expect(empty.demoPlayUrl).toBeNull()
+    expect(empty.compressionMandatePassed).toBe(false)
   })
 })
 
