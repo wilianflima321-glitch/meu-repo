@@ -7,7 +7,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Play, Pause, Square, Film, Clapperboard, RotateCcw, Clock } from 'lucide-react'
+import { Play, Pause, Square, Clapperboard, RotateCcw, Clock } from 'lucide-react'
 import {
   createSequencerIdePanelScaffold,
   createSequencerPlayController,
@@ -17,6 +17,7 @@ import {
   type CinematicDirectorIntent,
   type SequencerViewportTargets,
 } from '@/lib/sequencer'
+import type { CinematicVisualEvidenceResult } from '@/lib/production/cinematic-visual-evidence'
 
 export type SequencerIdePanelProps = {
   /** Director Mode intent — must rebuild timeline/controller (not cosmetic chrome). */
@@ -51,8 +52,43 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
   const [snapX, setSnapX] = useState<number | null>(null)
   const [snapLight, setSnapLight] = useState<number | null>(null)
   const [eventNames, setEventNames] = useState<string>('')
+  const [evidenceStatus, setEvidenceStatus] = useState<string>('idle')
   const rafRef = useRef<number | null>(null)
   const lastTsRef = useRef<number | null>(null)
+  const evidenceBusyRef = useRef(false)
+
+  const captureShootEvidence = useCallback(() => {
+    if (evidenceBusyRef.current) return
+    evidenceBusyRef.current = true
+    setEvidenceStatus('capturing')
+    void import('@/lib/production/cinematic-visual-evidence')
+      .then(({ attachCinematicVisualEvidenceAfterShoot }) =>
+        attachCinematicVisualEvidenceAfterShoot({
+          intent,
+          timelineId: scaffold.timeline.id,
+          timelineLabel: scaffold.timeline.label,
+          shootDurationMs: scaffold.timeline.durationMs,
+          source: 'sequencer-play-end',
+        }),
+      )
+      .then((result: CinematicVisualEvidenceResult) => {
+        const kind = result.visual.kind
+        const held = result.visual.webmHeld || result.visual.status === 'HELD'
+        setEvidenceStatus(
+          result.attachedImplemented
+            ? held
+              ? `attached:${kind}+webmHeld`
+              : `attached:${kind}`
+            : `held:${kind}`,
+        )
+      })
+      .catch(() => {
+        setEvidenceStatus('held:capture-error')
+      })
+      .finally(() => {
+        evidenceBusyRef.current = false
+      })
+  }, [intent, scaffold.timeline.durationMs, scaffold.timeline.id, scaffold.timeline.label])
 
   const syncFromTick = useCallback(
     (r: ReturnType<typeof controller.tick>) => {
@@ -67,9 +103,13 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
             ? mock.events.map((e) => e.name).slice(-3).join(', ')
             : ''),
       )
-      if (r.ended) setIsPlaying(false)
+      if (r.ended) {
+        setIsPlaying(false)
+        // J.9 / #63 — engine shoot ended → VisualEvidence (WebM or honest PNG+webmHeld)
+        captureShootEvidence()
+      }
     },
-    [controller, mock.events],
+    [controller, mock.events, captureShootEvidence],
   )
 
   useEffect(() => {
@@ -143,6 +183,7 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
       data-director-intent={intent}
       data-timeline-id={scaffold.timeline.id}
       data-sequencer-play-ready={playReady ? 'true' : 'false'}
+      data-cinematic-evidence={evidenceStatus}
     >
       <header className="space-y-1 border-b border-[var(--aethel-glass-border)] pb-3">
         <h2 className="text-sm font-bold text-[var(--aethel-text-primary)] flex items-center gap-2 font-mono">
@@ -241,10 +282,14 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
           <dt className="text-[var(--aethel-text-secondary)]">Shoot backend</dt>
           <dd>{director.shootBackend}</dd>
         </div>
+        <div>
+          <dt className="text-[var(--aethel-text-secondary)]">VisualEvidence</dt>
+          <dd data-testid="sequencer-cinematic-evidence">{evidenceStatus}</dd>
+        </div>
       </dl>
 
       <p className="mt-auto text-[10px] text-[var(--aethel-text-tertiary)] font-mono">
-        Cinematic Director Mode active. Playhead controls synchronized with Viewport camera &amp; lighting rigs.
+        Cinematic Director #63 — play-end captures WebM/PNG into the ledger (Veo demoted; final footage held).
       </p>
     </div>
   )

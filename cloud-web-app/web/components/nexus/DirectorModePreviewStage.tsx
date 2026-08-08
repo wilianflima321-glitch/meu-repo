@@ -44,7 +44,16 @@ export function DirectorModePreviewStage({
 }) {
   return (
     <div className="relative h-full w-full bg-[var(--aethel-bg-base)]" data-director-preview-stage="true">
-      <Canvas camera={{ position: [0, 1.6, 6], fov: 50 }} dpr={[1, 1.5]} shadows>
+      <Canvas
+        camera={{ position: [0, 1.6, 6], fov: 50 }}
+        dpr={[1, 1.5]}
+        shadows
+        onCreated={({ gl }) => {
+          // J.9 / #63 — tag previz canvas so cinematic VisualEvidence auto-capture can find it.
+          gl.domElement.setAttribute('data-aethel-viewport', 'true')
+          gl.domElement.setAttribute('data-engine-viewport', 'director-previz')
+        }}
+      >
         <color attach="background" args={[0x05070c]} />
         <ambientLight intensity={0.35} />
         <DirectorCameraLightBridge onReady={onTargetsReady} />

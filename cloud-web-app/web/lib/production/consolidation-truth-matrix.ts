@@ -295,12 +295,12 @@ export function buildConsolidationTruthMatrix(
     },
     {
       id: 'film.director.sequencer',
-      claim: 'DirectorMode → SequencerIdePanel intent wire; final footage / GPU soak HELD',
+      claim: 'DirectorMode → SequencerIdePanel + J.9 cinematic VisualEvidence previz; final footage / GPU soak HELD',
       path: 'components/nexus/DirectorMode.tsx',
       status: 'PARTIAL',
       marketingAllowed: false,
-      lastEvidence: 'intent prop → planCinematicDirectorShoot;finalFootage=HELD',
-      gatedNames: ['final offline render', 'Lumen'],
+      lastEvidence: 'play-end→cinematic-visual-evidence;engine_sequencer;veoDemoted;finalFootage=HELD',
+      gatedNames: ['final offline render', 'Lumen', 'Veo default'],
     },
     (() => {
       const heroBench = buildMasterUxHeroPanelBench()

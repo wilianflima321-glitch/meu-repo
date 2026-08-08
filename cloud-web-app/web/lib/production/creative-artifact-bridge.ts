@@ -220,6 +220,31 @@ export async function dispatchCreativeArtifact(input: {
       actor: 'CreativeCostGuard',
     })
 
+    // J.9 / #63 — cinematic-beat jobs attach engine VisualEvidence (never empty success; Veo demoted).
+    if (request.domain === 'cinematic-beat') {
+      const { attachCinematicVisualEvidenceAfterShoot } = await import(
+        '@/lib/production/cinematic-visual-evidence'
+      )
+      const cinematic = await attachCinematicVisualEvidenceAfterShoot({
+        intent: 'custom',
+        timelineId: `fusion-cinematic:${dispatched.artifactId}`,
+        timelineLabel: request.prompt.slice(0, 64),
+        source: 'fusion-cinematic-job',
+        jobId: dispatched.artifactId,
+        afterPatch: JSON.stringify({
+          artifactId: dispatched.artifactId,
+          domain: request.domain,
+          prompt: request.prompt.slice(0, 200),
+        }),
+        ledger,
+      })
+      if (cinematic.ledger) ledger = cinematic.ledger
+      if (cinematic.visual.status === 'IMPLEMENTED' && cinematic.visual.refs.length === 0) {
+        // Law XVI: refuse success theater if capture claimed IMPLEMENTED with empty refs
+        log.warn('cinematic_beat_empty_visual_refused', { artifactId: dispatched.artifactId })
+      }
+    }
+
     log.info('bridge_dispatch_ok', {
       domain: request.domain,
       artifactId: dispatched.artifactId,

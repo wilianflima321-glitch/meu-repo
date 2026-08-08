@@ -2,6 +2,7 @@
  * Letter cg — Cinematic Director #63 bridge types.
  * Fusion directs set/camera; engine/GPU shoots — Veo demoted.
  * Spec align only; final footage / Director Mode GPU soak HELD.
+ * J.9 evidence attach lives in `cinematic-visual-evidence.ts` (avoids import cycles).
  */
 
 import type { SequencerTimeline } from '@/lib/sequencer/core/types'
