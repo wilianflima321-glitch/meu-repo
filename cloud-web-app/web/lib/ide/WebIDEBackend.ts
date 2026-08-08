@@ -19,6 +19,7 @@ import type {
   IDEFileTreeNode,
   IDERenderJob,
   IDERenderJobStatus,
+  IDESceneColorUpdateResult,
   IDESceneNode,
   IDESceneNodeTransformPatch,
   IDETimelineAuthorResult,
@@ -58,6 +59,10 @@ import {
   type TimelineAuthorResult,
 } from '@/lib/sequencer/timeline-authoring';
 import { bindingToIDETimelineSnapshot } from '@/lib/sequencer/timeline-ui-adapter';
+import {
+  isValidSceneColorLiteral,
+  viewportObjectSupportsLiveColor,
+} from '@/lib/ide/scene-color-support';
 
 const log = createComponentLogger('WebIDEBackend');
 
@@ -105,6 +110,24 @@ class WebSceneService implements ISceneService {
 
   updateTransform(id: string, patch: IDESceneNodeTransformPatch): void {
     useViewportStore.getState().handleObjectTransformChange(id, patch);
+  }
+
+  setColor(id: string, color: string): IDESceneColorUpdateResult {
+    if (!isValidSceneColorLiteral(color)) {
+      return { ok: false, reason: 'invalid_color' };
+    }
+    const { objects } = useViewportStore.getState();
+    const obj = objects.find((entry) => entry.id === id);
+    if (!obj) return { ok: false, reason: 'missing_node' };
+    if (obj.locked) return { ok: false, reason: 'locked' };
+    if (!viewportObjectSupportsLiveColor(obj)) {
+      return { ok: false, reason: 'no_color_support' };
+    }
+    const next = color.trim();
+    useViewportStore.getState().setObjects((prev) =>
+      prev.map((entry) => (entry.id === id ? { ...entry, color: next } : entry)),
+    );
+    return { ok: true };
   }
 
   subscribe(listener: () => void): () => void {

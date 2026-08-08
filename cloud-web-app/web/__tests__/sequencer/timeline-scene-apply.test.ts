@@ -3,18 +3,26 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import type { ISceneService, IDESceneNode } from '../../../packages/ide-ui/backend/types'
+import type {
+  ISceneService,
+  IDESceneColorUpdateResult,
+  IDESceneNode,
+} from '../../../packages/ide-ui/backend/types'
 import {
   addAuthoringKeyframe,
-  addAuthoringLane,
   createAuthoringTimelineShell,
 } from '@/lib/sequencer/timeline-authoring'
 import {
   resolveTrackTargetNodeId,
   sampleTimelineSceneAtTime,
+  scaleCssColorByIntensity,
 } from '@/lib/sequencer/timeline-scene-apply'
 import { applyTimelineScrubToScene } from '@/lib/sequencer/timeline-scene-viewport-wire'
 import { buildDemoCutsceneTimeline } from '@/lib/sequencer/sequencer-apply-deepen'
+import {
+  isValidSceneColorLiteral,
+  viewportObjectSupportsLiveColor,
+} from '@/lib/ide/scene-color-support'
 
 function makeScene(nodes: IDESceneNode[]): ISceneService & { nodes: IDESceneNode[] } {
   const state = { nodes: nodes.map((n) => ({ ...n })) }
@@ -38,6 +46,21 @@ function makeScene(nodes: IDESceneNode[]): ISceneService & { nodes: IDESceneNode
         n.id === id && !n.locked ? { ...n, ...patch } : n,
       )
     },
+    setColor: (id, color): IDESceneColorUpdateResult => {
+      const node = state.nodes.find((n) => n.id === id)
+      if (!node) return { ok: false, reason: 'missing_node' }
+      if (node.locked) return { ok: false, reason: 'locked' }
+      if (!viewportObjectSupportsLiveColor(node)) {
+        return { ok: false, reason: 'no_color_support' }
+      }
+      if (!isValidSceneColorLiteral(color)) {
+        return { ok: false, reason: 'invalid_color' }
+      }
+      state.nodes = state.nodes.map((n) =>
+        n.id === id ? { ...n, color: color.trim() } : n,
+      )
+      return { ok: true }
+    },
     subscribe: () => () => undefined,
   }
 }
@@ -53,21 +76,42 @@ function seedNode(id: string, overrides?: Partial<IDESceneNode>): IDESceneNode {
     position: [0, 0, 0],
     rotation: [0, 0, 0],
     scale: [1, 1, 1],
+    color: '#3366cc',
     ...overrides,
   }
 }
 
+describe('scene-color-support', () => {
+  it('allows primitive mesh/light/camera color paint', () => {
+    expect(viewportObjectSupportsLiveColor({ type: 'mesh' })).toBe(true)
+    expect(viewportObjectSupportsLiveColor({ type: 'light' })).toBe(true)
+    expect(viewportObjectSupportsLiveColor({ type: 'camera' })).toBe(true)
+  })
+
+  it('fail-closed for imported meshUrl and PBR textureMaps', () => {
+    expect(
+      viewportObjectSupportsLiveColor({
+        type: 'mesh',
+        meshUrl: 'https://cdn.example/model.glb',
+        asset: { format: 'glb', viewerStatus: 'ready' },
+      }),
+    ).toBe(false)
+    expect(
+      viewportObjectSupportsLiveColor({
+        type: 'mesh',
+        textureMaps: { albedo: 'data:image/png;base64,xx' },
+      }),
+    ).toBe(false)
+  })
+})
+
 describe('timeline-scene-apply sampling', () => {
   it('fail-closed skips tracks without documented target node id', () => {
     let tl = createAuthoringTimelineShell('proj-scrub')
-    const lane = addAuthoringLane(tl, 'position')
+    const lane = addAuthoringKeyframe(tl, { lane: 'position', timeSec: 0, value: 0 })
     expect(lane.ok).toBe(true)
     if (!lane.ok) return
     tl = lane.timeline
-    const kf = addAuthoringKeyframe(tl, { lane: 'position', timeSec: 0, value: 0 })
-    expect(kf.ok).toBe(true)
-    if (!kf.ok) return
-    tl = kf.timeline
     const kf2 = addAuthoringKeyframe(tl, { lane: 'position', timeSec: 2, value: 10 })
     expect(kf2.ok).toBe(true)
     if (!kf2.ok) return
@@ -152,8 +196,8 @@ describe('timeline-scene-apply sampling', () => {
     expect(end.patches.find((p) => p.lane === 'visibility')?.visible).toBe(false)
   })
 
-  it('marks material and event as HELD (no scene patches)', () => {
-    let tl = createAuthoringTimelineShell('proj-held')
+  it('samples material intensity into color patches (event stays HELD)', () => {
+    let tl = createAuthoringTimelineShell('proj-material')
     let r = addAuthoringKeyframe(tl, {
       lane: 'material',
       timeSec: 0,
@@ -182,10 +226,24 @@ describe('timeline-scene-apply sampling', () => {
     if (!r.ok) return
     tl = r.timeline
 
-    const snap = sampleTimelineSceneAtTime(tl, 500, 0)
-    expect(snap.patches).toEqual([])
-    expect(snap.held.some((h) => h.lane === 'material' && h.reason === 'material_held')).toBe(true)
+    const snap = sampleTimelineSceneAtTime(
+      tl,
+      500,
+      0,
+      { 'mesh-a': { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1], color: '#ff0000' } },
+    )
+    const mat = snap.patches.find((p) => p.lane === 'material')
+    expect(mat?.nodeId).toBe('mesh-a')
+    expect(mat?.intensity).toBeCloseTo(0.6, 5)
+    expect(mat?.color).toBe(scaleCssColorByIntensity('#ff0000', mat!.intensity!))
     expect(snap.held.some((h) => h.lane === 'event' && h.eventName)).toBe(true)
+    expect(snap.held.some((h) => (h as { lane: string }).lane === 'material')).toBe(false)
+  })
+
+  it('scaleCssColorByIntensity darkens baseline at intensity 0.5', () => {
+    expect(scaleCssColorByIntensity('#3366cc', 0.5)).toBe('#1a3366')
+    expect(scaleCssColorByIntensity('#ffffff', 0)).toBe('#000000')
+    expect(scaleCssColorByIntensity('#abcdef', 1)).toBe('#abcdef')
   })
 })
 
@@ -250,10 +308,75 @@ describe('timeline-scene-viewport-wire apply', () => {
     expect(live?.visible).toBe(false)
   })
 
+  it('applies material intensity via setColor to live scene nodes', () => {
+    let tl = createAuthoringTimelineShell('proj-color')
+    const nodeId = 'cube-color'
+    let r = addAuthoringKeyframe(tl, {
+      lane: 'material',
+      timeSec: 0,
+      value: 1,
+      targetNodeId: nodeId,
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    tl = r.timeline
+    r = addAuthoringKeyframe(tl, {
+      lane: 'material',
+      timeSec: 1,
+      value: 0.25,
+      targetNodeId: nodeId,
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    tl = r.timeline
+
+    const scene = makeScene([seedNode(nodeId, { color: '#80ff00' })])
+    const result = applyTimelineScrubToScene({
+      timeline: tl,
+      timeSec: 1,
+      scene,
+      isDemo: false,
+    })
+    expect(result.applied).toBe(true)
+    expect(result.colorsApplied).toBe(1)
+    expect(result.heldMaterial).toBe(0)
+    expect(result.colorRejected).toBe(0)
+    const live = scene.getNodes().find((n) => n.id === nodeId)
+    expect(live?.color).toBe(scaleCssColorByIntensity('#80ff00', 0.25))
+  })
+
+  it('fail-closed material when node has no live color channel', () => {
+    let tl = createAuthoringTimelineShell('proj-nocolor')
+    const nodeId = 'imported-mesh'
+    const r = addAuthoringKeyframe(tl, {
+      lane: 'material',
+      timeSec: 0,
+      value: 0.5,
+      targetNodeId: nodeId,
+    })
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+
+    const scene = makeScene([seedNode(nodeId, { type: 'group', color: undefined })])
+    // Override setColor path: group has no color support via probe on node type.
+    const before = scene.getNodes()[0]!.color
+    const result = applyTimelineScrubToScene({
+      timeline: r.timeline,
+      timeSec: 0,
+      scene,
+      isDemo: false,
+    })
+    expect(result.colorsApplied).toBe(0)
+    expect(result.colorRejected).toBe(1)
+    expect(result.noColorSupportNodes).toContain(nodeId)
+    expect(scene.getNodes()[0]!.color).toBe(before)
+  })
+
   it('demoMode must not mutate the real scene', () => {
     const demo = buildDemoCutsceneTimeline()
-    const scene = makeScene([seedNode('should-stay', { position: [3, 3, 3] })])
-    const before = scene.getNodes()[0]!.position.slice() as [number, number, number]
+    const scene = makeScene([seedNode('should-stay', { position: [3, 3, 3], color: '#112233' })])
+    const beforePos = scene.getNodes()[0]!.position.slice() as [number, number, number]
+    const beforeColor = scene.getNodes()[0]!.color
     const result = applyTimelineScrubToScene({
       timeline: demo,
       timeSec: 1.5,
@@ -262,7 +385,9 @@ describe('timeline-scene-viewport-wire apply', () => {
     })
     expect(result.demoBlocked).toBe(true)
     expect(result.applied).toBe(false)
-    expect(scene.getNodes()[0]!.position).toEqual(before)
+    expect(result.colorsApplied).toBe(0)
+    expect(scene.getNodes()[0]!.position).toEqual(beforePos)
+    expect(scene.getNodes()[0]!.color).toBe(beforeColor)
   })
 
   it('fail-closed when bound node id is absent from the scene', () => {

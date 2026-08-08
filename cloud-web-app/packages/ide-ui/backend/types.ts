@@ -32,6 +32,15 @@ export interface IDESceneNode {
 export type IDESceneNodeTransformPatch = Partial<Pick<IDESceneNode, 'position' | 'rotation' | 'scale'>>
 
 /**
+ * Result of `ISceneService.setColor`. Fail-closed when the node is absent,
+ * locked, or its live R3F representation does not paint `color` (e.g. imported
+ * GLTF meshUrl path, or PBR textureMaps that force albedo white).
+ */
+export type IDESceneColorUpdateResult =
+  | { ok: true }
+  | { ok: false; reason: 'missing_node' | 'locked' | 'no_color_support' | 'invalid_color' }
+
+/**
  * Read/write access to the live engine scene graph backing the current
  * viewport. This is intentionally flat (no nested `children` requirement)
  * because the current engine viewport store is a flat object list; backends
@@ -45,6 +54,12 @@ export interface ISceneService {
   setVisible(id: string, visible: boolean): void
   setLocked(id: string, locked: boolean): void
   updateTransform(id: string, patch: IDESceneNodeTransformPatch): void
+  /**
+   * Mutate the node's base color when the live viewport paints `object.color`
+   * (mesh/light/camera primitives). Returns fail-closed reasons — never invents
+   * a color channel on unsupported node types.
+   */
+  setColor(id: string, color: string): IDESceneColorUpdateResult
   /** Subscribe to any scene mutation (nodes or selection). Returns an unsubscribe fn. */
   subscribe(listener: () => void): () => void
 }

@@ -102,11 +102,18 @@ export default function CanvasViewportSurface({
         isDemo: false,
       });
       prevPlayheadRef.current = timeSec;
-      if (result.skippedMissingNode > 0 || result.missingSceneNodes.length > 0) {
+      if (
+        result.skippedMissingNode > 0 ||
+        result.missingSceneNodes.length > 0 ||
+        result.colorRejected > 0 ||
+        result.noColorSupportNodes.length > 0
+      ) {
         log.debug('timeline_scrub_fail_closed', {
           skippedMissingNode: result.skippedMissingNode,
           missingSceneNodes: result.missingSceneNodes,
-          heldMaterial: result.heldMaterial,
+          colorsApplied: result.colorsApplied,
+          colorRejected: result.colorRejected,
+          noColorSupportNodes: result.noColorSupportNodes,
           heldEvent: result.heldEvent,
         });
       }

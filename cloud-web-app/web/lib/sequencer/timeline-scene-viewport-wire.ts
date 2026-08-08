@@ -8,6 +8,7 @@ import type { SequencerTimeline } from '@/lib/sequencer/core/types'
 import {
   sampleTimelineSceneAtTime,
   type TimelineSceneApplySnapshot,
+  type TimelineSceneNodeBaseline,
   type TimelineSceneVec3,
   TIMELINE_SCENE_APPLY_WIRED,
 } from '@/lib/sequencer/timeline-scene-apply'
@@ -22,28 +23,30 @@ export type TimelineSceneViewportApplyResult = {
   nodesUpdated: number
   transformsApplied: number
   visibilityApplied: number
-  heldMaterial: number
+  colorsApplied: number
+  /** Material patches rejected (missing node / no live color channel / locked). */
+  colorRejected: number
+  /** Event lane still HELD — no cue bus. */
   heldEvent: number
+  /** @deprecated Prefer colorRejected; kept 0 when material applies (compat). */
+  heldMaterial: number
   skippedMissingNode: number
   skippedOther: number
   snapshot: TimelineSceneApplySnapshot
   /** Node ids referenced in patches but absent from the live scene. */
   missingSceneNodes: string[]
+  /** Nodes that do not paint color in the live R3F path. */
+  noColorSupportNodes: string[]
 }
 
-function baselinesFromScene(scene: ISceneService): Record<
-  string,
-  { position: TimelineSceneVec3; rotation: TimelineSceneVec3; scale: TimelineSceneVec3 }
-> {
-  const out: Record<
-    string,
-    { position: TimelineSceneVec3; rotation: TimelineSceneVec3; scale: TimelineSceneVec3 }
-  > = {}
+function baselinesFromScene(scene: ISceneService): Record<string, TimelineSceneNodeBaseline> {
+  const out: Record<string, TimelineSceneNodeBaseline> = {}
   for (const node of scene.getNodes()) {
     out[node.id] = {
       position: [...node.position] as TimelineSceneVec3,
       rotation: [...node.rotation] as TimelineSceneVec3,
       scale: [...node.scale] as TimelineSceneVec3,
+      color: node.color,
     }
   }
   return out
@@ -54,8 +57,8 @@ function nodeExists(scene: ISceneService, nodeId: string): IDESceneNode | undefi
 }
 
 /**
- * Sample authored timeline at timeSec and push transforms/visibility into the live scene.
- * Fail-closed: demo binds, missing node ids, and absent scene nodes do not invent targets.
+ * Sample authored timeline at timeSec and push transforms/visibility/color into the live scene.
+ * Fail-closed: demo binds, missing node ids, and absent/unsupported color channels do not invent targets.
  */
 export function applyTimelineScrubToScene(input: {
   timeline: SequencerTimeline
@@ -77,12 +80,15 @@ export function applyTimelineScrubToScene(input: {
       nodesUpdated: 0,
       transformsApplied: 0,
       visibilityApplied: 0,
-      heldMaterial: snapshot.held.filter((h) => h.lane === 'material').length,
+      colorsApplied: 0,
+      colorRejected: 0,
+      heldMaterial: 0,
       heldEvent: snapshot.held.filter((h) => h.lane === 'event').length,
       skippedMissingNode: snapshot.skipped.filter((s) => s.reason === 'missing_node_id').length,
       skippedOther: snapshot.skipped.filter((s) => s.reason !== 'missing_node_id').length,
       snapshot,
       missingSceneNodes: [],
+      noColorSupportNodes: [],
     }
   }
 
@@ -91,16 +97,23 @@ export function applyTimelineScrubToScene(input: {
 
   let transformsApplied = 0
   let visibilityApplied = 0
+  let colorsApplied = 0
+  let colorRejected = 0
   const touched = new Set<string>()
   const missingSceneNodes: string[] = []
+  const noColorSupportNodes: string[] = []
 
   for (const patch of snapshot.patches) {
     const live = nodeExists(input.scene, patch.nodeId)
     if (!live) {
       missingSceneNodes.push(patch.nodeId)
+      if (patch.color != null) colorRejected += 1
       continue
     }
-    if (live.locked) continue
+    if (live.locked) {
+      if (patch.color != null) colorRejected += 1
+      continue
+    }
 
     if (patch.position || patch.rotation || patch.scale) {
       input.scene.updateTransform(patch.nodeId, {
@@ -116,6 +129,20 @@ export function applyTimelineScrubToScene(input: {
       visibilityApplied += 1
       touched.add(patch.nodeId)
     }
+    if (patch.color != null) {
+      const result = input.scene.setColor(patch.nodeId, patch.color)
+      if (result.ok) {
+        colorsApplied += 1
+        touched.add(patch.nodeId)
+      } else {
+        colorRejected += 1
+        if (result.reason === 'missing_node') {
+          missingSceneNodes.push(patch.nodeId)
+        } else if (result.reason === 'no_color_support') {
+          noColorSupportNodes.push(patch.nodeId)
+        }
+      }
+    }
   }
 
   return {
@@ -125,11 +152,14 @@ export function applyTimelineScrubToScene(input: {
     nodesUpdated: touched.size,
     transformsApplied,
     visibilityApplied,
-    heldMaterial: snapshot.held.filter((h) => h.lane === 'material').length,
+    colorsApplied,
+    colorRejected,
+    heldMaterial: 0,
     heldEvent: snapshot.held.filter((h) => h.lane === 'event').length,
     skippedMissingNode: snapshot.skipped.filter((s) => s.reason === 'missing_node_id').length,
     skippedOther: snapshot.skipped.filter((s) => s.reason !== 'missing_node_id').length,
     snapshot,
     missingSceneNodes: [...new Set(missingSceneNodes)],
+    noColorSupportNodes: [...new Set(noColorSupportNodes)],
   }
 }

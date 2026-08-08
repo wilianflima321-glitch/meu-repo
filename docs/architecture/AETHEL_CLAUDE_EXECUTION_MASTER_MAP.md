@@ -1255,6 +1255,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-08 | 1.4l | **Timeline material scrub UNHELD:** `ISceneService.setColor` + WebIDEBackend → Zustand → R3F `object.color` (ViewportSceneObjectMesh). Event lane still HELD (no cue bus). Hub checkout HELD. |
 | 2026-08-08 | 1.4k | **OPEN refresh + Timeline channel:** Remaining OPEN pruned (R2/R3/R5/R18 closed); CW4 DONE in Forge L note; Timeline keyframe move + visibility.opacity channel; material/event HELD (no ISceneService contracts). Hub checkout HELD. |
 | 2026-08-08 | 1.4j | **Authority sync vs Progress:** §0b AI-v1-c/e + Forge L note (L.5 Rust-via-L.1 DONE — remove “blocks `.rs`” overclaim); Hub-RTv1-b Instant Play+I.2; FinOps HELD list corrected; P2b cleared. Next OPEN = Progress Remaining OPEN table |
 | 2026-07-07 | 1.0 | Full catalog (43 arch MDs), Block 6 decomposition, session schedule |
