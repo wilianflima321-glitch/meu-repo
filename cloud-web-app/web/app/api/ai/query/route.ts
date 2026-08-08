@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { aiService } from '@/lib/ai-service';
 import { prisma } from '@/lib/db';
-import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits';
+import {
+  type AIQuotaReservation,
+  cancelAIQuotaReservation,
+  checkModelAccess,
+  getPlanLimits,
+  reserveAIQuota,
+  settleAIQuotaReservation,
+} from '@/lib/plan-limits';
 import { AITraceSummary, createAITraceId } from '@/lib/ai-internal-trace';
 import { persistAITrace } from '@/lib/ai-trace-store';
 import { createComponentLogger } from '@/lib/observability/logger';
@@ -26,6 +33,7 @@ const routeLogger = createComponentLogger('api.ai.query');
  * Block 6E: BYOK is header-only (never User.byokKey).
  */
 export async function POST(req: NextRequest) {
+  let reservation: AIQuotaReservation | null = null;
   try {
     const user = requireAuth(req);
     const rateLimited = enforceAiCoreRateLimit({
@@ -74,22 +82,26 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isByok) {
-      const quotaCheck = await checkAIQuota(user.userId, estimatedTokens);
-      if (!quotaCheck.allowed) {
+      // P2f #1: reserve BEFORE dispatch — closes the TOCTOU race in the
+      // previous check-then-record checkAIQuota pattern.
+      const reserved = await reserveAIQuota(user.userId, estimatedTokens);
+      if (!reserved.allowed) {
         return NextResponse.json(
           {
-            error: quotaCheck.code,
-            message: quotaCheck.reason,
+            error: reserved.code,
+            message: reserved.reason,
             upgradeUrl: '/pricing',
           },
           { status: 429 },
         );
       }
+      reservation = reserved.reservation;
     }
 
     if (model && !isByok) {
       const modelCheck = await checkModelAccess(user.userId, model);
       if (!modelCheck.allowed) {
+        if (reservation) cancelAIQuotaReservation(reservation);
         return NextResponse.json(
           {
             error: modelCheck.code,
@@ -116,6 +128,7 @@ export async function POST(req: NextRequest) {
 
     const availableProviders = aiService.getAvailableProviders();
     if (availableProviders.length === 0 && !byokKey) {
+      if (reservation) cancelAIQuotaReservation(reservation);
       return NextResponse.json(
         {
           error: 'NO_AI_PROVIDERS',
@@ -135,11 +148,13 @@ export async function POST(req: NextRequest) {
       apiKeyOverride: byokKey,
     });
 
-    if (!isByok) {
+    if (reservation) {
       try {
-        await recordTokenUsage(user.userId, response.tokensUsed);
+        await settleAIQuotaReservation(reservation, response.tokensUsed);
       } catch (dbError) {
         routeLogger.warn('[AI Query] Failed to record usage', dbError);
+      } finally {
+        reservation = null;
       }
     }
 
@@ -159,7 +174,6 @@ export async function POST(req: NextRequest) {
         provider: response.provider,
         model: response.model,
         tokensUsed: response.tokensUsed,
-        billingMode: isByok ? 'byok' : 'platform',
       },
     };
 
@@ -173,6 +187,7 @@ export async function POST(req: NextRequest) {
       billingMode: isByok ? 'byok' : 'platform',
     });
   } catch (error) {
+    if (reservation) cancelAIQuotaReservation(reservation);
     routeLogger.error('AI Query error', error);
     return NextResponse.json(
       {

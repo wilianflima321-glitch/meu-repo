@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
 import { aiService } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
-import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
+import {
+  type AIQuotaReservation,
+  cancelAIQuotaReservation,
+  checkModelAccess,
+  getPlanLimits,
+  reserveAIQuota,
+  settleAIQuotaReservation,
+} from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
 import {
@@ -48,6 +55,7 @@ function normalizeCompletion(text: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  let reservation: AIQuotaReservation | null = null
   try {
     const user = requireAuth(req)
     const rateLimited = enforceAiCoreRateLimit({
@@ -96,15 +104,19 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isByok) {
-      const quotaCheck = await checkAIQuota(user.userId, estimatedTokens)
-      if (!quotaCheck.allowed) {
-        return NextResponse.json({ error: quotaCheck.code, message: quotaCheck.reason }, { status: 429 })
+      // P2f #1: reserve BEFORE dispatch — closes the TOCTOU race in the
+      // previous check-then-record checkAIQuota pattern.
+      const reserved = await reserveAIQuota(user.userId, estimatedTokens)
+      if (!reserved.allowed) {
+        return NextResponse.json({ error: reserved.code, message: reserved.reason }, { status: 429 })
       }
+      reservation = reserved.reservation
     }
 
     if (model && !isByok) {
       const modelCheck = await checkModelAccess(user.userId, model)
       if (!modelCheck.allowed) {
+        if (reservation) cancelAIQuotaReservation(reservation)
         return NextResponse.json({ error: modelCheck.code, message: modelCheck.reason }, { status: 403 })
       }
     }
@@ -128,13 +140,17 @@ export async function POST(req: NextRequest) {
         message: 'AI provider not configured. Configure a real provider to run inline completion.',
         missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
       })
-      if (blocked) return blocked
+      if (blocked) {
+        if (reservation) cancelAIQuotaReservation(reservation)
+        return blocked
+      }
       if (isAiDemoModeEnabled()) {
         const demoUsage = await consumeAiDemoUsage({
           userId: user.userId,
           route: '/api/ai/inline-completion',
         })
         if (!demoUsage.allowed) {
+          if (reservation) cancelAIQuotaReservation(reservation)
           return capabilityResponse({
             error: 'AI_DEMO_LIMIT_REACHED',
             status: 429,
@@ -152,6 +168,10 @@ export async function POST(req: NextRequest) {
             },
           })
         }
+        if (reservation) {
+          cancelAIQuotaReservation(reservation)
+          reservation = null
+        }
         const demo = demoRouteMetadata({ route: '/api/ai/inline-completion', capability: 'AI_INLINE_COMPLETION' })
         const suggestion = buildDemoCompletion({ prompt })
         return NextResponse.json({
@@ -168,6 +188,7 @@ export async function POST(req: NextRequest) {
         })
       }
 
+      if (reservation) cancelAIQuotaReservation(reservation)
       return capabilityResponse({
         error: 'AI_PROVIDER_NOT_CONFIGURED',
         status: 503,
@@ -193,8 +214,9 @@ export async function POST(req: NextRequest) {
       apiKeyOverride: byokKey,
     })
 
-    if (!isByok) {
-      recordTokenUsage(user.userId, response.tokensUsed).catch(() => {})
+    if (reservation) {
+      await settleAIQuotaReservation(reservation, response.tokensUsed)
+      reservation = null
     }
     const suggestion = normalizeCompletion(response.content)
 
@@ -207,6 +229,7 @@ export async function POST(req: NextRequest) {
       latencyMs: response.latencyMs,
     })
   } catch (error) {
+    if (reservation) cancelAIQuotaReservation(reservation)
     routeLogger.error('[AI Inline Completion] Error:', error)
     return NextResponse.json(
       { error: 'AI_ERROR', message: error instanceof Error ? error.message : 'AI request failed' },

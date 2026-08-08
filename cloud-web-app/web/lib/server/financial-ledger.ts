@@ -13,11 +13,28 @@ interface UserLedgerRecord {
  * Batches token usage in RAM and flushes to PostgreSQL asynchronously 
  * to prevent Row Locks on high-concurrency LLM calls.
  */
+interface UserHoldAggregate {
+  tokens: number;
+  count: number;
+}
+
 class FinancialLedger {
   private buffer: Map<string, UserLedgerRecord> = new Map();
   private flushIntervalMs = 30000; // 30 seconds
   private intervalId: NodeJS.Timeout | null = null;
   private isShuttingDown = false;
+
+  /**
+   * In-flight reservation holds — closes the TOCTOU race for callers (e.g.
+   * checkAIQuota-based routes) that check-then-record instead of reserve/settle.
+   * A hold is added synchronously (no await) so a second concurrent request for
+   * the same user observes the first request's estimated spend before either
+   * one has committed real usage via addUsage(). See plan-limits.ts
+   * reserveAIQuota() / P2f #1 (Law XVI Trava I audit).
+   */
+  private holds: Map<string, { userId: string; tokens: number }> = new Map();
+  private holdsByUser: Map<string, UserHoldAggregate> = new Map();
+  private holdSeq = 0;
 
   constructor() {
     this.start();
@@ -57,13 +74,52 @@ class FinancialLedger {
 
   /**
    * Retrieves pending uncommitted tokens for a user (used for realtime quota checks).
+   * Includes both already-completed-but-unflushed usage (buffer) and estimated
+   * in-flight holds (see holdEstimate) so concurrent requests see each other.
    */
   public getPendingTokens(userId: string): number {
-    return this.buffer.get(userId)?.tokensUsed || 0;
+    const committed = this.buffer.get(userId)?.tokensUsed || 0;
+    const held = this.holdsByUser.get(userId)?.tokens || 0;
+    return committed + held;
   }
-  
+
   public getPendingRequests(userId: string): number {
-    return this.buffer.get(userId)?.requests || 0;
+    const committed = this.buffer.get(userId)?.requests || 0;
+    const held = this.holdsByUser.get(userId)?.count || 0;
+    return committed + held;
+  }
+
+  /**
+   * Places a synchronous estimated-token hold BEFORE the provider call resolves.
+   * Caller MUST release the hold exactly once (releaseHold), typically right
+   * after the real usage is recorded via addUsage — success or failure.
+   */
+  public holdEstimate(userId: string, tokens: number): string {
+    const safeTokens = Math.max(0, Math.floor(tokens) || 0);
+    if (safeTokens <= 0) return '';
+    const holdId = `hold_${++this.holdSeq}_${Date.now()}`;
+    this.holds.set(holdId, { userId, tokens: safeTokens });
+    const agg = this.holdsByUser.get(userId) || { tokens: 0, count: 0 };
+    agg.tokens += safeTokens;
+    agg.count += 1;
+    this.holdsByUser.set(userId, agg);
+    return holdId;
+  }
+
+  public releaseHold(holdId: string): void {
+    if (!holdId) return;
+    const hold = this.holds.get(holdId);
+    if (!hold) return;
+    this.holds.delete(holdId);
+    const agg = this.holdsByUser.get(hold.userId);
+    if (!agg) return;
+    const nextTokens = Math.max(0, agg.tokens - hold.tokens);
+    const nextCount = Math.max(0, agg.count - 1);
+    if (nextTokens === 0 && nextCount === 0) {
+      this.holdsByUser.delete(hold.userId);
+    } else {
+      this.holdsByUser.set(hold.userId, { tokens: nextTokens, count: nextCount });
+    }
   }
 
   /**

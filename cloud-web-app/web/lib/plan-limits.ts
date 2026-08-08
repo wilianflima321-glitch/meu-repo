@@ -383,12 +383,19 @@ export async function checkAIQuota(
 	const limits = getPlanLimits(user.plan);
 	const usage = await getCurrentUsage(userId);
 	const pendingTokens = TokenLedger.getPendingTokens(userId);
+	// P2f #1: default to fast-pool weight (1) when no modelId is given, matching
+	// checkPoolQuota's own default below — previously this only merged pending
+	// into tokensFastUsed when a modelId was explicitly passed, so callers like
+	// /api/ai/complete (which never pass modelId) silently ignored *any*
+	// already-recorded-but-unflushed usage in the fast-pool gate, not just
+	// reservation holds.
+	const requestWeight = modelId ? getModelTokenWeight(modelId) : 1;
 	const usageWithPending = {
 		...usage,
 		tokensUsed: usage.tokensUsed + pendingTokens,
-		tokensFastUsed: usage.tokensFastUsed + (modelId && getModelTokenWeight(modelId) <= 1 ? pendingTokens : 0),
+		tokensFastUsed: usage.tokensFastUsed + (requestWeight <= 1 ? pendingTokens : 0),
 		tokensPremiumRawUsed:
-			usage.tokensPremiumRawUsed + (modelId && isPremiumWeight(modelId) ? Math.ceil(pendingTokens / PREMIUM_TOKEN_WEIGHT) : 0),
+			usage.tokensPremiumRawUsed + (isPremiumWeight(modelId) ? Math.ceil(pendingTokens / PREMIUM_TOKEN_WEIGHT) : 0),
 	};
 
 	const poolCheck = checkPoolQuota(limits, usageWithPending, estimatedTokens, modelId);
@@ -527,4 +534,70 @@ export async function getUsageStatus(userId: string): Promise<UsageStatus> {
 
 export async function recordTokenUsage(userId: string, tokensUsed: number): Promise<void> {
 	TokenLedger.addUsage(userId, tokensUsed);
+}
+
+// ============================================================================
+// P2f #1 — Law XVI Trava I audit: reserve/settle wrapper around checkAIQuota
+// ============================================================================
+//
+// checkAIQuota() alone is check-then-record: it reads committed usage +
+// TokenLedger.getPendingTokens(), but nothing is written to the ledger until
+// recordTokenUsage() runs AFTER the provider call resolves. Two concurrent
+// requests for the same user (e.g. /api/ai/complete fired in parallel) both
+// read the same pending snapshot and can both pass, letting a user exceed
+// their quota (and, on free tier with no BYOK/wallet/PAYG, spend platform-paid
+// tokens beyond the intended fail-closed gate). This is a distinct bug class
+// from Law XVI Trava I (lib/production/creative-cost-guard.ts): that guard's
+// "free_tier_platform_pay_forbidden" policy denies ALL platform spend for
+// generative-media domains without BYOK; chat/complete intentionally DOES
+// subsidize a bounded free quota (see AI_QUOTA_PRESETS.free), so the fix here
+// is not "reuse the creative cost guard policy" but "make the existing
+// checkAIQuota gate a real reserve instead of a race-prone check."
+//
+// reserveAIQuota() closes the race by placing a synchronous TokenLedger hold
+// (see financial-ledger.ts holdEstimate) before checkAIQuota() runs, so a
+// second concurrent call observes the first call's estimate as pending spend.
+export interface AIQuotaReservation {
+	holdId: string;
+	userId: string;
+	estimatedTokens: number;
+}
+
+export type AIQuotaReserveResult =
+	| { allowed: true; reservation: AIQuotaReservation }
+	| (QuotaCheckResult & { allowed: false });
+
+export async function reserveAIQuota(
+	userId: string,
+	estimatedTokens: number = 1000,
+	modelId?: string,
+): Promise<AIQuotaReserveResult> {
+	const safeEstimate = Math.max(1, Math.floor(estimatedTokens) || 1);
+	// Hold FIRST, synchronously (no await before this line) — this is what
+	// makes a concurrent reservation for the same user observe this estimate
+	// as pending. checkAIQuota() below reads the hold back via
+	// TokenLedger.getPendingTokens(), so we pass `0` as its own marginal
+	// estimate to avoid double-counting the same tokens (once via the hold,
+	// once via checkAIQuota's estimatedTokens argument).
+	const holdId = TokenLedger.holdEstimate(userId, safeEstimate);
+	const check = await checkAIQuota(userId, 0, modelId);
+	if (!check.allowed) {
+		TokenLedger.releaseHold(holdId);
+		return check as QuotaCheckResult & { allowed: false };
+	}
+	return { allowed: true, reservation: { holdId, userId, estimatedTokens: safeEstimate } };
+}
+
+/** Provider call failed or was aborted before completion — no charge, release the hold. */
+export function cancelAIQuotaReservation(reservation: AIQuotaReservation): void {
+	TokenLedger.releaseHold(reservation.holdId);
+}
+
+/** Provider call resolved — commit real usage and release the estimate hold. */
+export async function settleAIQuotaReservation(
+	reservation: AIQuotaReservation,
+	actualTokens: number,
+): Promise<void> {
+	TokenLedger.releaseHold(reservation.holdId);
+	await recordTokenUsage(reservation.userId, actualTokens);
 }
