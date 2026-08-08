@@ -147,16 +147,51 @@ export function WaterSurface({ params }: WaterSurfaceProps) {
   }, [geometry]);
 
   // Animate waves — Gerstner default; FFT when fftOceanEnabled (letter cm).
+  const shaderUniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uWaveScale: { value: params.waveScale },
+    uNumWaves: { value: params.waves.length },
+    uWaves: { value: new Float32Array(8 * 4) }, // Max 8 waves, vec4(dirX, dirY, speed, frequency), and amplitudes in another uniform or packed
+    uAmplitudes: { value: new Float32Array(8) },
+    uFlow: { value: new THREE.Vector4(0, 0, 0, 0) }, // x, y (flowDir), offsetMult, weight
+  }), []);
+
+  // Update uniforms when params change
+  useEffect(() => {
+    shaderUniforms.uWaveScale.value = params.waveScale;
+    const waveCount = Math.min(params.waves.length, 8);
+    shaderUniforms.uNumWaves.value = waveCount;
+    
+    for (let i = 0; i < waveCount; i++) {
+      const w = params.waves[i];
+      const dirRad = (w.direction * Math.PI) / 180;
+      shaderUniforms.uWaves.value[i * 4 + 0] = Math.cos(dirRad);
+      shaderUniforms.uWaves.value[i * 4 + 1] = Math.sin(dirRad);
+      shaderUniforms.uWaves.value[i * 4 + 2] = w.speed;
+      shaderUniforms.uWaves.value[i * 4 + 3] = w.frequency;
+      shaderUniforms.uAmplitudes.value[i] = w.amplitude;
+    }
+    
+    if (params.flowEnabled && params.type === 'river') {
+      const flowDir = (params.flowDirecao * Math.PI) / 180;
+      shaderUniforms.uFlow.value.set(Math.cos(flowDir), Math.sin(flowDir), params.flowVelocidade, 1.0);
+    } else {
+      shaderUniforms.uFlow.value.setW(0.0);
+    }
+  }, [params]);
+
+  // Animate waves
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-
     timeRef.current += delta;
-    const positions = geometry.attributes.position.array as Float32Array;
-    const originals =
-      originalPositionsRef.current ??
-      (originalPositionsRef.current = new Float32Array(positions));
-
+    
     if (params.fftOceanEnabled) {
+      // Keep existing FFT CPU path for compatibility with capability score metrics
+      const positions = geometry.attributes.position.array as Float32Array;
+      const originals =
+        originalPositionsRef.current ??
+        (originalPositionsRef.current = new Float32Array(positions));
+
       const target = {
         positions,
         originalPositions: originals,
@@ -175,7 +210,6 @@ export function WaterSurface({ params }: WaterSurfaceProps) {
         amplitude: 0.4 * params.waveScale,
         target,
       });
-      // Letter cq — sun/cloud specular coupling (PBR sky analytic) into physical material.
       if (meshRef.current?.material) {
         const coupling = resolveOceanLightCoupling({
           capabilityScore: params.capabilityScore ?? 38,
@@ -185,55 +219,19 @@ export function WaterSurface({ params }: WaterSurfaceProps) {
         const mat = meshRef.current.material as THREE.MeshPhysicalMaterial;
         applyOceanLightToMaterial(
           {
-            setColorRgb: (r, g, b) => {
-              mat.color.setRGB(r, g, b);
-            },
-            setEnvMapIntensity: (v) => {
-              mat.envMapIntensity = v;
-            },
-            setOpacity: (v) => {
-              mat.opacity = v;
-            },
+            setColorRgb: (r, g, b) => { mat.color.setRGB(r, g, b); },
+            setEnvMapIntensity: (v) => { mat.envMapIntensity = v; },
+            setOpacity: (v) => { mat.opacity = v; },
           },
           coupling,
           params,
         );
       }
       geometry.computeVertexNormals();
-      return;
+    } else {
+      // GPU PATH: DEBT-PERF-004 CLOSED. Just update the time uniform.
+      shaderUniforms.uTime.value = timeRef.current;
     }
-
-    for (let i = 0; i < positions.length; i += 3) {
-      const x = originals[i];
-      const y = originals[i + 1];
-
-      let height = 0;
-
-      // Gerstner waves
-      params.waves.forEach((wave) => {
-        const dirRad = (wave.direction * Math.PI) / 180;
-        const dirX = Math.cos(dirRad);
-        const dirY = Math.sin(dirRad);
-
-        const dotProduct = x * dirX + y * dirY;
-        const phase = dotProduct * wave.frequency - timeRef.current * wave.speed;
-
-        height += wave.amplitude * params.waveScale * Math.sin(phase);
-      });
-
-      // Flow for rivers
-      if (params.flowEnabled && params.type === 'river') {
-        const flowDir = (params.flowDirecao * Math.PI) / 180;
-        const flowOffset = timeRef.current * params.flowVelocidade;
-        height += Math.sin(x * 0.5 + flowOffset) * 0.1;
-        void flowDir;
-      }
-
-      positions[i + 2] = height;
-    }
-
-    geometry.attributes.position.needsUpdate = true;
-    geometry.computeVertexNormals();
   });
 
   // Water material
@@ -257,6 +255,50 @@ export function WaterSurface({ params }: WaterSurfaceProps) {
         thickness={5}
         envMapIntensity={params.reflectionEnabled ? params.reflectionIntensity : 0}
         side={THREE.DoubleSide}
+        onBeforeCompile={(shader) => {
+          shader.uniforms.uTime = shaderUniforms.uTime;
+          shader.uniforms.uWaveScale = shaderUniforms.uWaveScale;
+          shader.uniforms.uNumWaves = shaderUniforms.uNumWaves;
+          shader.uniforms.uWaves = shaderUniforms.uWaves;
+          shader.uniforms.uAmplitudes = shaderUniforms.uAmplitudes;
+          shader.uniforms.uFlow = shaderUniforms.uFlow;
+
+          shader.vertexShader = `
+            uniform float uTime;
+            uniform float uWaveScale;
+            uniform int uNumWaves;
+            uniform vec4 uWaves[8];
+            uniform float uAmplitudes[8];
+            uniform vec4 uFlow;
+            ${shader.vertexShader}
+          `;
+
+          shader.vertexShader = shader.vertexShader.replace(
+            '#include <begin_vertex>',
+            `
+            #include <begin_vertex>
+            
+            // Apply GPU Gerstner displacement
+            float height = 0.0;
+            for(int i = 0; i < 8; i++) {
+              if(i >= uNumWaves) break;
+              vec2 dir = uWaves[i].xy;
+              float speed = uWaves[i].z;
+              float freq = uWaves[i].w;
+              float amp = uAmplitudes[i];
+              float phase = dot(position.xy, dir) * freq - uTime * speed;
+              height += amp * uWaveScale * sin(phase);
+            }
+            
+            if (uFlow.w > 0.5) {
+               float flowOffset = uTime * uFlow.z;
+               height += sin(position.x * 0.5 + flowOffset) * 0.1;
+            }
+            
+            transformed.z += height;
+            `
+          );
+        }}
       />
     </mesh>
   );
@@ -376,7 +418,7 @@ export function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
 
           <Slider
-            label="Frequencia"
+            label="Frequency"
             value={wave.frequency}
             min={0.1}
             max={5}
@@ -384,7 +426,7 @@ export function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
 
           <Slider
-            label="Velocidade"
+            label="Speed"
             value={wave.speed}
             min={0.1}
             max={5}
@@ -392,7 +434,7 @@ export function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
           />
 
           <Slider
-            label="Direcao"
+            label="Direction"
             value={wave.direction}
             min={-180}
             max={180}

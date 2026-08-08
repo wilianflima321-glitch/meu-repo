@@ -3,10 +3,10 @@
 // @aethel-heavy-async-boundary: loaded only through the /studio/level?tool=material route dynamic import.
 
 /**
- * Material Editor - Sistema de Materiais PBR Completo
+ * Material Editor - Complete PBR Material System
  *
- * Editor visual de materiais com node graph para criar
- * shaders e materiais PBR estilo Unreal/Unity.
+ * Visual material editor with node graph for creating
+ * shaders and PBR materials, Unreal/Unity style.
  *
  * Real Three.js-backed material graph, not a mock.
  */
@@ -22,8 +22,6 @@ import {
   useEdgesState,
   addEdge,
   Connection,
-  Handle,
-  Position,
   Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -31,211 +29,16 @@ import * as THREE from 'three';
 import { useToast } from '@/components/ui/Toast';
 import { createComponentLogger } from '@/lib/observability/logger'
 import { NODE_DEFINITIONS } from '@/components/materials/material-editor-models'
-import type { MaterialGraph, MaterialNodeData, MaterialProperty } from '@/components/materials/material-editor-models'
+import type { MaterialGraph, MaterialNodeData } from '@/components/materials/material-editor-models'
 import { PBRMaterial } from './material-editor-pbr';
 import { ShaderCompiler } from './material-editor-shader-compiler';
+import { MaterialNode } from './MaterialEditor.node';
 
 export type { MaterialGraph, MaterialNodeData, MaterialNodeDefinition, MaterialPort, MaterialProperty } from '@/components/materials/material-editor-models'
 export { PBRMaterial } from './material-editor-pbr';
 export { ShaderCompiler } from './material-editor-shader-compiler';
 
 const log = createComponentLogger('MaterialEditor')
-
-
-// ============================================================================
-// NODE COMPONENTS
-// ============================================================================
-
-interface NodeProps {
-  id: string;
-  data: MaterialNodeData;
-  selected: boolean;
-}
-
-function MaterialNode({ id, data, selected }: NodeProps) {
-  const getTypeColor = (type: string): string => {
-    switch (type) {
-      case 'output': return 'var(--aethel-error)';
-      case 'constant': return 'var(--aethel-success)';
-      case 'texture': return 'var(--aethel-accent)';
-      case 'math': return 'var(--aethel-info)';
-      case 'color': return 'var(--aethel-warning)';
-      case 'utility': return 'var(--aethel-success-light)';
-      case 'procedural': return 'var(--aethel-surface-quaternary)';
-      default: return 'var(--aethel-text-muted)';
-    }
-  };
-
-  const getPortColor = (portType: string): string => {
-    switch (portType) {
-      case 'color': return 'yellow';
-      case 'float': return 'cyan';
-      case 'vector2': return 'lime';
-      case 'vector3': return 'magenta';
-      case 'texture': return 'red';
-      default: return 'white';
-    }
-  };
-
-  return (
-    <div
-      className={`rounded-lg shadow-lg min-w-[180px] ${selected ? 'ring-2 ring-blue-500' : ''}`}
-      style={{
-        backgroundColor: 'var(--aethel-surface-primary)',
-        border: `2px solid ${getTypeColor(data.type)}`,
-      }}
-    >
-      {/* Header */}
-      <div
-        className="px-3 py-2 rounded-t-md text-[var(--aethel-text-primary)] text-sm font-medium"
-        style={{ backgroundColor: getTypeColor(data.type) }}
-      >
-        {data.label}
-      </div>
-
-      {/* Body */}
-      <div className="p-2">
-        {/* Inputs */}
-        <div className="space-y-1">
-          {data.inputs.map((input, i) => (
-            <div key={i} className="flex items-center">
-              <Handle
-                type="target"
-                position={Position.Left}
-                id={`input-${input.name}`}
-                style={{
-                  background: getPortColor(input.type),
-                  width: 10,
-                  height: 10,
-                }}
-              />
-              <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Properties */}
-        {data.properties.length > 0 && (
-          <div className="mt-2 space-y-1 border-t border-[var(--aethel-border-primary)] pt-2">
-            {data.properties.map((prop, i) => (
-              <PropertyInput
-                key={i}
-                property={prop}
-                onChange={(value) => data.onPropertyChange?.(prop.name, value)}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Outputs */}
-        <div className="space-y-1 mt-2">
-          {data.outputs.map((output, i) => (
-            <div key={i} className="flex items-center justify-end">
-              <span className="text-xs text-[var(--aethel-text-secondary)] mr-2">{output.name}</span>
-              <Handle
-                type="source"
-                position={Position.Right}
-                id={`output-${output.name}`}
-                style={{
-                  background: getPortColor(output.type),
-                  width: 10,
-                  height: 10,
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PropertyInput({ property, onChange }: { property: MaterialProperty; onChange?: (value: unknown) => void }) {
-  const textureInputRef = useRef<HTMLInputElement>(null);
-
-  switch (property.type) {
-    case 'color':
-      return (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
-          <input
-            type="color"
-            value={property.value as string}
-            onChange={(e) => onChange?.(e.target.value)}
-            className="w-6 h-6 rounded cursor-pointer"
-          />
-        </div>
-      );
-
-    case 'float':
-      return (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--aethel-text-secondary)] w-12">{property.name}</span>
-          <input
-            type="range"
-            min={property.min ?? 0}
-            max={property.max ?? 1}
-            step={0.01}
-            value={property.value as number}
-            onChange={(e) => onChange?.(parseFloat(e.target.value))}
-            className="flex-1 h-1"
-          />
-          <span className="text-xs text-[var(--aethel-text-secondary)] w-8">
-            {(property.value as number).toFixed(2)}
-          </span>
-        </div>
-      );
-
-    case 'texture': {
-      const uri = typeof property.value === 'string' ? property.value : '';
-      return (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
-          {uri ? (
-            // eslint-disable-next-line @next/next/no-img-element -- data: URL thumbnail, next/image cannot optimize it
-            <img src={uri} alt={`${property.name} preview`} className="h-6 w-6 rounded object-cover border border-[var(--aethel-border-subtle)]" />
-          ) : null}
-          <button
-            type="button"
-            aria-label={`Select resource for ${property.name}`}
-            onClick={() => textureInputRef.current?.click()}
-            className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
-          >
-            {uri ? 'Replace…' : 'Select...'}
-          </button>
-          {uri ? (
-            <button
-              type="button"
-              aria-label={`Clear resource for ${property.name}`}
-              onClick={() => onChange?.('')}
-              className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-error-light)]"
-            >
-              Clear
-            </button>
-          ) : null}
-          <input
-            ref={textureInputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            aria-hidden="true"
-            tabIndex={-1}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onload = () => onChange?.(reader.result as string);
-              reader.readAsDataURL(file);
-            }}
-          />
-        </div>
-      );
-    }
-
-    default:
-      return null;
-  }
-}
 
 // ============================================================================
 // NODE PALETTE
@@ -429,7 +232,7 @@ export function MaterialEditor() {
 				animated: true,
 				style: { stroke: 'white', strokeWidth: 2 },
 			};
-			setEdges((eds) => addEdge(edge, eds));
+			setEdges((eds: Edge[]) => addEdge(edge, eds));
 		},
     [setEdges]
   );
@@ -453,7 +256,7 @@ export function MaterialEditor() {
       },
     };
 
-    setNodes(nodes => [...nodes, newNode]);
+    setNodes((nodes: Node<MaterialNodeData>[]) => [...nodes, newNode]);
   }, [setNodes, updateNodeProperty]);
 
   const compileShader = useCallback(() => {
@@ -487,13 +290,13 @@ export function MaterialEditor() {
 
         <Panel position="top-left">
           <div className="flex gap-2">
-            <button type="button" aria-label={showPalette ? 'Ocultar paleta de material' : 'Mostrar paleta de material'}
+            <button type="button" aria-label={showPalette ? 'Hide material palette' : 'Show material palette'}
               onClick={() => setShowPalette(!showPalette)}
               className="px-3 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
             >
               {showPalette ? 'Hide Palette' : 'Show Palette'}
             </button>
-            <button type="button" aria-label="Compilar shader do material"
+            <button type="button" aria-label="Compile material shader"
               onClick={compileShader}
               className="px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
             >

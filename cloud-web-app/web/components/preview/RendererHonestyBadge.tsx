@@ -120,7 +120,7 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
   const presentRoot =
     report?.presentRoot || report?.livePath?.presentRoot || null
   const rootLabel = presentRoot?.canonicalPresentLabel || 'R3F/WebGL2'
-  const webgpuRole = presentRoot?.webgpuRole || 'adapter_probe_only'
+  const webgpuRole = presentRoot?.webgpuRole || 'exclusive_rhi'
   const desktopRole = presentRoot?.desktopWgpuRole || 'experimental_mount'
   const classTone =
     pathClass === 'canonical'
@@ -153,16 +153,14 @@ export function RendererHonestyBadge({ projectId }: { projectId?: string | null 
       <span className={statusTone}>{label}</span>
       <span className={`mt-0.5 block text-[10px] font-normal uppercase tracking-[0.12em] ${classTone}`}>
         Path · {pathClass}
-        {report?.livePath?.webgpuAdapterAcquired === true
-          ? ' · WebGPU adapter acquired (compute)'
-          : report?.livePath?.webgpuAdapterAvailable
-            ? ' · WebGPU API (adapter unprobed/failed)'
-            : ''}
       </span>
-      <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
+      <div className="flex gap-2 text-[var(--aethel-text-quaternary)]">
         Present root · {rootLabel} · WebGPU {webgpuRole.replace(/_/g, ' ')} · Desktop{' '}
-        {desktopRole.replace(/_/g, ' ')}
-      </span>
+        {report?.livePath?.desktopPresented ? '[LIVE]' : '[FALLBACK]'}
+        {report?.livePath?.webgpuAdapterAcquired === true && (
+          <span className="text-[var(--aethel-primary-light)]">· Unified RHI Acquired</span>
+        )}
+      </div>
       <span className="mt-0.5 block text-[10px] font-normal text-[var(--aethel-text-muted)]">
         {marketingAllowed ? 'Capability probe live' : 'Hardware Capability Probe Active'}
         {' · WebGPU Target Active'}

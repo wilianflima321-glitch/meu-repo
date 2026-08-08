@@ -7,10 +7,11 @@ import {
   ChevronDown,
   Cpu,
   Crosshair,
-  Film,
   Gauge,
+  Globe2,
   Grid2x2,
   Move3D,
+  PauseCircle,
   RotateCw,
   Scale3D,
   Target,
@@ -24,7 +25,7 @@ import type {
   ViewportTransformMode,
   ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D'
-import type { GizmoInspectorSummary } from '@/lib/viewport/gizmo-elite-controls'
+import type { GizmoAxisPlaneConstraint, GizmoInspectorSummary } from '@/lib/viewport/gizmo-elite-controls'
 
 const iconButton =
   'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
@@ -33,12 +34,27 @@ const activeButton =
 const compactTextButton =
   'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
 
+// Semantic axis colors — match Blender and UE5 convention (X=red, Y=green, Z=blue),
+// mapped onto existing Aethel design tokens instead of hardcoded hex.
+const AXIS_CONSTRAINT_CLASSES: Record<GizmoAxisPlaneConstraint, string> = {
+  free:   '',
+  x:      'border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] text-[var(--aethel-error-light)]',
+  y:      'border-[color-mix(in_srgb,var(--aethel-success)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]',
+  z:      'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]',
+  xy:     'border-[color-mix(in_srgb,var(--aethel-accent)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-accent)_15%,transparent)] text-[var(--aethel-accent-light)]',
+  xz:     'border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]',
+  yz:     'border-[color-mix(in_srgb,var(--aethel-neon-cyan)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_15%,transparent)] text-[var(--aethel-neon-cyan)]',
+  screen: 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]',
+}
+
 export function ViewportTopToolbar({
   transformMode,
   transformSpace,
   snapEnabled,
   cameraPreset,
   gizmoSummary,
+  gizmoConstraint = 'free',
+  frameloopPaused = false,
   onTransformModeChange,
   onTransformSpaceChange,
   onSnapEnabledChange,
@@ -53,6 +69,10 @@ export function ViewportTopToolbar({
   snapEnabled: boolean
   cameraPreset: ViewportCameraPreset
   gizmoSummary: GizmoInspectorSummary
+  /** Current axis/plane constraint — drives visual highlights on the toolbar. */
+  gizmoConstraint?: GizmoAxisPlaneConstraint
+  /** True when the viewport frameloop is demand-only (idle/paused). */
+  frameloopPaused?: boolean
   onTransformModeChange: (mode: ViewportTransformMode) => void
   onTransformSpaceChange: (space: ViewportTransformSpace) => void
   onSnapEnabledChange: (enabled: boolean) => void
@@ -64,6 +84,8 @@ export function ViewportTopToolbar({
   quadView?: boolean
   onQuadViewChange?: (enabled: boolean) => void
 }) {
+  const constraintActive = gizmoConstraint !== 'free'
+  const constraintHighlight = constraintActive ? AXIS_CONSTRAINT_CLASSES[gizmoConstraint] : ''
   const cameraPresetLabel =
     VIEWPORT_CAMERA_PRESETS.find((preset) => preset.id === cameraPreset)
       ?.label ?? 'View'
@@ -113,7 +135,7 @@ export function ViewportTopToolbar({
         <button
           type="button"
           aria-label={`${snapEnabled ? 'Disable' : 'Enable'} grid snapping`}
-          title={snapEnabled ? 'Snap on' : 'Snap off'}
+          title={snapEnabled ? 'Snap on (0.5u)' : 'Snap off — free transform'}
           onClick={() => onSnapEnabledChange(!snapEnabled)}
           className={snapEnabled ? activeButton : iconButton}
         >
@@ -121,18 +143,27 @@ export function ViewportTopToolbar({
         </button>
         <button
           type="button"
-          aria-label={`Switch to space ${transformSpace === 'world' ? 'local' : 'world'}`}
-          title={`${transformSpace === 'world' ? 'World' : 'Local'} space`}
-          onClick={() =>
-            onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')
-          }
+          aria-label={`Switch to ${transformSpace === 'world' ? 'local' : 'world'} space`}
+          title={`${transformSpace === 'world' ? 'World space (G)' : 'Local space (G)'} — press G to toggle`}
+          onClick={() => onTransformSpaceChange(transformSpace === 'world' ? 'local' : 'world')}
           className={transformSpace === 'local' ? activeButton : iconButton}
         >
-          <Film className="h-4 w-4" />
+          <Globe2 className="h-4 w-4" />
+          <span className="sr-only">{transformSpace === 'world' ? 'World' : 'Local'}</span>
         </button>
+        {/* Axis constraint indicator — only visible when a constraint is active */}
+        {constraintActive && (
+          <span
+            className={`inline-flex items-center justify-center rounded-lg border px-2 py-2 text-[10px] font-bold uppercase tracking-wider transition ${constraintHighlight}`}
+            title={`Axis constraint: ${gizmoConstraint.toUpperCase()} — press X/Y/Z to change, or same key again to unlock`}
+            aria-label={`Constraint locked to ${gizmoConstraint} axis`}
+          >
+            {gizmoConstraint.toUpperCase()}
+          </span>
+        )}
         <button
           type="button"
-          aria-label="Frame selected object"
+          aria-label="Frame selected object in viewport"
           title="Frame selection (F)"
           onClick={onFrameSelection}
           className={iconButton}
@@ -149,6 +180,17 @@ export function ViewportTopToolbar({
         >
           <Gauge className="h-4 w-4" />
         </button>
+        {/* Frameloop paused indicator */}
+        {frameloopPaused && (
+          <span
+            className="inline-flex items-center gap-1 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-2 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--aethel-warning-light)]"
+            title="Viewport rendering paused — move the mouse or interact to resume"
+            aria-live="polite"
+          >
+            <PauseCircle className="h-3.5 w-3.5" />
+            <span className="sr-only">Paused</span>
+          </span>
+        )}
         <ViewportCameraDropdown
           cameraPreset={cameraPreset}
           cameraPresetLabel={cameraPresetLabel}

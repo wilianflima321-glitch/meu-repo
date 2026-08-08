@@ -30,6 +30,7 @@ import {
   MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Music } from 'lucide-react';
 import { createComponentLogger } from '@/lib/observability/logger'
 import { nodeDefinitions } from './sound-cue-models';
 import { SoundNode, type SoundNodeData } from './SoundCueEditor.node';
@@ -216,7 +217,8 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
         />
       </div>
 
-      {/* Waveform visualization placeholder */}
+      {/* Playback activity indicator — decorative equalizer, not a real waveform/spectrum
+          (this cue has no AnalyserNode wired to it; do not imply live amplitude data). */}
       <div style={{
         marginTop: '12px',
         height: '60px',
@@ -229,19 +231,23 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
         fontSize: '11px',
       }}>
         {isPlaying ? (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '40px' }}>
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: '4px',
-                  height: `${20 + Math.random() * 20}px`,
-                  background: 'var(--aethel-success)',
-                  borderRadius: '2px',
-                  animation: 'pulse 0.5s infinite',
-                }}
-              />
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '32px' }}>
+              {EQUALIZER_BAR_HEIGHTS.map((h, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: '4px',
+                    height: `${h}px`,
+                    background: 'var(--aethel-success)',
+                    borderRadius: '2px',
+                    animation: `pulse ${0.5 + (i % 3) * 0.15}s ease-in-out infinite`,
+                    animationDelay: `${i * 40}ms`,
+                  }}
+                />
+              ))}
+            </div>
+            <span>Playing preview</span>
           </div>
         ) : (
           'No audio playing'
@@ -250,6 +256,12 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
     </div>
   );
 }
+
+// Deterministic bar heights for the decorative playback indicator above —
+// fixed pattern, not Math.random(), so it doesn't imply real amplitude data.
+const EQUALIZER_BAR_HEIGHTS = Array.from({ length: 20 }, (_, i) =>
+  20 + Math.round(12 * Math.abs(Math.sin(i * 0.7)))
+);
 
 // ============================================================================
 // PARAMETERS PANEL
@@ -468,7 +480,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       nodes: [...prev.nodes, newNode],
     }));
 
-    setNodes((nds) => [
+    setNodes((nds: any) => [
       ...nds,
       {
         id: newNode.id,
@@ -500,7 +512,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       connections: [...prev.connections, newConnection],
     }));
 
-    setEdges((eds) =>
+    setEdges((eds: any) =>
       addEdge(
         {
           ...connection,
@@ -587,6 +599,9 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
 
           <Panel position="top-left">
             <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
               background: 'var(--aethel-surface-secondary)',
               padding: '8px 16px',
               borderRadius: '6px',
@@ -594,7 +609,8 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
               fontSize: '14px',
               fontWeight: 'bold',
             }}>
-              ?? {cue.name}
+              <Music size={14} />
+              {cue.name}
             </div>
           </Panel>
 

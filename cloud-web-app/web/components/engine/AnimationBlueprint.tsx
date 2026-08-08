@@ -285,7 +285,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           borderRadius: '6px',
           border: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button" aria-label="Add state ao animation blueprint"
+          <button type="button" aria-label="Add state to animation blueprint"
             onClick={() => handleAddState('state')}
             className="inline-flex items-center gap-1.5"
             style={{
@@ -300,7 +300,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             <Plus className="w-3.5 h-3.5" /> Add State
           </button>
-          <button type="button" aria-label="Add conduit ao animation blueprint"
+          <button type="button" aria-label="Add conduit to animation blueprint"
             onClick={() => handleAddState('conduit')}
             className="inline-flex items-center gap-1.5"
             style={{
@@ -315,7 +315,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             <Zap className="w-3.5 h-3.5" /> Add Conduit
           </button>
-          <button type="button" aria-label="Add blend state ao animation blueprint"
+          <button type="button" aria-label="Add blend state to animation blueprint"
             onClick={() => handleAddState('blend')}
             className="inline-flex items-center gap-1.5"
             style={{
@@ -357,7 +357,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
-          onNodeDragStop={(_, __, nodes) => onNodesPositionChange(nodes)}
+          onNodeDragStop={(_: React.MouseEvent, __: Node, nodes: Node[]) => onNodesPositionChange(nodes)}
           nodeTypes={nodeTypes}
           fitView
           snapToGrid

@@ -18,11 +18,14 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, GizmoHelper, GizmoViewport, Grid, Stats } from '@react-three/drei';
-import * as THREE from 'three';
 import { resolveCssVarColor, resolveCssVarRgba } from '../../web/lib/style/resolve-css-var';
-import { defaultEmitterConfig, EffectPresetsPanel, EmitterPanel, initialEdges, initialNodes, nodeStyles, nodeTypes, ParticleRenderer } from './NiagaraVFXPanels.runtime';
+import { createComponentLogger } from '../../web/lib/observability/logger';
+import { defaultEmitterConfig, compileGraphToEmitterConfig, EffectPresetsPanel, EmitterPanel, initialEdges, initialNodes, nodeStyles, nodeTypes, ParticleRenderer } from './NiagaraVFXPanels.runtime';
 import { ParticleEmitter } from './NiagaraParticleEmitter.runtime';
+import { NIAGARA_PRESET_FACTORIES } from './niagara-vfx-presets';
 import type { EmitterConfig } from './NiagaraVFX.types';
+
+const log = createComponentLogger('NiagaraVFX');
 
 export { ParticleEmitter } from './NiagaraParticleEmitter.runtime';
 export type {
@@ -33,6 +36,30 @@ export type {
   SizeCurve,
   VelocityCurve,
 } from './NiagaraVFX.types';
+// Maps a set of {time: 0..1, value} points onto a 220x60 SVG path, normalized
+// against `maxValue` (or the curve's own peak when omitted). Used to render the
+// Timeline tab's Size/Alpha/Velocity-over-life graphs from the real emitterConfig.
+function curveToSvgPath(points: { time: number; value: number }[], maxValue?: number): string {
+  if (points.length === 0) return '';
+  const sorted = [...points].sort((a, b) => a.time - b.time);
+  const width = 220;
+  const height = 60;
+  const peak = maxValue ?? Math.max(...sorted.map((p) => p.value), 0.0001);
+  const toXY = (p: { time: number; value: number }) => {
+    const x = Math.min(1, Math.max(0, p.time)) * width;
+    const y = height - Math.min(1, Math.max(0, p.value / peak)) * height;
+    return `${x.toFixed(1)} ${y.toFixed(1)}`;
+  };
+  if (sorted.length === 1) {
+    const xy = toXY(sorted[0]);
+    return `M 0 ${xy.split(' ')[1]} L ${width} ${xy.split(' ')[1]}`;
+  }
+  return `M ${toXY(sorted[0])} ${sorted
+    .slice(1)
+    .map((p) => `L ${toXY(p)}`)
+    .join(' ')}`;
+}
+
 export default function NiagaraVFX() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -57,154 +84,61 @@ export default function NiagaraVFX() {
     setEmitterConfig(config);
     emittersRef.current[0] = new ParticleEmitter(config);
   }, []);
+
+  // DEBT-NIAGARA-002: Compile node graph to EmitterConfig automatically
+  useEffect(() => {
+    const compiled = compileGraphToEmitterConfig(nodes, edges, emitterConfig);
+    setEmitterConfig(compiled);
+    emittersRef.current[0] = new ParticleEmitter(compiled);
+  }, [nodes, edges]);
+
   const handlePresetSelect = useCallback((presetId: string) => {
-    let newConfig = { ...defaultEmitterConfig };
-    switch (presetId) {
-      case 'fire':
-        newConfig = {
-          ...newConfig,
-          name: 'Fire Effect',
-          spawnRate: 100,
-          lifetime: { min: 0.5, max: 1.5 },
-          initialVelocity: {
-            min: new THREE.Vector3(-0.5, 3, -0.5),
-            max: new THREE.Vector3(0.5, 6, 0.5),
-          },
-          initialSize: { min: 0.2, max: 0.5 },
-          gravity: new THREE.Vector3(0, -0.5, 0),
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(1, 1, 0.5), alpha: 1 },
-            { time: 0.3, color: new THREE.Color(1, 0.6, 0), alpha: 1 },
-            { time: 0.7, color: new THREE.Color(1, 0.2, 0), alpha: 0.6 },
-            { time: 1, color: new THREE.Color(0.2, 0, 0), alpha: 0 },
-          ],
-        };
-        break;
-      case 'smoke':
-        newConfig = {
-          ...newConfig,
-          name: 'Smoke Effect',
-          spawnRate: 30,
-          lifetime: { min: 2, max: 4 },
-          initialVelocity: {
-            min: new THREE.Vector3(-0.5, 1, -0.5),
-            max: new THREE.Vector3(0.5, 2, 0.5),
-          },
-          initialSize: { min: 0.3, max: 0.6 },
-          sizeOverLife: [
-            { time: 0, size: 0.3 },
-            { time: 1, size: 1.5 },
-          ],
-          gravity: new THREE.Vector3(0, 0.5, 0),
-          drag: 0.3,
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(0.3, 0.3, 0.3), alpha: 0.8 },
-            { time: 1, color: new THREE.Color(0.5, 0.5, 0.5), alpha: 0 },
-          ],
-          turbulence: { strength: 1, frequency: 0.5 },
-        };
-        break;
-      case 'sparks':
-        newConfig = {
-          ...newConfig,
-          name: 'Sparks Effect',
-          spawnRate: 200,
-          spawnBurst: [{ time: 0, count: 50 }],
-          lifetime: { min: 0.3, max: 0.8 },
-          initialVelocity: {
-            min: new THREE.Vector3(-5, 3, -5),
-            max: new THREE.Vector3(5, 8, 5),
-          },
-          initialSize: { min: 0.05, max: 0.15 },
-          gravity: new THREE.Vector3(0, -15, 0),
-          drag: 0.05,
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(1, 1, 0.8), alpha: 1 },
-            { time: 0.5, color: new THREE.Color(1, 0.5, 0), alpha: 1 },
-            { time: 1, color: new THREE.Color(1, 0, 0), alpha: 0 },
-          ],
-        };
-        break;
-      case 'explosion':
-        newConfig = {
-          ...newConfig,
-          name: 'Explosion Effect',
-          spawnRate: 0,
-          spawnBurst: [{ time: 0, count: 200 }],
-          lifetime: { min: 0.5, max: 1.5 },
-          spawnShape: 'sphere',
-          spawnShapeParams: { radius: 0.1 },
-          initialVelocity: {
-            min: new THREE.Vector3(-10, -10, -10),
-            max: new THREE.Vector3(10, 10, 10),
-          },
-          initialSize: { min: 0.2, max: 0.8 },
-          gravity: new THREE.Vector3(0, -5, 0),
-          drag: 0.2,
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(1, 1, 1), alpha: 1 },
-            { time: 0.1, color: new THREE.Color(1, 0.8, 0), alpha: 1 },
-            { time: 0.4, color: new THREE.Color(1, 0.3, 0), alpha: 0.8 },
-            { time: 1, color: new THREE.Color(0.2, 0, 0), alpha: 0 },
-          ],
-        };
-        break;
-      case 'snow':
-        newConfig = {
-          ...newConfig,
-          name: 'Snow Effect',
-          spawnRate: 50,
-          spawnShape: 'box',
-          spawnShapeParams: { width: 10, height: 0, depth: 10 },
-          lifetime: { min: 4, max: 6 },
-          initialVelocity: {
-            min: new THREE.Vector3(-0.2, -1, -0.2),
-            max: new THREE.Vector3(0.2, -0.5, 0.2),
-          },
-          initialSize: { min: 0.05, max: 0.15 },
-          gravity: new THREE.Vector3(0, -0.5, 0),
-          turbulence: { strength: 0.3, frequency: 0.3 },
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(1, 1, 1), alpha: 0.8 },
-            { time: 1, color: new THREE.Color(1, 1, 1), alpha: 0 },
-          ],
-        };
-        break;
-      case 'magic':
-        newConfig = {
-          ...newConfig,
-          name: 'Magic Effect',
-          spawnRate: 60,
-          spawnShape: 'sphere',
-          spawnShapeParams: { radius: 1 },
-          lifetime: { min: 1, max: 2 },
-          initialVelocity: {
-            min: new THREE.Vector3(-0.5, 0.5, -0.5),
-            max: new THREE.Vector3(0.5, 1.5, 0.5),
-          },
-          initialSize: { min: 0.1, max: 0.25 },
-          sizeOverLife: [
-            { time: 0, size: 0 },
-            { time: 0.2, size: 0.25 },
-            { time: 0.8, size: 0.15 },
-            { time: 1, size: 0 },
-          ],
-          gravity: new THREE.Vector3(0, 0, 0),
-          turbulence: { strength: 0.8, frequency: 2 },
-          colorOverLife: [
-            { time: 0, color: new THREE.Color(0.5, 0, 1), alpha: 1 },
-            { time: 0.3, color: new THREE.Color(0, 0.5, 1), alpha: 1 },
-            { time: 0.6, color: new THREE.Color(1, 0, 1), alpha: 1 },
-            { time: 1, color: new THREE.Color(0, 1, 1), alpha: 0 },
-          ],
-        };
-        break;
+    const factory = NIAGARA_PRESET_FACTORIES[presetId];
+    if (!factory) {
+      log.warn('niagara_preset_not_found', { presetId });
+      return;
     }
-    handleEmitterConfigChange(newConfig);
+    handleEmitterConfigChange(factory({ ...defaultEmitterConfig }));
   }, [handleEmitterConfigChange]);
   const handlePlayPause = useCallback(() => {
     setIsPlaying((p) => !p);
   }, []);
+  // Live curve paths derived from the actual emitterConfig — replaces static placeholder SVGs
+  // so Timeline actually reflects the current node graph / preset (DEBT-NIAGARA-003).
+  const sizeCurvePath = useMemo(
+    () => curveToSvgPath(emitterConfig.sizeOverLife.map((c) => ({ time: c.time, value: c.size }))),
+    [emitterConfig.sizeOverLife]
+  );
+  const alphaCurvePath = useMemo(
+    () => curveToSvgPath(emitterConfig.colorOverLife.map((c) => ({ time: c.time, value: c.alpha })), 1),
+    [emitterConfig.colorOverLife]
+  );
+  const velocityCurvePath = useMemo(
+    () => curveToSvgPath(emitterConfig.velocityOverLife.map((c) => ({ time: c.time, value: c.multiplier }))),
+    [emitterConfig.velocityOverLife]
+  );
+  const colorOverLifeGradient = useMemo(() => {
+    const stops = [...emitterConfig.colorOverLife].sort((a, b) => a.time - b.time);
+    if (stops.length === 0) return 'var(--aethel-surface-primary)';
+    return `linear-gradient(to right, ${stops
+      .map((stop) => {
+        const r = Math.round(stop.color.r * 255);
+        const g = Math.round(stop.color.g * 255);
+        const b = Math.round(stop.color.b * 255);
+        return `rgba(${r}, ${g}, ${b}, ${stop.alpha}) ${stop.time * 100}%`;
+      })
+      .join(', ')})`;
+  }, [emitterConfig.colorOverLife]);
+  const handleExportConfig = useCallback(() => {
+    const json = JSON.stringify(emitterConfig, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${(emitterConfig.name || 'emitter-config').replace(/\s+/g, '-').toLowerCase()}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, [emitterConfig]);
   const handleRestart = useCallback(() => {
     emittersRef.current.forEach((e) => e.reset());
     setIsPlaying(true);
@@ -262,19 +196,26 @@ export default function NiagaraVFX() {
         </label>
         <button
           type="button"
+          disabled
+          aria-label="Save VFX graph — not yet wired to project persistence"
+          title="Save is held until VFX graphs are wired to project persistence."
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-quaternary)',
             border: '1px solid var(--aethel-border-secondary)',
             borderRadius: '4px',
-            color: 'var(--aethel-text-primary)',
-            cursor: 'pointer',
+            color: 'var(--aethel-text-muted)',
+            cursor: 'not-allowed',
+            opacity: 0.6,
           }}
         >
           Save
         </button>
         <button
           type="button"
+          onClick={handleExportConfig}
+          aria-label="Export emitter config as JSON"
+          title="Export the current emitter configuration as a JSON file."
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-quaternary)',
@@ -414,9 +355,9 @@ export default function NiagaraVFX() {
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Size Over Life</div>
                   <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
-                    <svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 220 60" preserveAspectRatio="none" style={{ position: 'absolute' }}>
                       <path
-                        d="M 0 60 L 40 30 L 100 45 L 160 10 L 220 60"
+                        d={sizeCurvePath}
                         fill="none"
                         stroke="var(--aethel-accent)"
                         strokeWidth="2"
@@ -430,17 +371,16 @@ export default function NiagaraVFX() {
                     style={{
                       height: '24px',
                       borderRadius: '4px',
-                      background:
-                        'linear-gradient(to right, var(--aethel-warning, rgb(245, 158, 11)), var(--aethel-accent-orange, rgb(249, 115, 22)), var(--aethel-error, rgb(239, 68, 68)), var(--aethel-surface-primary, rgb(26, 26, 26)))',
+                      background: colorOverLifeGradient,
                     }}
                   />
                 </div>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ marginBottom: '8px' }}>Alpha Over Life</div>
                   <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
-                    <svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 220 60" preserveAspectRatio="none" style={{ position: 'absolute' }}>
                       <path
-                        d="M 0 10 L 80 10 L 180 50 L 220 60"
+                        d={alphaCurvePath}
                         fill="none"
                         stroke="var(--aethel-success)"
                         strokeWidth="2"
@@ -451,9 +391,9 @@ export default function NiagaraVFX() {
                 <div>
                   <div style={{ marginBottom: '8px' }}>Velocity Over Life</div>
                   <div style={{ height: '60px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
-                    <svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 220 60" preserveAspectRatio="none" style={{ position: 'absolute' }}>
                       <path
-                        d="M 0 10 L 220 50"
+                        d={velocityCurvePath}
                         fill="none"
                         stroke="var(--aethel-primary)"
                         strokeWidth="2"

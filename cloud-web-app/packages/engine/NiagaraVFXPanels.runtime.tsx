@@ -221,6 +221,46 @@ export const initialEdges: Edge[] = [
   { id: 'e7', source: 'color-1', target: 'render-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
   { id: 'e8', source: 'force-1', target: 'render-1', animated: true, style: { stroke: 'var(--aethel-text-primary)' } },
 ];
+
+export function compileGraphToEmitterConfig(nodes: Node[], edges: Edge[], baseConfig: EmitterConfig): EmitterConfig {
+  const config = { ...baseConfig };
+  for (const node of nodes) {
+    const data = node.data as any;
+    if (data.type === 'emitter') {
+      config.spawnRate = Number(data.params?.rate ?? config.spawnRate);
+      config.maxParticles = Number(data.params?.maxParticles ?? config.maxParticles);
+    } else if (data.type === 'spawn') {
+      config.spawnShape = String(data.params?.shape ?? config.spawnShape) as any;
+    } else if (data.type === 'velocity') {
+      const minY = Number(data.params?.minY ?? 2);
+      const maxY = Number(data.params?.maxY ?? 5);
+      const spread = Number(data.params?.spread ?? 1);
+      config.initialVelocity = {
+        min: new THREE.Vector3(-spread, minY, -spread),
+        max: new THREE.Vector3(spread, maxY, spread),
+      };
+    } else if (data.type === 'size') {
+      const start = Number(data.params?.start ?? 0.1);
+      const peak = Number(data.params?.peak ?? 0.3);
+      const end = Number(data.params?.end ?? 0);
+      config.sizeOverLife = [
+        { time: 0, size: start },
+        { time: 0.5, size: peak },
+        { time: 1, size: end },
+      ];
+    } else if (data.type === 'force') {
+      config.gravity = new THREE.Vector3(
+        Number(data.params?.x ?? 0),
+        Number(data.params?.y ?? -2),
+        Number(data.params?.z ?? 0)
+      );
+    } else if (data.type === 'render') {
+      config.blendMode = String(data.params?.blend ?? config.blendMode) as any;
+      config.sortMode = data.params?.sort ? 'byDistance' : 'none';
+    }
+  }
+  return config;
+}
 interface EmitterPanelProps {
   config: EmitterConfig;
   onChange: (config: EmitterConfig) => void;
