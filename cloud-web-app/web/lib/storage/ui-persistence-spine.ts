@@ -115,7 +115,99 @@ function readBag(): UiPersistenceBag {
   }
 }
 
+let _writeQueue: Partial<Record<UiPersistenceNamespace, unknown>> = {}
+let _writeLockActive = false
+
+async function flushWriteQueue() {
+  if (typeof navigator === 'undefined' || !navigator.locks) {
+    // Fallback if Web Locks API is unavailable
+    flushWriteQueueSync()
+    return
+  }
+  
+  if (_writeLockActive) return
+  _writeLockActive = true
+  
+  try {
+    await navigator.locks.request('aethel.ui.persistence.lock', async () => {
+      const pending = { ..._writeQueue }
+      _writeQueue = {}
+      
+      const bag = readBag()
+      for (const [key, value] of Object.entries(pending)) {
+        bag.entries[key as UiPersistenceNamespace] = value
+      }
+      
+      const next: UiPersistenceBag = {
+        ...bag,
+        v: UI_PERSISTENCE_SPINE_VERSION,
+        updatedAt: new Date().toISOString(),
+      }
+      
+      const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
+      if (!ok) {
+        log.warn('ui_persistence_bag_write_failed', { key: UI_PERSISTENCE_BAG_KEY })
+      } else {
+        notifyUiPersistenceLocalWrite()
+      }
+    })
+  } catch (error) {
+    log.warn('ui_persistence_lock_failed', { error })
+    flushWriteQueueSync()
+  } finally {
+    _writeLockActive = false
+    if (Object.keys(_writeQueue).length > 0) {
+      flushWriteQueue()
+    }
+  }
+}
+
+function flushWriteQueueSync() {
+  const pending = { ..._writeQueue }
+  _writeQueue = {}
+  
+  const bag = readBag()
+  for (const [key, value] of Object.entries(pending)) {
+    bag.entries[key as UiPersistenceNamespace] = value
+  }
+  
+  const next: UiPersistenceBag = {
+    ...bag,
+    v: UI_PERSISTENCE_SPINE_VERSION,
+    updatedAt: new Date().toISOString(),
+  }
+  
+  const ok = writeClientJson(UI_PERSISTENCE_BAG_KEY, next)
+  if (!ok) {
+    log.warn('ui_persistence_bag_write_failed', { key: UI_PERSISTENCE_BAG_KEY })
+  } else {
+    notifyUiPersistenceLocalWrite()
+  }
+}
+
+// Safety net for CW4-002: `flushWriteQueue()` above defers the canonical
+// bag write behind `navigator.locks.request`, a microtask/macrotask hop. If
+// the tab is closed, navigated away from, or backgrounded (mobile OS
+// suspend) before that callback runs, the queued write is silently lost —
+// `mirrorLegacy()` still lands synchronously, but the legacy key is
+// intentionally never read back into the bag (see `ensureMigrated` doc
+// above), so the loss is permanent. Force a synchronous flush of any
+// still-pending entries on the last reliable lifecycle signals.
+if (typeof window !== 'undefined') {
+  const flushPendingSync = () => {
+    if (Object.keys(_writeQueue).length > 0) {
+      flushWriteQueueSync()
+    }
+  }
+  window.addEventListener('pagehide', flushPendingSync)
+  window.addEventListener('beforeunload', flushPendingSync)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingSync()
+  })
+}
+
 function writeBag(bag: UiPersistenceBag): boolean {
+  // Sync fallback (should only be used in tests or early bootstrap)
   const next: UiPersistenceBag = {
     ...bag,
     v: UI_PERSISTENCE_SPINE_VERSION,
@@ -325,12 +417,13 @@ export function getUiPersistence<T>(
 
 export function setUiPersistence<T>(namespace: UiPersistenceNamespace, value: T): boolean {
   try {
-    const bag = ensureMigrated()
-    bag.entries[namespace] = value as unknown
-    const ok = writeBag(bag)
-    // Mirror to legacy key for consumers not yet on spine (compat window).
+    // 1. Queue the write for the async lock flusher (real multi-tab LWW)
+    _writeQueue[namespace] = value as unknown
+    flushWriteQueue()
+    
+    // 2. Also write legacy compat synchronously (since they don't share the bag)
     mirrorLegacy(namespace, value)
-    return ok
+    return true
   } catch (error) {
     log.warn('ui_persistence_set_failed', {
       namespace,

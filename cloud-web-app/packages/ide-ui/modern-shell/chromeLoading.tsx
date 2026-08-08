@@ -32,8 +32,8 @@ export function ModernIDELoading() {
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={spinnerStyle} />
+    <div style={containerStyle} role="status" aria-live="polite" aria-label="Loading IDE">
+      <div style={spinnerStyle} aria-hidden="true" />
       <span style={{ fontSize: tokens.typography.fontSize.sm }}>
         Loading IDE...
       </span>

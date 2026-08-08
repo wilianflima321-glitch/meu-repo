@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 // Contextual Collapse UI Manager
-// A IDE desaparece. O foco é absoluto.
+// NOTE: not wired into any shell yet — no dispatcher currently emits
+// 'sculpt_start' / 'hesitation_detected'. Kept as a scaffold for a future
+// focus-mode pass; do not present as shipped behavior.
 
 export const ContextualCollapseManager: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [uiOpacity, setUiOpacity] = useState(1);
     const [isFlowState, setIsFlowState] = useState(false);
 
     useEffect(() => {
-        // Simulação do Gaze-Tracking e detector de Hesitação.
-        // Se o usuário move o mouse/olhos fluidamente esculpindo, a UI morre.
+        // Placeholder for a future gaze/hesitation heuristic. When the user is
+        // fluidly sculpting, the chrome should fade out of the way.
         const enterFlowState = () => {
             setIsFlowState(true);
-            setUiOpacity(0); // A Interface afunda no vazio. Foco 100% no Barro 3D.
+            setUiOpacity(0); // Chrome fades to let the 3D viewport take full focus.
         };
 
         const exitFlowState = () => {
             setIsFlowState(false);
-            setUiOpacity(1); // Glassmorphism surge apenas quando o usuário para para pensar.
+            setUiOpacity(1); // Glassmorphism chrome returns once the user pauses.
         };
 
         // Event listeners placeholder
@@ -38,7 +40,6 @@ export const ContextualCollapseManager: React.FC<{ children: React.ReactNode }> 
             }}
             className="absolute inset-0 z-50 pointer-events-none"
         >
-            {/* Apenas as paletas semânticas renderizam aqui */}
             {children}
         </div>
     );

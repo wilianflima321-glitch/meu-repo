@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useRef, useState, type DragEvent as ReactDragEvent, type PointerEvent as ReactPointerEvent } from 'react'
-import { ArrowDown, ArrowUp, RotateCcw, ChevronDown, ChevronRight, Move, Layers, Palette, Box as BoxIcon } from 'lucide-react'
+import { RotateCcw, ChevronDown, Move, Layers, Palette, Box as BoxIcon, Cpu, Activity } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { AETHEL_ASSET_DRAG_MIME, readAssetDragPayload } from '../../web/lib/ide/assetDragPayload'
 import { Sparkline } from './Sparkline'
@@ -134,6 +134,21 @@ function computeMultiEditState(
   return { sections: baseline, divergence }
 }
 
+// ── Section accent color per icon type ────────────────────────────────────────
+const SECTION_ACCENT: Record<string, { bar: string; glow: string; label: string }> = {
+  Transform: { bar: '#3b82f6', glow: 'rgba(59,130,246,0.18)', label: '#93c5fd' },
+  Material:  { bar: '#a855f7', glow: 'rgba(168,85,247,0.18)', label: '#d8b4fe' },
+  Geometry:  { bar: '#22d3ee', glow: 'rgba(34,211,238,0.18)', label: '#a5f3fc' },
+  Visibility:{ bar: '#34d399', glow: 'rgba(52,211,153,0.18)', label: '#6ee7b7' },
+  Physics:   { bar: '#f59e0b', glow: 'rgba(245,158,11,0.18)', label: '#fcd34d' },
+  Audio:     { bar: '#f472b6', glow: 'rgba(244,114,182,0.18)', label: '#fbcfe8' },
+  Rendering: { bar: '#818cf8', glow: 'rgba(129,140,248,0.18)', label: '#c7d2fe' },
+}
+
+function getSectionAccent(title: string) {
+  return SECTION_ACCENT[title] ?? { bar: '#3b82f6', glow: 'rgba(59,130,246,0.14)', label: '#93c5fd' }
+}
+
 export function PropertiesPanel3D({
   sections: sectionsProp = [],
   objectName = '',
@@ -147,10 +162,12 @@ export function PropertiesPanel3D({
   // same `AETHEL_ASSET_DRAG_MIME` payload the 3D viewport and Visual
   // Scripting node ports already accept.
   const [assetDropKey, setAssetDropKey] = useState<string | null>(null)
-  const inputClass =
-    'w-full rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]'
-  // Unstable numeric data reads better tabular + monospaced (AGDS density rule) — digits never jitter width as they change.
-  const numericInputClass = `${inputClass} font-mono tabular-nums`
+
+  // AAA input base: glassmorphism, subtle border, monospaced numbers
+  const inputBase =
+    'w-full rounded-md border bg-[rgba(16,22,36,0.7)] text-[var(--aethel-text-secondary)] outline-none transition-all duration-150 focus:border-[var(--aethel-primary)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.2)] focus:text-[var(--aethel-text-primary)]'
+  const borderClass = 'border-[rgba(148,163,184,0.12)]'
+  const numericInputBase = `${inputBase} ${borderClass} font-mono tabular-nums text-right`
 
   const isMultiEdit = Boolean(selectedEntityIds && selectedEntityIds.length > 1 && resolveSections)
   const effectiveEntityIds = selectedEntityIds ?? []
@@ -182,15 +199,17 @@ export function PropertiesPanel3D({
     switch (prop.type) {
       case 'vector3': {
         const axisDivergence = (fieldDivergence as [boolean, boolean, boolean] | undefined) ?? [false, false, false]
+        const AXIS_COLORS = ['#f87171', '#86efac', '#93c5fd'] // red/green/blue X/Y/Z
         return (
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid grid-cols-3 gap-1.5">
             {(['X', 'Y', 'Z'] as const).map((axis, i) => (
               <MathCapableInput
                 key={axis}
                 axisLabel={axis}
+                axisColor={AXIS_COLORS[i]}
                 value={prop.value[i]}
                 isMixed={axisDivergence[i]}
-                inputClassName={`${numericInputClass} py-1 pl-5 pr-1 text-xs`}
+                inputClassName={`${numericInputBase} py-1 pl-5 pr-2 text-xs`}
                 ariaLabel={`${prop.name} ${axis}`}
                 scrubStep={0.01}
                 onCommit={(nextAxisValue) => {
@@ -203,46 +222,67 @@ export function PropertiesPanel3D({
           </div>
         )
       }
-      case 'float':
+      case 'float': {
+        const pct = prop.min !== undefined && prop.max !== undefined
+          ? ((prop.value - prop.min) / (prop.max - prop.min)) * 100
+          : prop.value
         return (
-          <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min={prop.min || 0}
-              max={prop.max || 100}
-              value={prop.value}
-              onChange={(e) => handleValueChange(sectionIndex, propIndex, parseFloat(e.target.value))}
-              aria-label={`${prop.name} slider`}
-              className="flex-1"
-            />
-            {prop.history && prop.history.length > 1 && (
-              <Sparkline values={prop.history} width={40} height={16} ariaLabel={`${prop.name} recent history`} />
-            )}
-            <MathCapableInput
-              value={prop.value}
-              isMixed={Boolean(fieldDivergence)}
-              inputClassName={`${numericInputClass} w-16 px-2 py-1 text-xs`}
-              ariaLabel={`${prop.name} value`}
-              onCommit={(next) => handleValueChange(sectionIndex, propIndex, next)}
-            />
+          <div className="space-y-1">
+            {/* Custom-styled slider track */}
+            <div className="relative flex items-center gap-2">
+              <div className="relative flex-1 h-[3px] rounded-full" style={{ background: 'rgba(148,163,184,0.14)' }}>
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{ width: `${Math.min(100, Math.max(0, pct))}%`, background: 'var(--aethel-primary)' }}
+                />
+                <input
+                  type="range"
+                  min={prop.min ?? 0}
+                  max={prop.max ?? 100}
+                  step={(((prop.max ?? 100) - (prop.min ?? 0)) / 100)}
+                  value={prop.value}
+                  onChange={(e) => handleValueChange(sectionIndex, propIndex, parseFloat(e.target.value))}
+                  aria-label={`${prop.name} slider`}
+                  className="absolute inset-0 w-full opacity-0 cursor-ew-resize"
+                  style={{ WebkitAppearance: 'none' }}
+                />
+              </div>
+              {prop.history && prop.history.length > 1 && (
+                <Sparkline values={prop.history} width={40} height={16} ariaLabel={`${prop.name} recent history`} />
+              )}
+              <MathCapableInput
+                value={prop.value}
+                isMixed={Boolean(fieldDivergence)}
+                inputClassName={`${numericInputBase} w-16 px-2 py-1 text-xs`}
+                ariaLabel={`${prop.name} value`}
+                onCommit={(next) => handleValueChange(sectionIndex, propIndex, next)}
+              />
+            </div>
           </div>
         )
+      }
       case 'color':
         return (
           <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={fieldDivergence ? '#808080' : prop.value}
-              onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-              aria-label={`${prop.name} color picker`}
-              className="w-8 h-6 rounded cursor-pointer"
-            />
+            <div className="relative flex-shrink-0">
+              <input
+                type="color"
+                value={fieldDivergence ? '#808080' : prop.value}
+                onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
+                aria-label={`${prop.name} color picker`}
+                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              />
+              <div
+                className="w-7 h-7 rounded-md border border-[rgba(255,255,255,0.15)] shadow-inner cursor-pointer"
+                style={{ background: fieldDivergence ? '#808080' : prop.value }}
+              />
+            </div>
             <input
               type="text"
               value={fieldDivergence ? MIXED_VALUE : prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
               aria-label={`${prop.name} color value`}
-              className={`${inputClass} flex-1 px-2 py-1 text-xs`}
+              className={`${inputBase} ${borderClass} flex-1 px-2 py-1 text-xs font-mono`}
             />
           </div>
         )
@@ -252,31 +292,39 @@ export function PropertiesPanel3D({
             type="button"
             onClick={() => handleValueChange(sectionIndex, propIndex, !prop.value)}
             aria-label={`${prop.name} ${prop.value ? 'enabled' : 'disabled'}`}
-            className={`w-10 h-5 rounded-full transition-colors ${fieldDivergence
-                ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_60%,var(--aethel-surface-tertiary))]'
-                : prop.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
-              }`}
             title={fieldDivergence ? 'Mixed values across selection' : undefined}
+            className="relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] focus:ring-offset-1 focus:ring-offset-[var(--aethel-surface-primary)]"
+            style={{
+              background: fieldDivergence
+                ? 'rgba(245,158,11,0.4)'
+                : prop.value
+                  ? 'var(--aethel-primary)'
+                  : 'rgba(148,163,184,0.2)',
+              boxShadow: prop.value && !fieldDivergence ? '0 0 8px rgba(59,130,246,0.4)' : 'none',
+            }}
           >
-            <div
-              className={`w-4 h-4 rounded-full bg-[var(--aethel-text-primary)] transition-transform ${prop.value ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
+            <span
+              className="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform duration-200"
+              style={{ transform: prop.value ? 'translateX(18px)' : 'translateX(2px)' }}
             />
           </button>
         )
       case 'enum':
         return (
-          <select
-            value={fieldDivergence ? '' : prop.value}
-            onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-            aria-label={`${prop.name} selection`}
-            className={`${inputClass} px-2 py-1 text-xs`}
-          >
-            {fieldDivergence ? <option value="">{MIXED_VALUE}</option> : null}
-            {(prop.options ?? []).map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={fieldDivergence ? '' : prop.value}
+              onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
+              aria-label={`${prop.name} selection`}
+              className={`${inputBase} ${borderClass} w-full px-2 py-1 text-xs appearance-none pr-7 cursor-pointer`}
+            >
+              {fieldDivergence ? <option value="">{MIXED_VALUE}</option> : null}
+              {(prop.options ?? []).map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--aethel-text-tertiary)]" />
+          </div>
         )
       case 'string': {
         const fieldKey = `${sectionTitle}::${prop.name}`
@@ -299,14 +347,16 @@ export function PropertiesPanel3D({
           <input
             type="text"
             value={fieldDivergence ? '' : prop.value}
-            placeholder={fieldDivergence ? MIXED_VALUE : undefined}
+            placeholder={fieldDivergence ? MIXED_VALUE : 'Drag asset or type path...'}
             onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
             onDragOver={handleAssetDragOver}
             onDragLeave={handleAssetDragLeave}
             onDrop={handleAssetDrop}
             aria-label={`${prop.name} value`}
-            className={`${inputClass} px-2 py-1 text-xs transition-colors ${
-              isAssetDropTarget ? 'ring-1 ring-inset ring-[var(--aethel-info)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : ''
+            className={`${inputBase} px-2 py-1 text-xs transition-all ${
+              isAssetDropTarget
+                ? 'border-[var(--aethel-info)] shadow-[0_0_0_2px_rgba(56,189,248,0.2)] bg-[rgba(56,189,248,0.06)]'
+                : borderClass
             }`}
           />
         )
@@ -317,86 +367,159 @@ export function PropertiesPanel3D({
   }
 
   return (
-    <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)]">
+    <div
+      className="flex h-full flex-col"
+      style={{ background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2">
-        <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Properties</span>
+      <div
+        className="flex items-center justify-between px-3 py-2 flex-shrink-0 border-b"
+        style={{
+          borderColor: 'var(--aethel-border-primary)',
+          background: 'rgba(10,14,24,0.85)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Activity size={12} style={{ color: 'var(--aethel-primary-light)', opacity: 0.8 }} />
+          <span className="text-xs font-semibold tracking-wide" style={{ color: 'var(--aethel-text-primary)', letterSpacing: '0.04em' }}>
+            {objectName ? objectName : 'PROPERTIES'}
+          </span>
+        </div>
         <button
           type="button"
-          className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
+          className="p-1 rounded-lg transition-all duration-150 hover:bg-[rgba(59,130,246,0.12)] hover:text-[var(--aethel-primary-light)]"
+          style={{ color: 'var(--aethel-text-tertiary)' }}
           title="Reset all properties to default"
           aria-label="Reset properties to default"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw size={12} />
         </button>
       </div>
 
       {isMultiEdit ? (
         <div
-          className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-[10px] font-medium text-[var(--aethel-info-light)]"
+          className="border-b px-3 py-1.5 text-[10px] font-medium tracking-wide"
+          style={{
+            borderColor: 'rgba(56,189,248,0.2)',
+            background: 'rgba(56,189,248,0.06)',
+            color: 'var(--aethel-info-light)',
+          }}
           role="status"
         >
-          Editing {effectiveEntityIds.length} objects · fields showing &ldquo;{MIXED_VALUE}&rdquo; differ across the selection
+          MULTI-EDIT — {effectiveEntityIds.length} objects &middot; "{MIXED_VALUE}" indicates mixed values
         </div>
       ) : null}
 
       {/* Properties */}
       <div className="flex-1 overflow-auto">
         {sections.length === 0 ? (
-          <div className="flex h-full items-center justify-center px-4 py-6 text-center text-xs text-[var(--aethel-text-tertiary)]">
-            No object selected.
+          <div
+            className="flex h-full flex-col items-center justify-center gap-3 px-4 py-8 text-center"
+            style={{ color: 'var(--aethel-text-quaternary)' }}
+          >
+            <Cpu size={28} style={{ opacity: 0.25 }} />
+            <span className="text-xs">Select an object to inspect its properties.</span>
           </div>
         ) : (
-        sections.map((section, sectionIndex) => (
-          <div key={section.title} className="border-b border-[var(--aethel-border-secondary)]">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSection(prev => {
-                  const next = new Set(prev)
-                  if (next.has(sectionIndex)) next.delete(sectionIndex)
-                  else next.add(sectionIndex)
-                  return next
-                })
-              }}
-              aria-expanded={activeSection.has(sectionIndex)}
-              aria-label={`${activeSection.has(sectionIndex) ? 'Collapse' : 'Expand'} section ${section.title}`}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <section.icon className="w-3.5 h-3.5 text-[var(--aethel-primary-light)]" />
-                {section.title}
-              </div>
-              {activeSection.has(sectionIndex) ? (
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
-              )}
-            </button>
-
-            {activeSection.has(sectionIndex) && (
-              <div className="px-3 py-2 space-y-3">
-                {section.properties.map((prop, propIndex) => (
-                  <div key={prop.name}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-[var(--aethel-text-secondary)]">{prop.name}</span>
-                    </div>
-                    {renderProperty(sectionIndex, prop, propIndex)}
+          sections.map((section, sectionIndex) => {
+            const accent = getSectionAccent(section.title)
+            const isOpen = activeSection.has(sectionIndex)
+            return (
+              <div
+                key={section.title}
+                className="border-b"
+                style={{ borderColor: 'rgba(148,163,184,0.08)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(prev => {
+                      const next = new Set(prev)
+                      if (next.has(sectionIndex)) next.delete(sectionIndex)
+                      else next.add(sectionIndex)
+                      return next
+                    })
+                  }}
+                  aria-expanded={isOpen}
+                  aria-label={`${isOpen ? 'Collapse' : 'Expand'} section ${section.title}`}
+                  className="w-full flex items-center justify-between px-3 py-2 transition-all duration-150 group"
+                  style={{
+                    background: isOpen ? `${accent.glow}` : 'transparent',
+                  }}
+                  onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = 'rgba(148,163,184,0.04)' }}
+                  onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = 'transparent' }}
+                >
+                  <div className="flex items-center gap-2">
+                    {/* Section accent bar */}
+                    <div
+                      className="w-[3px] h-4 rounded-full flex-shrink-0"
+                      style={{ background: accent.bar }}
+                    />
+                    <section.icon size={12} style={{ color: accent.label }} />
+                    <span
+                      className="text-[11px] font-semibold tracking-widest uppercase"
+                      style={{ color: accent.label, letterSpacing: '0.08em' }}
+                    >
+                      {section.title}
+                    </span>
                   </div>
-                ))}
+                  <ChevronDown
+                    size={12}
+                    style={{
+                      color: 'var(--aethel-text-tertiary)',
+                      transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                      transition: 'transform 200ms cubic-bezier(0.16,1,0.3,1)',
+                    }}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div
+                    className="px-3 pt-2 pb-3 space-y-3"
+                    style={{ background: 'rgba(10,14,24,0.4)' }}
+                  >
+                    {section.properties.map((prop, propIndex) => (
+                      <div key={prop.name}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span
+                            className="text-[11px] font-medium"
+                            style={{ color: 'var(--aethel-text-tertiary)' }}
+                          >
+                            {prop.name}
+                          </span>
+                        </div>
+                        {renderProperty(sectionIndex, prop, propIndex)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))
+            )
+          })
         )}
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2">
-        <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
-          <span>{sections.reduce((acc, s) => acc + s.properties.length, 0)} properties</span>
-          <span>{isMultiEdit ? `${effectiveEntityIds.length} objects` : objectName}</span>
-        </div>
+      <div
+        className="flex items-center justify-between px-3 py-2 border-t flex-shrink-0"
+        style={{
+          borderColor: 'var(--aethel-border-primary)',
+          background: 'rgba(10,14,24,0.7)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <span className="text-[10px] font-mono" style={{ color: 'var(--aethel-text-quaternary)' }}>
+          {sections.reduce((acc, s) => acc + s.properties.length, 0)} fields
+        </span>
+        {isMultiEdit && (
+          <span
+            className="text-[10px] font-mono"
+            style={{ color: 'var(--aethel-info-light)', opacity: 0.8 }}
+          >
+            {effectiveEntityIds.length} entities
+          </span>
+        )}
       </div>
     </div>
   )
@@ -419,6 +542,7 @@ function MathCapableInput({
   value,
   isMixed = false,
   axisLabel,
+  axisColor,
   ariaLabel,
   inputClassName,
   scrubStep = 0.1,
@@ -427,6 +551,7 @@ function MathCapableInput({
   value: number
   isMixed?: boolean
   axisLabel?: string
+  axisColor?: string
   ariaLabel: string
   inputClassName: string
   scrubStep?: number
@@ -480,10 +605,13 @@ function MathCapableInput({
       {axisLabel ? (
         <span
           onPointerDown={handleScrubPointerDown}
-          title={`Drag to scrub ${axisLabel} — hold Shift for fine, Ctrl for coarse`}
-          className={`absolute left-2 top-1/2 -translate-y-1/2 select-none text-xs font-mono cursor-ew-resize ${
-            isScrubbing ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-info-light)]'
-          }`}
+          title={`Drag to scrub ${axisLabel} — Shift for fine, Ctrl for coarse`}
+          className="absolute left-1.5 top-1/2 -translate-y-1/2 select-none text-[10px] font-bold font-mono cursor-ew-resize z-10 transition-opacity duration-100"
+          style={{
+            color: isScrubbing ? 'var(--aethel-text-inverse)' : axisColor ?? 'var(--aethel-text-quaternary)',
+            opacity: isScrubbing ? 1 : 0.9,
+            textShadow: isScrubbing ? `0 0 6px ${axisColor ?? 'var(--aethel-text-inverse)'}` : 'none',
+          }}
         >
           {axisLabel}
         </span>

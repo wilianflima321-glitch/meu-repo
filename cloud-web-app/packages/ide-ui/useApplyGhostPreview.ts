@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Frente A40 — Ghost previews holográficos.
+ * Holographic ghost previews for staged AI diffs.
  *
  * While a staged AI change (`pendingDiff`) targets the file open in the editor,
  * this hook paints a Cursor-style preview directly on the Monaco surface:

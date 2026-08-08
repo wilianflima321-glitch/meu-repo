@@ -73,7 +73,7 @@ export function getPrimaryActionButtonStyle(isEnabled: boolean): CSSProperties {
     backgroundImage: 'linear-gradient(135deg, var(--aethel-primary-light) 0%, var(--aethel-primary) 60%)',
     border: 'none',
     borderRadius: tokens.radius.md,
-    color: '#fff',
+    color: 'var(--aethel-text-inverse)',
     fontSize: tokens.typography.fontSize.xs,
     fontWeight: tokens.typography.fontWeight.semibold,
     cursor: isEnabled ? 'pointer' : 'not-allowed',

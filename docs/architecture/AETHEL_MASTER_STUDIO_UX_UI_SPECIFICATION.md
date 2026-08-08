@@ -28,10 +28,27 @@
 | `VoronoiDestructionPanel.tsx` | **MISSING** | Kernel math PARTIAL; UI absent | No Chaos exceeded |
 | `FacialBlendshapePanel.tsx` | **MISSING** | HELD / absent | No MetaHuman exceeded |
 | `NiagaraVfxGraphPanel.tsx` | **MISSING** | Kernel LBM PARTIAL; Niagara AAA HELD | No |
+| `DetailInspectorPanel.tsx` | **Exists** at `cloud-web-app/packages/ide-ui/panels/DetailInspectorPanel.tsx` but is a **fully static, unwired mockup** (uncontrolled `defaultValue` inputs, zero `onChange`, no props) — 0% | **HELD** — not imported/exported anywhere; no Yjs, no Tauri IPC (2026-08-08 shell-ux-audit) | **No.** §2.16's "Edits map directly to `SharedArrayBuffer` for zero-latency 120Hz updates" and "Yjs Real-Time Sync" claims are 0% real for this file — do not market. Real manual property editing lives in `PropertiesPanel3D.tsx` (functional, but 701 LoC over the 500-LoC limit — OPEN). |
+| `PostProcessSettingsPanel.tsx` | Exists at `cloud-web-app/packages/ide-ui/PostProcessSettingsPanel.tsx` | Not audited this pass (creative/viewport panel — out of shell/chrome/nav scope) | Unverified — do not assume §2.17 parity claims are true |
 
 **Acceptance columns required before any §2 “Parity Exceeded” line may be treated as DONE:** claim · code paths · status · benchmark · golden/video · RTX 3060 budget · disk budget · blocked_by · last proof · marketing yes/no.
 
 **Disk constraint (this workstation):** C: critically low free space; prefer `E:\aethel-target-gnu` / D: for cargo targets; no ONNX/weight dumps without Founder drop + content-addressed cache.
+
+---
+
+## 🛡️ 0.5 BASELINE UX SUPREMACY (THE ZERO-AI STATE)
+
+**Absolute Rule:** The Aethel Studio IDE MUST be inherently superior to Unreal Engine's Slate Editor *even when all AI features are completely disabled or offline*. 
+If Aethel's interface relies on AI to overcome bad design, convoluted menus, or sluggish performance, it fails as a professional tool.
+
+**Offline Supremacy Metrics:**
+1. **Boot Time:** Aethel Studio must boot to a rendering viewport in < 3 seconds (vs UE5's 30-120 seconds).
+2. **Ergonomic Superiority:** Standard human interactions (drag-and-drop, node wiring, asset browsing) must require fewer clicks and exhibit less UI latency than UE5.
+3. **Collaborative Baseline:** Yjs-based Multi-User Editing must function natively over local/cloud networks without complex server lock setups, independently of AI presence.
+4. **Instant Iteration:** WASM hot-reloading for logic must bypass C++ compile times, providing instant feedback to human programmers.
+
+*The AI Orchestrator is an Overdrive multiplier on top of a flawless, deterministic human UX foundation. It is not a patch for bad UX.*
 
 ---
 
@@ -394,7 +411,46 @@
 * **Drag-and-Drop Force Fields:** Drag gravity wells or wind turbulence fields directly into the VFX node canvas.
 
 #### C. Competitor Supremacy Requirements
-* **Unreal Niagara Parity Exceeded:** Natively compiled WGSL fluid & particle simulation running at 120 FPS.
+* **Unreal Niagara Parity Exceeded:** Zero-alloc WebGPU/Vulkan compute shaders manipulating 10+ million particles in real-time, completely bypassing CPU memory bottlenecks.
+
+---
+
+### 2.16 PANEL 16: DETAIL INSPECTOR & MANUAL REFINEMENT (`DetailInspectorPanel.tsx`)
+
+#### A. Interface Layout & Components
+* **Entity Header:** Context-aware title showing selected object name, ID, and active Rust ECS components.
+* **Property Sliders & Inputs:**
+  * Transform (Location, Rotation, Scale) with XYZ vector inputs and padlock (uniform scale).
+  * Direct float sliders for Material Overrides, Physics Mass, Friction, and Restitution.
+  * Color Picker with RGBA, HSV, and Hex input for lighting and base colors.
+* **Zero-AI Guarantee:** All parameters are exposed as pure mathematical variables. No AI prompt is required to tune them.
+
+#### B. Usability & Micro-Interactions
+* **Drag-to-Scrub:** Click and drag on any numeric label (e.g., "X: 1.0") to smoothly slide the value up or down.
+* **Yjs Real-Time Sync:** Modifying a value here instantly broadcasts the Delta State across the network to all other connected collaborators.
+
+#### C. Competitor Supremacy Requirements
+* **Unreal Details Panel Parity Exceeded:** Edits map directly to `SharedArrayBuffer` for zero-latency 120Hz updates without GameThread bottlenecks.
+
+---
+
+### 2.17 PANEL 17: POST-PROCESS & LIGHTING VOLUMES (`PostProcessSettingsPanel.tsx`)
+
+#### A. Interface Layout & Components
+* **Lighting Master Controls:**
+  * Radiance Cascade (GI) Ray Steps, Voxel Grid Resolution.
+  * Sun/Directional Light Lux intensity, Kelvin color temperature.
+* **Cinematic Post-Processing:**
+  * ACES Tone Mapping curves (Shoulder, Toe, Exposure).
+  * Bloom (Threshold, Scatter, Intensity).
+  * Chromatic Aberration and Film Grain.
+
+#### B. Usability & Micro-Interactions
+* **Volume Gizmos:** Drag and drop 3D bounding boxes in the Viewport to isolate post-process effects locally.
+* **A/B Split View:** Instantly compare post-process changes with a draggable visual slider over the viewport.
+
+#### C. Competitor Supremacy Requirements
+* **Unreal Post-Process Volume Parity Exceeded:** Fully manual sliders directly tied to WebGPU uniform buffers, offering pixel-perfect refinement offline.
 
 ---
 

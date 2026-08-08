@@ -200,10 +200,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         {/* Footer */}
         <div className="border-t border-[var(--aethel-border-secondary)] px-5 py-3">
           <p className="text-xs text-[var(--aethel-text-quaternary)]">
-            Pressione <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
-            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">K</kbd> +{' '}
-            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
-            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">S</kbd> to open this list
+            Press <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">?</kbd> to open this list anytime
           </p>
         </div>
       </div>
