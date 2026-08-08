@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import { AethelViewport3D } from '@/components/viewport/AethelViewport3D';
 import { AETHEL_ASSET_DRAG_MIME } from '@aethel/ide-ui/FileExplorerTree';
 import { useGizmoTransformPersistence } from '@/hooks/useGizmoTransformPersistence';
@@ -259,7 +260,7 @@ export function SceneViewportStage({
         scale: [1, 1, 1] as [number, number, number],
         visible: true,
         locked: false,
-        color: resolveCssVarColor('--aethel-info', 'rgb(56, 189, 248)'),
+        color: resolveCssVarColor('--aethel-info', tokenColor('--aethel-info')),
       },
     ]);
   }, [parseAssetDragPayload, setObjects]);

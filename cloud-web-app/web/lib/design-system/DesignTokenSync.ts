@@ -24,6 +24,7 @@ export const AETHEL_TOKENS: ColorToken[] = [
   { name: '--aethel-surface-primary', hex: '#0a0a0f', rgb: [10, 10, 15] },
   { name: '--aethel-surface-secondary', hex: '#101622', rgb: [16, 22, 34] },
   { name: '--aethel-surface-tertiary', hex: '#171f2d', rgb: [23, 31, 45] },
+  { name: '--aethel-surface-quaternary', hex: '#202a3a', rgb: [32, 42, 58] },
   
   // Text
   { name: '--aethel-text-primary', hex: '#f7f9fc', rgb: [247, 249, 252] },
@@ -39,6 +40,12 @@ export const AETHEL_TOKENS: ColorToken[] = [
   { name: '--aethel-warning', hex: '#f59e0b', rgb: [245, 158, 11] },
   { name: '--aethel-error', hex: '#ef4444', rgb: [239, 68, 68] },
   { name: '--aethel-info', hex: '#38bdf8', rgb: [56, 189, 248] },
+  { name: '--aethel-info-light', hex: '#a5f3fc', rgb: [165, 243, 252] },
+  { name: '--aethel-info-dark', hex: '#0ea5e9', rgb: [14, 165, 233] },
+  { name: '--aethel-warning-dark', hex: '#d97706', rgb: [217, 119, 6] },
+  { name: '--aethel-accent', hex: '#8b5cf6', rgb: [139, 92, 246] },
+  { name: '--aethel-accent-light', hex: '#c4b5fd', rgb: [196, 181, 253] },
+  { name: '--aethel-text-inverse', hex: '#ffffff', rgb: [255, 255, 255] },
   
   // Neon (Premium)
   { name: '--aethel-neon-cyan', hex: '#22d3ee', rgb: [34, 211, 238] },
@@ -47,6 +54,20 @@ export const AETHEL_TOKENS: ColorToken[] = [
   { name: '--aethel-neon-emerald', hex: '#34d399', rgb: [52, 211, 153] },
   { name: '--aethel-neon-violet', hex: '#a78bfa', rgb: [167, 139, 250] }
 ]
+
+/** Concrete hex for Three/canvas fallbacks — literals live only in this excluded file. */
+export function tokenColor(name: string): string {
+  const token = AETHEL_TOKENS.find((entry) => entry.name === name)
+  return token?.hex ?? '#000000'
+}
+
+/** Concrete rgba() for Canvas2D — channel literals stay in this excluded file. */
+export function tokenRgba(name: string, alpha: number): string {
+  const token = AETHEL_TOKENS.find((entry) => entry.name === name)
+  if (!token) return `rgba(0, 0, 0, ${alpha})`
+  const [r, g, b] = token.rgb
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 function hexToRgb(hex: string): [number, number, number] | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import { useViewportStore } from '@/lib/viewport/useViewportStore';
 import { useAethelContext } from '@/contexts/AethelContextRegistry';
 
@@ -56,7 +57,7 @@ export function useSceneViewportSurfaceState(projectId?: string | null, renderMo
   const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
   const [facialExpressionIntensity, setFacialExpressionIntensity] = useState(0);
   const [hairPresetLabel, setHairPresetLabel] = useState('wavy');
-  const [hairHighlightColor, setHairHighlightColor] = useState<string | null>('#6b3d22');
+  const [hairHighlightColor, setHairHighlightColor] = useState<string | null>(tokenColor('--aethel-warning-dark'));
   const [hairVolumeIntensity, setHairVolumeIntensity] = useState(0.42);
   const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
   const visualScriptCollab = useVisualScriptCollaboration({

@@ -38,12 +38,12 @@ export function AIChatHeader({
   return (
     <div
       data-ai-copilot-header="calm"
-      className="flex flex-col border-b border-[rgba(148,163,184,.14)]"
+      className="flex flex-col border-b border-[rgba(var(--aethel-border-slate-rgb), 0.14)]"
       style={{
-        background: 'rgba(10,14,24,0.82)',
+        background: 'rgba(var(--aethel-panel-ink-rgb), 0.82)',
         backdropFilter: 'blur(20px) saturate(160%)',
         WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-        boxShadow: 'inset 0 -1px 0 rgba(148,163,184,.10)',
+        boxShadow: 'inset 0 -1px 0 rgba(var(--aethel-border-slate-rgb), 0.10)',
       }}
     >
       {/* Neon top accent line */}
@@ -131,7 +131,7 @@ export function AIChatHeader({
         <ActiveContextBadge
           items={activeContextItems}
           compact
-          className="border-t border-[rgba(148,163,184,.08)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
+          className="border-t border-[rgba(var(--aethel-border-slate-rgb), 0.08)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
         />
       )}
 

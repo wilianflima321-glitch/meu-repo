@@ -62,10 +62,10 @@ export function CitationPill({ source }: CitationPillProps) {
         onClick={() => { if (source.url) window.open(source.url, '_blank', 'noopener') }}
         className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded px-1 text-[9px] font-bold transition-all"
         style={{
-          background: 'rgba(0,229,255,0.10)',
-          border: '1px solid rgba(0,229,255,0.30)',
+          background: 'rgba(var(--aethel-neon-cyan-rgb), 0.10)',
+          border: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.30)',
           color: 'var(--aethel-neon-cyan)',
-          boxShadow: open ? '0 0 8px rgba(0,229,255,0.22)' : 'none',
+          boxShadow: open ? '0 0 8px rgba(var(--aethel-neon-cyan-rgb), 0.22)' : 'none',
           fontFamily: "'Geist Mono', monospace",
           verticalAlign: 'super',
           fontSize: 8,
@@ -88,9 +88,9 @@ export function CitationPill({ source }: CitationPillProps) {
             transition={{ duration: 0.12 }}
             className="absolute bottom-full left-1/2 z-50 mb-2 w-72 -translate-x-1/2 overflow-hidden rounded-xl"
             style={{
-              background: 'rgba(2,6,23,0.95)',
-              border: '1px solid rgba(0,229,255,0.22)',
-              boxShadow: '0 16px 48px rgba(0,0,0,0.55), 0 0 16px rgba(0,229,255,0.08)',
+              background: 'rgba(var(--aethel-surface-primary-rgb), 0.95)',
+              border: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.22)',
+              boxShadow: '0 16px 48px rgba(var(--aethel-brand-pure-black-rgb), 0.55), 0 0 16px rgba(var(--aethel-neon-cyan-rgb), 0.08)',
               backdropFilter: 'blur(16px)',
             }}
             role="tooltip"
@@ -98,11 +98,11 @@ export function CitationPill({ source }: CitationPillProps) {
             {/* Citation number header */}
             <div
               className="flex items-center gap-2 px-3 py-2"
-              style={{ borderBottom: '1px solid rgba(0,229,255,0.10)' }}
+              style={{ borderBottom: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.10)' }}
             >
               <span
                 className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[9px] font-bold"
-                style={{ background: 'rgba(0,229,255,0.12)', color: 'var(--aethel-neon-cyan)', border: '1px solid rgba(0,229,255,0.28)' }}
+                style={{ background: 'rgba(var(--aethel-neon-cyan-rgb), 0.12)', color: 'var(--aethel-neon-cyan)', border: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.28)' }}
               >
                 {source.index}
               </span>
@@ -125,7 +125,7 @@ export function CitationPill({ source }: CitationPillProps) {
             {(source.url || source.subtitle) && (
               <div
                 className="flex items-center justify-between px-3 py-1.5"
-                style={{ borderTop: '1px solid rgba(0,229,255,0.08)' }}
+                style={{ borderTop: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.08)' }}
               >
                 <span className="truncate text-[9px] text-[var(--aethel-text-quaternary)]">
                   {source.subtitle ?? new URL(source.url ?? 'https://example.com').hostname}
@@ -135,7 +135,7 @@ export function CitationPill({ source }: CitationPillProps) {
                     href={source.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 shrink-0 rounded border border-[rgba(0,229,255,0.18)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-neon-cyan)] transition hover:bg-[rgba(0,229,255,0.08)]"
+                    className="ml-2 shrink-0 rounded border border-[rgba(var(--aethel-neon-cyan-rgb), 0.18)] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-[var(--aethel-neon-cyan)] transition hover:bg-[rgba(var(--aethel-neon-cyan-rgb), 0.08)]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Open

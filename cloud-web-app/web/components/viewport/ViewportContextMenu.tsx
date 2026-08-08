@@ -86,9 +86,9 @@ export function ViewportContextMenu({
             // Clamp to viewport
             transform: `translate(${x + 200 > window.innerWidth ? '-100%' : '0'}, ${y + 280 > window.innerHeight ? '-100%' : '0'})`,
           }}
-          className="min-w-[192px] overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_18%,transparent)] bg-[rgba(2,6,23,0.92)] shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_20px_rgba(0,229,255,0.07)] [backdrop-filter:blur(16px)]"
+          className="min-w-[192px] overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_18%,transparent)] bg-[rgba(var(--aethel-surface-primary-rgb), 0.92)] shadow-[0_24px_60px_rgba(0,0,0,0.6),0_0_20px_rgba(0,229,255,0.07)] [backdrop-filter:blur(16px)]"
           // Block viewport key events propagating through menu
-          onKeyDown={(e) => e.stopPropagation()}
+          onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
         >
           {/* Header */}
           {objectName && (

@@ -4,15 +4,15 @@ import type { GizmoTransformPersistenceChipTone } from '@/lib/viewport/gizmo-tra
 
 const memoryChipToneClass: Record<GizmoTransformPersistenceChipTone, string> = {
   neutral:
-    'border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.78)] text-[var(--aethel-text-tertiary)]',
+    'border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.78)] text-[var(--aethel-text-tertiary)]',
   saving:
-    'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-info-light)]',
+    'border-[color-mix(in_srgb,var(--aethel-info)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,rgba(var(--aethel-panel-ink-rgb), 0.72))] text-[var(--aethel-info-light)]',
   success:
-    'border-[color-mix(in_srgb,var(--aethel-success)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-success-light)]',
+    'border-[color-mix(in_srgb,var(--aethel-success)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,rgba(var(--aethel-panel-ink-rgb), 0.72))] text-[var(--aethel-success-light)]',
   warning:
-    'border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-warning-light)]',
+    'border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_14%,rgba(var(--aethel-panel-ink-rgb), 0.72))] text-[var(--aethel-warning-light)]',
   error:
-    'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_14%,rgba(7,12,20,0.72))] text-[var(--aethel-error-light)]',
+    'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_14%,rgba(var(--aethel-panel-ink-rgb), 0.72))] text-[var(--aethel-error-light)]',
 }
 
 export function ViewportGizmoMemoryChip({

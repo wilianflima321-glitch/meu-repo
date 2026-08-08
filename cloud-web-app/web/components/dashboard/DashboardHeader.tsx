@@ -40,7 +40,7 @@ export function DashboardHeader({
     : null
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,12,20,0.96),rgba(11,13,18,0.92))] backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(var(--aethel-surface-primary-rgb), 0.96),rgba(var(--aethel-surface-primary-rgb), 0.92))] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <button
@@ -56,7 +56,7 @@ export function DashboardHeader({
             </svg>
           </button>
 
-          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent))] px-3 py-1.5 shadow-[0_20px_50px_var(--aethel-shadow-xl,rgba(2,6,23,0.42))]">
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent))] px-3 py-1.5 shadow-[0_20px_50px_var(--aethel-shadow-xl,rgba(var(--aethel-surface-primary-rgb), 0.42))]">
             <Image
               src="/branding/aethel-mark.svg"
               alt="Aethel"
@@ -174,7 +174,7 @@ export function DashboardHeader({
           <button
             type="button"
             onClick={onOpenIde}
-            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-accent,rgba(79,70,229,0.95)),var(--aethel-info,rgba(14,165,233,0.9)))] px-4 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_16px_40px_color-mix(in_srgb,var(--aethel-info)_24%,transparent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-accent),var(--aethel-info))] px-4 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_16px_40px_color-mix(in_srgb,var(--aethel-info)_24%,transparent)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

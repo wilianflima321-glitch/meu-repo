@@ -105,7 +105,7 @@ export function ViewportTopToolbar({
   return (
     <>
       <div
-        className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.78)] p-1.5 shadow-[0_18px_54px_rgba(0,0,0,0.32)] backdrop-blur-md"
+        className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.78)] p-1.5 shadow-[0_18px_54px_rgba(0,0,0,0.32)] backdrop-blur-md"
         role="toolbar"
         aria-label="Viewport compact tool rail"
         data-viewport-top-toolbar="compact"
@@ -215,7 +215,7 @@ export function ViewportTopToolbar({
 
       {/* Stat FPS Overlay — real THREE.WebGLRenderer.info telemetry, sampled in RenderStatsProbe (no fabricated numbers) */}
       {showStats && (
-        <div className="absolute right-4 top-4 z-20 flex flex-col gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.85)] p-3 font-mono text-[11px] text-[var(--aethel-text-primary)] shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-4 top-4 z-20 flex flex-col gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.85)] p-3 font-mono text-[11px] text-[var(--aethel-text-primary)] shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between gap-4 border-b border-[var(--aethel-border-subtle)] pb-1.5 mb-1">
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
               <Activity className="h-3.5 w-3.5 animate-pulse" /> Stat FPS
@@ -306,7 +306,7 @@ function ViewportCameraDropdown({
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
       {open && (
-        <div className="absolute left-0 top-11 z-30 grid min-w-[140px] gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.94)] p-2 shadow-[0_22px_64px_rgba(0,0,0,0.44)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute left-0 top-11 z-30 grid min-w-[140px] gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.94)] p-2 shadow-[0_22px_64px_rgba(0,0,0,0.44)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100">
           <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
             View menu
           </p>

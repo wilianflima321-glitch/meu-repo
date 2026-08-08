@@ -64,7 +64,7 @@ export function ViewportDropGhost({
 
           {/* Label below the ghost */}
           {label && (
-            <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(2,6,23,0.85)] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-neon-cyan)] [backdrop-filter:blur(8px)]">
+            <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(var(--aethel-surface-primary-rgb), 0.85)] px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-neon-cyan)] [backdrop-filter:blur(8px)]">
               {label}
             </div>
           )}

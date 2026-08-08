@@ -1,3 +1,4 @@
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import type { ViewportAssetImportMetadata } from '@/lib/viewport/viewport-asset-import'
 import type { GizmoAxisPlaneConstraint, GizmoPivotMode } from '@/lib/viewport/gizmo-elite-controls'
 import type { GizmoTransformOperation } from '@/lib/viewport/gizmo-transform-operation'
@@ -133,7 +134,7 @@ export const viewportSeedObjects: ViewportSceneObject[] = [
     name: 'Airlock Shell',
     type: 'mesh',
     geometry: 'box',
-    color: 'rgb(125, 211, 252)',
+    color: tokenColor('--aethel-info-light'),
     position: [0, 0.55, 0],
     rotation: [0, 0.35, 0],
     scale: [1.8, 1.1, 1.2],
@@ -143,7 +144,7 @@ export const viewportSeedObjects: ViewportSceneObject[] = [
     id: 'camera-rig',
     name: 'Camera Rig',
     type: 'camera',
-    color: 'rgb(167, 139, 250)',
+    color: tokenColor('--aethel-neon-violet'),
     position: [2.2, 1.5, 2.4],
     rotation: [-0.35, 0.72, 0],
     scale: [1, 1, 1],
@@ -153,7 +154,7 @@ export const viewportSeedObjects: ViewportSceneObject[] = [
     id: 'key-light',
     name: 'Key Light',
     type: 'light',
-    color: 'rgb(251, 191, 36)',
+    color: tokenColor('--aethel-neon-amber'),
     position: [1.6, 2.2, 1.8],
     rotation: [0, 0, 0],
     scale: [1, 1, 1],

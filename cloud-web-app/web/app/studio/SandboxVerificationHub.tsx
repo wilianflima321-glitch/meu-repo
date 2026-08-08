@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 // @aethel-heavy-async-boundary
 import { motion, AnimatePresence } from 'framer-motion'
 import { resolveCssVarColor, resolveCssVarRgba } from '@/lib/style/resolve-css-var'
@@ -138,9 +139,9 @@ function MatrixRain({ visible }: { visible: boolean }) {
     const cols = Math.floor(W / COL_W)
     dropsRef.current = Array.from({ length: cols }, () => Math.random() * -H)
 
-    const fade = resolveCssVarRgba('--aethel-surface-primary', 0.12, 'rgb(10, 10, 15)')
-    const bright = resolveCssVarColor('--aethel-neon-emerald', 'rgb(52, 211, 153)')
-    const dim = resolveCssVarColor('--aethel-neon-cyan', 'rgb(34, 211, 238)')
+    const fade = resolveCssVarRgba('--aethel-surface-primary', 0.12, tokenColor('--aethel-surface-primary'))
+    const bright = resolveCssVarColor('--aethel-neon-emerald', tokenColor('--aethel-neon-emerald'))
+    const dim = resolveCssVarColor('--aethel-neon-cyan', tokenColor('--aethel-neon-cyan'))
 
     const draw = () => {
       ctx.fillStyle = fade
@@ -285,7 +286,7 @@ export function SandboxVerificationHub({
             value={cpuThreads}
             max={16}
             colorVar="--aethel-neon-cyan"
-            colorFallback="rgb(34, 211, 238)"
+            colorFallback={tokenColor('--aethel-neon-cyan')}
             unit="thr"
           />
           <TelemetryDial
@@ -293,7 +294,7 @@ export function SandboxVerificationHub({
             value={memoryMB}
             max={4096}
             colorVar="--aethel-accent"
-            colorFallback="rgb(139, 92, 246)"
+            colorFallback={tokenColor('--aethel-accent')}
             unit="MB"
           />
           <TelemetryDial
@@ -301,7 +302,7 @@ export function SandboxVerificationHub({
             value={hpmScore}
             max={100}
             colorVar="--aethel-neon-emerald"
-            colorFallback="rgb(52, 211, 153)"
+            colorFallback={tokenColor('--aethel-neon-emerald')}
             unit="pts"
           />
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import type { VisualScript } from '@aethel/visual-scripting/VisualScriptEditor';
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D';
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { GameplayAbilitySpec } from '@aethel/gameplay-ability-system';
@@ -63,24 +64,24 @@ export function deriveAbilityAccent(
   // Token-resolved accents for Three (fallback = token RGB from design system).
   if (normalized.includes('fire')) {
     return {
-      color: resolveCssVarColor('--aethel-warning', 'rgb(245, 158, 11)'),
+      color: resolveCssVarColor('--aethel-warning', tokenColor('--aethel-warning')),
       label: ability.name,
     };
   }
   if (normalized.includes('heal')) {
     return {
-      color: resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'),
+      color: resolveCssVarColor('--aethel-success', tokenColor('--aethel-success')),
       label: ability.name,
     };
   }
   if (normalized.includes('shield')) {
     return {
-      color: resolveCssVarColor('--aethel-info', 'rgb(56, 189, 248)'),
+      color: resolveCssVarColor('--aethel-info', tokenColor('--aethel-info')),
       label: ability.name,
     };
   }
   return {
-    color: resolveCssVarColor('--aethel-neon-violet', 'rgb(167, 139, 250)'),
+    color: resolveCssVarColor('--aethel-neon-violet', tokenColor('--aethel-neon-violet')),
     label: ability.name,
   };
 }

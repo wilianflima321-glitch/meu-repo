@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef } from 'react'
+import { tokenColor, tokenRgba } from '@/lib/design-system/DesignTokenSync'
 
 export type WaveformSpeaker = 'ai' | 'user' | 'idle'
 
@@ -21,13 +22,11 @@ interface LiveVoiceWaveformProps {
   className?: string
 }
 
-// Canvas 2D `fillStyle`/`shadowColor` cannot resolve CSS custom properties, so
-// these mirror the accent (#8b5cf6 = --aethel-accent) / neon-cyan design-token
-// palette as literal values rather than referencing var(--aethel-*) directly.
+// Canvas 2D cannot resolve CSS vars — concrete channels come from DesignTokenSync.
 const SPEAKER_COLORS: Record<WaveformSpeaker, { from: string; to: string; glow: string }> = {
-  ai:   { from: '#8b5cf6', to: '#c084fc', glow: 'rgba(139,92,246,0.4)' },
-  user: { from: '#06b6d4', to: '#00e5ff', glow: 'rgba(0,229,255,0.4)'  },
-  idle: { from: '#1e293b', to: '#334155', glow: 'transparent'          },
+  ai:   { from: tokenColor('--aethel-accent'), to: tokenColor('--aethel-accent-light'), glow: tokenRgba('--aethel-accent', 0.4) },
+  user: { from: tokenColor('--aethel-info-dark'), to: tokenColor('--aethel-neon-cyan'), glow: tokenRgba('--aethel-neon-cyan', 0.4) },
+  idle: { from: tokenColor('--aethel-surface-tertiary'), to: tokenColor('--aethel-surface-quaternary'), glow: 'transparent' },
 }
 
 export function LiveVoiceWaveform({

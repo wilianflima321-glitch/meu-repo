@@ -47,7 +47,7 @@ export function ViewportRuntimeDepthStatus({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.82)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+          className="flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.82)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)] shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           aria-label="Open viewport runtime details"
           aria-expanded={false}
         >
@@ -64,7 +64,7 @@ export function ViewportRuntimeDepthStatus({
 
   return (
     <div
-      className="absolute bottom-4 left-4 z-20 max-w-[360px] rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[rgba(7,12,20,0.82)] px-3 py-2 text-xs shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md"
+      className="absolute bottom-4 left-4 z-20 max-w-[360px] rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.82)] px-3 py-2 text-xs shadow-[0_18px_44px_rgba(0,0,0,0.32)] backdrop-blur-md"
       role="status"
       aria-label="Viewport render depth status"
       data-viewport-runtime-status="expanded"

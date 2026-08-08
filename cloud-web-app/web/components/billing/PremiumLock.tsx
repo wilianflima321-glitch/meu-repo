@@ -349,8 +349,8 @@ export function PremiumLock({
           gap: 16px;
           background: linear-gradient(
             135deg,
-            rgba(0, 0, 0, 0.6) 0%,
-            rgba(0, 0, 0, 0.8) 100%
+            rgba(var(--aethel-brand-pure-black-rgb), 0.6) 0%,
+            rgba(var(--aethel-brand-pure-black-rgb), 0.8) 100%
           );
           cursor: pointer;
           transition: background 0.2s ease;
@@ -358,8 +358,8 @@ export function PremiumLock({
         .premium-lock-overlay:hover {
           background: linear-gradient(
             135deg,
-            rgba(0, 0, 0, 0.5) 0%,
-            rgba(0, 0, 0, 0.7) 100%
+            rgba(var(--aethel-brand-pure-black-rgb), 0.5) 0%,
+            rgba(var(--aethel-brand-pure-black-rgb), 0.7) 100%
           );
         }
         .premium-lock-badge {
@@ -386,13 +386,13 @@ export function PremiumLock({
         }
         .premium-lock-cta:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 12px rgba(var(--aethel-brand-pure-black-rgb), 0.3);
         }
         /* Modal styles */
         .premium-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.8);
+          background: rgba(var(--aethel-brand-pure-black-rgb), 0.8);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -505,7 +505,7 @@ export function PremiumLock({
         }
         .premium-modal-upgrade:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+          box-shadow: 0 4px 20px rgba(var(--aethel-warning-rgb), 0.4);
         }
         .premium-modal-note {
           font-size: 12px;

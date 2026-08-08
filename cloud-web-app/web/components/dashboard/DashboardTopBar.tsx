@@ -60,7 +60,7 @@ export function DashboardTopBar({
   const fullAccessExpiry = formatFullAccessExpiry(fullAccessExpiresAt)
 
   return (
-    <header className="relative z-20 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-xl" style={{ boxShadow: backendOnline && aiProviderConfigured ? '0 1px 0 rgba(34,197,94,0.06), 0 4px 16px rgba(0,0,0,0.14)' : !backendOnline ? '0 1px 0 rgba(239,68,68,0.08), 0 4px 16px rgba(0,0,0,0.14)' : '0 1px 0 rgba(245,158,11,0.08), 0 4px 16px rgba(0,0,0,0.14)' }}>
+    <header className="relative z-20 border-b border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-xl" style={{ boxShadow: backendOnline && aiProviderConfigured ? '0 1px 0 rgba(var(--aethel-success-rgb), 0.06), 0 4px 16px rgba(var(--aethel-brand-pure-black-rgb), 0.14)' : !backendOnline ? '0 1px 0 rgba(var(--aethel-error-rgb), 0.08), 0 4px 16px rgba(var(--aethel-brand-pure-black-rgb), 0.14)' : '0 1px 0 rgba(var(--aethel-warning-rgb), 0.08), 0 4px 16px rgba(var(--aethel-brand-pure-black-rgb), 0.14)' }}>
       <div className="mx-auto flex min-h-14 w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <button

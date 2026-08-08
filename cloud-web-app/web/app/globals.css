@@ -126,6 +126,18 @@
     --aethel-success-rgb:  34, 197, 94;
     --aethel-accent-rgb:   139, 92, 246;
     --aethel-error-rgb:    239, 68, 68;
+    --aethel-surface-primary-rgb:   10, 10, 15;
+    --aethel-surface-secondary-rgb: 16, 22, 34;
+    --aethel-surface-tertiary-rgb:  23, 31, 45;
+    --aethel-panel-ink-rgb:         10, 14, 24;
+    --aethel-brand-pure-black-rgb:  0, 0, 0;
+    --aethel-text-inverse-rgb:      255, 255, 255;
+    --aethel-border-slate-rgb:      148, 163, 184;
+    --aethel-neon-cyan-rgb:         34, 211, 238;
+    --aethel-neon-indigo-rgb:       129, 140, 248;
+    --aethel-neon-amber-rgb:        251, 191, 36;
+    --aethel-neon-emerald-rgb:      52, 211, 153;
+    --aethel-neon-violet-rgb:       167, 139, 250;
 
     /*
      * ── AETHEL GLOBAL DESIGN SYSTEM (AGDS) — rigid semantic names ──
@@ -245,27 +257,69 @@
     justify-content: center;
   }
 
-  /* Custom Scrollbar */
+  /* ── Custom Scrollbar (AAA Precision Thin-Rail) ── */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.28);
-    border-radius: 5px;
-    border: 3px solid var(--aethel-surface-primary);
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    transition: background 150ms ease;
   }
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(148, 163, 184, 0.4);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* ── Range Input: Cross-Browser AAA Slider Thumb ── */
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: ew-resize;
+  }
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--aethel-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    cursor: ew-resize;
+    transition: box-shadow 120ms ease, transform 120ms ease;
+    margin-top: -4.5px;
+  }
+  input[type='range']::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.3);
+    transform: scale(1.15);
+  }
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 999px;
+    background: transparent;
+  }
+  input[type='range']::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--aethel-primary);
+    cursor: ew-resize;
   }
 
   /* Selection */
   ::selection {
     background: rgba(59, 130, 246, 0.3);
   }
+
 
   /*
    * LIGHT THEME - overrides when the root carries data-theme="light" or the

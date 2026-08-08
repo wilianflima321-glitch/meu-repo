@@ -30,14 +30,14 @@ export function FlyCameraHUD({ isActive, speed = 1 }: FlyCameraHUDProps) {
 
   return (
     <div
-      className="pointer-events-none absolute bottom-16 left-4 z-20 flex items-center gap-2 overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(2,6,23,0.72)] px-3 py-2 [backdrop-filter:blur(10px)]"
+      className="pointer-events-none absolute bottom-16 left-4 z-20 flex items-center gap-2 overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_28%,transparent)] bg-[rgba(var(--aethel-surface-primary-rgb), 0.72)] px-3 py-2 [backdrop-filter:blur(10px)]"
       role="status"
       aria-live="polite"
       aria-label={`Fly camera ${isActive ? 'active' : 'inactive'}, speed ${speed}x`}
       style={{
         opacity: isActive ? 1 : 0,
         transition: 'opacity 300ms ease',
-        boxShadow: isActive ? '0 0 16px rgba(0,229,255,0.12)' : 'none',
+        boxShadow: isActive ? '0 0 16px rgba(var(--aethel-neon-cyan-rgb), 0.12)' : 'none',
       }}
     >
       {/* Animated flight indicator */}

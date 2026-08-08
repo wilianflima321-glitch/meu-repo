@@ -44,7 +44,7 @@ export function MessageBubbleContent({
             return (
               <div
                 key={`code-${index}`}
-                className="group/message my-3 overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))]"
+                className="group/message my-3 overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(var(--aethel-panel-ink-rgb), 0.96),rgba(var(--aethel-surface-secondary-rgb), 0.88))]"
               >
                 <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-1.5">
                   <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>

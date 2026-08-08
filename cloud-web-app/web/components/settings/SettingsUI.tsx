@@ -41,23 +41,23 @@ function SettingsUIView({ className, initialCategoryFilter }: { className?: stri
   const modifiedCount = Array.from(settings.keys()).filter(key => isModified(key)).length;
 
   return (
-    <div className={`flex h-full flex-col ${className || ''}`} style={{ background: 'rgba(8,11,20,0.94)' }}>
+    <div className={`flex h-full flex-col ${className || ''}`} style={{ background: 'rgba(var(--aethel-surface-primary-rgb), 0.94)' }}>
       {/* Premium settings header with integrated search */}
       <div
         className="relative flex items-center justify-between gap-3 border-b px-4 py-3 flex-shrink-0"
         style={{
-          background: 'rgba(10,14,24,0.90)',
+          background: 'rgba(var(--aethel-panel-ink-rgb), 0.90)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(148,163,184,.12)',
-          boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.04)',
+          borderColor: 'rgba(var(--aethel-border-slate-rgb), 0.12)',
+          boxShadow: 'inset 0 -1px 0 rgba(var(--aethel-text-inverse-rgb), 0.04)',
         }}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(59,130,246,.40)] to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(var(--aethel-primary-rgb), 0.40)] to-transparent" />
         <div className="flex items-center gap-3">
           <div
             className="flex h-8 w-8 items-center justify-center rounded-lg"
-            style={{ background: 'rgba(59,130,246,.15)', border: '1px solid rgba(59,130,246,.25)' }}
+            style={{ background: 'rgba(var(--aethel-primary-rgb), 0.15)', border: '1px solid rgba(var(--aethel-primary-rgb), 0.25)' }}
           >
             <Settings className="h-4 w-4 text-[var(--aethel-primary-light)]" />
           </div>
@@ -72,7 +72,7 @@ function SettingsUIView({ className, initialCategoryFilter }: { className?: stri
         {/* Integrated search bar */}
         <div
           className="flex flex-1 max-w-xs items-center gap-2 rounded-lg px-3 py-1.5"
-          style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(148,163,184,.14)' }}
+          style={{ background: 'rgba(var(--aethel-text-inverse-rgb), 0.05)', border: '1px solid rgba(var(--aethel-border-slate-rgb), 0.14)' }}
         >
           <Search className="h-3.5 w-3.5 text-[var(--aethel-text-quaternary)] flex-shrink-0" />
           <input
@@ -102,7 +102,7 @@ function SettingsUIView({ className, initialCategoryFilter }: { className?: stri
               onClick={() => setScope(s)}
               className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-all ${
                 scope === s
-                  ? 'bg-[rgba(59,130,246,.18)] text-[var(--aethel-primary-light)] border border-[rgba(59,130,246,.30)]'
+                  ? 'bg-[rgba(var(--aethel-primary-rgb), 0.18)] text-[var(--aethel-primary-light)] border border-[rgba(var(--aethel-primary-rgb), 0.30)]'
                   : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] border border-transparent'
               }`}
             >
@@ -116,7 +116,7 @@ function SettingsUIView({ className, initialCategoryFilter }: { className?: stri
             onClick={() => setShowJSON(!showJSON)}
             className={`rounded-md p-1.5 transition-all border ${
               showJSON
-                ? 'bg-[rgba(59,130,246,.18)] text-[var(--aethel-primary-light)] border-[rgba(59,130,246,.30)]'
+                ? 'bg-[rgba(var(--aethel-primary-rgb), 0.18)] text-[var(--aethel-primary-light)] border-[rgba(var(--aethel-primary-rgb), 0.30)]'
                 : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] border-transparent'
             }`}
             title="Open settings as JSON"
@@ -126,7 +126,7 @@ function SettingsUIView({ className, initialCategoryFilter }: { className?: stri
         </div>
       </div>
 
-      <div className="border-b border-[var(--aethel-border-secondary)] px-4 py-1.5" style={{ borderColor: 'rgba(148,163,184,.08)' }}>
+      <div className="border-b border-[var(--aethel-border-secondary)] px-4 py-1.5" style={{ borderColor: 'rgba(var(--aethel-border-slate-rgb), 0.08)' }}>
         <SettingsSummaryBar
           activeFilterLabel={activeFilterLabel}
           filteredCount={filteredSettings.length}

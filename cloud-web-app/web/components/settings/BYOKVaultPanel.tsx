@@ -53,12 +53,12 @@ function VaultLockIcon({ isConfigured, isAnimating }: { isConfigured: boolean; i
         width: 72, height: 72,
         borderRadius: '18px',
         background: isConfigured
-          ? 'linear-gradient(135deg, rgba(16,185,129,.25) 0%, rgba(34,211,238,.12) 100%)'
-          : 'linear-gradient(135deg, rgba(251,191,36,.18) 0%, rgba(234,88,12,.10) 100%)',
-        border: `1px solid ${isConfigured ? 'rgba(16,185,129,.40)' : 'rgba(251,191,36,.35)'}`,
+          ? 'linear-gradient(135deg, rgba(var(--aethel-neon-emerald-rgb), 0.25) 0%, rgba(var(--aethel-neon-cyan-rgb), 0.12) 100%)'
+          : 'linear-gradient(135deg, rgba(var(--aethel-neon-amber-rgb), 0.18) 0%, color-mix(in srgb, var(--aethel-warning-dark) 10%, transparent) 100%)',
+        border: `1px solid ${isConfigured ? 'rgba(var(--aethel-neon-emerald-rgb), 0.40)' : 'rgba(var(--aethel-neon-amber-rgb), 0.35)'}`,
         boxShadow: isConfigured
-          ? '0 0 0 1px rgba(16,185,129,.12), inset 0 1px 0 rgba(255,255,255,.06), 0 0 24px rgba(16,185,129,.20)'
-          : '0 0 0 1px rgba(251,191,36,.12), inset 0 1px 0 rgba(255,255,255,.06), 0 0 24px rgba(251,191,36,.18)',
+          ? '0 0 0 1px rgba(var(--aethel-neon-emerald-rgb), 0.12), inset 0 1px 0 rgba(var(--aethel-text-inverse-rgb), 0.06), 0 0 24px rgba(var(--aethel-neon-emerald-rgb), 0.20)'
+          : '0 0 0 1px rgba(var(--aethel-neon-amber-rgb), 0.12), inset 0 1px 0 rgba(var(--aethel-text-inverse-rgb), 0.06), 0 0 24px rgba(var(--aethel-neon-amber-rgb), 0.18)',
       }}
     >
       {isConfigured ? (
@@ -177,7 +177,7 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
       {/* Decorative vault grid */}
       <div className="pointer-events-none absolute inset-0 aethel-grid-overlay opacity-30" />
       {/* Neon top accent */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(59,130,246,.55)] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(var(--aethel-primary-rgb), 0.55)] to-transparent" />
       {/* Header */}
       <div className="flex items-start gap-4">
         <VaultLockIcon isConfigured={byok.isConfigured} isAnimating={iconAnimating} />
@@ -190,8 +190,8 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
             <span
               className="inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full"
               style={{
-                background: 'rgba(59,130,246,.15)',
-                border: '1px solid rgba(59,130,246,.30)',
+                background: 'rgba(var(--aethel-primary-rgb), 0.15)',
+                border: '1px solid rgba(var(--aethel-primary-rgb), 0.30)',
                 color: 'var(--aethel-primary-light)',
               }}
             >
@@ -210,7 +210,7 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
         <div className="space-y-3">
           <div
             className="rounded-xl px-4 py-3 space-y-2"
-            style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}
+            style={{ background: 'rgba(var(--aethel-text-inverse-rgb), 0.03)', border: '1px solid rgba(var(--aethel-text-inverse-rgb), 0.07)' }}
           >
             <SkeletonLine height="h-4" width="w-32" />
             <SkeletonLine height="h-3" width="w-48" />
@@ -224,13 +224,13 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
           <div
             className="relative flex items-center gap-3 rounded-xl px-4 py-3.5 border overflow-hidden transition-all duration-300"
             style={byok.isConfigured ? {
-              background: 'rgba(16,185,129,.08)',
-              border: '1px solid rgba(16,185,129,.28)',
-              boxShadow: 'inset 0 0 24px rgba(16,185,129,.04)',
+              background: 'rgba(var(--aethel-neon-emerald-rgb), 0.08)',
+              border: '1px solid rgba(var(--aethel-neon-emerald-rgb), 0.28)',
+              boxShadow: 'inset 0 0 24px rgba(var(--aethel-neon-emerald-rgb), 0.04)',
             } : {
-              background: 'rgba(251,191,36,.07)',
-              border: '1px solid rgba(251,191,36,.28)',
-              boxShadow: 'inset 0 0 24px rgba(251,191,36,.04)',
+              background: 'rgba(var(--aethel-neon-amber-rgb), 0.07)',
+              border: '1px solid rgba(var(--aethel-neon-amber-rgb), 0.28)',
+              boxShadow: 'inset 0 0 24px rgba(var(--aethel-neon-amber-rgb), 0.04)',
             }}
           >
             {byok.isConfigured ? (
@@ -293,7 +293,7 @@ export function BYOKVaultPanel({ userId }: { userId?: string }) {
                   pl-10 pr-12 py-2.5 text-sm font-mono text-[var(--aethel-text-primary)]
                   placeholder:text-[var(--aethel-text-quaternary)]
                   transition-all duration-200
-                  focus:outline-none focus:border-[var(--aethel-neon-cyan)] focus:shadow-[0_0_0_3px_rgba(34,211,238,.12)]
+                  focus:outline-none focus:border-[var(--aethel-neon-cyan)] focus:shadow-[0_0_0_3px_rgba(var(--aethel-neon-cyan-rgb), 0.12)]
                   disabled:opacity-40
                 "
               />

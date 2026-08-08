@@ -82,7 +82,7 @@ function MockInspector() {
 
 function MockViewport3D() {
   return (
-    <div className="flex h-full items-center justify-center bg-[#09121F]">
+    <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)]">
       <div className="text-center">
         <div className="mx-auto mb-4 h-32 w-32 rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] opacity-40" />
         <p className="text-xs text-[var(--aethel-text-tertiary)]">3D viewport (Three.js / R3F)</p>
@@ -94,7 +94,7 @@ function MockViewport3D() {
 
 function MockCanvasPreview() {
   return (
-    <div className="flex h-full items-center justify-center bg-[#F8FAFC]">
+    <div className="flex h-full items-center justify-center bg-[var(--aethel-brand-paper)]">
       <div className="w-64 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
         <div className="mb-4 h-4 w-32 rounded bg-gray-200" />
         <div className="mb-2 h-3 w-full rounded bg-gray-100" />

@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import * as THREE from 'three'
 import { getAuthHeaders } from '@/lib/ai/change-feedback-client'
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -147,11 +148,11 @@ export function TerrainHeightfieldLiveLayer({
   const [tick, setTick] = useState(0)
 
   const terrainColor = useMemo(
-    () => resolveCssVarColor('--aethel-success', 'rgb(74, 124, 74)'),
+    () => resolveCssVarColor('--aethel-success', tokenColor('--aethel-success')),
     [],
   )
   const physicsColor = useMemo(
-    () => resolveCssVarColor('--aethel-info-light', 'rgb(56, 189, 248)'),
+    () => resolveCssVarColor('--aethel-info-light', tokenColor('--aethel-info')),
     [],
   )
 
@@ -228,7 +229,7 @@ export function TerrainHeightfieldLiveLayer({
           let b = 0
           for (let c = 0; c < layerCount; c++) {
             const w = splat.weights[base + c] ?? 0
-            const parsed = parseCssColor(splat.meta.layers[c]?.color ?? 'rgb(74,124,74)')
+            const parsed = parseCssColor(splat.meta.layers[c]?.color ?? tokenColor('--aethel-success'))
             r += parsed.r * w
             g += parsed.g * w
             b += parsed.b * w
@@ -307,7 +308,7 @@ export function TerrainHeightfieldLiveLayer({
         userData={{ aethelObjectId: 'terrain-heightfield-default', aethelTerrain: true }}
       >
         <meshStandardMaterial
-          color={useVertexColors ? '#ffffff' : terrainColor}
+          color={useVertexColors ? 'white' : terrainColor}
           vertexColors={useVertexColors}
           roughness={0.88}
           metalness={0.06}

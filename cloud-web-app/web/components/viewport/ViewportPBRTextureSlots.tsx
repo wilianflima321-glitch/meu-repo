@@ -126,7 +126,7 @@ export function ViewportPBRTextureSlots({
             ) : (
               <ImageOff className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-[var(--aethel-text-quaternary)]" />
             )}
-            <div className="relative z-10 flex w-full flex-col items-center gap-0.5 bg-[rgba(7,12,20,0.65)] px-1 py-1">
+            <div className="relative z-10 flex w-full flex-col items-center gap-0.5 bg-[rgba(var(--aethel-panel-ink-rgb), 0.65)] px-1 py-1">
               <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-[var(--aethel-text-primary)]">
                 {SLOT_LABELS[slot]}
               </span>
@@ -153,7 +153,7 @@ export function ViewportPBRTextureSlots({
               </div>
             </div>
             {busySlot === slot ? (
-              <span className="absolute inset-0 z-20 flex items-center justify-center bg-[rgba(7,12,20,0.78)] text-center text-[8px] uppercase tracking-[0.08em] text-[var(--aethel-text-primary)]">
+              <span className="absolute inset-0 z-20 flex items-center justify-center bg-[rgba(var(--aethel-panel-ink-rgb), 0.78)] text-center text-[8px] uppercase tracking-[0.08em] text-[var(--aethel-text-primary)]">
                 Processing…
               </span>
             ) : null}

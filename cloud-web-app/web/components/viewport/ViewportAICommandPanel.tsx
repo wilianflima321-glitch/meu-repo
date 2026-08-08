@@ -39,7 +39,7 @@ export function ViewportAICommandPanel({
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
-          className="inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.84)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_18px_54px_rgba(0,0,0,0.36)] backdrop-blur-md transition hover:border-[var(--aethel-border-secondary)]"
+          className="inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.84)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_18px_54px_rgba(0,0,0,0.36)] backdrop-blur-md transition hover:border-[var(--aethel-border-secondary)]"
           aria-label="Open viewport edit menu"
           aria-expanded={false}
         >
@@ -53,7 +53,7 @@ export function ViewportAICommandPanel({
 
   return (
     <div
-      className="absolute right-4 top-4 z-20 w-[340px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.86)] p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-md"
+      className="absolute right-4 top-4 z-20 w-[340px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb), 0.86)] p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-md"
       data-viewport-context-menu="expanded"
     >
       <div className="flex items-center justify-between gap-2">

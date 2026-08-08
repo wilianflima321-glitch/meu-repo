@@ -61,8 +61,8 @@ export function ResearchProgressCard({
     <div
       className="my-2 overflow-hidden rounded-xl"
       style={{
-        border: '1px solid rgba(0,229,255,0.18)',
-        background: 'rgba(2,6,23,0.60)',
+        border: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.18)',
+        background: 'rgba(var(--aethel-surface-primary-rgb), 0.60)',
         backdropFilter: 'blur(12px)',
       }}
       role="status"
@@ -72,7 +72,7 @@ export function ResearchProgressCard({
       {/* Header */}
       <div
         className="flex items-center gap-2 px-3 py-2"
-        style={{ borderBottom: '1px solid rgba(0,229,255,0.10)' }}
+        style={{ borderBottom: '1px solid rgba(var(--aethel-neon-cyan-rgb), 0.10)' }}
       >
         <Globe className="h-3.5 w-3.5 text-[var(--aethel-neon-cyan)]" />
         <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--aethel-neon-cyan)]">
@@ -82,7 +82,7 @@ export function ResearchProgressCard({
           <Loader2 className="ml-auto h-3 w-3 animate-spin text-[var(--aethel-text-quaternary)]" aria-hidden />
         )}
         {!isRunning && sourcesFound !== undefined && (
-          <span className="ml-auto rounded border border-[rgba(16,185,129,0.28)] bg-[rgba(16,185,129,0.10)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--aethel-neon-emerald)]">
+          <span className="ml-auto rounded border border-[rgba(var(--aethel-neon-emerald-rgb), 0.28)] bg-[rgba(var(--aethel-neon-emerald-rgb), 0.10)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--aethel-neon-emerald)]">
             {sourcesFound} sources
           </span>
         )}
