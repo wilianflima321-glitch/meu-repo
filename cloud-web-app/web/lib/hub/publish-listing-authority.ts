@@ -12,6 +12,7 @@ import {
   DISCOVERY_MAX_DEMO_BUNDLE_BYTES,
   evaluateCompressionMandateGate,
 } from '@/lib/hub/discovery-feed-engine'
+import { resolveDemoPlayUrlFromExportEvidence } from '@/lib/production/demo-web-slice'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('publish-listing-authority')
@@ -34,8 +35,15 @@ export interface PublishListingEvidence {
 
 export interface EvaluatePublishListingInput {
   gameId: string
-  /** Completed web export download / play URL. */
+  /** Completed web export download URL (often a zip — not Instant Play by itself). */
   webExportDownloadUrl?: string | null
+  /**
+   * Explicit Instant Play HTML URL from ExportJob.options when demo-web-slice is ready.
+   * Zip download URLs must not be passed here.
+   */
+  instantPlayHtmlUrl?: string | null
+  /** Cook/export stamped demoWebSliceReady — required before Instant Play demoPlayUrl. */
+  demoWebSliceReady?: boolean
   /** Measured ExportJob.fileSize (bytes) when cook reported size. */
   webExportFileSizeBytes?: number | null
   /**
@@ -89,12 +97,11 @@ export function evaluatePublishListingEvidence(
 ): PublishListingEvidence {
   const gameId = String(input.gameId || '').trim()
   const stampedAt = input.nowIso ?? new Date().toISOString()
-  const demoUrl = input.webExportDownloadUrl?.trim() || null
-  const noWebDemo = input.noWebDemo === true || !demoUrl
   const measured = resolveMeasuredBytes(input)
   const evidenceRef = input.evidenceRef?.trim() || null
 
-  if (noWebDemo) {
+  // Creator Desktop Exclusive opt-in — never invent Instant Play.
+  if (input.noWebDemo === true) {
     return {
       gameId,
       compressionMandatePassed: false,
@@ -103,9 +110,28 @@ export function evaluatePublishListingEvidence(
       noWebDemo: true,
       evidenceRef,
       stampedAt,
-      reason: demoUrl
-        ? 'no_web_demo_flag'
-        : 'web_export_missing — Desktop Exclusive until browser demo exists',
+      reason: 'no_web_demo_flag',
+    }
+  }
+
+  const slice = resolveDemoPlayUrlFromExportEvidence({
+    explicitDemoPlayUrl: input.instantPlayHtmlUrl,
+    webExportDownloadUrl: input.webExportDownloadUrl,
+    demoWebSliceReady: input.demoWebSliceReady,
+  })
+  const demoUrl = slice.demoPlayUrl
+
+  // Instant Play missing/held → honest build_pending path (not Desktop Exclusive unless opted out).
+  if (!demoUrl) {
+    return {
+      gameId,
+      compressionMandatePassed: false,
+      demoBundleBytes: measured,
+      demoPlayUrl: null,
+      noWebDemo: false,
+      evidenceRef,
+      stampedAt,
+      reason: slice.reason,
     }
   }
 

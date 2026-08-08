@@ -22,6 +22,12 @@ import {
   buildMeasuredExportBundleEvidence,
   mergeExportJobCompressionOptions,
 } from '@/lib/hub/export-bundle-measurement'
+import {
+  DEMO_WEB_SLICE_HOST_HELD_REASON,
+  evaluateDemoWebSliceStage,
+  isInstantPlayHtmlUrl,
+  resolveDemoPlayUrlFromExportEvidence,
+} from '@/lib/production/demo-web-slice'
 import { createMemoryTelemetrySpool } from '@/lib/liveops/telemetry-spool'
 import {
   enqueueSessionPlaytime,
@@ -48,12 +54,14 @@ describe('RTv1 measured export/cook bundle evidence', () => {
 
     const listing = evaluatePublishListingEvidence({
       gameId: 'measured-demo',
-      webExportDownloadUrl: 'https://cdn.example/demo/index.html',
+      instantPlayHtmlUrl: 'https://cdn.example/demo/index.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: measured.evidence.fileSize,
       cookPackByteLength: measured.evidence.cookPackByteLength,
       explicitCompressionMandatePassed: options.compressionMandatePassed === true,
     })
     expect(listing.compressionMandatePassed).toBe(true)
+    expect(listing.demoPlayUrl).toBe('https://cdn.example/demo/index.html')
     expect(listing.demoBundleBytes).toBe(42 * 1024 * 1024)
   })
 
@@ -75,12 +83,87 @@ describe('RTv1 measured export/cook bundle evidence', () => {
 
     const listing = evaluatePublishListingEvidence({
       gameId: 'too-big',
-      webExportDownloadUrl: 'https://cdn.example/big/index.html',
+      instantPlayHtmlUrl: 'https://cdn.example/big/index.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: oversize.evidence.fileSize,
       explicitCompressionMandatePassed: oversize.evidence.compressionMandatePassed,
     })
     expect(listing.compressionMandatePassed).toBe(false)
     expect(listing.demoBundleBytes).toBe(DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1)
+  })
+})
+
+describe('RTv1 demo-web-slice Instant Play honesty', () => {
+  it('accepts hosted HTML Instant Play URLs and rejects zip download URLs', () => {
+    expect(isInstantPlayHtmlUrl('https://cdn.example/demo/index.html')).toBe(true)
+    expect(isInstantPlayHtmlUrl('https://cdn.example/exports/job.zip')).toBe(false)
+    expect(
+      isInstantPlayHtmlUrl('https://app.example/api/render/jobs/1/artifact?format=web-static'),
+    ).toBe(false)
+  })
+
+  it('sets demoPlayUrl only when demo-web-slice is ready with HTML URL', () => {
+    const ready = resolveDemoPlayUrlFromExportEvidence({
+      explicitDemoPlayUrl: 'https://cdn.example/oss/index.html',
+      demoWebSliceReady: true,
+    })
+    expect(ready.demoPlayUrl).toBe('https://cdn.example/oss/index.html')
+    expect(ready.status).toBe('ready')
+
+    const zipOnly = resolveDemoPlayUrlFromExportEvidence({
+      webExportDownloadUrl: 'https://cdn.example/exports/webexp_1.zip',
+      demoWebSliceReady: false,
+    })
+    expect(zipOnly.demoPlayUrl).toBeNull()
+    expect(zipOnly.status).toBe('held')
+    expect(zipOnly.reason).toMatch(/demo_web_slice_held/)
+  })
+
+  it('holds web-static Instant Play until hosted HTML boot exists (no placeholder theater)', () => {
+    const stage = evaluateDemoWebSliceStage({
+      target: 'web-static',
+      demoWebSliceReady: false,
+      instantPlayHtmlUrl: null,
+    })
+    expect(stage.allowed).toBe(false)
+    expect(stage.shipStatus).toBe('HELD')
+    expect(stage.demoPlayUrl).toBeNull()
+    expect(stage.reason).toBe(DEMO_WEB_SLICE_HOST_HELD_REASON)
+  })
+
+  it('listing: slice present → demoPlayUrl; zip-only → fail-closed Instant Play; noWebDemo honest', () => {
+    const withSlice = evaluatePublishListingEvidence({
+      gameId: 'with-slice',
+      instantPlayHtmlUrl: 'https://cdn.example/play/index.html',
+      demoWebSliceReady: true,
+      webExportFileSizeBytes: 8 * 1024 * 1024,
+    })
+    expect(withSlice.demoPlayUrl).toBe('https://cdn.example/play/index.html')
+    expect(withSlice.noWebDemo).toBe(false)
+    expect(withSlice.compressionMandatePassed).toBe(true)
+
+    const zipOnly = evaluatePublishListingEvidence({
+      gameId: 'zip-only',
+      webExportDownloadUrl: 'https://cdn.example/exports/job.zip',
+      webExportFileSizeBytes: 8 * 1024 * 1024,
+      demoWebSliceReady: false,
+    })
+    expect(zipOnly.demoPlayUrl).toBeNull()
+    expect(zipOnly.noWebDemo).toBe(false)
+    expect(zipOnly.compressionMandatePassed).toBe(false)
+    expect(zipOnly.reason).toMatch(/demo_web_slice/)
+    expect(resolveHubDemoListingLabel(zipOnly)).toBe('build_pending')
+
+    const desktop = evaluatePublishListingEvidence({
+      gameId: 'desktop-opt-out',
+      instantPlayHtmlUrl: 'https://cdn.example/play/index.html',
+      demoWebSliceReady: true,
+      webExportFileSizeBytes: 8 * 1024 * 1024,
+      noWebDemo: true,
+    })
+    expect(desktop.noWebDemo).toBe(true)
+    expect(desktop.demoPlayUrl).toBeNull()
+    expect(resolveHubDemoListingLabel(desktop)).toBe('desktop_exclusive')
   })
 })
 
@@ -99,7 +182,8 @@ describe('RTv1 publish listing compression evidence', () => {
   it('fail-closes compressionMandatePassed when bundle bytes are missing', () => {
     const evidence = evaluatePublishListingEvidence({
       gameId: 'neon-runner',
-      webExportDownloadUrl: 'https://cdn.example/demo/index.html',
+      instantPlayHtmlUrl: 'https://cdn.example/demo/index.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: null,
       explicitCompressionMandatePassed: true,
     })
@@ -115,7 +199,8 @@ describe('RTv1 publish listing compression evidence', () => {
 
     const stamped = await stampPublishListingEvidence({
       gameId: 'oss-kit',
-      webExportDownloadUrl: 'https://cdn.example/oss/index.html',
+      instantPlayHtmlUrl: 'https://cdn.example/oss/index.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: 12 * 1024 * 1024,
       evidenceRef: 'exportJob:exp_1',
     })
@@ -131,7 +216,8 @@ describe('RTv1 publish listing compression evidence', () => {
   it('rejects oversize demo bundles (Compression Mandate)', () => {
     const evidence = evaluatePublishListingEvidence({
       gameId: 'giant-demo',
-      webExportDownloadUrl: 'https://cdn.example/giant/index.html',
+      instantPlayHtmlUrl: 'https://cdn.example/giant/index.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: DISCOVERY_MAX_DEMO_BUNDLE_BYTES + 1,
     })
     expect(evidence.compressionMandatePassed).toBe(false)
@@ -141,7 +227,8 @@ describe('RTv1 publish listing compression evidence', () => {
   it('marks noWebDemo as Desktop Exclusive and discovery-ineligible', () => {
     const evidence = evaluatePublishListingEvidence({
       gameId: 'desktop-only',
-      webExportDownloadUrl: 'https://cdn.example/should-ignore.html',
+      instantPlayHtmlUrl: 'https://cdn.example/should-ignore.html',
+      demoWebSliceReady: true,
       webExportFileSizeBytes: 8 * 1024 * 1024,
       noWebDemo: true,
     })

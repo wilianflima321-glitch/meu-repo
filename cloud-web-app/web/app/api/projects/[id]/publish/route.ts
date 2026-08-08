@@ -80,15 +80,18 @@ export async function POST(
     const tags = normalizeTags(body?.tags)
     const noWebDemo = body?.noWebDemo === true
 
-    // Tie the listing to the real web export pipeline: if a completed web
-    // export with a download URL exists, the game is immediately playable;
-    // otherwise it is published in an honest "build pending" state.
+    // Tie Instant Play to demo-web-slice HTML evidence only (XIV.3).
+    // Zip download URLs are not iframe targets — never mark playable from zip alone.
     const webExport = await prisma.exportJob.findFirst({
       where: { projectId, platform: 'web', status: 'completed' },
       orderBy: { createdAt: 'desc' },
       select: { id: true, downloadUrl: true, fileSize: true, options: true },
     })
-    const playable = Boolean(webExport?.downloadUrl) && !noWebDemo
+
+    const exportOptions =
+      webExport?.options && typeof webExport.options === 'object' && !Array.isArray(webExport.options)
+        ? (webExport.options as Record<string, unknown>)
+        : {}
 
     const existing = await prisma.publishedGame.findUnique({
       where: { projectId },
@@ -96,40 +99,16 @@ export async function POST(
     })
     const slug = existing?.slug ?? `${slugifyBase(title) || 'game'}-${projectId.slice(-6)}`
 
-    const game = await prisma.publishedGame.upsert({
-      where: { projectId },
-      update: {
-        title,
-        description,
-        tags,
-        visibility,
-        exportJobId: webExport?.id ?? null,
-        playUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
-        status: playable ? 'playable' : 'pending',
-        publishedAt: new Date(),
-      },
-      create: {
-        slug,
-        projectId,
-        authorId: user.userId,
-        title,
-        description,
-        tags,
-        visibility,
-        exportJobId: webExport?.id ?? null,
-        playUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
-        status: playable ? 'playable' : 'pending',
-        publishedAt: new Date(),
-      },
-    })
-
-    const exportOptions =
-      webExport?.options && typeof webExport.options === 'object' && !Array.isArray(webExport.options)
-        ? (webExport.options as Record<string, unknown>)
-        : {}
     const listingEvidence = await stampPublishListingEvidence({
-      gameId: game.slug,
+      gameId: slug,
       webExportDownloadUrl: noWebDemo ? null : webExport?.downloadUrl ?? null,
+      instantPlayHtmlUrl:
+        typeof exportOptions.instantPlayHtmlUrl === 'string'
+          ? exportOptions.instantPlayHtmlUrl
+          : typeof exportOptions.demoPlayUrl === 'string'
+            ? exportOptions.demoPlayUrl
+            : null,
+      demoWebSliceReady: exportOptions.demoWebSliceReady === true,
       webExportFileSizeBytes: webExport?.fileSize ?? null,
       explicitCompressionMandatePassed: exportOptions.compressionMandatePassed === true,
       cookPackByteLength:
@@ -142,12 +121,43 @@ export async function POST(
       evidenceRef: webExport?.id ? `exportJob:${webExport.id}` : null,
     })
 
+    // Instant Play iframe URL only — never promote zip downloadUrl into playUrl.
+    const playable = Boolean(listingEvidence.demoPlayUrl) && !listingEvidence.noWebDemo
+
+    const game = await prisma.publishedGame.upsert({
+      where: { projectId },
+      update: {
+        title,
+        description,
+        tags,
+        visibility,
+        exportJobId: webExport?.id ?? null,
+        playUrl: playable ? listingEvidence.demoPlayUrl : null,
+        status: playable ? 'playable' : 'pending',
+        publishedAt: new Date(),
+      },
+      create: {
+        slug,
+        projectId,
+        authorId: user.userId,
+        title,
+        description,
+        tags,
+        visibility,
+        exportJobId: webExport?.id ?? null,
+        playUrl: playable ? listingEvidence.demoPlayUrl : null,
+        status: playable ? 'playable' : 'pending',
+        publishedAt: new Date(),
+      },
+    })
+
     routeLogger.info('arcade.publish', {
       projectId,
       slug: game.slug,
       status: game.status,
       compressionMandatePassed: listingEvidence.compressionMandatePassed,
       noWebDemo: listingEvidence.noWebDemo,
+      demoPlayUrl: listingEvidence.demoPlayUrl,
     })
 
     return NextResponse.json({
@@ -170,14 +180,16 @@ export async function POST(
         noWebDemo: listingEvidence.noWebDemo,
         reason: listingEvidence.reason,
       },
-      // Honest guidance when the web build is not ready yet.
+      // Honest guidance when Instant Play / Compression evidence is not ready.
       hint: listingEvidence.noWebDemo
         ? 'Published as Desktop Exclusive — no Instant Play demo until a web export exists.'
         : playable
           ? listingEvidence.compressionMandatePassed
             ? undefined
-            : 'Published and playable. Discovery ranking stays closed until measured Compression Mandate evidence (≤150MB) is stamped on the web export.'
-          : 'Published. Run a Web export to make this game playable in the browser.',
+            : 'Published with Instant Play URL. Discovery ranking stays closed until measured Compression Mandate evidence (≤150MB) is stamped on the web export.'
+          : listingEvidence.reason.includes('demo_web_slice')
+            ? 'Published. Instant Play HTML demo-web-slice is [HELD] — cook zip alone is not an Arcade iframe target (no placeholder.html theater).'
+            : 'Published. Run a Web export with Instant Play HTML slice to make this game playable in the browser.',
     })
   } catch (error) {
     const mapped = apiErrorToResponse(error)

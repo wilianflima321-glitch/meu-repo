@@ -11,6 +11,10 @@ import {
   mergeExportJobCompressionOptions,
   type MeasuredExportBundleEvidence,
 } from '@/lib/hub/export-bundle-measurement'
+import {
+  mergeDemoWebSliceExportOptions,
+  type DemoWebSliceStageResult,
+} from '@/lib/production/demo-web-slice'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('stamp-export-bundle-measurement')
@@ -89,6 +93,8 @@ export async function stampWebExportJobFromCookArtifact(input: {
   cookPackByteLength?: number | null
   bakeReceiptRef?: string | null
   lightmapBytes?: number | null
+  /** XIV.3 Instant Play slice honesty — zip download alone never sets ready. */
+  demoWebSlice?: DemoWebSliceStageResult | null
 }): Promise<
   | { ok: true; exportJobId: string; evidence: MeasuredExportBundleEvidence }
   | { ok: false; reason: string }
@@ -100,7 +106,7 @@ export async function stampWebExportJobFromCookArtifact(input: {
   if (!measured.ok) return measured
 
   const evidenceRef = `renderJob:${input.renderJobId}`
-  const baseOptions: Record<string, unknown> = {
+  let baseOptions: Record<string, unknown> = {
     sourceRenderJobId: input.renderJobId,
     evidenceRef,
   }
@@ -109,6 +115,9 @@ export async function stampWebExportJobFromCookArtifact(input: {
   }
   if (typeof input.lightmapBytes === 'number' && input.lightmapBytes > 0) {
     baseOptions.lightmapBytes = Math.floor(input.lightmapBytes)
+  }
+  if (input.demoWebSlice) {
+    baseOptions = mergeDemoWebSliceExportOptions(baseOptions, input.demoWebSlice)
   }
 
   const options = mergeExportJobCompressionOptions(baseOptions, measured.evidence) as Prisma.InputJsonValue

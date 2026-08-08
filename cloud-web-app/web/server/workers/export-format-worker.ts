@@ -10,6 +10,7 @@ import {
   isSerializedVirtualizedMesh,
 } from '@aethel/export/nanite-bakedown';
 import { buildPublishPipelinePlan, type PublishTarget } from '@/lib/production/publish-pipeline-orchestrator';
+import type { DemoWebSliceStageResult } from '@/lib/production/demo-web-slice';
 import { stampWebExportJobFromCookArtifact } from '@/lib/hub/stamp-export-bundle-measurement';
 import { runPublishPackagingStage } from './export-format-worker.publish';
 
@@ -144,6 +145,7 @@ async function processExportJobInner(data: ExportJobData) {
   let cookPackByteLength: number | null = null;
   let bakeReceiptRef: string | null = null;
   let lightmapBytes: number | null = null;
+  let demoWebSlice: DemoWebSliceStageResult | null = null;
 
   if (isGeometryFormat) {
     const scene = await buildProjectExportScene(data.projectId, data.sceneIds ?? []);
@@ -194,6 +196,7 @@ async function processExportJobInner(data: ExportJobData) {
     contentType = artifact.contentType;
     fileExtension = artifact.fileExtension;
     cookPackByteLength = artifact.cookPackByteLength;
+    demoWebSlice = artifact.demoWebSlice;
     storageKey = `exports/${data.projectId}/${jobId}/export.${fileExtension}`;
   } else {
     // Non-geometry formats (wav/mp4/project archive) — real binary encoding
@@ -250,6 +253,7 @@ async function processExportJobInner(data: ExportJobData) {
       cookPackByteLength,
       bakeReceiptRef,
       lightmapBytes,
+      demoWebSlice,
     });
     if (!stamped.ok) {
       log.error('export_format.web_export_stamp_failed', {

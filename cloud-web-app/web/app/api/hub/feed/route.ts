@@ -152,7 +152,13 @@ export async function GET(req: NextRequest) {
 
       const listingByGame = await readPublishListingEvidenceBatch(rows.map((row) => row.slug))
       candidates = rows
-        .filter((row) => listingByGame.get(row.slug)?.noWebDemo !== true)
+        .filter((row) => {
+          const listing = listingByGame.get(row.slug)
+          // Instant Play discovery requires stamped HTML demoPlayUrl — zip-only / noWebDemo excluded.
+          if (listing?.noWebDemo === true) return false
+          if (!listing?.demoPlayUrl) return false
+          return true
+        })
         .map((row) =>
           toCandidate(
             row,

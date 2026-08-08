@@ -21,6 +21,11 @@ import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/produc
 import { writeAethelPack } from '@/lib/immunity/aethel-pack-writer';
 import { ensureZstdEncoder } from '@/lib/immunity/aethel-pack-compress';
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement';
+import {
+  DEMO_WEB_SLICE_HOST_HELD_REASON,
+  evaluateDemoWebSliceStage,
+  type DemoWebSliceStageResult,
+} from '@/lib/production/demo-web-slice';
 
 const log = createComponentLogger('worker.export-format.publish');
 
@@ -32,6 +37,8 @@ export interface PublishArtifact {
   measuredByteLength: number;
   cookPackByteLength: number;
   compressionMandatePassed: boolean;
+  /** XIV.3 Instant Play slice — HELD until hosted HTML boot exists. */
+  demoWebSlice: DemoWebSliceStageResult;
 }
 
 export interface PublishPackagingStageOptions {
@@ -344,6 +351,41 @@ export async function runPublishPackagingStage(
     zip.addFile('native-tauri-build.json', Buffer.from(JSON.stringify(nativeBuild, null, 2), 'utf8'));
   }
 
+  // XIV.3 — Instant Play HTML host + runtime-main browser bundle are not wired.
+  // Never emit placeholder index.html claiming playable (Zero-MVP). Cook zip stays measured.
+  const demoWebSlice = evaluateDemoWebSliceStage({
+    target: plan.target,
+    demoWebSliceReady: false,
+    instantPlayHtmlUrl: null,
+  });
+  if (plan.target === 'web-static') {
+    log.warn('publish.demo_web_slice_held', {
+      jobId,
+      projectId,
+      reason: demoWebSlice.reason || DEMO_WEB_SLICE_HOST_HELD_REASON,
+      shipStatus: demoWebSlice.shipStatus,
+      allowed: demoWebSlice.allowed,
+    });
+    zip.addFile(
+      'demo-web-slice.json',
+      Buffer.from(
+        JSON.stringify(
+          {
+            stageId: demoWebSlice.stageId,
+            status: demoWebSlice.status,
+            shipStatus: demoWebSlice.shipStatus,
+            demoPlayUrl: null,
+            reason: demoWebSlice.reason,
+            placeholderHtmlForbidden: true,
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      ),
+    );
+  }
+
   const body = zip.toBuffer();
   const measured = buildMeasuredExportBundleEvidence({
     artifactByteLength: body.length,
@@ -361,5 +403,6 @@ export async function runPublishPackagingStage(
     measuredByteLength: measured.evidence.fileSize,
     cookPackByteLength: cookGate.packByteLength,
     compressionMandatePassed: measured.evidence.compressionMandatePassed,
+    demoWebSlice,
   };
 }

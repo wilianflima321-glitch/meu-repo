@@ -48,6 +48,7 @@ export type PublishPipelineStageId =
   | 'netcode-inject'
   | 'monetization-inject'
   | 'package'
+  | 'demo-web-slice'
 
 export interface PublishPipelineStageMeta {
   id: PublishPipelineStageId
@@ -99,6 +100,13 @@ export const PUBLISH_PIPELINE_STAGES: readonly PublishPipelineStageMeta[] = [
     label: 'Target Packaging',
     description: 'Produce the web-static artifact or invoke `tauri build` for native-tauri.',
     parallelGroup: 3,
+  },
+  {
+    id: 'demo-web-slice',
+    label: 'Instant Play Demo Web Slice (XIV.3)',
+    description:
+      'Hosted HTML Instant Play slice for Hub iframe — fail-closed / HELD when only a cook zip exists (no placeholder.html theater).',
+    parallelGroup: 4,
   },
 ] as const
 

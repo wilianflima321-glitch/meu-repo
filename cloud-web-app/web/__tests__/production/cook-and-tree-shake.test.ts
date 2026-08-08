@@ -6,6 +6,7 @@ import {
   FORBIDDEN_RUNTIME_PACKAGES,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator'
+import { evaluateDemoWebSliceStage } from '@/lib/production/demo-web-slice'
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement'
 import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/production/visual-script-transpile-stage'
 import { computeParallelGroups } from '@/lib/production/studio-local-cook-queue'
@@ -31,6 +32,7 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
       'netcode-inject',
       'monetization-inject',
       'package',
+      'demo-web-slice',
     ])
     expect(plan.forbiddenRuntimePackages).toContain('@aethel/ide-ui')
     expect(plan.forbiddenRuntimePackages).toContain('@xyflow/react')
@@ -62,6 +64,21 @@ describe('publish pipeline orchestrator (Cook & Build Pipeline)', () => {
       expect(measured.evidence.fileSize).toBe(2048)
       expect(measured.evidence.cookPackByteLength).toBe(512)
     }
+  })
+
+  it('holds demo-web-slice Instant Play for web-static without hosted HTML (Zero-MVP)', () => {
+    const held = evaluateDemoWebSliceStage({ target: 'web-static' })
+    expect(held.allowed).toBe(false)
+    expect(held.shipStatus).toBe('HELD')
+    expect(held.demoPlayUrl).toBeNull()
+
+    const ready = evaluateDemoWebSliceStage({
+      target: 'web-static',
+      demoWebSliceReady: true,
+      instantPlayHtmlUrl: 'https://cdn.example/demo/index.html',
+    })
+    expect(ready.allowed).toBe(true)
+    expect(ready.demoPlayUrl).toBe('https://cdn.example/demo/index.html')
   })
 
   it('captures a real tauri build command for native-tauri without executing it', () => {
