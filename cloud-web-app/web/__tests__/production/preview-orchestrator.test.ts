@@ -362,4 +362,52 @@ describe('PreviewOrchestrator (L.8)', () => {
     expect(claimed.mode).toBe('hmr')
     expect(claimed.message).toMatch(/HMR bridge connected/)
   })
+
+  it('hot-update defaults preferHmr=true when omitted but still requires client bridge', async () => {
+    vi.spyOn(forgeSandbox, 'getForgeSandboxSession').mockReturnValue({
+      sessionId: 'sess-default-hmr',
+      provider: 'local-isolated',
+      projectId: 'p1',
+      agentMode: 'Builder',
+      networkPolicy: 'none',
+      costGuardReservationId: 'res-1',
+      evidenceLedgerId: 'ledger-1',
+      createdAt: 'now',
+    })
+    vi.spyOn(forgeSandbox, 'writeFilesToForgeSandbox').mockResolvedValue({
+      ok: true,
+      sessionId: 'sess-default-hmr',
+      provider: 'local-isolated',
+      filesWritten: 1,
+      projectRootPath: '/mock',
+    })
+
+    const withoutBridge = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-default-hmr',
+      files: [{ path: 'src/a.tsx', content: 'export const a = 1\n' }],
+      clientHmrConnected: false,
+    })
+    expect(withoutBridge.hmr).toBe(false)
+    expect(withoutBridge.reload).toBe(true)
+    expect(withoutBridge.mode).toBe('reload')
+
+    const withBridge = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-default-hmr',
+      files: [{ path: 'src/a.tsx', content: 'export const a = 1\n' }],
+      clientHmrConnected: true,
+    })
+    expect(withBridge.hmr).toBe(true)
+    expect(withBridge.reload).toBe(false)
+    expect(withBridge.mode).toBe('hmr')
+
+    const forcedReload = await syncAndRefreshPreviewSession({
+      sandboxSessionId: 'sess-default-hmr',
+      files: [{ path: 'src/a.tsx', content: 'export const a = 1\n' }],
+      clientHmrConnected: true,
+      preferHmr: false,
+    })
+    expect(forcedReload.hmr).toBe(false)
+    expect(forcedReload.reload).toBe(true)
+    expect(forcedReload.mode).toBe('reload')
+  })
 })

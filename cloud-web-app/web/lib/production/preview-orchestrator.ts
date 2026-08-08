@@ -254,8 +254,10 @@ export type PreviewHotUpdateMode = 'hmr' | 'reload' | 'denied'
 
 /**
  * Honesty flags for L.8 multi-file preview refresh.
- * - `hmr: true` only when the client already has a live HMR bridge AND requested preferHmr.
- * - Otherwise sync + full iframe reload (`hmr: false`, `reload: true`) — never theater.
+ * - `hmr: true` only when the client reports a live Vite `/@vite/client` or protocol WS bridge
+ *   AND preferHmr is not false — never when only iframe reload ran.
+ * - Otherwise sync + full iframe reload (`hmr: false`, `reload: true`).
+ * - E2B remote HMR remains separately HELD without a live E2B key / reachable Vite host.
  */
 export interface PreviewHotUpdateResult {
   ok: boolean
@@ -455,7 +457,9 @@ export async function syncAndRefreshPreviewSession(
     }
   }
 
-  const canClaimHmr = Boolean(input.preferHmr && input.clientHmrConnected)
+  // preferHmr defaults true at the API edge when omitted; explicit false forces reload.
+  const preferHmr = input.preferHmr !== false
+  const canClaimHmr = Boolean(preferHmr && input.clientHmrConnected)
   const result: PreviewHotUpdateResult = canClaimHmr
     ? {
         ok: true,
@@ -469,7 +473,7 @@ export async function syncAndRefreshPreviewSession(
         mode: 'hmr',
         provider: session.provider,
         message:
-          `Synced ${filesSynced} file(s) into live ${strategy} session; client HMR bridge connected — no full reload forced.`,
+          `Synced ${filesSynced} file(s) into live ${strategy} session; Vite/Next HMR bridge connected — module invalidate/reload (no full iframe reload).`,
       }
     : {
         ok: true,

@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
       files: parseFiles(body?.files),
       paths: parsePaths(body?.paths),
       clientHmrConnected: Boolean(body?.clientHmrConnected),
-      preferHmr: Boolean(body?.preferHmr),
+      // Omitted preferHmr ⇒ true (claim HMR when client bridge connected); explicit false forces reload.
+      preferHmr: body?.preferHmr !== false,
     })
 
     if (!result.ok) {

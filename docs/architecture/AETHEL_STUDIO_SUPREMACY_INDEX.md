@@ -309,7 +309,7 @@ Parallel to **A.1â€“A.6** and **Bâ†’D**; does **not** block Wedge #1 (
 |--------|-------------------|----------------|------------|-------------|
 | Render nuclear G.3 | UE5 Nanite/Lumen | **100%** | ~15% scaffold | **Deferred** (P2e) until platform J/L/RTv1 exit — not next queue |
 | Studio S1â€“S7 | UE5 editor tools | **100%** | ~5â€“20% | Deepen existing surfaces; no new hero panels (CW0) |
-| AI / IDE J + L | Cursor/v0/Devin | **100%** | ~50–70% platform | **2026-08-08:** P2b cleared; J.7 USDZ PARTIAL; J.9 auto-attach DONE-core; L.10 green; L.12 soak DONE; L.4 sandbox PTY first-light; L.13 farm+Monaco+Python matrix. Blockers for AI-native claim: L.8 true HMR, L.13 live acceptance, J.12 STOPPED |
+| AI / IDE J + L | Cursor/v0/Devin | **100%** | ~50–70% platform | **2026-08-08:** P2b cleared; J.7 USDZ PARTIAL; J.9 auto-attach DONE-core; L.10 green; L.12 soak DONE; L.4 sandbox PTY first-light; L.13 farm+Monaco+Python matrix. Blockers for AI-native claim: L.8 E2B remote HMR / live soak (local Vite first-light landed), L.13 live acceptance, J.12 STOPPED |
 | Platform H + I | Epic/Roblox/Steam | **100%** | ~25–35% ops | **H.0 DONE**; Instant Play + I.2 + Law XV bake SHIPPED; next = **H.1+** `hubCheckoutAudited` |
 | Runtime M + Vanguard K | UE defects + DLSS/XR | **100%** | ~0% product | Post-platform / post-G |
 | Law XV Hardware | Tier gating | **100%** | partial | Bake gate wired on web-static Instant Play (receipt+lightmap); Cap Score / FSR deepen remains |

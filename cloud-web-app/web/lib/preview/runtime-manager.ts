@@ -370,7 +370,8 @@ export async function requestPreviewHotUpdate(input: {
       paths: input.paths,
       files: input.files,
       clientHmrConnected: Boolean(input.clientHmrConnected),
-      preferHmr: Boolean(input.preferHmr),
+      // Default preferHmr=true so a live Vite/Next bridge can claim hmr without caller boilerplate.
+      preferHmr: input.preferHmr !== false,
     }),
   })
 

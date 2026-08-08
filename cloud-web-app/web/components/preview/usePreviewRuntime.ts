@@ -36,7 +36,8 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const sandboxIdRef = useRef<string | null>(null);
   const hmrConnectedRef = useRef(false);
   const { clearHealthPolling, startHealthPolling } = usePreviewRuntimeHealthMonitor(setRuntime);
-  const { clearHmrBridge, connectHMR } = usePreviewRuntimeHmrBridge(setRuntime);
+  const { clearHmrBridge, connectHMR, invalidateModules, isClientHmrConnected } =
+    usePreviewRuntimeHmrBridge(setRuntime);
 
   useEffect(() => {
     hmrConnectedRef.current = runtime.hmrConnected;
@@ -242,12 +243,16 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
             : 'Apply succeeded, but no live preview session — provision preview to enable hot-update.',
         }));
 
-        const preferHmr = Boolean(detail?.preferHmr);
+        // Prefer HMR when the live Vite/Next bridge is connected; callers may force reload with preferHmr:false.
+        const preferHmr = detail?.preferHmr !== false;
+        const clientHmrConnected = preferHmr
+          ? hmrConnectedRef.current || isClientHmrConnected()
+          : false;
         const finalResult = await requestPreviewHotUpdate({
           projectId: detail?.projectId ?? projectId ?? null,
           sandboxId,
           paths,
-          clientHmrConnected: preferHmr ? hmrConnectedRef.current : false,
+          clientHmrConnected,
           preferHmr,
         });
 
@@ -279,11 +284,15 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           lastSyncAt: Date.now(),
           guidance: finalResult.message || null,
           error: null,
-          // Honesty: only mark HMR connected when server claimed hmr — reload path keeps prior bridge state.
+          // Honesty: server hmr:true confirms bridge; reload path keeps prior bridge state.
           hmrConnected: finalResult.hmr ? true : prev.hmrConnected,
         }));
 
-        if (finalResult.reload) {
+        if (finalResult.hmr) {
+          // Best-effort Vite invalidate over WS; file-watcher HMR still applies when this returns false.
+          invalidateModules(paths);
+        } else if (finalResult.reload) {
+          // Never claim HMR when only iframe reload ran.
           forcePreviewIframeReload();
           window.setTimeout(() => {
             setRuntime((prev) => ({
@@ -307,7 +316,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
     return () => {
       window.removeEventListener(PREVIEW_APPLY_SUCCESS_EVENT, onApplySuccess as EventListener);
     };
-  }, [projectId]);
+  }, [projectId, invalidateModules, isClientHmrConnected]);
 
   useEffect(() => {
     const onPageHide = () => {

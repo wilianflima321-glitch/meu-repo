@@ -10,7 +10,10 @@ export const PREVIEW_HOT_UPDATE_RESULT_EVENT = 'aethel.preview.hot-update-result
 export type PreviewApplySuccessDetail = {
   paths: string[]
   projectId?: string | null
-  /** Prefer HMR when the preview bridge is connected; default forces reload. */
+  /**
+   * Prefer HMR when the preview bridge/Vite client is connected.
+   * Default true — set false to force full iframe reload even if HMR is live.
+   */
   preferHmr?: boolean
 }
 
@@ -36,7 +39,7 @@ export function notifyPreviewApplySuccess(detail: PreviewApplySuccessDetail): vo
       detail: {
         paths,
         projectId: detail.projectId ?? null,
-        preferHmr: Boolean(detail.preferHmr),
+        preferHmr: detail.preferHmr !== false,
       } satisfies PreviewApplySuccessDetail,
     }),
   )
