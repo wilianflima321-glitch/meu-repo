@@ -3,6 +3,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { Terminal as XTermType } from 'xterm';
 import { createComponentLogger } from '@/lib/observability/logger';
+import type { TerminalSocketHandle } from './terminalModels';
 import { TerminalWebSocket } from './terminalWebSocket';
 
 const log = createComponentLogger('terminalSessionConnection');
@@ -11,8 +12,8 @@ type ConnectTerminalSessionOptions = {
   sessionId: string;
   websocketUrl?: string;
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
-  fitTerminal: (socket?: TerminalWebSocket | null) => void;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
+  fitTerminal: (socket?: TerminalSocketHandle | null) => void;
   setIsConnected: Dispatch<SetStateAction<boolean>>;
   writeTerminalError: (message: string) => void;
 };
@@ -56,6 +57,6 @@ export function connectTerminalSessionSocket({
     writeTerminalError('Connection error. Attempting to reconnect...');
   };
 
-  websocketRef.current = ws;
+  websocketRef.current = ws as TerminalSocketHandle;
   ws.connect(sessionId);
 }

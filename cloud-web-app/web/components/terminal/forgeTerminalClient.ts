@@ -1,8 +1,11 @@
 'use client'
 
 /**
- * L.4 client adapter — IDE xterm ↔ Forge sandbox stream (not host PTY).
+ * L.4 client adapter — IDE xterm ↔ Forge sandbox duplex stream (not host PTY).
  * Agents and Forge panes use this; human local shells keep terminalWebSocket/Tauri PTY.
+ *
+ * Transport: NDJSON attach stream (stdout/stderr/ready/exit) + POST stdin/resize/detach.
+ * Connected is only true after a live `ready` event (zero-MVP — no fake connected).
  */
 
 import { getAuthHeaders } from '@/lib/ai/change-feedback-client'
@@ -68,7 +71,7 @@ export async function closeForgeTerminalSessionRequest(sessionId: string): Promi
 
 /**
  * Streams an allowlisted command into the Forge sandbox and writes chunks via callbacks.
- * Used by IDE Forge panes — never opens host PTY.
+ * Used by agents / one-shot probes — never opens host PTY.
  */
 export async function execForgeTerminalStream(input: {
   sessionId: string
@@ -147,4 +150,226 @@ export async function execForgeTerminalStream(input: {
   }
 
   return { ok: exitOk, exitCode, deniedMessage }
+}
+
+type ForgeDuplexEvent = {
+  type: string
+  data?: string
+  duplexId?: string
+  ok?: boolean
+  exitCode?: number | null
+  message?: string
+  mode?: string
+  pty?: boolean
+  held?: string
+  command?: string
+  cols?: number
+  rows?: number
+  ptyApplied?: boolean
+}
+
+/**
+ * Drop-in transport for Forge sandbox panes — same surface as TerminalWebSocket
+ * but never touches host/Tauri PTY. `connected` flips only after live `ready`.
+ */
+export class ForgeTerminalSocket {
+  private abort: AbortController | null = null
+  private duplexId: string | null = null
+  private sessionId = ''
+  private isConnected = false
+  private messageQueue: string[] = []
+  private cols = 80
+  private rows = 24
+
+  onData: ((data: string) => void) | null = null
+  onConnect: (() => void) | null = null
+  onDisconnect: (() => void) | null = null
+  onError: ((error: Event | string) => void) | null = null
+
+  connect(sessionId: string): void {
+    if (this.isConnected || this.abort) return
+    this.sessionId = sessionId
+    void this.attachDuplex(sessionId)
+  }
+
+  private async attachDuplex(sessionId: string): Promise<void> {
+    this.abort = new AbortController()
+    try {
+      const response = await fetch('/api/terminal/forge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+          'x-aethel-caller': 'user',
+        },
+        body: JSON.stringify({
+          action: 'attach',
+          sessionId,
+          command: 'node',
+          args: ['-i'],
+          cols: this.cols,
+          rows: this.rows,
+        }),
+        signal: this.abort.signal,
+      })
+
+      if (!response.ok || !response.body) {
+        const errText = await response.text().catch(() => '')
+        const message =
+          errText || `Forge duplex attach failed (HTTP ${response.status}) — fail-closed`
+        log.warn('forge_terminal_attach_http_fail', { status: response.status, errText })
+        this.onError?.(message)
+        this.isConnected = false
+        this.onDisconnect?.()
+        this.abort = null
+        return
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          this.handleEventLine(line)
+        }
+      }
+
+      if (this.isConnected) {
+        this.isConnected = false
+        this.onDisconnect?.()
+      }
+    } catch (err) {
+      if (this.abort?.signal.aborted) return
+      const message = err instanceof Error ? err.message : String(err)
+      log.warn('forge_terminal_attach_stream_fail', { message })
+      this.onError?.(message)
+      this.isConnected = false
+      this.onDisconnect?.()
+    } finally {
+      this.abort = null
+      this.duplexId = null
+    }
+  }
+
+  private handleEventLine(line: string): void {
+    if (!line.trim()) return
+    let event: ForgeDuplexEvent
+    try {
+      event = JSON.parse(line) as ForgeDuplexEvent
+    } catch {
+      log.warn('forge_terminal_duplex_ndjson_parse_fail', { line: line.slice(0, 120) })
+      return
+    }
+
+    if (event.type === 'ready' && event.duplexId) {
+      this.duplexId = event.duplexId
+      this.isConnected = true
+      this.onConnect?.()
+      while (this.messageQueue.length > 0) {
+        const queued = this.messageQueue.shift()
+        if (queued) this.send(queued)
+      }
+      return
+    }
+
+    if (event.type === 'stdout' && event.data) {
+      this.onData?.(event.data)
+      return
+    }
+
+    if (event.type === 'stderr' && event.data) {
+      this.onData?.(`\x1b[31m${event.data}\x1b[0m`)
+      return
+    }
+
+    if (event.type === 'exit') {
+      this.isConnected = false
+      this.onDisconnect?.()
+      return
+    }
+
+    if (event.type === 'error') {
+      this.onError?.(event.message || 'Forge duplex error')
+    }
+  }
+
+  send(data: string): void {
+    if (!this.duplexId || !this.isConnected) {
+      this.messageQueue.push(data)
+      return
+    }
+    void fetch('/api/terminal/forge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+        'x-aethel-caller': 'user',
+      },
+      body: JSON.stringify({
+        action: 'stdin',
+        duplexId: this.duplexId,
+        data,
+      }),
+    }).then(async (res) => {
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        log.warn('forge_terminal_stdin_fail', { status: res.status, body: body.slice(0, 160) })
+        this.onError?.('Forge stdin write failed — duplex may be closed')
+      }
+    })
+  }
+
+  resize(cols: number, rows: number): void {
+    this.cols = cols
+    this.rows = rows
+    if (!this.duplexId || !this.isConnected) return
+    void fetch('/api/terminal/forge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+        'x-aethel-caller': 'user',
+      },
+      body: JSON.stringify({
+        action: 'resize',
+        duplexId: this.duplexId,
+        cols,
+        rows,
+      }),
+    }).catch((err: unknown) => {
+      log.warn('forge_terminal_resize_fail', { error: err })
+    })
+  }
+
+  disconnect(): void {
+    const duplexId = this.duplexId
+    this.abort?.abort()
+    this.abort = null
+    this.isConnected = false
+    this.messageQueue = []
+    this.duplexId = null
+    if (duplexId) {
+      void fetch('/api/terminal/forge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+          'x-aethel-caller': 'user',
+        },
+        body: JSON.stringify({ action: 'detach', duplexId }),
+      }).catch(() => {
+        /* best-effort teardown */
+      })
+    }
+  }
+
+  get connected(): boolean {
+    return this.isConnected
+  }
 }

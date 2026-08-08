@@ -3,8 +3,7 @@
 import { useImperativeHandle, type ForwardedRef, type MutableRefObject } from 'react';
 import type { Terminal as XTermType } from 'xterm';
 import type { FitAddon } from 'xterm-addon-fit';
-import type { XTerminalRef } from './terminalModels';
-import { TerminalWebSocket } from './terminalWebSocket';
+import type { TerminalSocketHandle, XTerminalRef } from './terminalModels';
 
 type UseTerminalImperativeHandleOptions = {
   fitAddonRef: MutableRefObject<FitAddon | null>;
@@ -14,7 +13,7 @@ type UseTerminalImperativeHandleOptions = {
   searchNext: () => boolean;
   searchPrevious: () => boolean;
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
 };
 
 export function useTerminalImperativeHandle({

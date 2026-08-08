@@ -3,6 +3,22 @@ import type { ReactNode } from 'react';
 /** L.4 lane split — human host PTY vs Forge sandbox (agents never host PTY). */
 export type TerminalExecutionLane = 'human-host-pty' | 'forge-sandbox';
 
+/**
+ * Shared xterm transport surface — host/Tauri WebSocket or Forge sandbox duplex.
+ * Implementations must not claim connected until a live stream is ready.
+ */
+export interface TerminalSocketHandle {
+  send(data: string): void
+  resize(cols: number, rows: number): void
+  disconnect(): void
+  connect(sessionId: string): void
+  onData: ((data: string) => void) | null
+  onConnect: (() => void) | null
+  onDisconnect: (() => void) | null
+  onError: ((error: Event | string) => void) | null
+  readonly connected: boolean
+}
+
 export interface TerminalSession {
   id: string;
   name: string;

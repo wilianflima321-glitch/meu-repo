@@ -3,11 +3,10 @@
 import { useCallback, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import type { Terminal as XTermType } from 'xterm';
-import type { TerminalSession } from './terminalModels';
+import type { TerminalSession, TerminalSocketHandle } from './terminalModels';
 import { createTerminalSessionRequest, closeTerminalSessionRequest } from './terminalSessionApi';
-import { execForgeTerminalStream } from './forgeTerminalClient';
+import { ForgeTerminalSocket } from './forgeTerminalClient';
 import { connectTerminalSessionSocket } from './terminalSessionConnection';
-import { TerminalWebSocket } from './terminalWebSocket';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('useTerminalSessions');
@@ -20,8 +19,8 @@ type UseTerminalSessionsOptions = {
   forgeProjectId?: string;
   existingSandboxSessionId?: string;
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
-  fitTerminal: (socket?: TerminalWebSocket | null) => void;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
+  fitTerminal: (socket?: TerminalSocketHandle | null) => void;
   writeTerminalError: (message: string) => void;
 };
 
@@ -54,32 +53,43 @@ export function useTerminalSessions({
 
   const attachForgeSession = useCallback(async (session: TerminalSession) => {
     websocketRef.current?.disconnect();
-    setIsConnected(true);
+    setIsConnected(false);
+
     const term = terminalRef.current;
+    term?.clear();
     term?.writeln('\x1b[36m[Forge sandbox]\x1b[0m AgentShellPolicy lane — not host PTY.');
     term?.writeln(
       `\x1b[90msession=${session.forgeSessionId || session.id} provider=${session.provider || 'local-isolated'}\x1b[0m`,
     );
-    term?.writeln('\x1b[90mProbing sandbox with allowlisted node…\x1b[0m');
+    term?.writeln(
+      '\x1b[90mAttaching duplex (stdin/stdout pipes). True sandbox PTY remains HELD.\x1b[0m',
+    );
 
-    const probe = await execForgeTerminalStream({
-      sessionId: session.forgeSessionId || session.id,
-      command: 'node',
-      args: ['-e', "console.log('forge-terminal-bridge-ready')"],
-      onStdout: (chunk) => term?.write(chunk),
-      onStderr: (chunk) => term?.write(`\x1b[31m${chunk}\x1b[0m`),
-    });
-
-    if (!probe.ok) {
-      writeTerminalError(
-        probe.deniedMessage ||
-          'Forge sandbox probe failed — fail-closed (no host PTY fallback).',
+    const socket = new ForgeTerminalSocket();
+    socket.onData = (data) => {
+      terminalRef.current?.write(data);
+    };
+    socket.onConnect = () => {
+      setIsConnected(true);
+      terminalRef.current?.writeln(
+        '\x1b[32mForge duplex ready\x1b[0m \x1b[90m(mode=sandbox-exec-duplex, pty=false)\x1b[0m',
       );
+      terminalRef.current?.focus();
+      fitTerminal(socket);
+    };
+    socket.onDisconnect = () => {
       setIsConnected(false);
-      return;
-    }
-    term?.writeln('\x1b[32mForge terminal bridge ready.\x1b[0m');
-  }, [terminalRef, websocketRef, writeTerminalError]);
+    };
+    socket.onError = (error) => {
+      const message = typeof error === 'string' ? error : 'Forge duplex connection error';
+      log.error('Forge terminal duplex error', { error: message, sessionId: session.id });
+      writeTerminalError(`${message} — fail-closed (no host PTY fallback).`);
+      setIsConnected(false);
+    };
+
+    websocketRef.current = socket;
+    socket.connect(session.forgeSessionId || session.id);
+  }, [fitTerminal, terminalRef, websocketRef, writeTerminalError]);
 
   const createSession = useCallback(async (cwd?: string, shell?: string) => {
     try {

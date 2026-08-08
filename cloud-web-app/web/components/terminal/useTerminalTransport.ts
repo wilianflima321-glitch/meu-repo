@@ -4,7 +4,7 @@ import { useCallback, useEffect, type MutableRefObject, type RefObject } from 'r
 import type { ITerminalOptions, Terminal as XTermType } from 'xterm';
 import type { FitAddon } from 'xterm-addon-fit';
 import type { SearchAddon } from 'xterm-addon-search';
-import { TerminalWebSocket } from './terminalWebSocket';
+import type { TerminalSocketHandle } from './terminalModels';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('useTerminalTransport');
@@ -16,7 +16,7 @@ type UseTerminalTransportOptions = {
   createSession: (cwd?: string, shell?: string) => Promise<unknown>;
   disconnectViewport: () => void;
   fitAddonRef: MutableRefObject<FitAddon | null>;
-  fitTerminal: (socket?: TerminalWebSocket | null) => void;
+  fitTerminal: (socket?: TerminalSocketHandle | null) => void;
   initialCwd: string;
   initialShell?: string;
   observeViewport: (container: HTMLDivElement) => void;
@@ -25,7 +25,7 @@ type UseTerminalTransportOptions = {
   searchAddonRef: MutableRefObject<SearchAddon | null>;
   terminalOptions: ITerminalOptions;
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
 };
 
 export function useTerminalTransport({

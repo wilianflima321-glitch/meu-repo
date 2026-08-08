@@ -242,11 +242,12 @@ export async function streamInForgeSandbox(input: StreamExecOptions): Promise<St
     const child = spawn(commandGuard.normalized, args, {
       cwd: cwdGuard.resolved,
       env: buildScrubbedEnv(state.session.networkPolicy, input.extraEnv),
-      stdio: ['ignore', 'pipe', 'pipe']
+      // stdin ignored for one-shot stream; L.4 duplex uses openForgeSandboxDuplex instead
+      stdio: ['ignore', 'pipe', 'pipe'],
     })
 
-    if (input.onStdout) child.stdout.on('data', (d) => input.onStdout!(d.toString()))
-    if (input.onStderr) child.stderr.on('data', (d) => input.onStderr!(d.toString()))
+    if (input.onStdout) child.stdout?.on('data', (d) => input.onStdout!(d.toString()))
+    if (input.onStderr) child.stderr?.on('data', (d) => input.onStderr!(d.toString()))
 
     child.on('close', (code) => {
       appendExecEvidence(input.sessionId, code === 0 ? 'ok' : 'failed', input.command, args, `Streamed execution finished with code ${code}`)
@@ -258,6 +259,45 @@ export async function streamInForgeSandbox(input: StreamExecOptions): Promise<St
       resolve({ ok: false, exitCode: null, durationMs: Date.now() - startedAt, deniedReason: 'spawn_failed', deniedMessage: err.message })
     })
   })
+}
+
+/**
+ * Context slice for L.4 duplex (stdin/stdout pipes) without exposing the full runtime map.
+ * Fail-closed: null when session missing or already torn down.
+ */
+export function getForgeSandboxExecContext(sessionId: string): {
+  sessionId: string
+  projectRootPath: string
+  commandAllowlist: readonly string[]
+  networkPolicy: ForgeSandboxNetworkPolicy
+  agentMode: AgentMode
+  provider: ForgeSandboxProvider
+  buildEnv: (extra?: Record<string, string>) => Record<string, string>
+  appendEvidence: (
+    status: 'ok' | 'failed' | 'denied',
+    command: string,
+    args: string[],
+    summary: string,
+  ) => void
+  trackChild: (child: ChildProcess) => void
+} | null {
+  const state = RUNTIME_SESSIONS.get(sessionId)
+  if (!state || state.session.teardownAt) return null
+  return {
+    sessionId,
+    projectRootPath: state.projectRootPath,
+    commandAllowlist: state.commandAllowlist,
+    networkPolicy: state.session.networkPolicy,
+    agentMode: state.session.agentMode,
+    provider: state.session.provider,
+    buildEnv: (extra) => buildScrubbedEnv(state.session.networkPolicy, extra),
+    appendEvidence: (status, command, args, summary) =>
+      appendExecEvidence(sessionId, status, command, args, summary),
+    trackChild: (child) => {
+      if (!state.localBackgroundProcesses) state.localBackgroundProcesses = []
+      state.localBackgroundProcesses.push(child)
+    },
+  }
 }
 
 /**

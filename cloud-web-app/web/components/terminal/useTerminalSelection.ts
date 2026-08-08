@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type { Terminal as XTermType } from 'xterm';
 import type { SearchAddon } from 'xterm-addon-search';
-import { TerminalWebSocket } from './terminalWebSocket';
+import type { TerminalSocketHandle } from './terminalModels';
 
 const SEARCH_DECORATIONS = {
   decorations: { matchOverviewRuler: '#FF0' },
@@ -11,7 +11,7 @@ const SEARCH_DECORATIONS = {
 
 type UseTerminalSelectionOptions = {
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
 };
 
 export function useTerminalSelection({

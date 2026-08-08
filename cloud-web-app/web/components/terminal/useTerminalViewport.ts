@@ -3,11 +3,11 @@
 import { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type { Terminal as XTermType } from 'xterm';
 import type { FitAddon } from 'xterm-addon-fit';
-import { TerminalWebSocket } from './terminalWebSocket';
+import type { TerminalSocketHandle } from './terminalModels';
 
 type UseTerminalViewportOptions = {
   terminalRef: MutableRefObject<XTermType | null>;
-  websocketRef: MutableRefObject<TerminalWebSocket | null>;
+  websocketRef: MutableRefObject<TerminalSocketHandle | null>;
 };
 
 export function useTerminalViewport({
@@ -20,7 +20,7 @@ export function useTerminalViewport({
 
   const [isMaximized, setIsMaximized] = useState(false);
 
-  const fitTerminal = useCallback((socket?: TerminalWebSocket | null) => {
+  const fitTerminal = useCallback((socket?: TerminalSocketHandle | null) => {
     if (!fitAddonRef.current || !terminalRef.current) {
       return;
     }

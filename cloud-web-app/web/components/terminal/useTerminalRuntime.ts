@@ -5,7 +5,7 @@ import type { Terminal as XTermType } from 'xterm';
 import type { TerminalTheme, XTerminalRef } from './terminalModels';
 import { useTerminalImperativeHandle } from './useTerminalImperativeHandle';
 import { useTerminalOptions } from './useTerminalOptions';
-import { TerminalWebSocket } from './terminalWebSocket';
+import type { TerminalSocketHandle } from './terminalModels';
 import { useTerminalSelection } from './useTerminalSelection';
 import { useTerminalSessions } from './useTerminalSessions';
 import { useTerminalShortcuts } from './useTerminalShortcuts';
@@ -40,7 +40,7 @@ export function useTerminalRuntime({
   theme,
 }: UseTerminalRuntimeOptions) {
   const terminalRef = useRef<XTermType | null>(null);
-  const websocketRef = useRef<TerminalWebSocket | null>(null);
+  const websocketRef = useRef<TerminalSocketHandle | null>(null);
   const {
     containerRef,
     disconnectViewport,
