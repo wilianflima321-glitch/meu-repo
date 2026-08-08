@@ -1,10 +1,15 @@
 /**
- * J.4 embed providers — local hash (shipped) + BYOK cloud hook (HELD until CostGuard embed path).
+ * J.4 embed providers — local-hash (default/$0) + BYOK cloud (CostGuard-gated).
+ * Never read process.env.OPENAI_API_KEY for product embeds (Law XVI Trava I — no platform pay).
  */
 
 import crypto from 'node:crypto'
+import { createComponentLogger } from '@/lib/observability/logger'
 import type { VectorEmbedProviderKind } from './types'
 
+const log = createComponentLogger('vector-index.embed-provider')
+
+/** Local-hash dim; BYOK OpenAI text-embedding-3-small requested at same dim for store compat. */
 export const VECTOR_EMBED_DIM = 384
 
 export interface EmbedProvider {
@@ -13,7 +18,7 @@ export interface EmbedProvider {
   embed(texts: string[]): Promise<number[][]>
 }
 
-/** Deterministic local embedding — same family as semantic-code-search hash. */
+/** Deterministic local embedding — lexical/hash family (PARTIAL semantic quality). */
 export function createLocalHashEmbedProvider(): EmbedProvider {
   return {
     kind: 'local-hash',
@@ -25,14 +30,67 @@ export function createLocalHashEmbedProvider(): EmbedProvider {
 }
 
 /**
- * BYOK cloud embed — HELD: returns null provider until CostGuard-backed embed ships.
- * Callers must use local-hash; never silent-fail to empty vectors as "cloud".
+ * BYOK cloud embed (OpenAI text-embedding-3-small @ 384d).
+ * Requires caller-supplied apiKey. Returns null if key empty — never silent platform key.
  */
-export function createByokCloudEmbedProvider(_opts: {
+export function createByokCloudEmbedProvider(opts: {
   apiKey: string
   modelId?: string
+  fetchImpl?: typeof fetch
 }): EmbedProvider | null {
-  return null
+  const apiKey = opts.apiKey?.trim()
+  if (!apiKey) return null
+
+  const modelId = opts.modelId || 'text-embedding-3-small'
+  const fetchImpl = opts.fetchImpl ?? fetch
+
+  return {
+    kind: 'byok-cloud',
+    dimensions: VECTOR_EMBED_DIM,
+    async embed(texts: string[]) {
+      if (texts.length === 0) return []
+
+      const response = await fetchImpl('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          input: texts,
+          dimensions: VECTOR_EMBED_DIM,
+        }),
+      })
+
+      if (!response.ok) {
+        const body = await response.text().catch(() => '')
+        log.warn('byok_cloud_embed_http_failed', {
+          status: response.status,
+          // Never log apiKey or Authorization
+          bodyPreview: body.slice(0, 120),
+        })
+        throw new Error(`BYOK_CLOUD_EMBED_HTTP_${response.status}`)
+      }
+
+      const data = (await response.json()) as {
+        data?: Array<{ embedding?: number[]; index?: number }>
+      }
+      const rows = Array.isArray(data.data) ? data.data : []
+      if (rows.length !== texts.length) {
+        throw new Error('BYOK_CLOUD_EMBED_COUNT_MISMATCH')
+      }
+
+      const ordered = [...rows].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      return ordered.map((row) => {
+        const emb = row.embedding
+        if (!Array.isArray(emb) || emb.length === 0) {
+          throw new Error('BYOK_CLOUD_EMBED_EMPTY_VECTOR')
+        }
+        return emb
+      })
+    },
+  }
 }
 
 function hashEmbed(text: string, dim: number): number[] {

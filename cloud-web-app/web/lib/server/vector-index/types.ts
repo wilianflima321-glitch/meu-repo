@@ -1,10 +1,13 @@
 /**
  * J.4 VectorIndex — shared types (Law XVI / L.12 foundation).
- * Store: SQLite (node:sqlite). Similarity: cosine over local embeddings.
- * Native sqlite-vec extension = HELD until package+CI land (API ready for swap).
+ * Store: SQLite (node:sqlite). Similarity: JS cosine fallback (PARTIAL).
+ * Native sqlite-vec extension = HELD until package+loadExtension soak lands.
  */
 
 export type VectorEmbedProviderKind = 'local-hash' | 'byok-cloud'
+
+/** Honest quality — lexical-hash is NOT true semantic recall. */
+export type VectorSearchQuality = 'lexical-hash' | 'byok-semantic'
 
 export interface VectorChunkRecord {
   id: string
@@ -35,8 +38,10 @@ export interface VectorIndexStats {
   fileCount: number
   lastIndexedAt: number | null
   embedProvider: VectorEmbedProviderKind
-  /** Honest: true when using native sqlite-vec; false for cosine-over-SQLite */
-  sqliteVecExtension: false
+  searchQuality: VectorSearchQuality
+  /** Honest: true only when native sqlite-vec load proven */
+  sqliteVecExtension: boolean
+  sqliteVecStatus: 'available' | 'held'
   watcherActive: boolean
 }
 

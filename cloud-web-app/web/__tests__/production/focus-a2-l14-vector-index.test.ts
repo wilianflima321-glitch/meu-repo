@@ -36,16 +36,18 @@ describe('A2 J.4 VectorIndex', () => {
     const indexed = await reindexProjectVectorStore({ projectId, rootPath: root })
     expect(indexed.chunks).toBeGreaterThan(0)
 
-    const hits = await searchVectorIndex({
+    const result = await searchVectorIndex({
       projectId,
       query: 'jump height physics function',
       topK: 3,
     })
-    expect(hits.length).toBeGreaterThan(0)
-    expect(hits[0].filePath).toContain('jump')
+    expect(result.hits.length).toBeGreaterThan(0)
+    expect(result.hits[0].filePath).toContain('jump')
+    expect(result.searchQuality).toBe('lexical-hash')
 
     const stats = getVectorIndexStats(projectId)
     expect(stats.sqliteVecExtension).toBe(false)
+    expect(stats.sqliteVecStatus).toBe('held')
     expect(stats.chunkCount).toBeGreaterThan(0)
   })
 
@@ -65,12 +67,12 @@ describe('A2 J.4 VectorIndex', () => {
     const elapsed = Date.now() - t0
     expect(elapsed).toBeLessThan(5000)
 
-    const hits = await searchVectorIndex({
+    const result = await searchVectorIndex({
       projectId: `${projectId}_acc`,
       query: 'healLoop',
       topK: 2,
     })
-    expect(hits.some((h) => h.excerpt.includes('healLoop'))).toBe(true)
+    expect(result.hits.some((h) => h.excerpt.includes('healLoop'))).toBe(true)
   })
 })
 
@@ -94,7 +96,7 @@ describe('A2 L.14 live pack + architecture spine', () => {
     // Point workspace root by indexing under known project + mocking getScopedWorkspaceRoot is hard;
     // exercise vector + pack builder composition directly:
     await reindexProjectVectorStore({ projectId: pid, rootPath: root })
-    const hits = await searchVectorIndex({ projectId: pid, query: 'spawn entity mesh', topK: 4 })
+    const { hits } = await searchVectorIndex({ projectId: pid, query: 'spawn entity mesh', topK: 4 })
     expect(hits.length).toBeGreaterThan(0)
 
     const { buildMultiSurfaceContextPack } = await import(

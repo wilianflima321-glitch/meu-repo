@@ -137,6 +137,7 @@ export async function indexFileIntoVectorStore(input: {
 
   deleteChunksForFile(input.projectId, rel)
   upsertVectorChunks(input.projectId, records)
+  setVectorMeta(input.projectId, 'embedProvider', embed.kind)
   return records.length
 }
 
@@ -145,6 +146,7 @@ export async function reindexProjectVectorStore(input: {
   rootPath: string
   embed?: EmbedProvider
 }): Promise<{ files: number; chunks: number }> {
+  const embed = input.embed ?? createLocalHashEmbedProvider()
   const files = await walkFiles(input.rootPath)
   let chunks = 0
   for (const abs of files) {
@@ -152,11 +154,17 @@ export async function reindexProjectVectorStore(input: {
       projectId: input.projectId,
       rootPath: input.rootPath,
       absoluteFilePath: abs,
-      embed: input.embed,
+      embed,
     })
   }
   setVectorMeta(input.projectId, 'lastIndexedAt', String(Date.now()))
   setVectorMeta(input.projectId, 'rootPath', input.rootPath)
-  log.info('vector_reindex_complete', { projectId: input.projectId, files: files.length, chunks })
+  setVectorMeta(input.projectId, 'embedProvider', embed.kind)
+  log.info('vector_reindex_complete', {
+    projectId: input.projectId,
+    files: files.length,
+    chunks,
+    embedProvider: embed.kind,
+  })
   return { files: files.length, chunks }
 }

@@ -125,12 +125,13 @@ export async function buildLiveMultiSurfaceContextPack(input: {
     }
   }
 
-  const hits = await searchVectorIndex({
+  const searchResult = await searchVectorIndex({
     projectId: input.projectId,
     query: input.query,
     topK: 10,
     rootPath,
   })
+  const hits = searchResult.hits
 
   // Cold start: if still empty after search, force reindex once
   if (hits.length === 0) {
@@ -139,7 +140,7 @@ export async function buildLiveMultiSurfaceContextPack(input: {
   const finalHits =
     hits.length > 0
       ? hits
-      : await searchVectorIndex({ projectId: input.projectId, query: input.query, topK: 10 })
+      : (await searchVectorIndex({ projectId: input.projectId, query: input.query, topK: 10 })).hits
 
   let repositoryManifestId: string | undefined
   try {

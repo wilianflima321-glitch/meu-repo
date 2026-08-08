@@ -40,7 +40,8 @@ export async function queryRepoGraphRAG(
 ): Promise<RepoGraphRagResult> {
   const { topK = 3, maxDegrees = 1, maxFilesPerHit = 5, maxTotalFiles = 10 } = options
 
-  const semanticHits = await searchVectorIndex({ projectId, query, topK, rootPath })
+  const vectorResult = await searchVectorIndex({ projectId, query, topK, rootPath })
+  const semanticHits = vectorResult.hits
   if (semanticHits.length === 0) {
     return { query, neighborhoodFiles: [], semanticHits: [] }
   }
