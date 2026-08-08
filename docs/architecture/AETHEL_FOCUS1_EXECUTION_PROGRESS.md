@@ -34,6 +34,7 @@
 | 2026-08-08 l4-duplex | L.4 ForgeTerminalBridge duplex deepen (stdin↔stdout pipes) | **PARTIAL** L.4 duplex; tests **10/10**; sandbox PTY **HELD**; Hub checkout HELD |
 | 2026-08-08 l4-l2-l9 | L.4 ForgeTerminalBridge + L.2/L.9 commit/CI gate | **PARTIAL** L.4/L.2/L.9; targeted **20/20**; Hub checkout HELD |
 | 2026-08-08 creative-tools-ux-audit | Creative 3D editing tools UX audit (viewport/timeline/material/animation/VFX/audio/preview vs Unreal/Blender/Unity) — see Changelog below | 10 files fixed + 2 extracted; `qa:no-hex-in-components` + mojibake scan green; typecheck/lint/vitest **BLOCKED** (`node_modules` incomplete — no `tsc`/`eslint`/`vitest` binaries, not reinstalled per instruction) |
+| 2026-08-08 docs-authority-sync | Documentation authority sync — Progress ↔ Master Map §0b/§0c ↔ Index scorecard; Remaining OPEN P0/P1/P2 + DONE-but-PARTIAL | Docs only; no product code; P2b Anti-MOCK **fully cleared**; Hub checkout HELD; Onda G deferred |
 
 ---
 
@@ -292,7 +293,7 @@ npm run qa:plan-limits-parity
 | A1 | MoA + Auto-Heal ? **live** provider + L.5 sandbox | **DONE** ? `apex-mission-orchestrator` + adapters + apply `enableAutoHeal`; in-memory L.5 (not L.1 shell) |
 | A2 | SceneContext J.3 / VectorIndex J.4 if unwired | **DONE** ? L.14 live orchestrator + J.4 SQLite VectorIndex + spine ? MoA/chat; sqlite-vec ext + BYOK embed **HELD** |
 | A3 | AI-v1-c J.2 Nexus UI + J.9 VisualEvidence + Trava II undo | **DONE** (J.9 auto-attach deepened 2026-08-08) — phase strip + nucleus/peripheral board + ledger receipts + fusion undo banner; browser WebM/PNG auto-attach after FusionTx handoff/APPLY; Node/headless honest PNG/`webmHeld` + patch-hash; cinematic #63 still **HELD** |
-| A4 | AI-v1-e J.5 GraphOperator + J.6 VideoToMechanic + J.7 UsdIntegrator | **DONE** ? Bridge+FusionTx+Critic/Lazy; scaffold-only Trava III; no proxy capsule; USD viewer **HELD** |
+| A4 | AI-v1-e J.5 GraphOperator + J.6 VideoToMechanic + J.7 UsdIntegrator | **DONE-core + J.7 PARTIAL** — Bridge+FusionTx+Critic/Lazy; scaffold-only Trava III; no proxy capsule; **USDZ browser preview PARTIAL** (2026-08-08); USDA/USD/USDC + OpenUSD stage **HELD** |
 | A5 | AI-v1-f J.8 BrowserOperator CORE | **DONE** (2026-07-11ai) ? governed allowlist fetch + CostGuard + ledger; CDP/Playwright farm **HELD** |
 | A6 | AI-v1-g J.10 LiveVoice CORE | **DONE** (2026-07-11aj) ? PTT/generate?play + CostGuard + ledger + honesty badge; duplex WebRTC **HELD** |
 | A7 | AI-v1-g J.11 ACP / J.12 OrchestratorProd | **HELD / STOPPED** ? Founder Pacto (2026-07-11ak): do **not** continue; pivot to Focus 1B + A.1 |
@@ -321,8 +322,8 @@ no parallel swarm, per Founder order.
 | J.8 | BrowserOperator | **DONE (CORE)** | `lib/production/browser-operator.ts` + `POST /api/agents/browser-operator/research` — governed allowlist fetch + CostGuard + ledger. CDP/Playwright farm **HELD**. | Full CDP farm for JS-rendered page research (currently allowlisted fetch only). |
 | J.9 | VisualEvidence (Trava II) | **DONE (CORE)** — auto-attach 2026-08-08; cinematic #63 **HELD** | `captureViewportVisualEvidenceAuto` + `autoAttachViewportVisualEvidenceAfterApply`: WebM via MediaRecorder when canvas.captureStream allows; else honest PNG (`webmHeld:true`) or patch-hash. Wired after FusionTx client handoff (banner) + chat APPLY. Law XVI: never IMPLEMENTED with empty blob/refs. Ledger prefers Nexus browser capture. | Cinematic engine capture (#63) still HELD. Full WebM in headless CI remains HELD (honest PNG/patch-hash). |
 | J.10 | LiveVoice | **DONE (CORE)** | `lib/production/live-voice-operator.ts` + `POST /api/agents/live-voice/direction` — PTT / generate→play + CostGuard + ledger. Duplex WebRTC **HELD**. | Real-time duplex WebRTC session (currently push-to-talk request/response only). |
-| J.11 | ACP Unification | **STOPPED (Founder Pacto 2026-07-11ak)** | No `acp-*.ts` files exist. Explicit ledger row: "do not continue; pivot to Focus 1B + A.1." | Founder must explicitly lift the STOP before any ACP work resumes. |
-| J.12 | OrchestratorProd | **STOPPED (same Pacto)** | No `orchestrator-prod.ts` / equivalent exists. | Same — Founder-gated. |
+| J.11 | ACP Unification | **STOPPED (Founder Pacto 2026-07-11ak)** | Working-tree scaffold `agent-control-protocol.ts` may exist — **not shipped** (no Vitest / CostGuard / production dispatch). Pacto remains binding. | Founder must explicitly lift the STOP before any ACP work resumes. |
+| J.12 | OrchestratorProd | **STOPPED (same Pacto)** | Working-tree scaffold `orchestrator-prod.ts` may exist — **not shipped**. Same STOP. | Same — Founder-gated. |
 
 **Onda J summary (updated 2026-08-08 j7-usdz):** 8 DONE-core (J.1, J.2, J.4, J.5, J.6, J.8-core, J.9-core, J.10-core), 1 PARTIAL (J.7 — USDZ browser preview PARTIAL; full USD stage HELD), 1 superseded-by-design (J.3→L.14), 2 STOPPED by explicit Founder order (J.11, J.12 — **do not resume without Founder sign-off**).
 
@@ -345,16 +346,11 @@ no parallel swarm, per Founder order.
 | L.13 | UniversalLspFarm | **PARTIAL (cloud relay core 2026-08-08)** | `lib/server/universal-lsp-relay.ts` + client-safe `lib/lsp/universal-lsp-endpoint.ts` — farm registry, acquire/release via `lsp-runtime`, Monaco endpoint resolve; honesty: Tauri sidecar **HELD**. Tests: **5/5**. | **Multi-week remaining for DONE:** `apps/studio-local/src-tauri/src/lsp_farm.rs` sidecar spawn + Monaco desktop hover/definition acceptance (L.C). Not a one-PR close. |
 | L.14 | MultiSurfaceContextPack | **DONE** | `lib/production/multi-surface-context-pack.ts` — `buildMultiSurfaceContextPack`, `ContextChunk`, `WorkspaceSurfaceMode`, `assertPackWithinBudget`; live per A2 row (supersedes J.3) | — |
 
-**Onda L summary (post round 3):** **5 of 14** contracts have real code (L.1 `local-isolated` now
-DONE + `e2b`/`firecracker` honestly HELD, L.3 as a now-provably-load-bearing policy, L.6, L.11,
-L.14), **1 partially upgraded but still blocked on the Rust integration** (L.5 — the generic exec
-primitive exists but is not yet wired into the Rust check path), and **7 remain pure 0% GAPs** (L.2,
-L.4, L.7, L.8, L.9, L.10, L.12, L.13). Of the 8 items round 1 flagged as "0% because they depend on
-L.1", the honest re-check this round found only **L.2 and L.4 truly gate on L.1 exec** (and both
-remain unimplemented — L.1 existing does not auto-complete them); **L.7, L.9, L.10** depend on other
-still-GAP pieces (L.2/L.8) more than on L.1 directly; and **L.12, L.13** were **mis-attributed** to
-L.1 in round 1 — they are read-only/long-lived-process concerns, not one-shot sandbox exec, and do
-not depend on L.1 at all. See the round-3 report below for the corrected dependency read.
+**Onda L summary (updated 2026-08-08 authority sync — supersedes post-round-3 GAP narrative):**
+**DONE-core:** L.1 `local-isolated`, L.2 on-disk, L.3 policy, L.5 TS+lint+Rust-via-L.1, L.6, L.7 MagicWand→FusionTx, L.11, L.14.
+**PARTIAL (real code, not GAP):** L.4 duplex pipes (sandbox PTY HELD), L.8 provision/teardown (HMR/E2B HELD), L.9 scaffold+commit gate (interactive UX open), L.10 apply QA + **ide-ui colors 0** (web `qa:hardcoded-colors` debt open), L.12 RepoGraphRAG core (precision soak open), L.13 cloud LSP relay (Tauri `lsp_farm.rs` multi-week HELD).
+**Do not** re-read the round-3 “7 remain pure 0% GAPs” paragraph as current truth — that inventory is historical.
+**Universal IDE / AI-native marketing still blocked** (needs L.8 HMR depth + L.13 desktop + J.12 or Founder alternate).
 
 #### Item executed this round: L.5 ProjectValidationGate — TS+lint+Rust dual-stack completion
 
@@ -473,14 +469,14 @@ without either using a forbidden host PTY (#48) or silently doing nothing.
 **Dependent-item unlock assessment (honest, per-item):**
 | L item | Unlocked by L.1 now? | What still remains regardless |
 |--------|----------------------|-------------------------------|
-| L.2 DevContainerManifest | **Yes, genuinely** — has a real `local-isolated` exec target to provision into. | Still 0% — devcontainer template registry itself not started. |
-| L.4 ForgeTerminalBridge | **Partially** — L.1 proves non-interactive exec is safe, but a terminal bridge needs a *streaming* PTY-like channel (xterm ⇄ sandbox), which `execInForgeSandbox`'s buffered request/response model does not provide. | Needs a new streaming exec API on top of L.1, not just L.1 itself. |
-| L.7 AgenticUIStudio | **No** — blocked on UI/viewport work (DOM tree, props inspector), not sandbox exec. | Full scope, unrelated to L.1. |
+| L.2 DevContainerManifest | **Yes** — **DONE (core 2026-08-08)** on-disk `.aethel/devcontainer.json` | Full DevContainer runtime provision soak via L.1/L.9 |
+| L.4 ForgeTerminalBridge | **Yes → PARTIAL** — duplex pipes over L.1 (2026-08-08) | True sandbox PTY (node-pty / E2B PTY) still **HELD** |
+| L.7 AgenticUIStudio | **DONE-core** MagicWand→FusionTx (not L.1-gated) | v0-class multi-file HMR authoring still open |
 | L.8 PreviewOrchestrator | **PARTIAL (core wired 2026-08-08)** — strategy selection + local/E2B paths real; e2b still env-gated HELD without `E2B_API_KEY`; IDE provision/teardown wired. | Live E2B key + v0-class multi-file HMR authoring still open. |
-| L.9 FullStackScaffoldEngine | **Partially** — needs L.1 (now real) **and** L.2 (still 0%) together. | L.2 template registry. |
-| L.10 DesignTokenSync | **No** — unrelated to sandbox exec. | Full scope. |
-| L.12 RepoGraphRAG | **No — corrected mis-attribution.** Read-only import/call graph work; never depended on exec. | Full scope, unrelated to L.1. |
-| L.13 UniversalLspFarm | **No — corrected mis-attribution.** Needs a long-lived sidecar process model; L.1's one-shot exec primitive doesn't cover that lifecycle. | Full scope, unrelated to L.1 as built. |
+| L.9 FullStackScaffoldEngine | **PARTIAL** — L.2 registry + commit/CI gate landed | Interactive scaffold UX + live create-next-app soak |
+| L.10 DesignTokenSync | **PARTIAL** — apply QA + ide-ui **0** findings | web/non-ide-ui `qa:hardcoded-colors` debt |
+| L.12 RepoGraphRAG | **PARTIAL core** — never L.1-gated | Neighborhood precision ≥90% soak |
+| L.13 UniversalLspFarm | **PARTIAL cloud relay** — never L.1-gated | Tauri `lsp_farm.rs` sidecar + desktop hover/definition (multi-week) |
 
 ### P1c — RTv1 / H / I / F end-to-end audit (2026-08-08)
 
@@ -550,7 +546,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 #### P2b — Anti-MOCK / Zero-MVP sweep ([Sweep anti-mock MVP TODO honestidade](931e5d4c-8109-4918-b50a-276b940b7bb9))
 
-**47 violations** in `cloud-web-app/web/`, `apps/studio-local/`, `packages/` (dead root code excluded). **No commercial-ship certificate** until BLOCKERs cleared.
+**47 violations** in `cloud-web-app/web/`, `apps/studio-local/`, `packages/` (dead root code excluded). **P2b Anti-MOCK inventory fully cleared 2026-08-08** (12/12 BLOCKER + 18/18 HIGH + 17/17 MEDIUM). **Commercial-ship / AI-native / Hub-checkout certificates still withheld** for product gates (H.1+, Universal IDE depth, Onda G) — not for open Anti-MOCK BLOCKERs.
 
 | Severity | Count | Law |
 |----------|------:|-----|
@@ -573,7 +569,7 @@ Two independent audits recorded here (documentation alignment only this round �
 
 **Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → ~~BLOCKERs 7–9 (consolidation-truth-matrix)~~ **DONE** → ~~1–2 (USD export)~~ **DONE** → ~~3–6 (discovery probes)~~ **DONE** → ~~10 (email mock default)~~ **DONE** → ~~BLOCKER 11 (DAP)~~ **DONE** → ~~BLOCKER 12 (plugin_sandbox)~~ **DONE** → ~~P1 dead-mock orphan panels (MaterialGraph / PostProcess / DetailInspector)~~ **DONE** (deleted) → ~~Timeline3D real data~~ **DONE** → ~~RTv1 operational wires (P1c playtime + listing evidence)~~ **DONE** → ~~RTv1 export measured bytes~~ **DONE** → ~~RTv1 demo-web-slice Instant Play honesty~~ **DONE** → ~~Instant Play cook chain (packer+registry+html+host)~~ **DONE** → ~~I.2 verified reviews F.2 ≥2h gate~~ **DONE** → ~~L.5 Rust wire via L.1~~ **DONE** → ~~Timeline `*.timeline.json` persist~~ **DONE** → ~~FusionTx server→client handoff~~ **DONE** → ~~J.9 auto WebM/PNG attach~~ **DONE** → ~~L.7 MagicWand→FusionTx~~ **DONE** → ~~J.7 USDZ browser preview PARTIAL~~ **DONE** → ~~L.8 PreviewOrchestrator core wire~~ **PARTIAL** → next OPEN: L.2/L.9 commit+gate / L.4 ForgeTerminalBridge / L.12 deepen / RTv1-c depth (H.1+ Treasury / `hubCheckoutAudited`) / J.7 OpenUSD stage (still HELD). Hub checkout stays **HELD**.
 
-**P2b BLOCKER table status (2026-08-08 anti-mock debt pass):** all **12/12 BLOCKERs DONE** — zero OPEN rows remaining. Remaining Anti-MOCK platform debt is HIGH/MEDIUM + product deepen (not BLOCKER severity).
+**P2b BLOCKER table status (2026-08-08 anti-mock debt pass):** all **12/12 BLOCKERs DONE** — zero OPEN rows remaining. **HIGH 18/18 + MEDIUM 17/17 also DONE.** Remaining platform work is product deepen (Forge L PARTIALs, RTv1-c H.1+, deferred Onda G) — **not** open Anti-MOCK severity rows.
 
 **P2b HIGH table (inventory #13–#30 from Anti-MOCK sweep + re-grep):**
 
@@ -678,9 +674,9 @@ Two independent audits recorded here (documentation alignment only this round �
 | Phase | Window | Priority items (sequential) |
 |-------|--------|----------------------------|
 | **P0 — Honesty + wedge loop** | Days 1–21 | ~~(1) Fix P2b BLOCKERs 7–9 `consolidation-truth-matrix.ts` false marketing flags.~~ **DONE** (2026-08-08 — `applyConsolidationMarketingFailClosed` + vitest `consolidation-truth-matrix-cw1.test.ts` 6/6; commit hash in changelog). ~~(2) BLOCKERs 1–2 USD export empty payload.~~ **DONE**. ~~(3) BLOCKERs 3–6 discovery/compression probes.~~ **DONE** (smokeCompressionMandateGate + smokeLaunchWindowGate; Arcade `isDiscoveryFeedUiUnlocked`; commit in changelog). ~~(4) RTv1 operational: wire `playtime-client` into Arcade/runtime.~~ **DONE**. ~~(5) Publish pipeline stamp `compressionMandatePassed` + `demoPlayUrl`.~~ **DONE** (disk `publish-listing-authority`; feed fail-closed without measured bytes). ~~(5b) Export/cook stamp measured bundle bytes.~~ **DONE** (`export-bundle-measurement` + build-queue options + web-static → ExportJob mirror; Law XV bake gate on package). ~~(5c) `demo-web-slice` Instant Play honesty.~~ **DONE / host HELD**. ~~(5d) Instant Play unhold probe.~~ **still HELD** — blockers: browser-packer + game-scripts-registry + html-emitter + html-host (`DEMO_WEB_SLICE_UNHOLD_BLOCKERS`) (`lib/production/demo-web-slice.ts` + pipeline stage; zip ≠ `demoPlayUrl`; cook stamps HELD receipt — no placeholder.html theater). |
-| **P1 — Onda J closure** | Days 22–45 | (6) J.7 USD in-app viewer (honest preview, not capsule). (7) J.9 WebM/visual diff evidence on FusionTx. (8) J.4 sqlite-vec + BYOK embed path (semantic recall). (9) **Only if Founder lifts STOP:** J.11 ACP + J.12 OrchestratorProd commit series with CostGuard + ledger + Vitest — else skip. |
-| **P2 — Onda L Forge** | Days 46–75 | (10) Commit + gate L.2/L.8/L.9/L.12 scaffolds (vitest). (11) L.5 wire `execInForgeSandbox` → `cargo check/clippy/test` for `.rs` apply path. (12) L.4 ForgeTerminalBridge streaming exec. (13) L.7 AgenticUIStudio MVP on existing preview surfaces (no new hero panel file). (14) L.10 DesignTokenSync automate CW5 debt reduction. |
-| **P3 — RTv1 + Commerce depth** | Days 76–90 | (15) H.1+ Treasury audit trail + `hubCheckoutAudited` flip criteria. (16) I.1 discovery feed eligibility with real compression + catalog. ~~(17) I.2 verified reviews with live playtime.~~ **DONE** (2026-08-08 — authenticated F.2 ≥7200s / EA 1800s; see changelog). (18) Block 6B.12 org pool when schema exists (else stay HELD). (19) CW4 persistence spine exception-only + LWW locks production. (20) CW1 bench columns for 15 UX panels. |
+| **P1 — Onda J closure** | Days 22–45 | ~~(6) J.7 USD in-app viewer.~~ **PARTIAL** USDZ (2026-08-08) — OpenUSD stage still HELD. ~~(7) J.9 WebM/visual evidence.~~ **DONE-core** auto-attach (cinematic #63 HELD). (8) J.4 sqlite-vec + BYOK embed path (semantic recall) — still OPEN. (9) **Only if Founder lifts STOP:** J.11 ACP + J.12 OrchestratorProd — else skip. |
+| **P2 — Onda L Forge** | Days 46–75 | ~~(10) L.2/L.8/L.9/L.12 scaffolds.~~ **PARTIAL/core landed** (L.2 DONE-core; L.8/L.9/L.12 PARTIAL). ~~(11) L.5 Rust via L.1.~~ **DONE**. ~~(12) L.4 streaming.~~ **PARTIAL** duplex (PTY HELD). ~~(13) L.7 MagicWand→FusionTx.~~ **DONE-core** (v0 HMR still open). ~~(14) L.10 ide-ui colors.~~ **ide-ui 0**; web hardcoded-colors debt OPEN. Next: L.8 HMR, L.13 Tauri, L.4 PTY. |
+| **P3 — RTv1 + Commerce depth** | Days 76–90 | (15) H.1+ Treasury audit trail + `hubCheckoutAudited` flip criteria — **P0 OPEN**. ~~(16) Instant Play + measured compression.~~ **chain SHIPPED**; Law XV bake + Prisma `demoPlayUrl` column still open. ~~(17) I.2 verified reviews.~~ **DONE**. (18) Block 6B.12 org pool when schema exists (else stay HELD). (19) CW4 persistence spine exception-only + LWW locks production. (20) CW1 bench columns for 15 UX panels. |
 | **Deferred to post-90d** | After platform exit | Onda **G** desktop nuclear (see P2e). Onda **M** PSO Vault / DirectStorage. Agones / cross-play marketing. Hub Coins mint. |
 
 #### P2e — Explicitamente ADIADOS (saltos AAA — do not execute until platform P0–P3 exit)
@@ -1038,10 +1034,56 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ---
 
+## Remaining OPEN ranked (next sessions — 2026-08-08 authority sync)
+
+Ruthless honesty after today’s platform pass. **P2b Anti-MOCK BLOCKER/HIGH/MEDIUM = 0 OPEN.** Do not invent new MD files — execute from this table + Master Map §0b.
+
+| Pri | ID | Item | Why next | Honest status |
+|-----|-----|------|----------|---------------|
+| **P0** | R1 | **H.1+ Treasury / `hubCheckoutAudited`** | Hub Buy/Coins still fail-closed by design — wedge monetize blocked | **HELD** — schema stubs only; no mint/burn/Backpack |
+| **P0** | R2 | **Law XV bake evidence for web-static Instant Play** | Instant Play chain ships, but web-static package stays HELD without bake receipt/lightmap | **OPEN** — cook path fail-closed correctly |
+| **P0** | R3 | **CW4 dual-write → exception-only + multi-tab LWW** | Persistence spine still PARTIAL; data-loss risk on dual-write debt | **PARTIAL** — dock spine + pagehide flush; LWW/lock production OPEN |
+| **P0** | R4 | **L.8 multi-file HMR authoring loop** | Blocks honest Universal IDE / v0-class claim | **PARTIAL** — provision/teardown wired; HMR + E2B live key HELD |
+| **P0** | R5 | **Web `qa:hardcoded-colors` outside ide-ui** | ide-ui **0**; full web gate still red — CW5/L.10 not DONE | **OPEN** debt (ide-ui cleared) |
+| **P1** | R6 | **L.13 Tauri `lsp_farm.rs` + desktop Monaco hover/definition** | Cloud relay PARTIAL; desktop farm multi-week | **PARTIAL** cloud / **HELD** Tauri |
+| **P1** | R7 | **L.4 true sandbox PTY** | Duplex pipes DONE; resize `ptyApplied:false` | **PARTIAL** — PTY HELD |
+| **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | USDZ browser preview only | **PARTIAL** USDZ; stage HELD |
+| **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Auto-attach browser WebM/PNG DONE-core | **DONE-core**; cinematic **HELD** |
+| **P1** | R10 | **L.12 RepoGraphRAG precision soak + L.9 interactive scaffold UX** | Cores landed; acceptance matrix open | **PARTIAL** |
+| **P1** | R11 | **J.4 sqlite-vec + BYOK embeddings** | Lexical VectorIndex DONE; semantic recall HELD | **HELD** |
+| **P1** | R12 | **CW1 15-panel bench + CW5 Storybook/Figma government** | Truth matrix + tokens PARTIAL | **PARTIAL** |
+| **P1** | R13 | **CW3 unified RHI / WebGPU viewport / desktop present-in-product** | Secondary-winit probe ≠ product WebView present | **PARTIAL** |
+| **P2** | R14 | **Onda G nuclear (Nanite/Lumen/Entropy)** | Founder ADIADO until platform exit | **DEFERRED** (~15% scaffold) |
+| **P2** | R15 | **J.11 ACP / J.12 OrchestratorProd** | Founder STOP; WT scaffolds ≠ ship | **STOPPED** |
+| **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | G.2 + H.1+ gates | **HELD** |
+| **P2** | R17 | **MaterialX / OpenVDB production + Outliner/Properties LoC&gt;500 split** | Draft/hygiene; IDE deepen | **HELD / OPEN** |
+
+**Top 10 for next executor (copy-paste):** R1 H.1+ → R2 Law XV bake → R3 CW4 LWW → R4 L.8 HMR → R5 web color debt → R6 L.13 Tauri → R7 L.4 PTY → R8 J.7 OpenUSD → R9 J.9 cinematic → R10 L.12/L.9 deepen.
+
+### DONE-but-PARTIAL (self-critique — do not market as full DONE)
+
+| Ledger label | Practice reality | Remaining for true DONE |
+|--------------|------------------|-------------------------|
+| **J.7** “AI-v1-e DONE” / USD integrator | **USDZ PARTIAL** only | OpenUSD/Hydra; USDA/USDC loaders; Meshy→USD cook |
+| **J.9** DONE-core + auto-attach | Browser WebM/PNG path real; headless = PNG/patch-hash | Cinematic #63 engine capture; CI WebM |
+| **L.5** DONE (TS+lint+Rust via L.1) | Rust runs in `local-isolated`; network kernel isolation HELD | e2b/firecracker soak; OS firewall isolation |
+| **L.7** DONE-core | MagicWand→FusionTx + L.8 autoProvision | v0 multi-file generate+HMR IDE loop |
+| **L.8 / L.4 / L.9 / L.10 / L.12 / L.13** | Real cores; often still labeled PARTIAL correctly | HMR / PTY / scaffold UX / web colors / RAG soak / Tauri LSP |
+| **L.1** local-isolated DONE | Real sandbox; e2b env-gated; firecracker HELD | Kernel-level network isolation |
+| **Instant Play chain SHIPPED** | Packer→registry→html→host unhold path live | Law XV bake on web-static; Prisma `demoPlayUrl` column; anon playtime→auth |
+| **RTv1-b** | Instant Play + I.2 gate live | H.1+ / bake / checkout still block full train |
+| **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | `composerSurpassClaim` = posture; tree-sitter web wire false; J.11/J.12 STOPPED |
+| **Timeline persist DONE** | `cinematics/main.timeline.json` | Clip/keyframe authoring UI (SequencerIdePanel local demos) |
+| **FusionTx handoff DONE** | `aethel.fusion-tx-handoff.v1` arms client store | Undo without shared Y.Doc still PARTIAL |
+| **AI-native / Universal IDE marketing** | Explicitly **not** certified | Needs J.12 (or Founder alt) + L.8 HMR + L.13 desktop |
+
+---
+
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 docs-authority-sync | **Documentation authority sync (no new MD files).** Aligned Progress ↔ Master Map §0b/§0c ↔ Index scorecard with 2026-08-08 reality: P2b Anti-MOCK **12/12+18/18+17/17 cleared**; Instant Play + I.2 + L.2/L.4/L.5/L.7/L.8/L.9/L.10 ide-ui0/L.12/L.13 cloud + J.7 USDZ PARTIAL + J.9 auto-attach + FusionTx handoff + Timeline persist. Replaced stale Onda L “7 GAP” summary. Added **Remaining OPEN ranked P0/P1/P2** + **DONE-but-PARTIAL** self-critique. Hub checkout HELD; Onda G deferred; J.11/J.12 STOPPED. |
 | 2026-08-08 l10-timeline-tokens | **L.10 / CW5 — ide-ui hardcoded-color residual cleared (Timeline3D).** Commit: `2ff0e4a08`. Scanner before: **69** ide-ui findings (all `Timeline3D.tsx`); after: **0**. Tokenized Timeline chrome + canvas via `var(--aethel-*)` / `rgba(var(--aethel-*-rgb),…)` / `color-mix`; canvas resolves tokens via `getComputedStyle`. Split LoC: `Timeline3D.styles.ts` + `Timeline3D.canvas.ts` + `Timeline3D.toolbar.tsx` (main `Timeline3D.tsx` **438** &lt;500). Kept `demoMode` / empty-timeline honesty badges; no fake live keyframes. Also tokenized one leftover `WorkbenchPreviewProposalOverlay` gradient/shadow. Full web `qa:hardcoded-colors` still fails (non-ide-ui debt). Hub checkout HELD. No Onda G. |
 | 2026-08-08 l4-duplex | **P2 deepen — L.4 ForgeTerminalBridge duplex PARTIAL (max-real pipes, sandbox PTY HELD).** Commit: `327332021`. (1) `lib/production/forge-sandbox-duplex.ts` — allowlisted child with stdin/stdout/stderr pipes inside L.1 session; resize records cols/rows only (`ptyApplied:false`). (2) Bridge + `POST /api/terminal/forge`: `attach` NDJSON stream (`ready`/`stdout`/`stderr`/`exit`), `stdin`, `resize`, `detach`; `describeForgeTerminalDuplexHonesty()` never claims `pty:true`. (3) IDE: `ForgeTerminalSocket` wired into xterm (`useTerminalSessions`) — `connected` only after live `ready`; fail-closed, no host PTY fallback. Agents still blocked on `/api/terminal/create`. Tests: L.4 **10/10**. Hub checkout HELD. No Onda G. |
 | 2026-08-08 l13-l2-disk | **P2 deepen — L.13 UniversalLspFarm PARTIAL + L.2 on-disk DONE + L.10/L.12 polish.** Commit: `a5781d189`. (1) **L.13:** `lib/server/universal-lsp-relay.ts` + `lib/lsp/universal-lsp-endpoint.ts` — farm registry, acquire/release via `lsp-runtime`, Monaco endpoint resolve; Tauri `lsp_farm.rs` + desktop hover/definition **honestly HELD (multi-week)**. (2) **L.2:** `persistDevContainerManifestToDisk` → `.aethel/devcontainer.json` (confine + re-read); L.9 scaffold + commit gate on-disk verify. (3) **L.10:** `assertUiPatchPassesDesignTokenQa` on apply gate (`DESIGN_TOKEN_SYNC_FAIL`). (4) **L.12:** commit RepoGraphRAG core. Targeted vitest **42/42**. Hub checkout HELD. No Onda G. |
