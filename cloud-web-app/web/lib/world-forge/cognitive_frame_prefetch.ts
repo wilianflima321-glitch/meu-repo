@@ -1,26 +1,45 @@
 /**
- * A Interface Neuro-Preemptiva
- * Morte ao delay de 200ms entre olho e mão. A IA adivinha sua intenção.
+ * P2b MEDIUM #39 — Cognitive frame prefetch.
+ *
+ * HELD / NON-SHIP: prior revision logged "Neuro-Prefetch" theater and faked
+ * cursor confidence. No intent model or GPU pre-click buffer exists.
+ * Not exported from the World Forge barrel.
  */
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-cognitive-prefetch')
+
+export const COGNITIVE_FRAME_PREFETCH_SHIP_READY = false as const
+
+export type CognitivePrefetchResult = {
+  ready: false
+  heldReason: 'intent_model_unavailable'
+  confidence: number
+}
+
 export class CognitiveFramePrefetch {
-  private cursorInertia: { x: number, y: number, confidence: number } = { x: 0, y: 0, confidence: 0 }
+  private cursorInertia = { x: 0, y: 0, confidence: 0 }
 
-  /**
-   * Monitora o mouse. Se a IA atingir 95% de certeza do que você vai fazer,
-   * ela gera o Quadro Final invisivelmente ANTES do clique.
-   */
-  public preemptUserIntent(mouseX: number, mouseY: number, isHoveringTool: boolean) {
-    this.updateInertia(mouseX, mouseY)
-
-    if (isHoveringTool && this.cursorInertia.confidence > 0.95) {
-      console.log(`[Neuro-Prefetch] Confiança Alta. Injetando State Visual pré-clique no Buffer.`)
-      // A renderização 3D do botão de esculpir já ocorre na VRAM invisivelmente.
-      // Quando o humano clica (200ms depois), o swap de buffer é 0ms. Efeito "Magia".
+  public preemptUserIntent(
+    mouseX: number,
+    mouseY: number,
+    isHoveringTool: boolean,
+  ): CognitivePrefetchResult {
+    this.cursorInertia.x = mouseX
+    this.cursorInertia.y = mouseY
+    // Honest: hover is not a calibrated intent model — confidence stays 0.
+    this.cursorInertia.confidence = 0
+    void isHoveringTool
+    log.debug('cognitive_prefetch_held', {
+      heldReason: 'intent_model_unavailable',
+      mouseX,
+      mouseY,
+    })
+    return {
+      ready: false,
+      heldReason: 'intent_model_unavailable',
+      confidence: this.cursorInertia.confidence,
     }
-  }
-
-  private updateInertia(x: number, y: number) {
-    // Calculo simples de aceleração humana do cursor
-    this.cursorInertia.confidence += 0.05 // Simulação
   }
 }

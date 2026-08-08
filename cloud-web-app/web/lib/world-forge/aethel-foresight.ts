@@ -1,51 +1,37 @@
-import { SemanticWorldIntent } from './world-forge-maestro'
-
 /**
- * Aethel Foresight (Aethel Previsão) - L7
- * Elimina o tempo real. O motor começa a simular e renderizar ramificações (Branches) 
- * no espaço latente em background ANTES do usuário confirmar a ação.
+ * P2b MEDIUM #47 — Aethel foresight.
+ *
+ * HELD / NON-SHIP: prior revision claimed GPU ghost-branch pre-render with only
+ * an in-memory Set of BigInts + console.log — no WASM/Rust compile path.
+ * Not exported from the World Forge barrel.
  */
+
+import { createComponentLogger } from '@/lib/observability/logger'
+import type { SemanticWorldIntent } from './world-forge-maestro'
+
+const log = createComponentLogger('world-forge-aethel-foresight')
+
+export const AETHEL_FORESIGHT_SHIP_READY = false as const
+
+export type ForesightResult = {
+  ready: false
+  heldReason: 'ghost_branch_gpu_compile_unavailable'
+  activeGhostBranches: 0
+}
+
 export class AethelForesightOrchestrator {
   private activeGhostBranches: Set<bigint> = new Set()
 
-  /**
-   * Chamado a cada milissegundo de input ou hesitação capturada pelo Limitador Sináptico.
-   * Cria 4 variantes de probabilidade baseadas na intenção atual.
-   */
-  public preemptiveBranching(baseIntent: SemanticWorldIntent) {
-    console.log('[Aethel Foresight] Hesitação detectada. Iniciando colapso de onda temporal...')
-    
-    // Libera as ramificações antigas para não saturar a VRAM
-    this.flushGhostBranches()
-
-    // Gera 4 matrizes de probabilidade para cobrir a decisão do usuário em -10ms de latência.
-    const probabilities = [
-      this.mutateIntent(baseIntent, { densityShift: +0.2 }),
-      this.mutateIntent(baseIntent, { densityShift: -0.2 }),
-      this.mutateIntent(baseIntent, { environmentOverride: 'alien' }),
-      this.mutateIntent(baseIntent, { moodOverride: 'cinematic-dark' })
-    ]
-
-    probabilities.forEach((p_intent, idx) => {
-      // Dispara instrução binária silenciosa para o Rust compilar o estado fantasma na GPU
-      const ghostPayloadId = BigInt(Date.now() * 1000 + idx)
-      this.activeGhostBranches.add(ghostPayloadId)
-      // (Envia para o WebWorker/WASM ponte sem travar a main thread)
-      console.log(`[Aethel Foresight] Branch fantasma ${ghostPayloadId} pré-renderizado.`)
-    })
-  }
-
-  private mutateIntent(base: SemanticWorldIntent, mutations: any): SemanticWorldIntent {
-    return {
-      environmentType: mutations.environmentOverride || base.environmentType,
-      density: Math.max(0, Math.min(1, base.density + (mutations.densityShift || 0))),
-      mood: mutations.moodOverride || base.mood,
-      suggestedPropDistribution: base.suggestedPropDistribution
-    }
-  }
-
-  private flushGhostBranches() {
+  public preemptiveBranching(baseIntent: SemanticWorldIntent): ForesightResult {
+    void baseIntent
     this.activeGhostBranches.clear()
-    // Comando para o Rust dropar as entidades não materializadas do ECS
+    log.info('foresight_held', {
+      heldReason: 'ghost_branch_gpu_compile_unavailable',
+    })
+    return {
+      ready: false,
+      heldReason: 'ghost_branch_gpu_compile_unavailable',
+      activeGhostBranches: 0,
+    }
   }
 }

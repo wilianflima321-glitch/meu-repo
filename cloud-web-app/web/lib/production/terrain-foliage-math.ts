@@ -197,7 +197,7 @@ export function applyFoliageStroke(
     }
   }
 
-  // Soft cap — keep document honest / finite for MVP
+  // Soft cap — keep document finite for authoring memory (not a ship-scope claim)
   const MAX_INSTANCES = 4096
   if (doc.instances.length > MAX_INSTANCES) {
     doc.instances = doc.instances.slice(doc.instances.length - MAX_INSTANCES)

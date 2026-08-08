@@ -1,36 +1,39 @@
 /**
- * Aethel Engine: QA Dopaminérgico (Experiência de Usuário Bioindutiva)
- * 
- * Uma interface que monitora o estresse humano. Em vez de testar o código, 
- * o Motor monitora o criador. Se o cérebro trava, a Aethel atua como remédio.
+ * P2b MEDIUM #45 — Dopaminergic QA loop.
+ *
+ * HELD / NON-SHIP: prior revision claimed cortisol / HR vision AI and "micro-win"
+ * voxel snaps via console.log only — no camera telemetry or UX injector.
+ * Not exported from the World Forge barrel.
  */
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-dopaminergic-qa')
+
+export const DOPAMINERGIC_QA_SHIP_READY = false as const
+
 interface BioTelemetry {
-  pupilDilationDelta: number // Micro-flutuações
-  heartRateVariability: number // HR via câmera RGB da face
+  pupilDilationDelta: number
+  heartRateVariability: number
   cortisolSpikeProbable: boolean
 }
 
-export class DopaminergicQaDirector {
-  
-  /**
-   * Chamado a cada 500ms pela Vision AI local do navegador/tauri.
-   */
-  public analyzeBiologicalState(telemetry: BioTelemetry) {
-    if (telemetry.cortisolSpikeProbable || telemetry.heartRateVariability > 1.5) {
-      console.log('[Dopaminergic QA] Estresse extremo detectado no humano (Cortisol Pico).')
-      this.injectMicroWin()
-    }
-  }
+export type DopaminergicQaResult = {
+  ready: false
+  heldReason: 'bio_telemetry_pipeline_unavailable'
+  microWinInjected: false
+}
 
-  /**
-   * O usuário está frustrado tentando alinhar um Voxel?
-   * A IA "Mágicamente" faz o Voxel encaixar perfeitamente e emite um
-   * feedback audiovisual recompensador.
-   */
-  private injectMicroWin() {
-    console.log('[Dopaminergic QA] Injetando Micro-Vitórias: Alinhamento automático perfeito ativado.')
-    console.log('[Dopaminergic QA] Harmonização estética instantânea para resgatar Estado de Flow.')
-    // UX renderiza flares dourados suaves e estabiliza a Câmera 3D.
+export class DopaminergicQaDirector {
+  public analyzeBiologicalState(telemetry: BioTelemetry): DopaminergicQaResult {
+    void telemetry
+    log.debug('dopaminergic_qa_held', {
+      heldReason: 'bio_telemetry_pipeline_unavailable',
+    })
+    return {
+      ready: false,
+      heldReason: 'bio_telemetry_pipeline_unavailable',
+      microWinInjected: false,
+    }
   }
 }

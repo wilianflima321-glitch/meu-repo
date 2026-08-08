@@ -1,47 +1,51 @@
-import { SemanticWorldIntent } from './world-forge-maestro'
-
 /**
- * Aethel Engine: A Autogênese (Cura da Mudez do Destino)
- * A engine toma a iniciativa criativa se o usuário parar.
+ * P2b MEDIUM #44 — Autogenesis director.
+ *
+ * HELD / NON-SHIP: prior revision console.log'd "hologram destiny" branches with
+ * no gaze/eye-tracking wire and no quantum_overlap UI projection.
+ * Not exported from the World Forge barrel.
  */
-export class AutogenesisDirector {
-  private hesitationThresholdMs = 30000 // 30 segundos
-  private hesitationTimer: NodeJS.Timeout | null = null
 
-  /**
-   * Ligado ao monitoramento de Gaze (Eye-tracking) ou repouso de mouse no UX.
-   */
-  public onUserHesitationStarted(currentMatterIntent: SemanticWorldIntent) {
+import { createComponentLogger } from '@/lib/observability/logger'
+import type { SemanticWorldIntent } from './world-forge-maestro'
+
+const log = createComponentLogger('world-forge-autogenesis')
+
+export const AUTOGENESIS_DIRECTOR_SHIP_READY = false as const
+
+export type AutogenesisResult = {
+  ready: false
+  heldReason: 'gaze_and_hologram_projection_unavailable'
+  branches: []
+}
+
+export class AutogenesisDirector {
+  private hesitationThresholdMs = 30000
+  private hesitationTimer: ReturnType<typeof setTimeout> | null = null
+
+  public onUserHesitationStarted(currentMatterIntent: SemanticWorldIntent): void {
     if (this.hesitationTimer) clearTimeout(this.hesitationTimer)
-    
     this.hesitationTimer = setTimeout(() => {
       this.triggerAutogenesis(currentMatterIntent)
     }, this.hesitationThresholdMs)
   }
 
-  public onUserInteracted() {
+  public onUserInteracted(): void {
     if (this.hesitationTimer) {
       clearTimeout(this.hesitationTimer)
       this.hesitationTimer = null
     }
   }
 
-  /**
-   * Ocorre quando o usuário encara a arte por 30s sem saber o que fazer.
-   * O Maestro colapsa o vazio injetando 3 destinos (Ruína, Máquina, Biológico).
-   */
-  private triggerAutogenesis(baseIntent: SemanticWorldIntent) {
-    console.log('[Autogenesis] Fricção criativa (30s de hesitação) detectada.')
-    console.log('[Autogenesis] Projetando Hologramas de Destino...')
-
-    const destinyBranches: SemanticWorldIntent[] = [
-      { ...baseIntent, mood: `${baseIntent.mood} decaying ancient rune temple` }, // Ruína
-      { ...baseIntent, mood: `${baseIntent.mood} industrial war machine cogs` },   // Máquina
-      { ...baseIntent, mood: `${baseIntent.mood} flesh biological anomaly pulse` } // Biológico
-    ]
-
-    // Estes 3 intents seriam enviados ao `quantum_overlap.rs` para desenhar 
-    // realidades holográficas semi-transparentes na UI.
-    console.table(destinyBranches)
+  private triggerAutogenesis(baseIntent: SemanticWorldIntent): AutogenesisResult {
+    void baseIntent
+    log.info('autogenesis_held', {
+      heldReason: 'gaze_and_hologram_projection_unavailable',
+    })
+    return {
+      ready: false,
+      heldReason: 'gaze_and_hologram_projection_unavailable',
+      branches: [],
+    }
   }
 }

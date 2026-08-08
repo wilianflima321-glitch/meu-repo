@@ -1,21 +1,35 @@
 /**
- * Protocolo de Troca Semântica (A Economia Genômica)
- * O fim do "Turbosquid" e do Unreal Marketplace. 
- * Ninguém vende arquivos .obj estáticos. O criador vende a "Semente de Lógica".
+ * P2b MEDIUM #43 — Semantic genomic exchange.
+ *
+ * HELD / NON-SHIP: prior revision minted fabricated `AETHEL_DNA_*` hashes and
+ * claimed generative marketplace economics. Fail-closed until Treasury + real
+ * seed custody exist (Hub Coins remain HELD).
+ * Not exported from the World Forge barrel.
  */
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-genomic-exchange')
+
+export const SEMANTIC_GENOMIC_EXCHANGE_SHIP_READY = false as const
+
+export type GenomicMintResult = {
+  success: false
+  heldReason: 'genomic_marketplace_held'
+  genomicHash: null
+}
+
 export class SemanticGenomicExchange {
-  /**
-   * Transaciona o estilo e comportamento da mente do Criador original.
-   */
-  public mintGenerativeSeed(authorId: string, semanticRules: string) {
-    console.log(`[Genomic Exchange] Cunhando Semente Estilística de ${authorId}...`)
-    
-    // O usuário vende a lógica "Torres Góticas Sujas de Musgo". 
-    // O comprador pode gerar 50.000 castelos usando isso, todos únicos.
-    // O Royalties são rastreados através do Hash do Genoma da Árvore de Comandos do ECS.
-    
-    const genomicHash = `AETHEL_DNA_X8_${authorId}_${Date.now()}`
-    console.log(`[Genomic Exchange] Semente Cunhada: ${genomicHash}. A economia visual 3D tornou-se generativa e infinita.`)
-    return genomicHash
+  public mintGenerativeSeed(authorId: string, semanticRules: string): GenomicMintResult {
+    log.warn('genomic_mint_held', {
+      heldReason: 'genomic_marketplace_held',
+      authorId,
+      rulesLen: semanticRules.length,
+    })
+    return {
+      success: false,
+      heldReason: 'genomic_marketplace_held',
+      genomicHash: null,
+    }
   }
 }

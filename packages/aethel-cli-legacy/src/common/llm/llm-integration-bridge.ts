@@ -583,7 +583,8 @@ Use markdown code blocks.`;
   getCacheStats(): { size: number; hitRate: number } {
     return {
       size: this.cache.size,
-      hitRate: 0 // TODO: implementar tracking
+      // HELD (NON-PRODUCTION): cache hit-rate instrumentation not wired; report 0 honestly
+      hitRate: 0
     };
   }
   

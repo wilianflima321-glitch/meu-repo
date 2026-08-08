@@ -1,21 +1,33 @@
 /**
- * Maestro Adversarial QA (A Máquina de Alucinação)
- * Um parasita lógico no sistema cujo único trabalho é tentar quebrar a engine 
- * antes do usuário perceber a falha.
+ * P2b MEDIUM #41 — Adversarial QA maestro.
+ *
+ * HELD / NON-SHIP: prior revision claimed kernel panic survival with a hardcoded
+ * `didKernelPanic = false` and console theater. No physics paradox injector ships.
+ * Not exported from the World Forge barrel.
  */
-export class AdversarialQaMaestro {
-  
-  /**
-   * Injeta física paradoxal invisível durante ciclos ociosos da CPU.
-   */
-  public hallucinatePhysicsCrash() {
-    console.log(`[Adversarial QA] Injetando Paradoxo Físico: 'Água sólida com flutuabilidade negativa'.`)
-    
-    // Testa como o Kernel (Unified Field Theory) lida com erros na malha
-    const didKernelPanic = false // O Rust ECS engole a falha e regenera o estado
 
-    if (!didKernelPanic) {
-      console.log(`[Adversarial QA] Kernel Rust sobreviveu à anomalia. Resiliência Sistêmica confirmada.`)
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-adversarial-qa')
+
+export const ADVERSARIAL_QA_SHIP_READY = false as const
+
+export type AdversarialQaResult = {
+  ready: false
+  heldReason: 'physics_paradox_injector_unavailable'
+  kernelSurvived: null
+}
+
+export class AdversarialQaMaestro {
+  public hallucinatePhysicsCrash(): AdversarialQaResult {
+    log.warn('adversarial_qa_held', {
+      heldReason: 'physics_paradox_injector_unavailable',
+    })
+    return {
+      ready: false,
+      heldReason: 'physics_paradox_injector_unavailable',
+      // Never invent survival evidence without a real soak harness.
+      kernelSurvived: null,
     }
   }
 }

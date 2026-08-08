@@ -1,45 +1,50 @@
 /**
- * Aethel Engine: QA de Visão via G-Buffer Semântico
- * 
- * Vision AI baseada em Pixels (Screenshot) quebra se a sombra mudar um tom.
- * O Aethel testa a MATÉRIA, não a cor. Validamos a colisão, profundidade e IDs (G-Buffer).
+ * World-forge semantic G-Buffer QA (adjacent to P2b MEDIUM theater class).
+ *
+ * Depth / collision / entity-id integrity checks are real pure math.
+ * Prior revision used console.log supremacy theater ("L5 topologically perfect").
+ * Logger-only; never claim L5/ship completeness from a local buffer probe.
+ * Not exported from the World Forge barrel.
  */
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-semantic-gbuffer-qa')
+
+export const SEMANTIC_GBUFFER_QA_SHIP_READY = false as const
+
 interface SemanticGBuffer {
-  depthMap: Float32Array // Distância de cada voxel da câmera
-  collisionNormals: Float32Array // Direção das colisões físicas
-  entityIds: Uint32Array // IDs Persistentes (SlotMap) de quem está ali
+  depthMap: Float32Array
+  collisionNormals: Float32Array
+  entityIds: Uint32Array
 }
 
 export class SemanticGBufferQA {
-  
-  /**
-   * O QA de Playwright invoca isso ao final de um prompt do Maestro.
-   */
   public validatePhysicalIntegrity(buffer: SemanticGBuffer, expectedEntityId: number): boolean {
-    console.log(`[Semantic QA] Validando G-Buffer Matemático em vez de Screenshot RGB.`)
-    
-    // Verifica se a estrutura gerada tem Volume Físico no espaço 3D, e não
-    // se ela está iluminada corretamente. O que importa é a gravidade e topologia.
     const hasVolume = this.checkDepthIntegrity(buffer.depthMap)
     const hasValidPhysics = this.checkCollisionNormals(buffer.collisionNormals)
     const containsRightMatter = buffer.entityIds.includes(expectedEntityId)
+    const ok = hasVolume && hasValidPhysics && containsRightMatter
 
-    if (!hasVolume || !hasValidPhysics || !containsRightMatter) {
-      console.error(`[Semantic QA] FALHA: Geometria Inválida. O Barro carece de massa estrutural.`)
+    if (!ok) {
+      log.warn('semantic_gbuffer_integrity_failed', {
+        hasVolume,
+        hasValidPhysics,
+        containsRightMatter,
+        expectedEntityId,
+      })
       return false
     }
 
-    console.log(`[Semantic QA] SUCESSO: A massa semântica L5 está topologicamente perfeita.`)
+    log.debug('semantic_gbuffer_integrity_ok', { expectedEntityId })
     return true
   }
 
   private checkDepthIntegrity(depths: Float32Array): boolean {
-    return depths.some(d => d > 0 && d < Infinity)
+    return depths.some((d) => d > 0 && d < Infinity)
   }
 
   private checkCollisionNormals(normals: Float32Array): boolean {
-    // Valida se as normais não são [0,0,0], garantindo reação à luz e física
     return normals.length > 0
   }
 }

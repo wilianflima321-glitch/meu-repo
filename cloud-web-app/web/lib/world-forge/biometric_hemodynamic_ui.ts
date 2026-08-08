@@ -1,31 +1,38 @@
 /**
- * Simbiose Hemo-Dinâmica (Biometria Neural)
- * O Motor não depende só de cliques, ele lê o sistema nervoso do humano.
+ * P2b MEDIUM #42 — Biometric hemodynamic UI.
+ *
+ * HELD / NON-SHIP: prior revision claimed webcam TF.js blood-flow reading and
+ * "Supervisor mode" UI collapse via console.log only — no camera / model wire.
+ * Not exported from the World Forge barrel.
  */
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-forge-biometric-ui')
+
+export const BIOMETRIC_HEMO_UI_SHIP_READY = false as const
+
+export type BiometricUiResult = {
+  ready: false
+  heldReason: 'biometric_vision_pipeline_unavailable'
+  fatigueLevel: number
+}
+
 export class BiometricHemodynamicUI {
-  private userFatigueLevel: number = 0; // 0 (Flow) a 1 (Exausto)
+  private userFatigueLevel = 0
 
-  /**
-   * Monitora a webcam via TensorFlow.js Lite para extrair piscar e respiração
-   * baseando-se em micro-variações no sangue facial (Hemo-dinâmica).
-   */
-  public analyzeBiologicalFlowState(bpm: number, blinkRatePerMin: number) {
-    if (blinkRatePerMin > 25 || bpm < 50) {
-      this.userFatigueLevel = 0.8
-      this.collapseUiComplexity()
-    } else {
-      this.userFatigueLevel = 0.1
-      this.expandRawCreatorMode()
+  public analyzeBiologicalFlowState(bpm: number, blinkRatePerMin: number): BiometricUiResult {
+    // Accept telemetry args for API stability but do not act on them as vision truth.
+    void bpm
+    void blinkRatePerMin
+    this.userFatigueLevel = 0
+    log.debug('biometric_ui_held', {
+      heldReason: 'biometric_vision_pipeline_unavailable',
+    })
+    return {
+      ready: false,
+      heldReason: 'biometric_vision_pipeline_unavailable',
+      fatigueLevel: this.userFatigueLevel,
     }
-  }
-
-  private collapseUiComplexity() {
-    console.log(`[Hemo-Dynamic UI] Exaustão detectada (Piscar alto). Colapsando Ferramentas Cruas.`);
-    console.log(`[Hemo-Dynamic UI] Aethel assumiu 'Modo Supervisor'. IA fará o trabalho pesado.`);
-  }
-
-  private expandRawCreatorMode() {
-    console.log(`[Hemo-Dynamic UI] Arquiteto em estado de FLOW profundo.`);
-    console.log(`[Hemo-Dynamic UI] Liberando Controle Atômico do Kernel. O Humano é o Rei.`);
   }
 }

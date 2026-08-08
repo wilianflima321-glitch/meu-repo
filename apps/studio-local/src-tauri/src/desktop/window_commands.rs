@@ -1,4 +1,7 @@
-//! Desktop window controls, notifications, and AI completion stubs.
+//! Desktop window controls, notifications, and AI completion IPC.
+//!
+//! `ai_complete` / `notify_native` are honest `provider_unavailable` HELD paths —
+//! not production stubs presented as working AI or OS notifications.
 
 use serde::{Deserialize, Serialize};
 use tauri::Window;

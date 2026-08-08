@@ -84,7 +84,8 @@ export class ContextStore {
       id,
       metadata: {
         createdAt: timestamp,
-        createdBy: 'system', // TODO: Get from auth context
+        // HELD (NON-PRODUCTION package): no auth context wire — canonical path is cloud-web-app/web
+        createdBy: 'system',
         version: 1,
         tags: [],
       },
@@ -460,8 +461,8 @@ export class ContextStore {
     entries: ContextEntry[],
     query: string
   ): Promise<ContextEntry[]> {
-    // TODO: Implement vector similarity search
-    // For now, simple text matching
+    // HELD (NON-PRODUCTION): vector similarity search lives in cloud-web-app/web J.4 path.
+    // Legacy fallback = substring match only — never claim semantic/vector recall.
     const lowerQuery = query.toLowerCase();
     
     return entries.filter(entry => {

@@ -556,7 +556,7 @@ Two independent audits recorded here (documentation alignment only this round �
 |----------|------:|-----|
 | **BLOCKER** | 12 (0 OPEN) | XI / XVI — auto-reject PR or false commercial claim |
 | **HIGH** | 18 inventoried → **18 DONE** / **0 OPEN** | XI / XVI — mock/teatro in runtime or indevido marketing |
-| **MEDIUM** | 17 | XI — TODO/teatro latente |
+| **MEDIUM** | 17 inventoried → **17 DONE** / **0 OPEN** | XI — TODO/teatro latente |
 
 **Top BLOCKERs (fix before RTv1 discovery / AI-native marketing / AAA desktop claims):**
 
@@ -599,7 +599,33 @@ Two independent audits recorded here (documentation alignment only this round �
 | 30 | `web/lib/cosmos/acoustic-atmosphere-wire.ts` | `createAcousticMockBus` in playtest wire | **DONE** — renamed `createAcousticInMemoryBus` (soak sink) |
 | — | `app/api/projects/[id]/commits/route.ts` | **Re-grep HIGH:** fabricated `Math.random` commit history | **DONE** — empty HELD until real git/snapshot store |
 
-**P2b HIGH status (2026-08-08):** all **18/18 HIGH DONE** (web batch + Rust/legacy #13–#16/#29). **MEDIUM remain: 17.** Tests: `__tests__/production/p2b-high-anti-mock-honesty.test.ts` (11).
+**P2b HIGH status (2026-08-08):** all **18/18 HIGH DONE** (web batch + Rust/legacy #13–#16/#29). Tests: `__tests__/production/p2b-high-anti-mock-honesty.test.ts` (11).
+
+**P2b MEDIUM table (inventory #31–#47 from Anti-MOCK sweep):**
+
+| # | File:line | Issue | Status |
+|---|-----------|-------|--------|
+| 31 | `web/lib/production/usd-gltf-exporter.ts:20,46` | `// TODO` parser WASM + ECS→hierarchy | **DONE** (evidence: BLOCKER 1–2 — fail-closed `not_implemented` / `empty_payload`; no `// TODO` ship path; `usd-gltf-exporter-honesty.test.ts`) |
+| 32 | `web/lib/audio/spatial-audio-occlusion.ts:104` | `// TODO` ConvolverNode IR swap | **DONE** — `classifyRoomReverbFromAverageDistance` + `setReverbPreset` apply; returns `RoomAcousticsProbe` |
+| 33 | `web/lib/production/terrain-foliage-math.ts:200` | “finite for **MVP**” comment | **DONE** — MVP label removed; soft-cap comment honesty |
+| 34 | `packages/aethel-cli-legacy/.../context-store.ts:87,463` | TODO auth + vector search | **DONE** — HELD/NON-PRODUCTION comments; `DEPRECATION_NOTICE` #34–#35 |
+| 35 | `packages/aethel-cli-legacy/.../llm-integration-bridge.ts:586` | TODO cache hit-rate tracking | **DONE** — HELD; report `hitRate: 0` honestly |
+| 36 | `apps/studio-local/.../desktop/window_commands.rs:1` | Module doc “AI completion **stubs**” | **DONE** — doc = honest `provider_unavailable` HELD paths |
+| 37 | `apps/studio-local/.../kernel_materialx_bridge_wire.rs:27,49` | “mock SceneGraph” comments + corrupted struct fields | **DONE** — ephemeral SceneGraph soak language; removed invalid `distinct_from_peers_note` injects |
+| 38 | `apps/studio-local/.../kernel_openvdb_bridge_wire.rs:26,45` | “mock SVO” comments + corrupted struct fields | **DONE** — ephemeral SVO soak language; same syntax hygiene |
+| 39 | `web/lib/world-forge/cognitive_frame_prefetch.ts` | Neuro-Prefetch console theater | **DONE** — HELD fail-closed; `ready:false`; logger |
+| 40 | `web/lib/world-forge/darwinian_recovery_system.ts` | Darwinian AI console theater | **DONE** — HELD fail-closed; logger |
+| 41 | `web/lib/world-forge/adversarial_qa_maestro.ts` | Hardcoded kernel-survive theater | **DONE** — HELD; `kernelSurvived: null` |
+| 42 | `web/lib/world-forge/biometric_hemodynamic_ui.ts` | Webcam biometry console theater | **DONE** — HELD fail-closed |
+| 43 | `web/lib/world-forge/semantic_genomic_exchange.ts` | Fabricated DNA hash mint | **DONE** — `success:false` / `genomicHash:null` |
+| 44 | `web/lib/world-forge/autogenesis_director.ts` | Hologram destiny console theater | **DONE** — HELD; empty branches |
+| 45 | `web/lib/world-forge/dopaminergic_qa_loop.ts` | Cortisol micro-win theater | **DONE** — HELD; `microWinInjected:false` |
+| 46 | `web/lib/world-forge/spine_ai_router.ts` | Fake 0ms LLM / GPT-5 route | **DONE** — HELD heuristic hint only (no provider claim) |
+| 47 | `web/lib/world-forge/aethel-foresight.ts` | Ghost-branch GPU pre-render theater | **DONE** — HELD; zero ghost branches |
+
+**Also sanitized (same theater class, not in numbered 17):** `multiagent_spine_orchestrator.ts`, `semantic_gbuffer_qa.ts` — logger + fail-closed / no supremacy console.
+
+**P2b MEDIUM status (2026-08-08):** all **17/17 MEDIUM DONE**. Tests: `__tests__/production/p2b-medium-anti-mock-honesty.test.ts`. Hub checkout/Coins HELD. No Onda G.
 
 **Timeline3D real data — DONE (2026-08-08):** Source of truth = `SequencerTimeline` (`aethel.timeline.v1` in `lib/sequencer`). Added project-scoped `project-timeline-store` + `timeline-ui-adapter` (curve/clip → Timeline3D / SequenceData; **never** transform→fake keyframes). `ITimelineService` on `IIDEBackend` / `WebIDEBackend`; `CanvasViewportSurface` reads snapshot (`demoMode` only when binding `isDemo`); unbound/empty = honest empty badge (not `duration={8}` theater). `Timeline3D` accepts external `keyframes`/`tracks`; fixture only when `demoMode={true}`. `CanonicalSequencer` defaults to `EMPTY_SEQUENCE_DATA` (demo only via explicit `DEMO_SEQUENCE`). **Remaining gap:** clip/keyframe authoring UI + persisting `*.timeline.json` into the project store (SequencerIdePanel still builds director demo timelines locally). Tests: `timeline-real-data-wire.test.ts`.
 
@@ -1011,6 +1037,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 p2b-medium | **P2b MEDIUM Anti-MOCK batch DONE — 17/17 MEDIUM closed.** Closed #31–#47 from sweep inventory. **Verdicts:** (31) USD exporter already fail-closed post-BLOCKER 1–2 (no `// TODO`). (32) room acoustics IR wired via `classifyRoomReverbFromAverageDistance` → `setReverbPreset`. (33) foliage MVP label removed. (34–35) cli-legacy TODOs → HELD/NON-PRODUCTION. (36) window_commands doc honesty. (37–38) MaterialX/OpenVDB wire comments + corrupted struct field hygiene (ephemeral soak SceneGraph/SVO, not “mock”; files still unregistered in module tree). (39–47) world-forge theater modules rewritten fail-closed HELD + `createComponentLogger` (no Neuro-Prefetch / Darwinian / DNA-hash / ghost-GPU claims); also multiagent + semantic_gbuffer. Tests: `p2b-medium-anti-mock-honesty.test.ts`. Gates: `__tests__/production` **595/595**; `npx next lint` clean on touched web. Studio-local `cargo check` **pre-broken** by WIP `distinct_from_peers_note` injects across ~80 wires (P2c) — not introduced by this MEDIUM pass; #36–#38 edits are comment/hygiene only. Hub checkout/Coins HELD. No Onda G. |
 | 2026-08-08 p2b-high-rust | **P2b HIGH Anti-MOCK Rust/legacy batch DONE — 18/18 HIGH closed.** Commit: `4938705c8`. Closed #13–#16 + #29. **Verdicts:** (13) `aethel-cli-legacy/server.js` dead mock-core ship theater → NON-PRODUCTION HELD `exit 1` + banner (no mock listen). (14) new `wgpu_framegraph` honesty probe: `memory_aliasing_active: false` (lifetime bookkeeping ≠ heap alias). (15) new `metasounds_dsp_compiler` linear DSP + `metasounds_aaa_ready: false` (no MetaSounds AAA claim). (16) `quantum_overlap` HEAD already `broadphase_aaa_ready: false` — verified soak assert; WIP theater discarded. (29) `shaders/radix_sort.wgsl` workgroup-local scatter (no “minimal mock” / identity theater); `gpu_radix_sort` probe holds AAA/LBVH/global-prefix. **Gates:** `CARGO_TARGET_DIR=E:\aethel-target-gnu` — `cargo check` green; `cargo clippy --lib -- -D warnings` green; module tests `--test-threads=1` wgpu_framegraph/metasounds/gpu_radix_sort/quantum_overlap **all ok**. No web TS touch — production **584/584** unchanged. **MEDIUM remain: 17.** Hub checkout/Coins HELD. No Onda G. |
 | 2026-08-08 p2b-high | **P2b HIGH Anti-MOCK batch DONE (web ship path).** Commit: `c04b9c218`. Closed HIGH #17–#20, #23–#25, #30 + re-grep commits fabrication; marked #21/#22/#26/#27/#28 DONE with prior BLOCKER/P2d evidence. **Fixes:** WebXR `WEBXR_MARKETING_SHIP_ALLOWED=false`; F.2 spool/ingest real probes + evaluate fail-closed; Copilot process-local honesty (no MVP); Foley partner stubs removed (catalog HELD); partition SSD theater comment; auto-retopo `subsampleBudgetFallbackUsed`; wasm-boot logger + fail-closed; acoustic `createAcousticInMemoryBus`; commits API empty HELD (no fabricated history). Tests: `p2b-high-anti-mock-honesty.test.ts` (11). Gates: `__tests__/production` **584/584**; `npx next lint` clean on touched files. **Remain OPEN (5):** #13 cli-legacy, #14–#16/#29 kernel Rust → **closed in p2b-high-rust**. Hub checkout/Coins HELD. No Onda G. |
 | 2026-08-08 spend-l5-honesty | **Law XI — closed the last 2 `__tests__/production` failures (stale Focus 2A renderer-honesty assertions).** Commit: `ff3cf327e`. Root cause: `focus1-focus2-spend-l5.test.ts` still expected pre-CW3 labels (`activePath: 'webgl2'`) and `marketingAllowed: true` when WebGPU API + desktop mount were probed. Product already fail-closed correctly (`activePath: 'r3f-webgl2'`, `marketingAllowed` always `false` — adapter/mount ≠ dual-live AAA). **Fix:** align spend-l5 assertions with CW3 + `render-path-honesty-cw3` doctrine (no product overclaim rollback). Gates: spend-l5 **8/8**; full `__tests__/production` **573/573** (0 failures); `npx next lint` clean on touched test. Hub checkout untouched. |

@@ -12,6 +12,10 @@ This directory is preserved for reference only. It is **not** part of active run
 
 Explicit local mock tooling (if needed for archaeology) lives under `tools/llm-mock/`, not this package.
 
+## P2b MEDIUM #34–#35 (latent TODOs)
+
+Legacy `context-store.ts` / `llm-integration-bridge.ts` TODOs for auth context, vector search, and cache hit-rate tracking are marked **HELD** — they are not product debt. Canonical successors: Next.js auth + J.4 vector index + production LLM bridge under `cloud-web-app/web`.
+
 ## Migration Mapping
 
 | Legacy File | Canonical Successor | Description |
