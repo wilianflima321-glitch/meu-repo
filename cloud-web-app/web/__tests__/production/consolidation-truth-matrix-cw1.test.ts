@@ -107,8 +107,9 @@ describe('CW1 consolidation truth matrix', () => {
     expect(nexus?.status).not.toBe('IMPLEMENTED')
 
     const hero = matrix.rows.find((r) => r.id === 'master-ux.hero-panels')
-    expect(hero?.heldReason).toBe('cw1_15_panel_bench_open')
-    expect(hero?.lastEvidence).toMatch(/cw1Bench=OPEN/)
+    expect(hero?.heldReason).toBe('cw1_hero_panel_product_depth')
+    expect(hero?.lastEvidence).toMatch(/benchColumns=CLOSED/)
+    expect(hero?.lastEvidence).toMatch(/slots=15/)
     expect(hero?.status).not.toBe('IMPLEMENTED')
 
     const spine = matrix.rows.find((r) => r.id === 'ui.persistence.spine')

@@ -29,6 +29,10 @@ import {
   evaluateRendererHonesty,
   type RendererHonestyInput,
 } from '@/lib/production/renderer-honesty-capability'
+import {
+  buildMasterUxHeroPanelBench,
+  formatMasterUxHeroBenchEvidence,
+} from '@/lib/production/master-ux-hero-panel-bench'
 
 const log = createComponentLogger('consolidation-truth-matrix')
 
@@ -298,17 +302,21 @@ export function buildConsolidationTruthMatrix(
       lastEvidence: 'intent prop → planCinematicDirectorShoot;finalFootage=HELD',
       gatedNames: ['final offline render', 'Lumen'],
     },
-    {
-      id: 'master-ux.hero-panels',
-      claim: 'Master UX Spec 15-panel ship matrix — CW1 bench columns OPEN',
-      path: 'docs/architecture/AETHEL_MASTER_STUDIO_UX_UI_SPECIFICATION.md',
-      status: 'PARTIAL',
-      marketingAllowed: false,
-      heldReason: 'cw1_15_panel_bench_open',
-      note: 'CW1 freeze active — full 15-panel bench verification not DONE',
-      lastEvidence: 'cw1Bench=OPEN;panelMatrix=PARTIAL;marketingBlocked=true',
-      gatedNames: [...AAA_GATED, 'parity exceeded'],
-    },
+    (() => {
+      const heroBench = buildMasterUxHeroPanelBench()
+      return {
+        id: 'master-ux.hero-panels',
+        claim:
+          'Master UX Spec 15-slot hero bench CLOSED — real surfaces only; product depth PARTIAL (not 15/15 ship)',
+        path: 'lib/production/master-ux-hero-panel-bench.ts',
+        status: 'PARTIAL' as ConsolidationTruthStatus,
+        marketingAllowed: false,
+        heldReason: heroBench.heldReason,
+        note: `Bench columns CLOSED (${heroBench.specSlotCount}/${heroBench.specSlotCount}); dockRegistered=${heroBench.summary.dockRegistered}; mockHeroPresent=${heroBench.summary.mockHeroFilesPresent}; CW0 freeze — no Spec-named hero invent.`,
+        lastEvidence: formatMasterUxHeroBenchEvidence(heroBench),
+        gatedNames: [...AAA_GATED, 'parity exceeded'],
+      }
+    })(),
   ]
 
   applyConsolidationMarketingFailClosed(rows)
