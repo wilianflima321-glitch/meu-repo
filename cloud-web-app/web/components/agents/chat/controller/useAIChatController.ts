@@ -9,6 +9,7 @@ import {
   inferAdvancedProfile,
   isProviderSetupError,
   requestAdvancedChat,
+  streamAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import type { AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
 import { ensureLocalEngineReady, generateLocalChatReply } from '@/lib/ai/local-chat-bridge'
@@ -435,6 +436,89 @@ export function useAIChatController({
           })
         }
 
+        // R19 — single-agent path: real SSE token stream (cancelable). Multi-agent / agentId stay JSON.
+        const canStreamTokens =
+          !selectedAgentId && profileResolution.profile.agentCount === 1
+
+        if (canStreamTokens) {
+          const streamingId = `assistant-${Date.now()}`
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: streamingId,
+              role: 'assistant',
+              content: '',
+              timestamp: new Date(),
+              model: currentModel,
+            },
+          ])
+
+          const streamResult = await streamAdvancedChat({
+            message: requestMessage,
+            model: currentModel,
+            messages: requestMessages,
+            projectId,
+            headers: {
+              ...aethelContext.toApiHeaders(),
+              ...getByokHeaders(),
+            },
+            profileOverride: profileResolution.profile,
+            signal: controller.signal,
+            onDelta: (_delta, accumulated) => {
+              setMessages((prev) =>
+                prev.map((entry) =>
+                  entry.id === streamingId ? { ...entry, content: accumulated } : entry,
+                ),
+              )
+            },
+          })
+
+          const latencyMs = Math.max(
+            0,
+            Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt),
+          )
+          const finalContent =
+            streamResult.content ||
+            (streamResult.aborted ? 'Generation stopped.' : 'No response from model.')
+
+          setMessages((prev) =>
+            prev.map((entry) =>
+              entry.id === streamingId
+                ? {
+                    ...entry,
+                    content: finalContent,
+                    tokens: streamResult.tokensUsed,
+                    model: currentModel,
+                  }
+                : entry,
+            ),
+          )
+
+          analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
+            surface: 'ide',
+            status: streamResult.aborted ? 'aborted' : 'success',
+            model: currentModel,
+          })
+          analytics?.track?.('ai', 'ai_stream', {
+            metadata: {
+              source: 'ide-panel',
+              model: currentModel,
+              projectId,
+              latencyMs,
+              status: streamResult.aborted ? 'aborted' : 'success',
+              transport: 'sse-chat-advanced',
+              usedFallback: false,
+              qualityMode: profileResolution.profile.qualityMode,
+              agentCount: 1,
+              enableWebResearch: profileResolution.profile.enableWebResearch,
+              consoleMode: context?.consoleMode ?? 'ask',
+              mentionTags: profileResolution.tags,
+              traceId: streamResult.traceId,
+            },
+          })
+          return
+        }
+
         const result = await requestAdvancedChat({
           message: requestMessage,
           model: currentModel,
@@ -528,6 +612,7 @@ export function useAIChatController({
             projectId,
             latencyMs,
             status: 'success',
+            transport: 'json-chat-advanced',
             usedFallback: result.usedFallback,
             qualityMode: profileResolution.profile.qualityMode,
             agentCount: profileResolution.profile.agentCount,

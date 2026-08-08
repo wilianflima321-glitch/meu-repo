@@ -280,3 +280,195 @@ export async function streamPlainChat(options: {
 
   return { content }
 }
+
+export type AdvancedChatStreamMeta = {
+  traceId?: string
+  model?: string
+  estimatedTokens?: number
+  spendLane?: string
+  noticeCode?: string
+}
+
+export type AdvancedChatStreamResult = {
+  content: string
+  tokensUsed?: number
+  traceId?: string
+  meta?: AdvancedChatStreamMeta
+  /** True when the client aborted mid-stream (partial content may be present). */
+  aborted: boolean
+}
+
+function parseSseDataBlocks(buffer: string): { events: string[]; rest: string } {
+  const events: string[] = []
+  let rest = buffer
+  let sep = rest.indexOf('\n\n')
+  while (sep >= 0) {
+    const block = rest.slice(0, sep)
+    rest = rest.slice(sep + 2)
+    const dataLines = block
+      .split('\n')
+      .filter((line) => line.startsWith('data:'))
+      .map((line) => line.slice(5).trimStart())
+    if (dataLines.length > 0) {
+      events.push(dataLines.join('\n'))
+    }
+    sep = rest.indexOf('\n\n')
+  }
+  return { events, rest }
+}
+
+/**
+ * Token streaming for AIChatPanelPro / advanced chat (single-agent path).
+ * Uses `/api/ai/chat-advanced` with `stream: true` → SSE deltas from chatStream.
+ * Multi-agent / Apex MoA remain JSON (server fail-closes STREAM_NOT_SUPPORTED_*).
+ * Do not fake a typewriter over a completed JSON fetch.
+ */
+export async function streamAdvancedChat(options: {
+  message: string
+  model: string
+  messages: ChatAdvancedMessage[]
+  projectId?: string
+  headers?: Record<string, string>
+  signal?: AbortSignal
+  profileOverride?: AdvancedProfile
+  onDelta: (chunk: string, accumulated: string) => void
+  onMeta?: (meta: AdvancedChatStreamMeta) => void
+}): Promise<AdvancedChatStreamResult> {
+  const profile = options.profileOverride ?? inferAdvancedProfile(options.message)
+  if (profile.agentCount > 1) {
+    throw new AdvancedChatRequestError({
+      code: 'STREAM_NOT_SUPPORTED_FOR_MULTI_ROLE',
+      message: 'Streaming is not supported in multi-role mode yet.',
+      status: 400,
+    })
+  }
+
+  const byokHeaders = getByokHeaders()
+  const response = await fetch('/api/ai/chat-advanced', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+      ...byokHeaders,
+      ...(options.headers || {}),
+    },
+    body: JSON.stringify({
+      model: options.model,
+      messages: options.messages,
+      projectId: options.projectId,
+      qualityMode: profile.qualityMode,
+      agentCount: 1 as const,
+      enableWebResearch: profile.enableWebResearch,
+      includeTrace: true,
+      stream: true,
+    }),
+    signal: options.signal,
+  })
+
+  if (!response.ok) {
+    const raw = await response.text()
+    throw parseAdvancedChatError(raw, response.status)
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  if (!response.body || !contentType.includes('text/event-stream')) {
+    // Fail-closed: do not invent token theater over a completed JSON body.
+    throw new AdvancedChatRequestError({
+      code: 'AI_STREAM_UNAVAILABLE',
+      message: 'Advanced chat did not return an event-stream body.',
+      status: 502,
+    })
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let content = ''
+  let tokensUsed: number | undefined
+  let traceId: string | undefined
+  let meta: AdvancedChatStreamMeta | undefined
+  let aborted = false
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const parsed = parseSseDataBlocks(buffer)
+      buffer = parsed.rest
+
+      for (const rawEvent of parsed.events) {
+        let event: Record<string, unknown>
+        try {
+          event = JSON.parse(rawEvent) as Record<string, unknown>
+        } catch {
+          continue
+        }
+        const type = typeof event.type === 'string' ? event.type : ''
+        if (type === 'meta') {
+          meta = {
+            traceId: typeof event.traceId === 'string' ? event.traceId : undefined,
+            model: typeof event.model === 'string' ? event.model : undefined,
+            estimatedTokens:
+              typeof event.estimatedTokens === 'number' ? event.estimatedTokens : undefined,
+            spendLane: typeof event.spendLane === 'string' ? event.spendLane : undefined,
+            noticeCode: typeof event.noticeCode === 'string' ? event.noticeCode : undefined,
+          }
+          if (meta.traceId) traceId = meta.traceId
+          options.onMeta?.(meta)
+          continue
+        }
+        if (type === 'content') {
+          const delta =
+            typeof event.delta === 'string'
+              ? event.delta
+              : typeof event.content === 'string' && event.content.startsWith(content)
+                ? event.content.slice(content.length)
+                : typeof event.content === 'string'
+                  ? event.content
+                  : ''
+          if (!delta) continue
+          content += delta
+          options.onDelta(delta, content)
+          continue
+        }
+        if (type === 'done') {
+          if (typeof event.tokensUsed === 'number') tokensUsed = event.tokensUsed
+          if (typeof event.traceId === 'string') traceId = event.traceId
+          if (typeof event.content === 'string' && event.content.length > content.length) {
+            const tail = event.content.slice(content.length)
+            if (tail) {
+              content = event.content
+              options.onDelta(tail, content)
+            }
+          }
+          continue
+        }
+        if (type === 'error') {
+          const code =
+            typeof event.error === 'string' ? event.error : 'AI_STREAM_ERROR'
+          const message =
+            typeof event.message === 'string'
+              ? event.message
+              : typeof event.error === 'string'
+                ? event.error
+                : 'Advanced chat stream failed.'
+          throw new AdvancedChatRequestError({
+            code,
+            message,
+            status: 502,
+            metadata: event,
+          })
+        }
+      }
+    }
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      aborted = true
+      return { content, tokensUsed, traceId, meta, aborted }
+    }
+    throw err
+  }
+
+  return { content, tokensUsed, traceId, meta, aborted }
+}

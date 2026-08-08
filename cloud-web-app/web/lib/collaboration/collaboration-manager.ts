@@ -146,6 +146,13 @@ export class CollaborationManager extends EventEmitter {
     // Set current session
     this.currentSession = session;
 
+    // R19 — Fusion undo prefers the shared collab Y.Doc when present.
+    if (this.ydoc && session.projectId) {
+      void import('@/lib/production/fusion-scope-registry').then(({ registerSharedWorkspaceYDoc }) => {
+        registerSharedWorkspaceYDoc(session.projectId, this.ydoc!)
+      })
+    }
+
     // Add self as collaborator
     this.collaborators.set(this.userId, {
       id: this.userId,
@@ -164,6 +171,8 @@ export class CollaborationManager extends EventEmitter {
   async leaveSession(): Promise<void> {
     if (!this.currentSession) return;
 
+    const leavingProjectId = this.currentSession.projectId
+
     // Clean up Monaco bindings
     for (const binding of this.monacoBindings.values()) {
       binding.destroy();
@@ -175,6 +184,12 @@ export class CollaborationManager extends EventEmitter {
       this.wsProvider.disconnect();
       this.wsProvider.destroy();
       this.wsProvider = null;
+    }
+
+    if (leavingProjectId) {
+      void import('@/lib/production/fusion-scope-registry').then(({ unregisterSharedWorkspaceYDoc }) => {
+        unregisterSharedWorkspaceYDoc(leavingProjectId)
+      })
     }
 
     // Destroy Yjs document
@@ -402,6 +417,11 @@ export class CollaborationManager extends EventEmitter {
    */
   getSession(): CollaborationSession | null {
     return this.currentSession;
+  }
+
+  /** Shared collab Y.Doc when a session is active (Fusion undo prefers this). */
+  getYDoc(): Y.Doc | null {
+    return this.ydoc;
   }
 
   /**

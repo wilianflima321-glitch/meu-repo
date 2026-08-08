@@ -222,34 +222,51 @@ export async function handleStreamingResponse(
         })
         controller.enqueue(encoder.encode(`data: ${meta}\n\n`))
 
-        const historyContext = messages
-          .slice(0, -1)
-          .filter((message) => message.role !== 'tool')
-          .map((message) => `${message.role}: ${message.content}`)
-          .join('\n')
+        // Real token-by-token provider stream — never buffer a completed query then dump.
+        const streamMessages = [
+          ...(systemPrompt
+            ? [{ role: 'system' as const, content: systemPrompt }]
+            : []),
+          ...messages
+            .filter((message) => message.role === 'user' || message.role === 'assistant' || message.role === 'system')
+            .map((message) => ({
+              role: message.role as 'user' | 'assistant' | 'system',
+              content: message.content,
+            })),
+        ]
 
-        const result = await aiService.query(
-          messages[messages.length - 1].content,
-          historyContext || undefined,
-          {
-            model,
-            systemPrompt,
-            isBYOK: isByok,
-            apiKeyOverride: byokApiKey,
-            userId,
-          },
-        )
+        let accumulated = ''
+        for await (const delta of aiService.chatStream({
+          messages: streamMessages,
+          model,
+          isBYOK: isByok,
+          apiKeyOverride: byokApiKey,
+          userId,
+        })) {
+          if (abortSignal?.aborted) {
+            await session.cancel().catch(() => {})
+            activeSession = null
+            controller.close()
+            return
+          }
+          if (!delta) continue
+          accumulated += delta
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: 'content', delta, content: accumulated })}\n\n`,
+            ),
+          )
+        }
 
         if (abortSignal?.aborted) {
           await session.cancel().catch(() => {})
+          activeSession = null
           controller.close()
           return
         }
 
-        const data = JSON.stringify({ type: 'content', content: result.content })
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`))
-
-        await session.settle(result.tokensUsed || estimatedTokens)
+        const tokensUsed = Math.max(1, Math.ceil(accumulated.length / 4) || estimatedTokens)
+        await session.settle(tokensUsed)
         activeSession = null
 
         persistAITrace({
@@ -257,16 +274,16 @@ export async function handleStreamingResponse(
           kind: 'stream',
           trace: {
             traceId,
-            summary: 'Resposta gerada (modo chat streaming).',
+            summary: 'Resposta gerada (modo chat streaming token-by-token).',
             decisionRecord: {
-              decision: 'Responder via streaming com backpressure.',
+              decision: 'Responder via aiService.chatStream com SSE deltas canceláveis.',
             },
             evidence: [{ kind: 'context', label: `historyContextMessages=${messages.length - 1}` }],
-            telemetry: { model, estimatedTokens, tokensUsed: result.tokensUsed },
+            telemetry: { model, estimatedTokens, tokensUsed },
           },
         }).catch((err) => logger.warn('Failed to persist streaming trace', err, { traceId }))
 
-        const doneData = JSON.stringify({ type: 'done', tokensUsed: result.tokensUsed, traceId })
+        const doneData = JSON.stringify({ type: 'done', tokensUsed, traceId, content: accumulated })
         controller.enqueue(encoder.encode(`data: ${doneData}\n\n`))
         controller.close()
       } catch (error) {
