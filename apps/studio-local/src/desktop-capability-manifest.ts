@@ -74,5 +74,12 @@ export const STUDIO_LOCAL_DESKTOP_MANIFEST: StudioLocalDesktopManifest = {
     'releaseReady=true',
     'electron ship path',
     'local shell via cloud node-pty',
+    'ZERO-LOSS PRORES',
+    'NPR KERNEL ACTIVE',
+    'Telepathic Architect',
+    'CoVe Grounded',
+    'SYSTEM HEALTHY with fake WASM RUNNING',
+    'Aethel Studio Pro · Native Runtime',
+    'fabricated 60 FPS overlay',
   ],
 }

@@ -1,71 +1,59 @@
 /**
- * FpsOverlayBadge — Real-time frame-time and GPU usage telemetry badge.
- *
- * Reads `probe.frameTimeMs` and `probe.gpuUsagePercent` from the runtime adapter.
- * Renders a compact, always-visible floating overlay badge in the top-right corner
- * of the active viewport surface (Cinema, Aesthetic or Viewport tabs).
- *
- * Color coding:
- * - Green   (< 16.67 ms = 60 FPS+): Optimal
- * - Yellow  (16.67–33 ms = 30-60 FPS): Acceptable
- * - Red     (> 33 ms = <30 FPS): Performance Warning
+ * Frame-time overlay — fail-closed when RuntimeProbe has no real frameTimeMs.
+ * Prior revision defaulted to 16.7ms / 60 FPS theater when probe was empty.
  */
 
-import React, { useState, useEffect } from 'react'
 import type { RuntimeProbe } from '../../../../packages/aethel-ide-shared/src/runtime-adapter/types'
 
 interface FpsOverlayBadgeProps {
   probe: RuntimeProbe | null
 }
 
+function readNumericField(probe: RuntimeProbe | null, key: string): number | null {
+  if (!probe) return null
+  const value = (probe as unknown as Record<string, unknown>)[key]
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null
+}
+
 export function FpsOverlayBadge({ probe }: FpsOverlayBadgeProps) {
-  const [frameTimeMs, setFrameTimeMs] = useState<number | null>(null)
-
-  // Derive frame time from probe or simulate a stable 16.6ms at 60fps
-  useEffect(() => {
-    // If probe exposes frameTimeMs use it; otherwise derive from gpuUsagePercent as proxy
-    const ft = (probe as unknown as Record<string, number>)?.frameTimeMs
-    if (typeof ft === 'number' && ft > 0) {
-      setFrameTimeMs(ft)
-    } else {
-      // Default to 60 FPS when no data available
-      setFrameTimeMs(16.7)
-    }
-  }, [probe])
-
-  const fps = frameTimeMs ? Math.round(1000 / frameTimeMs) : null
-  const gpuPct = (probe as unknown as Record<string, number>)?.gpuUsagePercent ?? null
+  const frameTimeMs = readNumericField(probe, 'frameTimeMs')
+  const gpuPct = readNumericField(probe, 'gpuUsagePercent')
+  const fps = frameTimeMs != null ? Math.round(1000 / frameTimeMs) : null
 
   const fpsColor =
     fps === null
-      ? 'text-slate-500'
+      ? 'text-[var(--aethel-text-quaternary)]'
       : fps >= 60
-      ? 'text-emerald-400'
-      : fps >= 30
-      ? 'text-amber-400'
-      : 'text-red-400'
+        ? 'text-[var(--aethel-success-light)]'
+        : fps >= 30
+          ? 'text-[var(--aethel-warning)]'
+          : 'text-[var(--aethel-error-light)]'
 
   return (
     <div className="pointer-events-none absolute top-2 right-2 z-20 flex items-center gap-1.5 font-mono">
-      {/* FPS Badge */}
-      <div className="flex items-center gap-1 bg-slate-950/85 backdrop-blur border border-slate-800/80 rounded-lg px-2 py-1">
+      <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_85%,transparent)] backdrop-blur border border-[var(--aethel-border-secondary)] rounded-lg px-2 py-1">
         <span className={`text-[11px] font-bold tabular-nums ${fpsColor}`}>
-          {fps !== null ? `${fps} FPS` : '—'}
+          {fps !== null ? `${fps} FPS` : 'FPS HELD'}
         </span>
-        {frameTimeMs !== null && (
-          <span className="text-[9px] text-slate-500 tabular-nums">
+        {frameTimeMs != null ? (
+          <span className="text-[9px] text-[var(--aethel-text-quaternary)] tabular-nums">
             {frameTimeMs.toFixed(1)}ms
           </span>
+        ) : (
+          <span className="text-[9px] text-[var(--aethel-text-quaternary)]">no probe</span>
         )}
       </div>
 
-      {/* GPU Usage Badge */}
-      {gpuPct !== null && (
-        <div className="flex items-center gap-1 bg-slate-950/85 backdrop-blur border border-slate-800/80 rounded-lg px-2 py-1">
-          <span className="text-[9px] text-slate-500">GPU</span>
+      {gpuPct != null && (
+        <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_85%,transparent)] backdrop-blur border border-[var(--aethel-border-secondary)] rounded-lg px-2 py-1">
+          <span className="text-[9px] text-[var(--aethel-text-quaternary)]">GPU</span>
           <span
             className={`text-[11px] font-bold tabular-nums ${
-              gpuPct > 90 ? 'text-red-400' : gpuPct > 70 ? 'text-amber-400' : 'text-sky-400'
+              gpuPct > 90
+                ? 'text-[var(--aethel-error-light)]'
+                : gpuPct > 70
+                  ? 'text-[var(--aethel-warning)]'
+                  : 'text-[var(--aethel-info-light)]'
             }`}
           >
             {gpuPct}%

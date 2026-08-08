@@ -36,8 +36,13 @@ export function TerminalPanel({ backend }: TerminalPanelProps) {
       fontFamily: "'Cascadia Code', 'Fira Code', Consolas, monospace",
       fontSize: 13,
       theme: {
-        background: '#0b1220',
-        foreground: '#d6e0f5',
+        // xterm requires concrete CSS colors; resolve design tokens when available.
+        background:
+          getComputedStyle(document.documentElement).getPropertyValue('--aethel-surface-primary').trim() ||
+          'rgb(11, 18, 32)',
+        foreground:
+          getComputedStyle(document.documentElement).getPropertyValue('--aethel-text-primary').trim() ||
+          'rgb(214, 224, 245)',
       },
       cursorBlink: true,
     })
@@ -91,17 +96,31 @@ export function TerminalPanel({ backend }: TerminalPanelProps) {
   return (
     <div className="panel terminal-panel" style={{ display: 'flex', flexDirection: 'column', height: 280 }}>
       <div className="panel-heading">
-        <span>Terminal (Native PTY)</span>
+        <span>Terminal (Human Native PTY)</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <strong style={{ color: sessionId ? 'var(--muted)' : '#ff8080' }}>
-            {sessionId ? sessionId : error ?? 'connecting…'}
+          <strong
+            style={{
+              color: sessionId ? 'var(--aethel-text-tertiary)' : 'var(--aethel-error-light)',
+              fontSize: 11,
+            }}
+            title="Law #48: agents must use sandbox only — never this host PTY"
+          >
+            {sessionId ? `${sessionId} · human-only` : error ?? 'connecting…'}
           </strong>
           <button type="button" onClick={() => void openPanelWindow('terminal')} title="Open this panel in its own window">
             Undock ↗
           </button>
         </div>
       </div>
-      <div ref={containerRef} style={{ flex: 1, minHeight: 0, padding: 4, background: '#0b1220' }} />
+      <div
+        ref={containerRef}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          padding: 4,
+          background: 'var(--aethel-surface-primary)',
+        }}
+      />
     </div>
   )
 }

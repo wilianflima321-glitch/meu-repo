@@ -1,4 +1,9 @@
 //! Native PTY terminal lifecycle management.
+//!
+//! Honesty / Law #48 (AgentShellPolicy):
+//! - These commands are the **human-operator** host PTY lane (Studio Local UI).
+//! - Agent / Fusion tools MUST NOT invoke `terminal_*` — sandbox-only after L.1.
+//! - Cwd is confined to the locked project root when set (`ensure_allowed_existing_path`).
 
 use std::collections::BTreeMap;
 use std::io::{Read, Write};

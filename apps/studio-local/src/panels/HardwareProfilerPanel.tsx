@@ -104,10 +104,21 @@ export function HardwareProfilerPanel() {
               </dd>
             </div>
             <div>
-              <dt>VRAM / Hardware Tier</dt>
+              <dt>VRAM / GPU temperature</dt>
               <dd>
-                {sample.gpuVramUsedMb != null ? `${sample.gpuVramUsedMb} MB` : '12,288 MB (RTX 3060 12GB)'} |{' '}
-                <span style={{ color: '#10b981', fontWeight: 600 }}>Tier 2 — Hardware Ray Tracing & Tensor Cores</span>
+                {sample.gpuVramUsedMb != null
+                  ? `${sample.gpuVramUsedMb} MB used`
+                  : `VRAM HELD — ${sample.gpuMetricsReason || 'no measured path'}`}
+                {' · '}
+                {sample.gpuTemperatureC != null
+                  ? `${sample.gpuTemperatureC}°C`
+                  : 'temp HELD'}
+              </dd>
+            </div>
+            <div>
+              <dt>Hardware tier marketing</dt>
+              <dd style={{ color: 'var(--aethel-warning)', fontWeight: 600 }}>
+                HELD — never invent RTX / RT / Tensor tier badges from missing metrics
               </dd>
             </div>
           </dl>

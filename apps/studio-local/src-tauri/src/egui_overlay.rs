@@ -7,7 +7,9 @@ use winit::{
     window::WindowBuilder,
 };
 
-/// Launches a native debug overlay bypassing React DOM for maximum performance and direct GPU inspection.
+/// Launches a **debug scaffold** egui+winit window (not product telemetry).
+/// Honesty: does not stream FPS/VRAM/kernel probes — UI is a placeholder only.
+/// Product present path remains the Tauri WebView; AAA wgpu present-in-product is HELD.
 #[tauri::command]
 pub async fn launch_native_egui_overlay() -> Result<(), String> {
     std::thread::spawn(|| {
@@ -22,7 +24,7 @@ fn run_egui_loop() -> Result<(), String> {
     let event_loop = EventLoopBuilder::new().build().map_err(|e| e.to_string())?;
     let window = Arc::new(
         WindowBuilder::new()
-            .with_title("Aethel Engine - Native Egui Overlay")
+            .with_title("Aethel Engine — Egui Debug Scaffold (not live telemetry)")
             .with_inner_size(winit::dpi::PhysicalSize::new(800, 600))
             .build(&event_loop)
             .map_err(|e| e.to_string())?,
@@ -93,10 +95,11 @@ fn run_egui_loop() -> Result<(), String> {
                     WindowEvent::RedrawRequested => {
                         let raw_input = egui_winit_state.take_egui_input(&window);
                         let full_output = egui_ctx.run(raw_input, |ctx| {
-                            egui::Window::new("Aethel Native Telemetry")
+                            egui::Window::new("Egui Debug Scaffold")
                                 .show(ctx, |ui| {
-                                    ui.label("Egui Native Overlay Active");
-                                    ui.label("Bypassing React DOM.");
+                                    ui.label("HELD — debug window only.");
+                                    ui.label("Not live FPS/VRAM/kernel telemetry.");
+                                    ui.label("Product viewport remains Tauri WebView.");
                                     if ui.button("Close").clicked() {
                                         elwt.exit();
                                     }

@@ -1,107 +1,158 @@
-import React, { useState } from 'react';
-import { Activity, ShieldAlert, Cpu, HardDrive, Thermometer, RefreshCw } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
+import { useEffect, useState } from 'react'
+import { Activity, Thermometer, HardDrive, Cpu } from 'lucide-react'
 
-export const SentinelHardwareMonitorPanel: React.FC = () => {
-  const [gpuTemp, setGpuTemp] = useState(62);
-  const [vramSliceMb, setVramSliceMb] = useState(256);
-  const [agentHappiness, setAgentHappiness] = useState(98.5);
+/** Mirrors `hardware_profiler.rs` `HardwareSample` (camelCase via serde). */
+type HardwareSample = {
+  timestampUnixMs: number
+  cpuUsagePercent: number
+  cpuPerCorePercent: number[]
+  memoryUsedMb: number
+  memoryTotalMb: number
+  gpuName: string | null
+  gpuBackend: string | null
+  gpuVramUsedMb: number | null
+  gpuTemperatureC: number | null
+  gpuMetricsReason: string
+}
+
+/**
+ * Replaces fabricated "SYSTEM HEALTHY" / fake WASM kernel RUNNING rows /
+ * hardcoded GPU°C / "Hardware Happiness %" theater with the same native
+ * `hardware_profiler` stream used by HardwareProfilerPanel.
+ */
+export function SentinelHardwareMonitorPanel() {
+  const [sample, setSample] = useState<HardwareSample | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    let unlisten: (() => void) | undefined
+
+    invoke<HardwareSample>('hardware_profiler_sample_once')
+      .then((initial) => {
+        if (!cancelled) setSample(initial)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Native hardware profiler unavailable outside Tauri.')
+        }
+      })
+
+    listen<HardwareSample>('hardware_sample', (event) => {
+      if (cancelled) return
+      setSample(event.payload)
+      setError(null)
+    })
+      .then((fn) => {
+        unlisten = fn
+      })
+      .catch(() => undefined)
+
+    return () => {
+      cancelled = true
+      unlisten?.()
+    }
+  }, [])
+
+  const memoryPercent =
+    sample && sample.memoryTotalMb > 0
+      ? Math.round((sample.memoryUsedMb / sample.memoryTotalMb) * 100)
+      : null
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 text-slate-100 p-4 border border-slate-800 rounded-xl shadow-2xl backdrop-blur-md">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+    <div className="flex flex-col h-full p-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] text-[var(--aethel-text-primary)]">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-red-400" />
-          <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-red-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
-            Kernel 0 Sentinel & Hardware Resilience
-          </h2>
+          <Activity className="w-5 h-5 text-[var(--aethel-error-light)]" />
+          <h2 className="text-sm font-bold tracking-wide">Hardware Sentinel</h2>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 font-mono font-semibold">
-          SYSTEM HEALTHY
+        <span
+          className={[
+            'text-[10px] px-2 py-1 rounded font-mono font-semibold border',
+            sample
+              ? 'text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]'
+              : 'text-[var(--aethel-warning)] border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
+          ].join(' ')}
+        >
+          {sample ? 'LIVE SAMPLE' : error ? 'UNAVAILABLE' : 'WAITING'}
         </span>
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-3 gap-3 my-4">
-        {/* GPU Temp */}
-        <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>GPU Temperature</span>
-            <Thermometer className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-xl font-mono font-bold text-slate-100 mt-2">
-            {gpuTemp}°C
-          </div>
-          <div className="text-[10px] text-emerald-400 font-semibold mt-1">
-            Safe-Bound (&lt;80°C)
-          </div>
-        </div>
+      {error && !sample && (
+        <p className="mt-3 text-xs text-[var(--aethel-error-light)]">{error}</p>
+      )}
 
-        {/* Virtual VRAM Pager */}
-        <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>VRAM Neural Slice</span>
-            <HardDrive className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div className="text-xl font-mono font-bold text-cyan-300 mt-2">
-            {vramSliceMb} MB
-          </div>
-          <div className="text-[10px] text-cyan-400 font-semibold mt-1">
-            Overflow Blocked
-          </div>
-        </div>
+      {!sample ? (
+        <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">Waiting for native hardware_profiler…</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-3 my-4">
+            <div className="p-3 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)]">
+              <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+                <span>GPU temperature</span>
+                <Thermometer className="w-3.5 h-3.5 text-[var(--aethel-warning)]" />
+              </div>
+              <div className="text-lg font-mono font-bold mt-2">
+                {sample.gpuTemperatureC != null ? `${sample.gpuTemperatureC}°C` : 'HELD'}
+              </div>
+              <div className="text-[10px] text-[var(--aethel-text-quaternary)] mt-1">
+                {sample.gpuTemperatureC != null ? 'From native sampler' : sample.gpuMetricsReason || 'No sensor path'}
+              </div>
+            </div>
 
-        {/* Agent Health */}
-        <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Hardware Happiness</span>
-            <Cpu className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-xl font-mono font-bold text-emerald-400 mt-2">
-            {agentHappiness}%
-          </div>
-          <div className="text-[10px] text-slate-400 mt-1">
-            60s Health Check Active
-          </div>
-        </div>
-      </div>
+            <div className="p-3 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)]">
+              <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+                <span>VRAM used</span>
+                <HardDrive className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />
+              </div>
+              <div className="text-lg font-mono font-bold mt-2 text-[var(--aethel-info-light)]">
+                {sample.gpuVramUsedMb != null ? `${sample.gpuVramUsedMb} MB` : 'HELD'}
+              </div>
+              <div className="text-[10px] text-[var(--aethel-text-quaternary)] mt-1">
+                {sample.gpuVramUsedMb != null ? 'Measured' : 'Never invent VRAM / Tier claims'}
+              </div>
+            </div>
 
-      {/* WASM Micro-Kernel Health Table */}
-      <div className="flex-1 bg-slate-900/80 rounded-lg border border-slate-800 p-3">
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          WASM Micro-Kernel Isolation Status
-        </div>
-        <div className="space-y-2 font-mono text-xs">
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-vfx (Magia & Partículas)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
+            <div className="p-3 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)]">
+              <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+                <span>CPU</span>
+                <Cpu className="w-3.5 h-3.5 text-[var(--aethel-success-light)]" />
+              </div>
+              <div className="text-lg font-mono font-bold mt-2 text-[var(--aethel-success-light)]">
+                {sample.cpuUsagePercent.toFixed(1)}%
+              </div>
+              <div className="text-[10px] text-[var(--aethel-text-quaternary)] mt-1">
+                RAM {memoryPercent != null ? `${memoryPercent}%` : '—'} · {sample.cpuPerCorePercent.length} cores
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-phys (P4/P7 Física)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
+
+          <div className="flex-1 rounded-lg border border-[var(--aethel-border-secondary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_30%,transparent)]">
+            <div className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
+              Adapter honesty
+            </div>
+            <dl className="space-y-2 font-mono text-[11px]">
+              <div className="flex justify-between gap-2">
+                <dt className="text-[var(--aethel-text-tertiary)]">GPU</dt>
+                <dd className="text-right text-[var(--aethel-text-secondary)]">
+                  {sample.gpuName ?? 'Probing…'}
+                  {sample.gpuBackend ? ` (${sample.gpuBackend})` : ''}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt className="text-[var(--aethel-text-tertiary)]">WASM micro-kernels</dt>
+                <dd className="text-[var(--aethel-warning)]">HELD — no RUNNING theater</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt className="text-[var(--aethel-text-tertiary)]">Native present (product WebView)</dt>
+                <dd className="text-[var(--aethel-warning)]">HELD — secondary probe only</dd>
+              </div>
+            </dl>
           </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-ai-local (IA de Baixa Latência)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
-          </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-lux (Raymarcher Espectral)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
-          </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-netcode (Serializador Binário zero-alloc)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
-          </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-ast (Indexador Simbólico AST)</span>
-            <span className="text-emerald-400 font-bold">RUNNING</span>
-          </div>
-          <div className="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-            <span className="text-slate-200">kernel-fallback (RTX 3060 Tier 2 / Tier 0 Legacy Auto)</span>
-            <span className="text-emerald-400 font-bold">TIER 2 ACTIVE</span>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
-  );
-};
+  )
+}
