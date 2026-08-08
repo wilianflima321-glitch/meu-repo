@@ -554,8 +554,8 @@ Two independent audits recorded here (documentation alignment only this round �
 
 | Severity | Count | Law |
 |----------|------:|-----|
-| **BLOCKER** | 12 | XI / XVI — auto-reject PR or false commercial claim |
-| **HIGH** | 18 | XI / XVI — mock/teatro in runtime or indevido marketing |
+| **BLOCKER** | 12 (0 OPEN) | XI / XVI — auto-reject PR or false commercial claim |
+| **HIGH** | 18 inventoried → **13 DONE** / **5 OPEN** (Rust/legacy) | XI / XVI — mock/teatro in runtime or indevido marketing |
 | **MEDIUM** | 17 | XI — TODO/teatro latente |
 
 **Top BLOCKERs (fix before RTv1 discovery / AI-native marketing / AAA desktop claims):**
@@ -574,6 +574,32 @@ Two independent audits recorded here (documentation alignment only this round �
 **Execution queue (one item at a time, platform first):** see P2d (90-day plan) → P1b (J/L deepen) → ~~BLOCKERs 7–9 (consolidation-truth-matrix)~~ **DONE** → ~~1–2 (USD export)~~ **DONE** → ~~3–6 (discovery probes)~~ **DONE** → ~~10 (email mock default)~~ **DONE** → ~~BLOCKER 11 (DAP)~~ **DONE** → ~~BLOCKER 12 (plugin_sandbox)~~ **DONE** → ~~P1 dead-mock orphan panels (MaterialGraph / PostProcess / DetailInspector)~~ **DONE** (deleted) → ~~Timeline3D real data~~ **DONE** → ~~RTv1 operational wires (P1c playtime + listing evidence)~~ **DONE** → ~~RTv1 export measured bytes~~ **DONE** → ~~RTv1 demo-web-slice Instant Play honesty~~ **DONE** → ~~Instant Play cook chain (packer+registry+html+host)~~ **DONE** → ~~I.2 verified reviews F.2 ≥2h gate~~ **DONE** → L.5 Rust wire via L.1 → RTv1-c depth (H.1+ Treasury / `hubCheckoutAudited`).
 
 **P2b BLOCKER table status (2026-08-08 anti-mock debt pass):** all **12/12 BLOCKERs DONE** — zero OPEN rows remaining. Remaining Anti-MOCK platform debt is HIGH/MEDIUM + product deepen (not BLOCKER severity).
+
+**P2b HIGH table (inventory #13–#30 from Anti-MOCK sweep + re-grep):**
+
+| # | File:line | Issue | Status |
+|---|-----------|-------|--------|
+| 13 | `packages/aethel-cli-legacy/server.js` | Backend LLM mock (`mock-core`) | **OPEN** — legacy package; not `cloud-web-app/web` ship path |
+| 14 | `packages/aethel-kernel-rust/src/wgpu_framegraph.rs:132` | `memory_aliasing_active: true` mocked | **OPEN** — kernel Rust |
+| 15 | `packages/aethel-kernel-rust/src/metasounds_dsp_compiler.rs` | MetaSounds linear mock compiler | **OPEN** — kernel Rust |
+| 16 | `packages/aethel-kernel-rust/src/quantum_overlap.rs:509` | `broadphase_aaa_ready: true` without AAA | **OPEN** — kernel Rust |
+| 17 | `web/lib/webxr/webxr-honesty-capability.ts:48` | `marketingAllowed: true` on wire-complete | **DONE** (2026-08-08 P2b HIGH) — `WEBXR_MARKETING_SHIP_ALLOWED=false` always |
+| 18 | `web/lib/liveops/liveops-f2-capability.ts:466-467` | spool/ingest hardcoded `true` in probe | **DONE** — real `probeTelemetrySpoolModuleReady` + ingest contract; evaluate fail-closed |
+| 19 | `web/lib/copilot/context-store.ts:16-17` | “MVP” + in-memory serverless store | **DONE** — process-local honesty (`durable:false`); MVP label removed |
+| 20 | `web/lib/audio/audio-library-search.ts:108,120` | Foley “catalog stub” rows | **DONE** — partner catalog empty HELD; stubs removed from search pool |
+| 21 | `web/lib/dap/index.ts` | DEPRECATED/mock adapters still exported | **DONE** (evidence: BLOCKER 11 — fail-closed DAP; no mock success) |
+| 22 | `web/lib/dap/adapters/java-dap.ts` | Mock breakpoints/evaluate | **DONE** (evidence: BLOCKER 11 — mock stacks stripped) |
+| 23 | `web/lib/world-streaming/partition-cell-store.ts:82` | “simulates async SSD read” theater | **DONE** — honest in-memory CAS yield comment |
+| 24 | `web/lib/mesh-quality/auto-retopology.ts:431` | subsample fallback vs QEM claim risk | **DONE** — `subsampleBudgetFallbackUsed` + evidence `subsample-budget-fallback-not-qem` |
+| 25 | `web/lib/production/wasm-boot.ts:14,27` | console.log supremacy theater | **DONE** — `createComponentLogger` + fail-closed boot |
+| 26 | `apps/studio-local/.../plugin_sandbox.rs:118` | `println!` LoRA theater | **DONE** (evidence: BLOCKER 12 — HELD Err) |
+| 27 | `consolidation-truth-matrix.ts` UI persistence `marketingAllowed` | Marketing before CW4/LWW | **DONE** (evidence: P2d fail-closed + `applyConsolidationMarketingFailClosed`) |
+| 28 | `app/api/runtime/consolidation-truth/route.ts` | API exposes false marketing matrix | **DONE** (same fail-closed matrix) |
+| 29 | `packages/.../shaders/radix_sort.wgsl` | “minimal mock” ship shader | **OPEN** — kernel shader |
+| 30 | `web/lib/cosmos/acoustic-atmosphere-wire.ts` | `createAcousticMockBus` in playtest wire | **DONE** — renamed `createAcousticInMemoryBus` (soak sink) |
+| — | `app/api/projects/[id]/commits/route.ts` | **Re-grep HIGH:** fabricated `Math.random` commit history | **DONE** — empty HELD until real git/snapshot store |
+
+**P2b HIGH web batch status (2026-08-08):** all web HIGH rows from the sweep table are **DONE**; **5 OPEN** remain (legacy CLI + kernel Rust/shader). Tests: `__tests__/production/p2b-high-anti-mock-honesty.test.ts` (11).
 
 **Timeline3D real data — DONE (2026-08-08):** Source of truth = `SequencerTimeline` (`aethel.timeline.v1` in `lib/sequencer`). Added project-scoped `project-timeline-store` + `timeline-ui-adapter` (curve/clip → Timeline3D / SequenceData; **never** transform→fake keyframes). `ITimelineService` on `IIDEBackend` / `WebIDEBackend`; `CanvasViewportSurface` reads snapshot (`demoMode` only when binding `isDemo`); unbound/empty = honest empty badge (not `duration={8}` theater). `Timeline3D` accepts external `keyframes`/`tracks`; fixture only when `demoMode={true}`. `CanonicalSequencer` defaults to `EMPTY_SEQUENCE_DATA` (demo only via explicit `DEMO_SEQUENCE`). **Remaining gap:** clip/keyframe authoring UI + persisting `*.timeline.json` into the project store (SequencerIdePanel still builds director demo timelines locally). Tests: `timeline-real-data-wire.test.ts`.
 
@@ -985,6 +1011,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 p2b-high | **P2b HIGH Anti-MOCK batch DONE (web ship path).** Commit: `c04b9c218`. Closed HIGH #17–#20, #23–#25, #30 + re-grep commits fabrication; marked #21/#22/#26/#27/#28 DONE with prior BLOCKER/P2d evidence. **Fixes:** WebXR `WEBXR_MARKETING_SHIP_ALLOWED=false`; F.2 spool/ingest real probes + evaluate fail-closed; Copilot process-local honesty (no MVP); Foley partner stubs removed (catalog HELD); partition SSD theater comment; auto-retopo `subsampleBudgetFallbackUsed`; wasm-boot logger + fail-closed; acoustic `createAcousticInMemoryBus`; commits API empty HELD (no fabricated history). Tests: `p2b-high-anti-mock-honesty.test.ts` (11). Gates: `__tests__/production` **584/584**; `npx next lint` clean on touched files. **Remain OPEN (5):** #13 cli-legacy, #14–#16/#29 kernel Rust. Hub checkout/Coins HELD. No Onda G. |
 | 2026-08-08 spend-l5-honesty | **Law XI — closed the last 2 `__tests__/production` failures (stale Focus 2A renderer-honesty assertions).** Commit: `ff3cf327e`. Root cause: `focus1-focus2-spend-l5.test.ts` still expected pre-CW3 labels (`activePath: 'webgl2'`) and `marketingAllowed: true` when WebGPU API + desktop mount were probed. Product already fail-closed correctly (`activePath: 'r3f-webgl2'`, `marketingAllowed` always `false` — adapter/mount ≠ dual-live AAA). **Fix:** align spend-l5 assertions with CW3 + `render-path-honesty-cw3` doctrine (no product overclaim rollback). Gates: spend-l5 **8/8**; full `__tests__/production` **573/573** (0 failures); `npx next lint` clean on touched test. Hub checkout untouched. |
 | 2026-08-08 rtv1-i2-verified-gate | **I.2 verified reviews gate wired to authenticated F.2 playtime (XIV.2 / GF-HUB-002).** Commit: `754e254cb`. Threshold: **7200s (2h)** default; Early Access creator opt-in keeps **1800s (30m)**. `resolveViewerReviewEligibility` joins `PlayerGameStats` + `evaluateVerifiedReviewGate`; GET `/api/hub/games/[slug]/reviews` returns `viewerEligibility`; POST / `submitVerifiedReview` fail-closes `AUTH_REQUIRED` (unauth) / `PLAYTIME_GATE` (under threshold) — no fake verified badges; anonymous Arcade spool stays unsynced on 401 (honest). `VerifiedReviewsPanel` disables submit until eligible. Tests: `rtv1-operational-loop` I.2 cases + existing i2/f2/hub suites **43/43**; `npx next lint` clean. Hub checkout/Coins still **HELD**. |
 | 2026-08-08 rtv1-instant-play-chain | **Instant Play chain SHIPPED (all 4 stages) — unhold path live.** Commit: `ece2094c7`. `lib/production/instant-play/*`: game-scripts-registry → browser-packer (monorepo esbuild via Node child) → html-emitter (`#aethel-root` + module boot) → html-host (`/api/hub/instant-play/{projectId}/{jobId}/index.html` serves real cooked bytes). Cook `export-format-worker.publish` wires slice; stamps `demoWebSliceReady` + `demoPlayUrl` **only** on full success; `DEMO_WEB_SLICE_UNHOLD_BLOCKERS=[]` (catalog retained). Law XV bake + Compression Mandate fail-closed unchanged; `addWebTemplate` theater forbidden. Tests: `__tests__/production/instant-play-demo-web-slice.test.ts` + cook/rtv1 suites; `npx next lint` clean on touched files. Instant Play can unhold for eligible cooks; remaining RTv1 gaps = auth playtime / I.2 / Hub checkout. |
