@@ -9,10 +9,10 @@
  *
  * Honesty (Zero-MVP):
  * - Cloud HTTP relay path is real (`/api/lsp/*` + this registry).
- * - Tauri desktop sidecar first-light (`apps/studio-local/src-tauri/src/lsp_farm.rs`)
- *   is **PARTIAL** — real binary discovery + process spawn + stdio initialize IPC probe;
- *   fail-closed when binary missing (never fake diagnostics).
- * - Monaco desktop hover/definition acceptance remains **OPEN** (multi-week).
+ * - Tauri desktop sidecar (`apps/studio-local/src-tauri/src/lsp_farm.rs`) is **PARTIAL** —
+ *   real binary discovery + spawn + initialize + minimal didOpen + hover/definition IPC;
+ *   fail-closed when binary missing (never fake diagnostics/hover).
+ * - Monaco desktop hover/definition wire is **PARTIAL**; full L.C soak (Python) still OPEN.
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -52,9 +52,10 @@ export type LspFarmLanguageStatus = {
 
 export type UniversalLspFarmHonesty = {
   cloudRelayCore: true
-  /** `partial` = Tauri lsp_farm first-light shipped; never `live` until Monaco acceptance. */
+  /** `partial` = Tauri lsp_farm spawn+IPC shipped; never `live` until L.C soak. */
   tauriSidecarSpawn: 'partial'
-  monacoDesktopHoverDefinition: 'open'
+  /** `partial` = Monaco hover/definition IPC wired; full L.C (Python) still OPEN. */
+  monacoDesktopHoverDefinition: 'partial'
   marketingAllowed: false
   message: string
 }
@@ -101,10 +102,10 @@ export function describeUniversalLspFarmHonesty(): UniversalLspFarmHonesty {
   return {
     cloudRelayCore: true,
     tauriSidecarSpawn: 'partial',
-    monacoDesktopHoverDefinition: 'open',
+    monacoDesktopHoverDefinition: 'partial',
     marketingAllowed: false,
     message:
-      'L.13 cloud relay + Tauri lsp_farm first-light (spawn/IPC probe) are real; Monaco desktop hover/definition acceptance remains OPEN; marketing blocked.',
+      'L.13 cloud relay + Tauri lsp_farm Monaco hover/definition IPC are real (minimal didOpen; fail-closed without binary); full L.C multi-language soak (Python) remains OPEN; marketing blocked.',
   }
 }
 

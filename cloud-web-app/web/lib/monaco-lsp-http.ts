@@ -8,16 +8,11 @@
 import type * as monaco from 'monaco-editor';
 
 import { createComponentLogger, logger } from '@/lib/observability/logger'
-import type {
-  CompletionItem,
-  CompletionList,
-  Diagnostic,
-  Hover,
-  Location,
-  LspResponse,
-  MonacoApi,
-  SignatureHelp,
-} from './monaco-lsp-http.converters';
+import {
+  detectMonacoLspTauriFarmAvailable,
+  tauriLspDefinition,
+  tauriLspHover,
+} from '@/lib/lsp/monaco-lsp-tauri-farm'
 import {
   getMarkerSeverity,
   hasStringValue,
@@ -25,6 +20,14 @@ import {
   toMonacoHover,
   toMonacoRange,
   toPosition,
+  type CompletionItem,
+  type CompletionList,
+  type Diagnostic,
+  type Hover,
+  type Location,
+  type LspResponse,
+  type MonacoApi,
+  type SignatureHelp,
 } from './monaco-lsp-http.converters';
 
 const log = createComponentLogger('monaco-lsp-http')
@@ -189,17 +192,36 @@ export function createLspCompletionProvider(
 }
 
 /**
- * Monaco Hover Provider using LSP HTTP
+ * Monaco Hover Provider — Tauri lsp_farm when desktop live, else HTTP relay.
+ * Never fabricates tooltips: null when farm/HTTP has no real result.
  */
 export function createLspHoverProvider(language: string): monaco.languages.HoverProvider {
   return {
     async provideHover(model, position): Promise<monaco.languages.Hover | null> {
       const uri = model.uri.toString();
+      const lspPosition = toPosition(position);
+
+      if (detectMonacoLspTauriFarmAvailable()) {
+        const farmHover = await tauriLspHover(
+          language,
+          uri,
+          model.getValue(),
+          model.getVersionId(),
+          lspPosition,
+        );
+        // Fail-closed empty when sidecar missing/dead — do not invent, do not HTTP-fallback
+        // fake content on desktop (HTTP may be a different process tree).
+        if (!farmHover) {
+          return null;
+        }
+        return toMonacoHover(farmHover);
+      }
+
       await ensureInitialized(language, uri);
 
       const result = await sendLspRequest<Hover>(language, 'textDocument/hover', {
         textDocument: { uri },
-        position: toPosition(position),
+        position: lspPosition,
       });
 
       if (!result) {
@@ -260,7 +282,7 @@ export function createLspSignatureHelpProvider(language: string): monaco.languag
 }
 
 /**
- * Monaco Definition Provider using LSP HTTP
+ * Monaco Definition Provider — Tauri lsp_farm when desktop live, else HTTP relay.
  */
 export function createLspDefinitionProvider(
   monacoApi: MonacoApi,
@@ -269,15 +291,30 @@ export function createLspDefinitionProvider(
   return {
     async provideDefinition(model, position): Promise<monaco.languages.Definition | null> {
       const uri = model.uri.toString();
-      await ensureInitialized(language, uri);
+      const lspPosition = toPosition(position);
 
-      const result = await sendLspRequest<Location | Location[]>(language, 'textDocument/definition', {
-        textDocument: { uri },
-        position: toPosition(position),
-      });
+      let result: Location | Location[] | null = null;
 
-      if (!result) {
-        return null;
+      if (detectMonacoLspTauriFarmAvailable()) {
+        result = await tauriLspDefinition(
+          language,
+          uri,
+          model.getValue(),
+          model.getVersionId(),
+          lspPosition,
+        );
+        if (!result) {
+          return null;
+        }
+      } else {
+        await ensureInitialized(language, uri);
+        result = await sendLspRequest<Location | Location[]>(language, 'textDocument/definition', {
+          textDocument: { uri },
+          position: lspPosition,
+        });
+        if (!result) {
+          return null;
+        }
       }
 
       const locations = Array.isArray(result) ? result : [result];

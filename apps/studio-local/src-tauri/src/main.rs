@@ -422,10 +422,13 @@ fn main() {
             motion_matching::motion_matching_status,
             entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
             entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
-            // L.13 UniversalLspFarm first-light (minimal; do not re-expand cut kernel wires)
+            // L.13 UniversalLspFarm — spawn/IPC + Monaco hover/definition wire
             lsp_farm::lsp_farm_honesty,
             lsp_farm::lsp_farm_probe,
             lsp_farm::lsp_farm_spawn,
+            lsp_farm::lsp_farm_ensure_session,
+            lsp_farm::lsp_farm_did_open,
+            lsp_farm::lsp_farm_request,
             lsp_farm::lsp_farm_list,
             lsp_farm::lsp_farm_stop,
             lsp_farm::lsp_farm_ipc_probe,

@@ -48,7 +48,8 @@ describe('L.13 UniversalLspFarm (cloud relay core)', () => {
     expect(honesty.cloudRelayCore).toBe(true)
     expect(honesty.tauriSidecarSpawn).toBe('partial')
     expect(honesty.marketingAllowed).toBe(false)
-    expect(honesty.monacoDesktopHoverDefinition).toBe('open')
+    expect(honesty.monacoDesktopHoverDefinition).toBe('partial')
+    expect(endpoint.monacoDesktopHoverDefinition).toBe('partial')
   })
 
   it('defaults WS placeholder without claiming farm live', () => {

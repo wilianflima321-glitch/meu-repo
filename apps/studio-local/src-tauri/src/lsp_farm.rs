@@ -1,4 +1,4 @@
-//! L.13 — UniversalLspFarm (Tauri sidecar first-light)
+//! L.13 — UniversalLspFarm (Tauri sidecar + Monaco hover/definition IPC)
 //!
 //! Real language-server process spawn/manage for Studio Local desktop.
 //! Binding: `AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md` L.13 + Progress ledger.
@@ -8,20 +8,24 @@
 //!   resolves on PATH / env override / local `node_modules/.bin`.
 //! - Fail-closed (`LSP_BINARY_HELD`) when the binary is missing — never fabricates
 //!   diagnostics, hover, or definition results.
-//! - IPC probe speaks stdio JSON-RPC `initialize` and reports only real responses.
-//! - Monaco desktop hover/definition acceptance remains **OPEN** (multi-week).
+//! - Monaco desktop path: hover + definition over stdio JSON-RPC with minimal
+//!   `textDocument/didOpen` (no full didChange sync / completion / diagnostics push).
+//! - Full L.C acceptance (multi-language soak incl. Python) remains OPEN.
+//! - Marketing blocked until acceptance soak.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::{mpsc, Mutex};
 use std::time::Duration;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use tauri::State;
 
-const IPC_PROBE_TIMEOUT: Duration = Duration::from_secs(8);
+const IPC_TIMEOUT: Duration = Duration::from_secs(8);
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(12);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum LspLanguage {
@@ -77,6 +81,9 @@ struct LspSession {
     child: Child,
     stdin: Option<ChildStdin>,
     stdout: Option<BufReader<ChildStdout>>,
+    initialized: bool,
+    next_request_id: u64,
+    open_uris: HashSet<String>,
 }
 
 impl Drop for LspSession {
@@ -89,6 +96,8 @@ impl Drop for LspSession {
 #[derive(Default)]
 pub struct LspFarmRegistry {
     next_id: u64,
+    /// language → session_id (one live session per language for Monaco path)
+    by_language: HashMap<&'static str, String>,
     sessions: HashMap<String, LspSession>,
 }
 
@@ -96,8 +105,9 @@ pub struct LspFarmRegistry {
 #[serde(rename_all = "camelCase")]
 pub struct LspFarmHonestyReport {
     pub cloud_relay_core: bool,
-    /// `partial` = first-light spawn + IPC probe shipped; never `live` until Monaco acceptance.
+    /// `partial` = spawn + IPC + Monaco hover/definition wire; never `live` until L.C soak.
     pub tauri_sidecar_spawn: &'static str,
+    /// `partial` = hover/definition IPC wired (fail-closed without binary); full L.C OPEN.
     pub monaco_desktop_hover_definition: &'static str,
     pub marketing_allowed: bool,
     pub message: String,
@@ -120,6 +130,7 @@ pub struct LspSessionInfo {
     pub language: String,
     pub binary_path: String,
     pub alive: bool,
+    pub initialized: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -140,6 +151,42 @@ pub struct LspIpcProbeResult {
     pub process_alive: bool,
     pub initialize_response: Option<String>,
     pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspRpcResult {
+    pub session_id: String,
+    pub ok: bool,
+    pub process_alive: bool,
+    pub result: Option<Value>,
+    pub error: Option<Value>,
+    pub message: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspEnsureArgs {
+    pub language: String,
+    pub root_uri: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspDidOpenArgs {
+    pub session_id: String,
+    pub uri: String,
+    pub language_id: String,
+    pub text: String,
+    pub version: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LspRequestArgs {
+    pub session_id: String,
+    pub method: String,
+    pub params: Value,
 }
 
 fn path_is_executable(path: &Path) -> bool {
@@ -298,6 +345,9 @@ fn spawn_language_server(language: LspLanguage, binary: &Path) -> Result<LspSess
         child,
         stdin: Some(stdin),
         stdout: Some(BufReader::new(stdout)),
+        initialized: false,
+        next_request_id: 1,
+        open_uris: HashSet::new(),
     })
 }
 
@@ -350,15 +400,197 @@ fn session_alive(session: &mut LspSession) -> bool {
     }
 }
 
-/// Honesty surface for desktop L.13 first-light (never claims Monaco acceptance).
+fn message_id_matches(body: &str, expected_id: u64) -> bool {
+    let Ok(value) = serde_json::from_str::<Value>(body) else {
+        return false;
+    };
+    match value.get("id") {
+        Some(Value::Number(n)) => n.as_u64() == Some(expected_id),
+        Some(Value::String(s)) => s.parse::<u64>().ok() == Some(expected_id),
+        _ => false,
+    }
+}
+
+fn is_response_message(body: &str) -> bool {
+    let Ok(value) = serde_json::from_str::<Value>(body) else {
+        return false;
+    };
+    value.get("id").is_some() && (value.get("result").is_some() || value.get("error").is_some())
+}
+
+/// Read stdout until a JSON-RPC response with `expected_id` arrives (skip notifications).
+fn read_response_for_id(
+    session: &mut LspSession,
+    expected_id: u64,
+    timeout: Duration,
+) -> Result<Value, String> {
+    let mut reader = session
+        .stdout
+        .take()
+        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdout missing".to_string())?;
+
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        loop {
+            match read_one_lsp_message(&mut reader) {
+                Ok(body) => {
+                    if message_id_matches(&body, expected_id) && is_response_message(&body) {
+                        match serde_json::from_str::<Value>(&body) {
+                            Ok(v) => {
+                                let _ = tx.send(Ok((v, reader)));
+                                return;
+                            }
+                            Err(e) => {
+                                let _ = tx.send(Err((
+                                    format!("LSP_IPC_PARSE_FAILED: {e}"),
+                                    reader,
+                                )));
+                                return;
+                            }
+                        }
+                    }
+                    // Skip server notifications / unrelated traffic.
+                }
+                Err(e) => {
+                    let _ = tx.send(Err((e, reader)));
+                    return;
+                }
+            }
+        }
+    });
+
+    match rx.recv_timeout(timeout) {
+        Ok(Ok((value, reader))) => {
+            session.stdout = Some(reader);
+            Ok(value)
+        }
+        Ok(Err((err, reader))) => {
+            session.stdout = Some(reader);
+            Err(err)
+        }
+        Err(_) => {
+            let _ = session.child.kill();
+            let _ = session.child.wait();
+            Err(
+                "LSP_IPC_TIMEOUT: no matching response within deadline — fail-closed (no mock hover)."
+                    .to_string(),
+            )
+        }
+    }
+}
+
+fn send_notification(session: &mut LspSession, method: &str, params: Value) -> Result<(), String> {
+    let stdin = session
+        .stdin
+        .as_mut()
+        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
+    let body = serde_json::json!({
+        "jsonrpc": "2.0",
+        "method": method,
+        "params": params,
+    });
+    write_lsp_message(stdin, &body.to_string())
+}
+
+fn send_request(
+    session: &mut LspSession,
+    method: &str,
+    params: Value,
+    timeout: Duration,
+) -> Result<Value, String> {
+    let id = session.next_request_id;
+    session.next_request_id = session.next_request_id.saturating_add(1);
+    let stdin = session
+        .stdin
+        .as_mut()
+        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
+    let body = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": id,
+        "method": method,
+        "params": params,
+    });
+    write_lsp_message(stdin, &body.to_string())?;
+    read_response_for_id(session, id, timeout)
+}
+
+fn ensure_initialized(session: &mut LspSession, root_uri: Option<&str>) -> Result<(), String> {
+    if session.initialized {
+        return Ok(());
+    }
+    if !session_alive(session) {
+        return Err("LSP_SESSION_DEAD: language server process is not alive".to_string());
+    }
+
+    let params = serde_json::json!({
+        "processId": null,
+        "clientInfo": { "name": "aethel-lsp-farm", "version": "0.2.0" },
+        "rootUri": root_uri,
+        "capabilities": {
+            "textDocument": {
+                "synchronization": { "didSave": true, "dynamicRegistration": false },
+                "hover": { "contentFormat": ["markdown", "plaintext"] },
+                "definition": { "linkSupport": false },
+            },
+            "workspace": { "workspaceFolders": false }
+        },
+        "trace": "off"
+    });
+
+    let response = send_request(session, "initialize", params, IPC_TIMEOUT)?;
+    if response.get("error").is_some() {
+        return Err(format!(
+            "LSP_INITIALIZE_FAILED: {}",
+            response
+                .get("error")
+                .map(|e| e.to_string())
+                .unwrap_or_else(|| "unknown".into())
+        ));
+    }
+
+    send_notification(session, "initialized", serde_json::json!({}))?;
+    session.initialized = true;
+    Ok(())
+}
+
+fn insert_session(registry: &mut LspFarmRegistry, mut session: LspSession) -> LspSpawnResult {
+    registry.next_id += 1;
+    let session_id = format!("lsp-{}-{}", session.language.as_str(), registry.next_id);
+    session.id = session_id.clone();
+    let lang_key = session.language.as_str();
+    let alive = session_alive(&mut session);
+    let binary_path = session.binary_path.display().to_string();
+    let language = session.language.as_str().to_string();
+
+    // Replace any prior session for this language.
+    if let Some(old_id) = registry.by_language.insert(lang_key, session_id.clone()) {
+        let _ = registry.sessions.remove(&old_id);
+    }
+    registry.sessions.insert(session_id.clone(), session);
+
+    LspSpawnResult {
+        session_id,
+        language,
+        binary_path,
+        alive,
+        message: if alive {
+            "Language server sidecar running (stdio). Call lsp_farm_ensure_session for initialize + Monaco hover/definition."
+                .to_string()
+        } else {
+            "Language server exited before registration — fail-closed.".to_string()
+        },
+    }
+}
+
+/// Honesty surface for desktop L.13 Monaco hover/definition wire.
 #[tauri::command]
 pub fn lsp_farm_honesty() -> LspFarmHonestyReport {
     LspFarmHonestyReport {
         cloud_relay_core: true,
         tauri_sidecar_spawn: "partial",
-        monaco_desktop_hover_definition: "open",
+        monaco_desktop_hover_definition: "partial",
         marketing_allowed: false,
-        message: "L.13 Tauri lsp_farm first-light: real binary discovery + sidecar spawn + stdio initialize IPC probe. Monaco desktop hover/definition acceptance still OPEN. Marketing blocked.".to_string(),
+        message: "L.13 Tauri lsp_farm: real binary discovery + sidecar spawn + initialize + minimal didOpen + hover/definition IPC. Full L.C multi-language soak (Python) still OPEN. Marketing blocked.".to_string(),
     }
 }
 
@@ -402,33 +634,211 @@ pub fn lsp_farm_spawn(
 ) -> Result<LspSpawnResult, String> {
     let lang = LspLanguage::parse(&language).ok_or_else(|| {
         format!(
-            "UNSUPPORTED_LANGUAGE: {language} (first-light supports typescript/javascript and rust)"
+            "UNSUPPORTED_LANGUAGE: {language} (desktop farm supports typescript/javascript and rust)"
         )
     })?;
     let binary = resolve_binary(lang)?;
-    let mut session = spawn_language_server(lang, &binary)?;
+    let session = spawn_language_server(lang, &binary)?;
 
     let mut guard = registry
         .lock()
         .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
-    guard.next_id += 1;
-    let session_id = format!("lsp-{}-{}", lang.as_str(), guard.next_id);
-    session.id = session_id.clone();
-    let alive = session_alive(&mut session);
-    let binary_path = session.binary_path.display().to_string();
-    guard.sessions.insert(session_id.clone(), session);
+    Ok(insert_session(&mut guard, session))
+}
 
-    Ok(LspSpawnResult {
-        session_id,
-        language: lang.as_str().to_string(),
-        binary_path,
-        alive,
-        message: if alive {
-            "Language server sidecar running (stdio). Use lsp_farm_ipc_probe for initialize handshake. Monaco hover acceptance still OPEN.".to_string()
-        } else {
-            "Language server exited before registration — fail-closed.".to_string()
-        },
+/// Ensure a live initialized session for `language` (spawn + initialize if needed).
+/// Fail-closed when binary missing — never fabricates hover/definition.
+#[tauri::command]
+pub fn lsp_farm_ensure_session(
+    args: LspEnsureArgs,
+    registry: State<'_, Mutex<LspFarmRegistry>>,
+) -> Result<LspSessionInfo, String> {
+    let lang = LspLanguage::parse(&args.language).ok_or_else(|| {
+        format!(
+            "UNSUPPORTED_LANGUAGE: {} (desktop farm supports typescript/javascript and rust)",
+            args.language
+        )
+    })?;
+
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+
+    let existing_id = guard.by_language.get(lang.as_str()).cloned();
+    if let Some(session_id) = existing_id {
+        if let Some(session) = guard.sessions.get_mut(&session_id) {
+            if session_alive(session) {
+                ensure_initialized(session, args.root_uri.as_deref())?;
+                return Ok(LspSessionInfo {
+                    session_id: session.id.clone(),
+                    language: session.language.as_str().to_string(),
+                    binary_path: session.binary_path.display().to_string(),
+                    alive: true,
+                    initialized: session.initialized,
+                });
+            }
+            // Dead session — drop and respawn.
+            let _ = guard.sessions.remove(&session_id);
+            guard.by_language.remove(lang.as_str());
+        }
+    }
+
+    // Drop lock briefly so spawn I/O does not hold the farm mutex.
+    drop(guard);
+    let binary = resolve_binary(lang)?;
+    let session = spawn_language_server(lang, &binary)?;
+
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    let spawn = insert_session(&mut guard, session);
+    let session = guard
+        .sessions
+        .get_mut(&spawn.session_id)
+        .ok_or_else(|| "LSP_SESSION_NOT_FOUND: just spawned".to_string())?;
+    ensure_initialized(session, args.root_uri.as_deref())?;
+
+    Ok(LspSessionInfo {
+        session_id: session.id.clone(),
+        language: session.language.as_str().to_string(),
+        binary_path: session.binary_path.display().to_string(),
+        alive: session_alive(session),
+        initialized: session.initialized,
     })
+}
+
+/// Minimal `textDocument/didOpen` (idempotent per URI). No full didChange sync.
+#[tauri::command]
+pub fn lsp_farm_did_open(
+    args: LspDidOpenArgs,
+    registry: State<'_, Mutex<LspFarmRegistry>>,
+) -> Result<LspRpcResult, String> {
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    let session = guard
+        .sessions
+        .get_mut(&args.session_id)
+        .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+
+    if !session_alive(session) {
+        return Ok(LspRpcResult {
+            session_id: args.session_id,
+            ok: false,
+            process_alive: false,
+            result: None,
+            error: None,
+            message: "Language server process is not alive — fail-closed (no mock hover)."
+                .to_string(),
+        });
+    }
+
+    ensure_initialized(session, None)?;
+
+    if session.open_uris.contains(&args.uri) {
+        // Limitation: no didChange — re-open with fresh text via didClose + didOpen.
+        send_notification(
+            session,
+            "textDocument/didClose",
+            serde_json::json!({ "textDocument": { "uri": args.uri } }),
+        )?;
+        session.open_uris.remove(&args.uri);
+    }
+
+    send_notification(
+        session,
+        "textDocument/didOpen",
+        serde_json::json!({
+            "textDocument": {
+                "uri": args.uri,
+                "languageId": args.language_id,
+                "version": args.version.unwrap_or(1),
+                "text": args.text,
+            }
+        }),
+    )?;
+    session.open_uris.insert(args.uri);
+
+    Ok(LspRpcResult {
+        session_id: session.id.clone(),
+        ok: true,
+        process_alive: true,
+        result: Some(Value::Null),
+        error: None,
+        message: "didOpen sent (minimal sync; no continuous didChange).".to_string(),
+    })
+}
+
+/// JSON-RPC request over an initialized farm session (hover / definition).
+/// Returns only real server payloads — never fabricates results.
+#[tauri::command]
+pub fn lsp_farm_request(
+    args: LspRequestArgs,
+    registry: State<'_, Mutex<LspFarmRegistry>>,
+) -> Result<LspRpcResult, String> {
+    let method = args.method.trim();
+    // Desktop wire is intentionally narrow: hover + definition (+ initialize via ensure).
+    const ALLOWED: &[&str] = &[
+        "textDocument/hover",
+        "textDocument/definition",
+        "textDocument/typeDefinition",
+        "shutdown",
+    ];
+    if !ALLOWED.contains(&method) {
+        return Err(format!(
+            "LSP_METHOD_HELD: {method} not on desktop wire (allowed: hover/definition)"
+        ));
+    }
+
+    let mut guard = registry
+        .lock()
+        .map_err(|_| "LSP_FARM_LOCK_POISONED".to_string())?;
+    let session = guard
+        .sessions
+        .get_mut(&args.session_id)
+        .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {}", args.session_id))?;
+
+    if !session_alive(session) {
+        return Ok(LspRpcResult {
+            session_id: args.session_id,
+            ok: false,
+            process_alive: false,
+            result: None,
+            error: None,
+            message: "Language server process is not alive — fail-closed (no mock hover)."
+                .to_string(),
+        });
+    }
+
+    ensure_initialized(session, None)?;
+
+    match send_request(session, method, args.params, REQUEST_TIMEOUT) {
+        Ok(response) => {
+            let error = response.get("error").cloned();
+            let result = response.get("result").cloned();
+            let ok = error.is_none();
+            Ok(LspRpcResult {
+                session_id: session.id.clone(),
+                ok,
+                process_alive: session_alive(session),
+                result,
+                error,
+                message: if ok {
+                    format!("{method} response from live language server")
+                } else {
+                    format!("{method} returned LSP error — fail-closed UI must not invent hover")
+                },
+            })
+        }
+        Err(message) => Ok(LspRpcResult {
+            session_id: args.session_id,
+            ok: false,
+            process_alive: session_alive(session),
+            result: None,
+            error: None,
+            message,
+        }),
+    }
 }
 
 /// List live farm sessions (alive flag from try_wait — no fabricated diagnostics).
@@ -444,6 +854,7 @@ pub fn lsp_farm_list(registry: State<'_, Mutex<LspFarmRegistry>>) -> Result<Vec<
             language: session.language.as_str().to_string(),
             binary_path: session.binary_path.display().to_string(),
             alive: session_alive(session),
+            initialized: session.initialized,
         });
     }
     Ok(out)
@@ -462,12 +873,18 @@ pub fn lsp_farm_stop(
         .sessions
         .remove(&session_id)
         .ok_or_else(|| format!("LSP_SESSION_NOT_FOUND: {session_id}"))?;
+    if let Some(mapped) = guard.by_language.get(session.language.as_str()).cloned() {
+        if mapped == session_id {
+            guard.by_language.remove(session.language.as_str());
+        }
+    }
     let alive_before = session_alive(&mut session);
     let info = LspSessionInfo {
         session_id: session.id.clone(),
         language: session.language.as_str().to_string(),
         binary_path: session.binary_path.display().to_string(),
         alive: alive_before,
+        initialized: session.initialized,
     };
     drop(session); // Drop kills the child
     Ok(info)
@@ -498,65 +915,31 @@ pub fn lsp_farm_ipc_probe(
         });
     }
 
-    let stdin = session
-        .stdin
-        .as_mut()
-        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdin missing".to_string())?;
-    let initialize_body = r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"processId":null,"clientInfo":{"name":"aethel-lsp-farm","version":"0.1.0"},"rootUri":null,"capabilities":{},"trace":"off"}}"#;
-    write_lsp_message(stdin, initialize_body)?;
+    if session.initialized {
+        return Ok(LspIpcProbeResult {
+            session_id,
+            ok: true,
+            process_alive: true,
+            initialize_response: Some(r#"{"jsonrpc":"2.0","id":0,"result":{"alreadyInitialized":true}}"#.to_string()),
+            message: "Session already initialized for Monaco hover/definition wire.".to_string(),
+        });
+    }
 
-    let mut reader = session
-        .stdout
-        .take()
-        .ok_or_else(|| "LSP_IPC_UNAVAILABLE: stdout missing".to_string())?;
-
-    let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        let result = read_one_lsp_message(&mut reader);
-        let _ = tx.send((result, reader));
-    });
-
-    match rx.recv_timeout(IPC_PROBE_TIMEOUT) {
-        Ok((Ok(body), reader)) => {
-            session.stdout = Some(reader);
-            let looks_like_response = body.contains("\"id\":1") || body.contains("\"result\"");
-            Ok(LspIpcProbeResult {
-                session_id,
-                ok: looks_like_response,
-                process_alive: session_alive(session),
-                initialize_response: Some(body),
-                message: if looks_like_response {
-                    "Stdio initialize handshake succeeded. Monaco desktop hover/definition still OPEN."
-                        .to_string()
-                } else {
-                    "Received stdout payload but it did not look like an initialize result — fail-closed."
-                        .to_string()
-                },
-            })
-        }
-        Ok((Err(err), reader)) => {
-            session.stdout = Some(reader);
-            Ok(LspIpcProbeResult {
-                session_id,
-                ok: false,
-                process_alive: session_alive(session),
-                initialize_response: None,
-                message: err,
-            })
-        }
-        Err(_) => {
-            // Timeout: kill the stuck session so the blocked reader thread can exit.
-            let _ = session.child.kill();
-            let _ = session.child.wait();
-            Ok(LspIpcProbeResult {
-                session_id,
-                ok: false,
-                process_alive: false,
-                initialize_response: None,
-                message: "LSP_IPC_TIMEOUT: no initialize response within deadline — fail-closed (no mock hover)."
-                    .to_string(),
-            })
-        }
+    match ensure_initialized(session, None) {
+        Ok(()) => Ok(LspIpcProbeResult {
+            session_id,
+            ok: true,
+            process_alive: session_alive(session),
+            initialize_response: Some(r#"{"jsonrpc":"2.0","result":{"initialized":true}}"#.to_string()),
+            message: "Stdio initialize handshake succeeded. Monaco hover/definition IPC ready when binary live.".to_string(),
+        }),
+        Err(message) => Ok(LspIpcProbeResult {
+            session_id,
+            ok: false,
+            process_alive: session_alive(session),
+            initialize_response: None,
+            message,
+        }),
     }
 }
 
@@ -584,10 +967,19 @@ mod tests {
     }
 
     #[test]
-    fn honesty_never_allows_marketing_or_claims_monaco() {
+    fn honesty_never_allows_marketing_or_claims_full_lc() {
         let report = lsp_farm_honesty();
         assert_eq!(report.tauri_sidecar_spawn, "partial");
-        assert_eq!(report.monaco_desktop_hover_definition, "open");
+        assert_eq!(report.monaco_desktop_hover_definition, "partial");
         assert!(!report.marketing_allowed);
+        assert!(report.message.contains("OPEN") || report.message.contains("blocked"));
+    }
+
+    #[test]
+    fn message_id_match_helpers() {
+        assert!(message_id_matches(r#"{"jsonrpc":"2.0","id":3,"result":null}"#, 3));
+        assert!(!message_id_matches(r#"{"jsonrpc":"2.0","id":2,"result":null}"#, 3));
+        assert!(is_response_message(r#"{"id":1,"result":{}}"#));
+        assert!(!is_response_message(r#"{"method":"window/logMessage","params":{}}"#));
     }
 }
