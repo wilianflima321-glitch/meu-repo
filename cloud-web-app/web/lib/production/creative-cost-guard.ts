@@ -10,10 +10,12 @@ import { randomUUID } from 'crypto'
 const log = createComponentLogger('creative-cost-guard')
 
 export type CostGuardBlockReason =
+  /** BYOK is technically required for the requested provider/domain on a paid plan but was not supplied. */
   | 'byok_missing'
   | 'credits_exhausted'
   | 'cost_guard_denied'
   | 'invalid_estimate'
+  /** Free tier with no BYOK — platform policy refuses to absorb provider cost (not a technical key gap). */
   | 'free_tier_platform_pay_forbidden'
 
 export interface CreativeCostGuardInput {
@@ -131,6 +133,7 @@ export async function reserveCreativeCost(
   const hasByok = await adapter.hasByok(input.userId, input.byokProfileId)
 
   if (isFree && !hasByok && input.allowPlatformPay !== true) {
+    // Policy denial, not a technical key gap: platform refuses to absorb cost on free tier.
     log.warn('free_tier_platform_pay_forbidden', { userId: input.userId, domain: input.domain })
     return {
       ok: false,
