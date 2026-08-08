@@ -58,8 +58,15 @@ describe('L.13 UniversalLspFarm (cloud relay core)', () => {
     expect(endpoint.wsFarmLive).toBe(false)
   })
 
-  it('lists TS + Python as acceptance-critical languages', () => {
-    expect(LSP_FARM_ACCEPTANCE_LANGUAGES).toEqual(['typescript', 'python'])
+  it('lists TS + Rust + Python as acceptance-critical languages', () => {
+    expect(LSP_FARM_ACCEPTANCE_LANGUAGES).toEqual(['typescript', 'rust', 'python'])
+  })
+
+  it('honesty mentions python matrix and never allows marketing', () => {
+    const honesty = describeUniversalLspFarmHonesty()
+    expect(honesty.marketingAllowed).toBe(false)
+    expect(honesty.message.toLowerCase()).toContain('python')
+    expect(honesty.message).toContain('AETHEL_LSP_PYTHON')
   })
 
   it('acquires farm sessions fail-closed on unsupported language', async () => {

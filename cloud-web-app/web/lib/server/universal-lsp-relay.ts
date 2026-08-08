@@ -12,7 +12,8 @@
  * - Tauri desktop sidecar (`apps/studio-local/src-tauri/src/lsp_farm.rs`) is **PARTIAL** —
  *   real binary discovery + spawn + initialize + continuous didChange + publishDiagnostics
  *   + hover/definition/completion IPC; fail-closed when binary missing (never fake LSP).
- * - Monaco desktop wire is **PARTIAL**; full L.C soak (Python) still OPEN.
+ * - Monaco desktop wire is **PARTIAL**; L.C multi-lang matrix (TS/Rust/Python) shipped;
+ *   live soak HELD per language when binary missing (`AETHEL_LSP_PYTHON` on Windows).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -27,8 +28,8 @@ const log = createComponentLogger('universal-lsp-relay')
 export type { UniversalLspEndpoint }
 export { resolveUniversalLspEndpoint }
 
-/** Languages required by Forge L.C acceptance (TS + Python hover/definition). */
-export const LSP_FARM_ACCEPTANCE_LANGUAGES = ['typescript', 'python'] as const
+/** Languages required by Forge L.C acceptance (TS + Rust + Python hover/definition). */
+export const LSP_FARM_ACCEPTANCE_LANGUAGES = ['typescript', 'rust', 'python'] as const
 
 export type LspFarmLanguage =
   | 'typescript'
@@ -54,7 +55,7 @@ export type UniversalLspFarmHonesty = {
   cloudRelayCore: true
   /** `partial` = Tauri lsp_farm spawn+IPC shipped; never `live` until L.C soak. */
   tauriSidecarSpawn: 'partial'
-  /** `partial` = Monaco hover/definition/didChange/diagnostics wired; full L.C (Python) still OPEN. */
+  /** `partial` = Monaco hover/definition/didChange/diagnostics wired; L.C matrix shipped. */
   monacoDesktopHoverDefinition: 'partial'
   marketingAllowed: false
   message: string
@@ -63,12 +64,30 @@ export type UniversalLspFarmHonesty = {
 const LANGUAGE_COMMAND_HINTS: Record<LspFarmLanguage, string> = {
   typescript: 'typescript-language-server --stdio',
   javascript: 'typescript-language-server --stdio',
-  python: 'pyright-langserver --stdio',
+  python: 'pyright-langserver --stdio (or pylsp / AETHEL_LSP_PYTHON)',
   rust: 'rust-analyzer',
   go: 'gopls serve',
   cpp: 'clangd --background-index',
   java: 'jdtls',
   csharp: 'OmniSharp -lsp',
+}
+
+/** PATH / env candidates probed for binaryResolvable (first hit wins). */
+const LANGUAGE_PROBE_COMMANDS: Record<LspFarmLanguage, string[]> = {
+  typescript: ['typescript-language-server'],
+  javascript: ['typescript-language-server'],
+  python: ['pyright-langserver', 'basedpyright-langserver', 'pylsp'],
+  rust: ['rust-analyzer'],
+  go: ['gopls'],
+  cpp: ['clangd'],
+  java: ['jdtls'],
+  csharp: ['OmniSharp'],
+}
+
+const LANGUAGE_ENV_KEYS: Partial<Record<LspFarmLanguage, string[]>> = {
+  typescript: ['AETHEL_LSP_TYPESCRIPT', 'AETHEL_LSP_TSSERVER'],
+  python: ['AETHEL_LSP_PYTHON', 'AETHEL_LSP_PYRIGHT'],
+  rust: ['AETHEL_LSP_RUST_ANALYZER', 'AETHEL_LSP_RUST'],
 }
 
 function normalizeFarmLanguage(language: string): LspFarmLanguage | null {
@@ -98,6 +117,22 @@ async function probeCommandOnPath(command: string): Promise<boolean> {
   }
 }
 
+async function probeEnvOverride(keys: string[] | undefined): Promise<'hit' | 'held' | null> {
+  if (!keys?.length) return null
+  const fs = await import('node:fs/promises')
+  for (const key of keys) {
+    const value = process.env[key]?.trim()
+    if (!value) continue
+    try {
+      const st = await fs.stat(value)
+      if (st.isFile()) return 'hit'
+    } catch {
+      return 'held'
+    }
+  }
+  return null
+}
+
 export function describeUniversalLspFarmHonesty(): UniversalLspFarmHonesty {
   return {
     cloudRelayCore: true,
@@ -105,7 +140,7 @@ export function describeUniversalLspFarmHonesty(): UniversalLspFarmHonesty {
     monacoDesktopHoverDefinition: 'partial',
     marketingAllowed: false,
     message:
-      'L.13 cloud relay + Tauri lsp_farm Monaco wire are real (continuous didChange + publishDiagnostics markers + hover/definition/completion; fail-closed without binary); full L.C multi-language soak (Python) remains OPEN; marketing blocked.',
+      'L.13 cloud relay + Tauri lsp_farm Monaco wire are real (continuous didChange + publishDiagnostics markers + hover/definition/completion for typescript/javascript, rust, python; fail-closed without binary). L.C multi-lang matrix shipped; live soak HELD per missing binary (AETHEL_LSP_PYTHON on Windows). Marketing blocked.',
   }
 }
 
@@ -116,16 +151,32 @@ export async function listLspFarmLanguageStatus(): Promise<LspFarmLanguageStatus
 
   for (const language of languages) {
     const hint = LANGUAGE_COMMAND_HINTS[language]
-    const command = hint.split(/\s+/)[0] || hint
-    const binaryResolvable = await probeCommandOnPath(command)
+    const commands = LANGUAGE_PROBE_COMMANDS[language] ?? [hint.split(/\s+/)[0] || hint]
+    const envKeys = LANGUAGE_ENV_KEYS[language]
+    const envProbe = await probeEnvOverride(envKeys)
+    let binaryResolvable = envProbe === 'hit'
+    if (!binaryResolvable && envProbe !== 'held') {
+      for (const command of commands) {
+        if (await probeCommandOnPath(command)) {
+          binaryResolvable = true
+          break
+        }
+      }
+    }
+    const primary = commands[0] || hint
     out.push({
       language,
-      acceptanceCritical: language === 'typescript' || language === 'python',
+      acceptanceCritical:
+        language === 'typescript' || language === 'python' || language === 'rust',
       commandHint: hint,
       binaryResolvable,
       message: binaryResolvable
-        ? `${command} resolvable on PATH`
-        : `${command} not installed — farm will fail-closed on acquire`,
+        ? `${primary} resolvable (PATH or env override)`
+        : envProbe === 'held'
+          ? `LSP_BINARY_HELD: env override set but not an executable — fail-closed`
+          : `${primary} not installed — farm will fail-closed on acquire${
+              language === 'python' ? ' (set AETHEL_LSP_PYTHON)' : ''
+            }`,
     })
   }
 

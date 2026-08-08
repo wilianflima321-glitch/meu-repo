@@ -4,15 +4,17 @@
 //! Binding: `AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md` L.13 + Progress ledger.
 //!
 //! Honesty (Zero-MVP):
-//! - Spawns a real sidecar when `typescript-language-server` or `rust-analyzer`
-//!   resolves on PATH / env override / local `node_modules/.bin`.
+//! - Spawns a real sidecar when `typescript-language-server`, `rust-analyzer`, or
+//!   a Python LS (`pyright-langserver` / `pylsp` / `AETHEL_LSP_PYTHON`) resolves
+//!   on PATH / env override / local `node_modules`.
 //! - Fail-closed (`LSP_BINARY_HELD`) when the binary is missing — never fabricates
 //!   diagnostics, hover, definition, or completion results.
 //! - Continuous `textDocument/didChange` (full-text sync) + `publishDiagnostics`
 //!   buffer/emit → Monaco markers (clear on session death).
 //! - Hover / definition / completion over stdio JSON-RPC.
-//! - Full L.C acceptance (multi-language soak incl. Python) remains OPEN.
-//! - Marketing blocked until acceptance soak.
+//! - L.C multi-language matrix (TS/Rust/Python) shipped; live Python soak is HELD
+//!   until a resolvable binary is present (never fake).
+//! - Marketing blocked until full L.C acceptance soak.
 
 use std::collections::{HashMap, HashSet};
 use std::io::{BufRead, BufReader, Read, Write};
@@ -36,6 +38,7 @@ const SESSION_DEAD_EVENT: &str = "lsp-farm-session-dead";
 enum LspLanguage {
     TypeScript,
     Rust,
+    Python,
 }
 
 impl LspLanguage {
@@ -44,6 +47,7 @@ impl LspLanguage {
             "typescript" | "typescriptreact" | "javascript" | "javascriptreact" | "ts" | "tsx"
             | "js" | "jsx" => Some(Self::TypeScript),
             "rust" | "rs" => Some(Self::Rust),
+            "python" | "py" => Some(Self::Python),
             _ => None,
         }
     }
@@ -52,6 +56,7 @@ impl LspLanguage {
         match self {
             Self::TypeScript => "typescript",
             Self::Rust => "rust",
+            Self::Python => "python",
         }
     }
 
@@ -59,6 +64,8 @@ impl LspLanguage {
         match self {
             Self::TypeScript => &["typescript-language-server"],
             Self::Rust => &["rust-analyzer"],
+            // Prefer pyright-langserver (cloud parity); pylsp / basedpyright as fallbacks.
+            Self::Python => &["pyright-langserver", "basedpyright-langserver", "pylsp"],
         }
     }
 
@@ -66,6 +73,8 @@ impl LspLanguage {
         match self {
             Self::TypeScript => &["AETHEL_LSP_TYPESCRIPT", "AETHEL_LSP_TSSERVER"],
             Self::Rust => &["AETHEL_LSP_RUST_ANALYZER", "AETHEL_LSP_RUST"],
+            // Documented Windows override when PATH discovery fails.
+            Self::Python => &["AETHEL_LSP_PYTHON", "AETHEL_LSP_PYRIGHT"],
         }
     }
 
@@ -73,6 +82,8 @@ impl LspLanguage {
         match self {
             Self::TypeScript => &["--stdio"],
             Self::Rust => &[],
+            // Default for pyright-langserver; pylsp override handled in spawn_language_server.
+            Self::Python => &["--stdio"],
         }
     }
 }
@@ -285,10 +296,22 @@ fn which_on_path(command: &str) -> Option<PathBuf> {
     None
 }
 
-fn discover_typescript_node_modules() -> Option<PathBuf> {
+fn walk_ancestors_for<F>(mut finder: F) -> Option<PathBuf>
+where
+    F: FnMut(&Path) -> Option<PathBuf>,
+{
     let cwd = std::env::current_dir().ok()?;
     let mut dir = cwd.as_path();
     loop {
+        if let Some(found) = finder(dir) {
+            return Some(found);
+        }
+        dir = dir.parent()?;
+    }
+}
+
+fn discover_typescript_node_modules() -> Option<PathBuf> {
+    walk_ancestors_for(|dir| {
         let cli = dir
             .join("node_modules")
             .join("typescript-language-server")
@@ -308,8 +331,39 @@ fn discover_typescript_node_modules() -> Option<PathBuf> {
         if path_is_executable(&bin) {
             return Some(bin);
         }
-        dir = dir.parent()?;
-    }
+        None
+    })
+}
+
+fn discover_python_node_modules() -> Option<PathBuf> {
+    walk_ancestors_for(|dir| {
+        // pyright npm package ships a Node langserver entry.
+        let pyright_js = dir
+            .join("node_modules")
+            .join("pyright")
+            .join("langserver.index.js");
+        if pyright_js.is_file() {
+            return Some(pyright_js);
+        }
+        let based_js = dir
+            .join("node_modules")
+            .join("basedpyright")
+            .join("langserver.index.js");
+        if based_js.is_file() {
+            return Some(based_js);
+        }
+        for name in ["pyright-langserver", "basedpyright-langserver"] {
+            let bin = dir.join("node_modules").join(".bin").join(if cfg!(windows) {
+                format!("{name}.cmd")
+            } else {
+                name.to_string()
+            });
+            if path_is_executable(&bin) {
+                return Some(bin);
+            }
+        }
+        None
+    })
 }
 
 fn resolve_binary(language: LspLanguage) -> Result<PathBuf, String> {
@@ -339,6 +393,11 @@ fn resolve_binary(language: LspLanguage) -> Result<PathBuf, String> {
             return Ok(path);
         }
     }
+    if language == LspLanguage::Python {
+        if let Some(path) = discover_python_node_modules() {
+            return Ok(path);
+        }
+    }
 
     Err(format!(
         "LSP_BINARY_HELD: {} not found on PATH (install the language server or set {:?})",
@@ -349,6 +408,20 @@ fn resolve_binary(language: LspLanguage) -> Result<PathBuf, String> {
             .unwrap_or("language-server"),
         language.env_override_keys()
     ))
+}
+
+fn python_spawn_args(binary: &Path) -> &'static [&'static str] {
+    let stem = binary
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    // pylsp defaults to stdio; --stdio is not a valid flag.
+    if stem == "pylsp" || stem.starts_with("pylsp.") {
+        &[]
+    } else {
+        &["--stdio"]
+    }
 }
 
 fn write_lsp_message(stdin: &mut ChildStdin, body: &str) -> Result<(), String> {
@@ -541,7 +614,12 @@ fn spawn_language_server(language: LspLanguage, binary: &Path) -> Result<LspSess
         Command::new(binary)
     };
 
-    for arg in language.spawn_args() {
+    let args = if language == LspLanguage::Python {
+        python_spawn_args(binary)
+    } else {
+        language.spawn_args()
+    };
+    for arg in args {
         cmd.arg(arg);
     }
 
@@ -782,14 +860,14 @@ pub fn lsp_farm_honesty() -> LspFarmHonestyReport {
         tauri_sidecar_spawn: "partial",
         monaco_desktop_hover_definition: "partial",
         marketing_allowed: false,
-        message: "L.13 Tauri lsp_farm: real binary discovery + sidecar spawn + initialize + continuous didChange (full text) + publishDiagnostics→Monaco markers + hover/definition/completion IPC. Full L.C multi-language soak (Python) still OPEN. Marketing blocked.".to_string(),
+        message: "L.13 Tauri lsp_farm: real binary discovery + sidecar spawn + initialize + continuous didChange (full text) + publishDiagnostics→Monaco markers + hover/definition/completion IPC for typescript/javascript, rust, and python. L.C multi-lang matrix shipped; live soak per language is HELD when binary missing (set AETHEL_LSP_PYTHON on Windows if PATH empty). Marketing blocked.".to_string(),
     }
 }
 
 /// Probe PATH/env for supported language servers without spawning.
 #[tauri::command]
 pub fn lsp_farm_probe() -> Vec<LspBinaryProbe> {
-    [LspLanguage::TypeScript, LspLanguage::Rust]
+    [LspLanguage::TypeScript, LspLanguage::Rust, LspLanguage::Python]
         .into_iter()
         .map(|language| {
             let command = language
@@ -827,7 +905,7 @@ pub fn lsp_farm_spawn(
 ) -> Result<LspSpawnResult, String> {
     let lang = LspLanguage::parse(&language).ok_or_else(|| {
         format!(
-            "UNSUPPORTED_LANGUAGE: {language} (desktop farm supports typescript/javascript and rust)"
+            "UNSUPPORTED_LANGUAGE: {language} (desktop farm supports typescript/javascript, rust, python)"
         )
     })?;
     let binary = resolve_binary(lang)?;
@@ -849,7 +927,7 @@ pub fn lsp_farm_ensure_session(
 ) -> Result<LspSessionInfo, String> {
     let lang = LspLanguage::parse(&args.language).ok_or_else(|| {
         format!(
-            "UNSUPPORTED_LANGUAGE: {} (desktop farm supports typescript/javascript and rust)",
+            "UNSUPPORTED_LANGUAGE: {} (desktop farm supports typescript/javascript, rust, python)",
             args.language
         )
     })?;
@@ -1323,6 +1401,8 @@ mod tests {
             Some(LspLanguage::TypeScript)
         );
         assert_eq!(LspLanguage::parse("rs"), Some(LspLanguage::Rust));
+        assert_eq!(LspLanguage::parse("python"), Some(LspLanguage::Python));
+        assert_eq!(LspLanguage::parse("py"), Some(LspLanguage::Python));
         assert_eq!(LspLanguage::parse("cobol"), None);
     }
 
@@ -1338,13 +1418,61 @@ mod tests {
     }
 
     #[test]
+    fn python_missing_env_override_is_held_not_fabricated() {
+        std::env::set_var(
+            "AETHEL_LSP_PYTHON",
+            "E:\\definitely-missing-pyright-langserver.exe",
+        );
+        let err = resolve_binary(LspLanguage::Python).expect_err("must fail-closed");
+        assert!(err.contains("LSP_BINARY_HELD"), "{err}");
+        assert!(
+            err.contains("AETHEL_LSP_PYTHON") || err.contains("not an executable"),
+            "{err}"
+        );
+        std::env::remove_var("AETHEL_LSP_PYTHON");
+    }
+
+    #[test]
+    fn python_spawn_args_omit_stdio_for_pylsp() {
+        assert!(python_spawn_args(Path::new("C:\\Tools\\pylsp.exe")).is_empty());
+        assert_eq!(
+            python_spawn_args(Path::new("C:\\Tools\\pyright-langserver.cmd")),
+            &["--stdio"]
+        );
+    }
+
+    #[test]
     fn honesty_never_allows_marketing_or_claims_full_lc() {
         let report = lsp_farm_honesty();
         assert_eq!(report.tauri_sidecar_spawn, "partial");
         assert_eq!(report.monaco_desktop_hover_definition, "partial");
         assert!(!report.marketing_allowed);
-        assert!(report.message.contains("OPEN") || report.message.contains("blocked"));
+        assert!(report.message.contains("python") || report.message.contains("Python"));
+        assert!(report.message.contains("AETHEL_LSP_PYTHON") || report.message.contains("blocked"));
         assert!(report.message.contains("didChange") || report.message.contains("diagnostics"));
+    }
+
+    #[test]
+    fn multi_lang_probe_matrix_includes_python_held_or_live() {
+        let probes = lsp_farm_probe();
+        let langs: Vec<&str> = probes.iter().map(|p| p.language.as_str()).collect();
+        assert!(langs.contains(&"typescript"));
+        assert!(langs.contains(&"rust"));
+        assert!(langs.contains(&"python"));
+        for probe in &probes {
+            if !probe.available {
+                assert!(
+                    probe.message.contains("LSP_BINARY_HELD")
+                        || probe.message.contains("not found")
+                        || probe.message.contains("not an executable"),
+                    "unavailable probe must be honest HELD: {}",
+                    probe.message
+                );
+                assert!(probe.resolved_path.is_none());
+            } else {
+                assert!(probe.resolved_path.is_some());
+            }
+        }
     }
 
     #[test]

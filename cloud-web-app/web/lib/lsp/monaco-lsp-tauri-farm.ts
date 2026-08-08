@@ -10,7 +10,8 @@
  * (never fabricate tooltips, completions, or diagnostics).
  *
  * Browser path must continue using HTTP `/api/lsp/request` (see monaco-lsp-http).
- * Desktop languages: typescript/javascript + rust (Python L.C soak still OPEN).
+ * Desktop languages: typescript/javascript + rust + python
+ * (live Python soak HELD without `pyright-langserver`/`pylsp`/`AETHEL_LSP_PYTHON`).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -131,6 +132,7 @@ function normalizeFarmLanguage(language: string): string | null {
     return 'typescript'
   }
   if (l === 'rust' || l === 'rs') return 'rust'
+  if (l === 'python' || l === 'py') return 'python'
   return null
 }
 
@@ -140,6 +142,7 @@ function toLanguageId(language: string): string {
   if (l === 'javascriptreact' || l === 'jsx') return 'javascriptreact'
   if (l === 'javascript' || l === 'js') return 'javascript'
   if (l === 'rust' || l === 'rs') return 'rust'
+  if (l === 'python' || l === 'py') return 'python'
   return 'typescript'
 }
 

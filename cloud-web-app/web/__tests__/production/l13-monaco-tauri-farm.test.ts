@@ -338,9 +338,74 @@ describe('L.13 Monaco ↔ Tauri lsp_farm client', () => {
     })
   })
 
-  it('unsupported language (python) fail-closes on desktop farm', async () => {
-    const invoke = vi.fn()
+  it('python is on desktop farm matrix; binary-held ensure fail-closes (no fake session)', async () => {
+    const invoke = vi.fn(async () => {
+      throw new Error(
+        'LSP_BINARY_HELD: pyright-langserver not found on PATH (set AETHEL_LSP_PYTHON)',
+      )
+    })
     const session = await ensureTauriLspFarmSession('python', {
+      invoke,
+      forceInvoke: true,
+    })
+    expect(session).toBeNull()
+    expect(invoke).toHaveBeenCalledWith('lsp_farm_ensure_session', {
+      args: { language: 'python', rootUri: null },
+    })
+  })
+
+  it('python hover uses farm request when session live (never invents tooltip)', async () => {
+    const invoke = vi.fn(async (cmd: string) => {
+      if (cmd === 'lsp_farm_ensure_session') {
+        return {
+          sessionId: 'lsp-python-1',
+          language: 'python',
+          binaryPath: 'C:\\Tools\\pyright-langserver.cmd',
+          alive: true,
+          initialized: true,
+        }
+      }
+      if (cmd === 'lsp_farm_did_open') {
+        return {
+          sessionId: 'lsp-python-1',
+          ok: true,
+          processAlive: true,
+          message: 'didOpen',
+        }
+      }
+      if (cmd === 'lsp_farm_request') {
+        return {
+          sessionId: 'lsp-python-1',
+          ok: true,
+          processAlive: true,
+          result: { contents: { kind: 'markdown', value: '```python\ndef foo() -> int\n```' } },
+          message: 'hover',
+        }
+      }
+      throw new Error(cmd)
+    })
+    const hover = await tauriLspHover(
+      'python',
+      'file:///workspace/a.py',
+      'def foo():\n    return 1\n',
+      1,
+      { line: 0, character: 4 },
+      { invoke, forceInvoke: true },
+    )
+    expect(hover).toEqual({
+      contents: { kind: 'markdown', value: '```python\ndef foo() -> int\n```' },
+    })
+    expect(invoke).toHaveBeenCalledWith(
+      'lsp_farm_did_open',
+      expect.objectContaining({
+        args: expect.objectContaining({ languageId: 'python' }),
+      }),
+    )
+  })
+
+  it('unsupported language (cobol) fail-closes without invoke', async () => {
+    const invoke = vi.fn()
+    const session = await ensureTauriLspFarmSession('cobol', {
       invoke,
       forceInvoke: true,
     })

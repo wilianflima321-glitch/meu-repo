@@ -185,6 +185,17 @@ const LSP_CONFIGS: Record<string, LspServerConfig> = {
   python: {
     command: 'pyright-langserver',
     args: ['--stdio'],
+    localPath: async (workspaceRoot) => {
+      const candidates = [
+        path.join(workspaceRoot, 'node_modules', 'pyright', 'langserver.index.js'),
+        path.join(workspaceRoot, 'node_modules', 'basedpyright', 'langserver.index.js'),
+      ];
+      for (const candidate of candidates) {
+        const hit = await fs.stat(candidate).then(() => candidate).catch(() => null);
+        if (hit) return hit;
+      }
+      return null;
+    },
   },
   go: {
     command: 'gopls',
@@ -252,8 +263,34 @@ export async function getOrCreateLspSession(opts: {
   let execPath: string | null = null;
   let execArgs: string[] = config.args;
 
+  // Env override (Windows: AETHEL_LSP_PYTHON when PATH discovery fails).
+  const envKeys =
+    language === 'python'
+      ? ['AETHEL_LSP_PYTHON', 'AETHEL_LSP_PYRIGHT']
+      : language === 'typescript'
+        ? ['AETHEL_LSP_TYPESCRIPT', 'AETHEL_LSP_TSSERVER']
+        : language === 'rust'
+          ? ['AETHEL_LSP_RUST_ANALYZER', 'AETHEL_LSP_RUST']
+          : [];
+  for (const key of envKeys) {
+    const override = process.env[key]?.trim();
+    if (!override) continue;
+    const hit = await fs.stat(override).then(() => override).catch(() => null);
+    if (hit) {
+      execPath = hit;
+      if (language === 'python' && /pylsp/i.test(path.basename(hit))) {
+        execArgs = [];
+      }
+      break;
+    }
+    throw Object.assign(
+      new Error(`LSP_BINARY_HELD: env ${key}=${override} is set but not an executable file`),
+      { code: `${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED` }
+    );
+  }
+
   // Try local installation first (for Node-based LSPs)
-  if (config.localPath) {
+  if (!execPath && config.localPath) {
     const localEntry = await config.localPath(workspaceRootAbs);
     if (localEntry) {
       execPath = process.execPath; // node
@@ -261,17 +298,31 @@ export async function getOrCreateLspSession(opts: {
     }
   }
 
-  // Fall back to global installation
+  // Fall back to global installation (+ python secondary binaries).
   if (!execPath) {
-    const globalPath = await findExecutable(config.command);
-    if (globalPath) {
-      execPath = globalPath;
+    const candidates =
+      language === 'python'
+        ? [config.command, 'basedpyright-langserver', 'pylsp']
+        : [config.command];
+    for (const command of candidates) {
+      const globalPath = await findExecutable(command);
+      if (globalPath) {
+        execPath = globalPath;
+        if (language === 'python' && /pylsp/i.test(command)) {
+          execArgs = [];
+        }
+        break;
+      }
     }
   }
 
   if (!execPath) {
+    const hint =
+      language === 'python'
+        ? `${config.command} (or pylsp); on Windows set AETHEL_LSP_PYTHON`
+        : config.command;
     throw Object.assign(
-      new Error(`${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED: Install ${config.command}`),
+      new Error(`${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED: Install ${hint}`),
       { code: `${language.toUpperCase()}_LANGUAGE_SERVER_NOT_INSTALLED` }
     );
   }
