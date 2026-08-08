@@ -293,9 +293,10 @@ export type AdvancedChatStreamMeta = {
   estimatedTokens?: number
   spendLane?: string
   noticeCode?: string
-  /** `token` = single-agent chatStream; `apex_coordinator` = status+final MoA */
-  streamMode?: 'token' | 'apex_coordinator'
+  /** `token` = single-agent chatStream; `apex_coordinator` = status+final MoA; `agent_executor` = agentId ReAct */
+  streamMode?: 'token' | 'apex_coordinator' | 'agent_executor'
   notice?: string
+  agentId?: string
 }
 
 export type AdvancedChatStreamStatusEvent = {
@@ -321,10 +322,11 @@ export type AdvancedChatStreamResult = {
   meta?: AdvancedChatStreamMeta
   /** True when the client aborted mid-stream (partial content may be present). */
   aborted: boolean
-  streamMode?: 'token' | 'apex_coordinator'
+  streamMode?: 'token' | 'apex_coordinator' | 'agent_executor'
   apexMission?: Record<string, unknown>
   nexusMission?: NexusMissionUiPayload | null
   blocked?: boolean
+  agentExecution?: { steps?: number; artifacts?: number }
 }
 
 function parseSseDataBlocks(buffer: string): { events: string[]; rest: string } {
@@ -436,10 +438,10 @@ export function foldCoordinatorStreamIntoNexus(
 }
 
 /**
- * Token / coordinator streaming for AIChatPanelPro / advanced chat.
+ * Token / coordinator / agent-executor streaming for AIChatPanelPro / advanced chat.
  * - Single-agent: real `aiService.chatStream` SSE deltas.
  * - Multi-agent / Apex MoA: `apex_coordinator` SSE (status + cell + final_complete).
- * - `agentId` AgentExecutor path remains JSON (client must not call this with agentId).
+ * - `agentId` AgentExecutor: status + real ANSWER: chatStream deltas (`agent_executor`).
  * Do not fake a typewriter over a completed JSON fetch.
  */
 export async function streamAdvancedChat(options: {
@@ -447,6 +449,8 @@ export async function streamAdvancedChat(options: {
   model: string
   messages: ChatAdvancedMessage[]
   projectId?: string
+  /** Specialized AgentExecutor id — streams via agent_executor SSE when set. */
+  agentId?: string
   headers?: Record<string, string>
   signal?: AbortSignal
   profileOverride?: AdvancedProfile
@@ -461,6 +465,8 @@ export async function streamAdvancedChat(options: {
 }): Promise<AdvancedChatStreamResult> {
   const profile = options.profileOverride ?? inferAdvancedProfile(options.message)
   const byokHeaders = getByokHeaders()
+  // Specialized agent path is single-executor (not multi-agent MoA fan-out).
+  const agentCount = options.agentId ? 1 : profile.agentCount
   const response = await fetch('/api/ai/chat-advanced', {
     method: 'POST',
     headers: {
@@ -473,12 +479,14 @@ export async function streamAdvancedChat(options: {
       model: options.model,
       messages: options.messages,
       projectId: options.projectId,
+      agentId: options.agentId,
       qualityMode: profile.qualityMode,
-      agentCount: profile.agentCount,
-      enableWebResearch: profile.enableWebResearch,
+      agentCount,
+      enableWebResearch: options.agentId ? false : profile.enableWebResearch,
       includeTrace: true,
       stream: true,
-      enableApexMoA: options.enableApexMoA === true || profile.agentCount >= 2,
+      enableApexMoA:
+        !options.agentId && (options.enableApexMoA === true || profile.agentCount >= 2),
       apexTargetFilePath: options.apexTargetFilePath,
     }),
     signal: options.signal,
@@ -507,10 +515,11 @@ export async function streamAdvancedChat(options: {
   let traceId: string | undefined
   let meta: AdvancedChatStreamMeta | undefined
   let aborted = false
-  let streamMode: 'token' | 'apex_coordinator' | undefined
+  let streamMode: 'token' | 'apex_coordinator' | 'agent_executor' | undefined
   let apexMission: Record<string, unknown> | undefined
   let nexusMission: NexusMissionUiPayload | null = null
   let blocked = false
+  let agentExecution: { steps?: number; artifacts?: number } | undefined
 
   try {
     while (true) {
@@ -530,7 +539,11 @@ export async function streamAdvancedChat(options: {
         const type = typeof event.type === 'string' ? event.type : ''
         if (type === 'meta') {
           const mode =
-            event.streamMode === 'apex_coordinator' ? 'apex_coordinator' : ('token' as const)
+            event.streamMode === 'apex_coordinator'
+              ? 'apex_coordinator'
+              : event.streamMode === 'agent_executor'
+                ? 'agent_executor'
+                : ('token' as const)
           streamMode = mode
           meta = {
             traceId: typeof event.traceId === 'string' ? event.traceId : undefined,
@@ -541,6 +554,7 @@ export async function streamAdvancedChat(options: {
             noticeCode: typeof event.noticeCode === 'string' ? event.noticeCode : undefined,
             streamMode: mode,
             notice: typeof event.notice === 'string' ? event.notice : undefined,
+            agentId: typeof event.agentId === 'string' ? event.agentId : undefined,
           }
           if (meta.traceId) traceId = meta.traceId
           options.onMeta?.(meta)
@@ -597,7 +611,16 @@ export async function streamAdvancedChat(options: {
           if (typeof event.tokensUsed === 'number') tokensUsed = event.tokensUsed
           if (typeof event.traceId === 'string') traceId = event.traceId
           if (event.streamMode === 'apex_coordinator') streamMode = 'apex_coordinator'
+          if (event.streamMode === 'agent_executor') streamMode = 'agent_executor'
+          if (event.aborted === true) aborted = true
           if (event.blocked === true) blocked = true
+          if (event.agentExecution && typeof event.agentExecution === 'object') {
+            const ae = event.agentExecution as { steps?: unknown; artifacts?: unknown }
+            agentExecution = {
+              steps: typeof ae.steps === 'number' ? ae.steps : undefined,
+              artifacts: typeof ae.artifacts === 'number' ? ae.artifacts : undefined,
+            }
+          }
           if (event.apexMission && typeof event.apexMission === 'object') {
             apexMission = event.apexMission as Record<string, unknown>
             const nexus = (event.apexMission as { nexus?: NexusMissionUiPayload }).nexus
@@ -658,6 +681,7 @@ export async function streamAdvancedChat(options: {
         apexMission,
         nexusMission,
         blocked,
+        agentExecution,
       }
     }
     throw err
@@ -673,5 +697,6 @@ export async function streamAdvancedChat(options: {
     apexMission,
     nexusMission,
     blocked,
+    agentExecution,
   }
 }

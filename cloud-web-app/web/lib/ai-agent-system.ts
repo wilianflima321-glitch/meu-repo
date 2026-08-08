@@ -110,10 +110,27 @@ export interface AgentExecution {
   taskId: string;
   agentId: string;
   steps: AgentStep[];
-  status: 'running' | 'completed' | 'failed' | 'paused';
+  status: 'running' | 'completed' | 'failed' | 'paused' | 'aborted';
   artifacts: Artifact[];
   finalAnswer?: string;
   error?: string;
+}
+
+/** Progressive hooks for chat-advanced SSE (R19 agentId path). */
+export interface AgentExecuteOptions {
+  abortSignal?: AbortSignal
+  onStep?: (event: {
+    iteration: number
+    phase: 'thinking' | 'tool' | 'final'
+    thought?: string
+    tool?: string
+    detail?: string
+  }) => void
+  /**
+   * When set, `thinkAndAct` uses `aiService.chatStream` and forwards only the
+   * `ANSWER:` portion as real provider deltas (tool-loop ReAct text stays off-wire).
+   */
+  onFinalAnswerDelta?: (delta: string) => void
 }
 
 // ============================================================================
@@ -246,7 +263,7 @@ export class AgentExecutor {
     };
   }
 
-  async execute(task: AgentTask): Promise<AgentExecution> {
+  async execute(task: AgentTask, options?: AgentExecuteOptions): Promise<AgentExecution> {
     this.execution.taskId = task.id;
     this.execution.status = 'running';
     this.execution.steps = [];
@@ -257,15 +274,39 @@ export class AgentExecutor {
       let iteration = 0;
 
       while (iteration < this.agent.maxIterations && this.execution.status === 'running') {
+        if (options?.abortSignal?.aborted) {
+          this.execution.status = 'aborted';
+          this.execution.error = 'Aborted by client'
+          break
+        }
+
         iteration++;
+
+        options?.onStep?.({
+          iteration,
+          phase: 'thinking',
+          detail: `Agent iteration ${iteration}`,
+        })
 
         // Construir prompt com contexto atual
         const prompt = this.buildPrompt(task, iteration);
 
         // Chamar IA para decidir próxima ação
-        const response = await this.thinkAndAct(prompt);
+        const response = await this.thinkAndAct(prompt, options);
+
+        if (options?.abortSignal?.aborted) {
+          this.execution.status = 'aborted';
+          this.execution.error = 'Aborted by client'
+          break
+        }
 
         if (response.finalAnswer) {
+          options?.onStep?.({
+            iteration,
+            phase: 'final',
+            thought: response.thought,
+            detail: 'Final answer',
+          })
           this.execution.finalAnswer = response.finalAnswer;
           this.execution.status = 'completed';
           break;
@@ -273,6 +314,14 @@ export class AgentExecutor {
 
         // Executar ação se houver
         if (response.action) {
+          options?.onStep?.({
+            iteration,
+            phase: 'tool',
+            thought: response.thought,
+            tool: response.action.tool,
+            detail: `Running tool ${response.action.tool}`,
+          })
+
           const executionContext = task.executionContext
             ? {
                 ...task.executionContext,
@@ -315,12 +364,17 @@ export class AgentExecutor {
 
       if (this.execution.status === 'running') {
         this.execution.status = 'completed';
-        this.execution.finalAnswer = 'Tarefa concluída após máximo de iterações.';
+        this.execution.finalAnswer = 'Task completed after maximum iterations.';
       }
 
     } catch (error) {
-      this.execution.status = 'failed';
-      this.execution.error = error instanceof Error ? error.message : 'Unknown error';
+      if (options?.abortSignal?.aborted) {
+        this.execution.status = 'aborted'
+        this.execution.error = 'Aborted by client'
+      } else {
+        this.execution.status = 'failed';
+        this.execution.error = error instanceof Error ? error.message : 'Unknown error';
+      }
     }
 
     return this.execution;
@@ -378,36 +432,18 @@ PARAMS: [JSON parameters if using a tool]
 ANSWER: [final answer if done]`;
   }
 
-  private async thinkAndAct(prompt: string): Promise<{
+  private parseThinkActContent(content: string): {
     thought: string;
     action?: { tool: string; params: Record<string, unknown> };
     finalAnswer?: string;
-  }> {
-    const fullPrompt = `${this.agent.systemPrompt}\n\n${prompt}`;
-
-    // AETHEL FUSION: Route through the intelligent model router
-    // instead of hard-coding a model.
-    const fusionConfig = resolveTaskKindForRole(this.agent.role);
-    const response = await aiService.chat({
-      taskKind: fusionConfig.taskKind,
-      messages: [
-        { role: 'system', content: this.agent.systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      maxTokens: 4000,
-      temperature: 0.2,
-    });
-
-    // Parse da resposta
-    const content = response.content;
-    
+  } {
     const thoughtMatch = content.match(/THOUGHT:\s*(.+?)(?=\nACTION:|$)/s);
     const actionMatch = content.match(/ACTION:\s*(\w+)/);
     const paramsMatch = content.match(/PARAMS:\s*({.+?})/s);
     const answerMatch = content.match(/ANSWER:\s*(.+)/s);
 
     const thought = thoughtMatch?.[1]?.trim() || 'Processing...';
-    
+
     if (actionMatch?.[1] === 'FINAL_ANSWER' || answerMatch) {
       return {
         thought,
@@ -435,6 +471,75 @@ ANSWER: [final answer if done]`;
     }
 
     return { thought };
+  }
+
+  private async thinkAndAct(
+    prompt: string,
+    options?: AgentExecuteOptions,
+  ): Promise<{
+    thought: string;
+    action?: { tool: string; params: Record<string, unknown> };
+    finalAnswer?: string;
+  }> {
+    // AETHEL FUSION: Route through the intelligent model router
+    // instead of hard-coding a model.
+    const fusionConfig = resolveTaskKindForRole(this.agent.role);
+    const messages = [
+      { role: 'system' as const, content: this.agent.systemPrompt },
+      { role: 'user' as const, content: prompt },
+    ];
+
+    // Streaming path: real provider deltas; forward only ANSWER: portion.
+    if (options?.onFinalAnswerDelta) {
+      let content = ''
+      let answerStarted = false
+      let answerEmitted = ''
+
+      for await (const delta of aiService.chatStream({
+        taskKind: fusionConfig.taskKind,
+        messages,
+        maxTokens: 4000,
+        temperature: 0.2,
+        userId: undefined,
+      })) {
+        if (options.abortSignal?.aborted) {
+          throw new Error('Aborted by client')
+        }
+        if (!delta) continue
+        content += delta
+
+        if (!answerStarted) {
+          const match = content.match(/ANSWER:\s*/)
+          if (match && typeof match.index === 'number') {
+            answerStarted = true
+            const after = content.slice(match.index + match[0].length)
+            if (after) {
+              answerEmitted = after
+              options.onFinalAnswerDelta(after)
+            }
+          }
+        } else {
+          answerEmitted += delta
+          options.onFinalAnswerDelta(delta)
+        }
+      }
+
+      const parsed = this.parseThinkActContent(content)
+      // If ANSWER streamed but parser missed FINAL_ANSWER marker, keep streamed text.
+      if (!parsed.finalAnswer && answerStarted && answerEmitted.trim()) {
+        return { thought: parsed.thought, finalAnswer: answerEmitted.trim() }
+      }
+      return parsed
+    }
+
+    const response = await aiService.chat({
+      taskKind: fusionConfig.taskKind,
+      messages,
+      maxTokens: 4000,
+      temperature: 0.2,
+    });
+
+    return this.parseThinkActContent(response.content);
   }
 
   private formatObservation(result: ToolResult): string {

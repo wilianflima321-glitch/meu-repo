@@ -31,7 +31,11 @@ import {
   normalizeModelName,
   summarizeCritic,
 } from './model-policy'
-import { handleAgentRequest, handleStreamingResponse } from './agent-and-streaming'
+import {
+  handleAgentExecutorStream,
+  handleAgentRequest,
+  handleStreamingResponse,
+} from './agent-and-streaming'
 import { handleApexCoordinatorStream } from './apex-coordinator-stream'
 import type { AdvancedChatRequest, ChatMessage, ChatResponse } from './types'
 import { runApexCodeMission, estimateMoASpendTokens } from '@/lib/production/apex-mission-orchestrator'
@@ -323,6 +327,19 @@ export async function handleAdvancedChatRequest(params: {
         { error: agentsFeature.code || 'FEATURE_NOT_ALLOWED', message: agentsFeature.reason || 'Agents not available in your plan' },
         { status: 403 }
       )
+    }
+    // R19 — agentId stream = AgentExecutor SSE (status + ANSWER chatStream deltas).
+    if (stream) {
+      return handleAgentExecutorStream({
+        userId,
+        agentId,
+        messages,
+        projectId,
+        includeTrace,
+        byok,
+        byokApiKey,
+        abortSignal,
+      })
     }
     return handleAgentRequest(userId, agentId, messages, projectId, includeTrace, byok, byokApiKey)
   }

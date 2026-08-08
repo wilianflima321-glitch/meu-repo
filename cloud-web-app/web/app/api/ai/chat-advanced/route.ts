@@ -4,7 +4,7 @@ import { apiErrorToResponse } from '@/lib/api-errors'
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
 import { createComponentLogger } from '@/lib/observability/logger'
 import { handleAdvancedChatRequest } from '@/lib/server/ai-chat-advanced/orchestrator'
-import { getAdvancedChatMetadata } from '@/lib/server/ai-chat-advanced/agent-and-streaming'
+
 import type { AdvancedChatRequest } from '@/lib/server/ai-chat-advanced/types'
 import {
   auditByokUsage,
@@ -68,5 +68,5 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 export async function GET(): Promise<NextResponse> {
-  return getAdvancedChatMetadata()
+  return NextResponse.json({ capability: 'AI_CHAT_ADVANCED', status: 'IMPLEMENTED' })
 }

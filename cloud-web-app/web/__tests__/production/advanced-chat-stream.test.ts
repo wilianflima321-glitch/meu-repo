@@ -263,6 +263,127 @@ describe('streamAdvancedChat (AIChatPanelPro / chat-advanced)', () => {
     expect(result.aborted).toBe(false)
   })
 
+  it('streams AgentExecutor agentId path with status + ANSWER deltas (not JSON theater)', async () => {
+    const statuses: string[] = []
+    const deltas: Array<{ chunk: string; tokenSource?: string }> = []
+    let resolveAfterStatus: (() => void) | undefined
+    const afterStatusGate = new Promise<void>((resolve) => {
+      resolveAfterStatus = resolve
+    })
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        const body = typeof init?.body === 'string' ? init.body : ''
+        expect(body).toContain('"stream":true')
+        expect(body).toContain('"agentId":"coder"')
+        expect(body).toContain('"agentCount":1')
+
+        const encoder = new TextEncoder()
+        let step = 0
+        const stream = new ReadableStream<Uint8Array>({
+          async pull(controller) {
+            if (step === 0) {
+              controller.enqueue(
+                encoder.encode(
+                  sseBlock({
+                    type: 'meta',
+                    streamMode: 'agent_executor',
+                    agentId: 'coder',
+                    notice: 'AgentExecutor SSE',
+                    traceId: 'tr-agent',
+                  }) +
+                    sseBlock({
+                      type: 'status',
+                      phase: 'maestro_planning',
+                      label: 'Thinking (iteration 1)',
+                      at: '2026-08-08T12:00:00.000Z',
+                      agentPhase: 'thinking',
+                      iteration: 1,
+                    }),
+                ),
+              )
+              step = 1
+              return
+            }
+            if (step === 1) {
+              await afterStatusGate
+              controller.enqueue(
+                encoder.encode(
+                  sseBlock({
+                    type: 'status',
+                    phase: 'apply',
+                    label: 'Final answer',
+                    at: '2026-08-08T12:00:01.000Z',
+                    agentPhase: 'final',
+                    iteration: 1,
+                  }) +
+                    sseBlock({
+                      type: 'content',
+                      delta: 'Done',
+                      content: 'Done',
+                      tokenSource: 'agent_answer',
+                    }) +
+                    sseBlock({
+                      type: 'content',
+                      delta: ' patch',
+                      content: 'Done patch',
+                      tokenSource: 'agent_answer',
+                    }) +
+                    sseBlock({
+                      type: 'done',
+                      tokensUsed: 42,
+                      traceId: 'tr-agent',
+                      content: 'Done patch',
+                      streamMode: 'agent_executor',
+                      agentExecution: { steps: 1, artifacts: 0 },
+                    }),
+                ),
+              )
+              step = 2
+              return
+            }
+            controller.close()
+          },
+        })
+        return new Response(stream, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'X-Aethel-Stream-Mode': 'agent_executor',
+          },
+        })
+      }),
+    )
+
+    const result = await streamAdvancedChat({
+      message: 'fix the bug',
+      model: 'test-model',
+      messages: [{ role: 'user', content: 'fix the bug' }],
+      agentId: 'coder',
+      profileOverride: { qualityMode: 'studio', agentCount: 3, enableWebResearch: true },
+      onDelta: (chunk, _acc, meta) => {
+        deltas.push({ chunk, tokenSource: meta?.tokenSource })
+      },
+      onStatus: (s) => {
+        statuses.push(s.phase)
+        if (statuses.length === 1) resolveAfterStatus?.()
+      },
+    })
+
+    expect(statuses).toEqual(['maestro_planning', 'apply'])
+    expect(deltas).toEqual([
+      { chunk: 'Done', tokenSource: 'agent_answer' },
+      { chunk: ' patch', tokenSource: 'agent_answer' },
+    ])
+    expect(result.streamMode).toBe('agent_executor')
+    expect(result.content).toBe('Done patch')
+    expect(result.agentExecution?.steps).toBe(1)
+    expect(result.meta?.streamMode).toBe('agent_executor')
+    expect(result.meta?.agentId).toBe('coder')
+    expect(result.aborted).toBe(false)
+  })
+
   it('foldCoordinatorStreamIntoNexus accumulates phases and cells as RUNNING then APPLY', () => {
     let nexus = foldCoordinatorStreamIntoNexus(null, {
       kind: 'status',
@@ -430,5 +551,182 @@ describe('handleApexCoordinatorStream (server SSE contract)', () => {
     expect(text).toContain('"type":"done"')
     expect(settle).toHaveBeenCalledWith(900)
     expect(cancel).not.toHaveBeenCalled()
+  })
+})
+
+describe('handleAgentExecutorStream (server SSE contract)', () => {
+  it('emits agent_executor meta, status, ANSWER chatStream deltas, and done', async () => {
+    vi.resetModules()
+    const settle = vi.fn(async () => undefined)
+    const cancel = vi.fn(async () => undefined)
+    const settleZero = vi.fn(async () => undefined)
+
+    vi.doMock('@/lib/ai/chat-spend-session', () => ({
+      beginChatSpendSession: vi.fn(async () => ({
+        ok: true,
+        session: {
+          reservationId: 'r-agent',
+          lane: 'subscription_fast',
+          modelId: 'openai/gpt-4o-mini',
+          headers: {},
+          noticeCode: undefined,
+          settle,
+          cancel,
+          settleZero,
+        },
+      })),
+    }))
+    vi.doMock('@/lib/plans', () => ({
+      getPlanById: vi.fn(() => ({ id: 'pro', limits: {} })),
+    }))
+    vi.doMock('@/lib/prisma', () => ({
+      prisma: {
+        user: {
+          findUnique: vi.fn(async () => ({ plan: 'pro' })),
+        },
+      },
+    }))
+    vi.doMock('@/lib/server/project-rules', () => ({
+      loadProjectRulesContext: vi.fn(async () => null),
+    }))
+    vi.doMock('@/lib/ai-trace-store', () => ({
+      persistAITrace: vi.fn(async () => undefined),
+    }))
+    vi.doMock('@/lib/ai-internal-trace', () => ({
+      createAITraceId: vi.fn(() => 'tr-agent-server'),
+    }))
+
+    const chatStream = vi.fn(async function* () {
+      yield 'THOUGHT: done\n'
+      yield 'ACTION: FINAL_ANSWER\n'
+      yield 'ANSWER: '
+      yield 'Hello'
+      yield ' world'
+    })
+
+    vi.doMock('@/lib/ai-service', () => ({
+      aiService: {
+        chatStream,
+        chat: vi.fn(),
+        getAvailableProviders: vi.fn(() => ['openai']),
+      },
+    }))
+    vi.doMock('@/lib/ai/fusion-role-map', () => ({
+      resolveTaskKindForRole: vi.fn(() => ({ taskKind: 'code_edit' })),
+    }))
+    vi.doMock('@/lib/server/agent-context/assemble-agent-context', () => ({
+      assembleAgentContext: vi.fn(async () => ({ text: '' })),
+    }))
+    vi.doMock('@/lib/ai-tools-registry', () => ({
+      aiTools: {
+        getAll: vi.fn(() => []),
+        get: vi.fn(() => undefined),
+        execute: vi.fn(),
+      },
+    }))
+
+    // Import after mocks so AgentExecutor uses chatStream.
+    const { handleAgentExecutorStream } = await import(
+      '@/lib/server/ai-chat-advanced/agent-and-streaming'
+    )
+
+    const response = await handleAgentExecutorStream({
+      userId: 'u1',
+      agentId: 'coder',
+      messages: [{ role: 'user', content: 'say hi' }],
+      includeTrace: true,
+    })
+
+    expect(response.headers.get('Content-Type')).toContain('text/event-stream')
+    expect(response.headers.get('X-Aethel-Stream-Mode')).toBe('agent_executor')
+
+    const text = await response.text()
+    expect(text).toContain('"streamMode":"agent_executor"')
+    expect(text).toContain('"type":"status"')
+    expect(text).toContain('"tokenSource":"agent_answer"')
+    expect(text).toContain('Hello')
+    expect(text).toContain(' world')
+    expect(text).toContain('"type":"done"')
+    expect(chatStream).toHaveBeenCalled()
+    expect(settle).toHaveBeenCalled()
+    expect(cancel).not.toHaveBeenCalled()
+  })
+
+  it('JSON agentId path (stream=false) still returns application/json — not SSE theater', async () => {
+    vi.resetModules()
+    const settle = vi.fn(async () => undefined)
+    const cancel = vi.fn(async () => undefined)
+    const settleZero = vi.fn(async () => undefined)
+
+    vi.doMock('@/lib/ai/chat-spend-session', () => ({
+      beginChatSpendSession: vi.fn(async () => ({
+        ok: true,
+        session: {
+          reservationId: 'r-json',
+          lane: 'subscription_fast',
+          modelId: 'openai/gpt-4o-mini',
+          headers: {},
+          settle,
+          cancel,
+          settleZero,
+        },
+      })),
+    }))
+    vi.doMock('@/lib/plans', () => ({
+      getPlanById: vi.fn(() => ({ id: 'pro', limits: {} })),
+    }))
+    vi.doMock('@/lib/prisma', () => ({
+      prisma: {
+        user: {
+          findUnique: vi.fn(async () => ({ plan: 'pro' })),
+        },
+      },
+    }))
+    vi.doMock('@/lib/server/project-rules', () => ({
+      loadProjectRulesContext: vi.fn(async () => null),
+    }))
+    vi.doMock('@/lib/ai-trace-store', () => ({
+      persistAITrace: vi.fn(async () => undefined),
+    }))
+    vi.doMock('@/lib/ai-internal-trace', () => ({
+      createAITraceId: vi.fn(() => 'tr-json'),
+    }))
+    vi.doMock('@/lib/ai-service', () => ({
+      aiService: {
+        chat: vi.fn(async () => ({
+          content: 'THOUGHT: ok\nACTION: FINAL_ANSWER\nANSWER: JSON only path',
+        })),
+        chatStream: vi.fn(),
+        getAvailableProviders: vi.fn(() => ['openai']),
+      },
+    }))
+    vi.doMock('@/lib/ai/fusion-role-map', () => ({
+      resolveTaskKindForRole: vi.fn(() => ({ taskKind: 'code_edit' })),
+    }))
+    vi.doMock('@/lib/server/agent-context/assemble-agent-context', () => ({
+      assembleAgentContext: vi.fn(async () => ({ text: '' })),
+    }))
+    vi.doMock('@/lib/ai-tools-registry', () => ({
+      aiTools: {
+        getAll: vi.fn(() => []),
+        get: vi.fn(() => undefined),
+        execute: vi.fn(),
+      },
+    }))
+
+    const { handleAgentRequest } = await import('@/lib/server/ai-chat-advanced/agent-and-streaming')
+    const response = await handleAgentRequest(
+      'u1',
+      'coder',
+      [{ role: 'user', content: 'hi' }],
+      undefined,
+      false,
+    )
+
+    expect(response.headers.get('Content-Type')).toContain('application/json')
+    expect(response.headers.get('Content-Type') || '').not.toContain('text/event-stream')
+    const json = await response.json()
+    expect(json.message?.content).toContain('JSON only path')
+    expect(settle).toHaveBeenCalled()
   })
 })
