@@ -17,11 +17,11 @@
 | `ViewportStudioPanel.tsx` | **MISSING** — viewport lives in Scene/Studio shells | PARTIAL (R3F + honesty badges) | No (Nanite/Lumen/3DGS claims HELD) |
 | `AiTriumviratePanel.tsx` | **MISSING** — Agents/Nexus surfaces exist | PARTIAL (MoA live; J.11/J.12 STOPPED) | No “AI-native IDE” until J.1+J.2+J.12 |
 | `NodeEditorPanel.tsx` | **MISSING** — Visual Script / ReactFlow exist | PARTIAL | No “500+ nodes → WGSL” without bake soak |
-| `CinematicTimelinePanel.tsx` | **MISSING** — Sequencer IDE PARTIAL; `Timeline3D` prop-driven via `ITimelineService` ← `aethel.timeline.v1` (2026-08-08): unbound/empty = honest empty; `demoMode` only for explicit demo; persist `*.timeline.json` DONE; **authoring core PARTIAL** (Add Track / Add Keyframe / Delete → store → persist; no fabricated tracks). Curve editor + scrub→viewport + clip trim still OPEN | PARTIAL (`sequencerPlayReady`; live dock + authoring core DONE; UE parity OPEN) | No UE Sequencer exceeded; do not claim full curve/scrubbing parity — empty projects stay empty until user authors |
+| `CinematicTimelinePanel.tsx` | **MISSING** — Sequencer IDE PARTIAL; `Timeline3D` via `ITimelineService` ← `aethel.timeline.v1` (2026-08-08): unbound/empty = honest empty; `demoMode` only for explicit demo; persist `*.timeline.json` DONE; authoring + scrub→viewport (pos/rot/scale/visibility) DONE-core; **material color UNHELD** via `ISceneService.setColor`; **event cue bus PARTIAL** (editor only, not GAS); keyframe drag-move + visibility.opacity channel. Still OPEN: multi-channel curve editor, clip trim handles, SequencerIdePanel local demo path | PARTIAL (live dock + scrub/material; UE Sequencer parity OPEN) | No UE Sequencer exceeded; do not claim full curve/GAS event parity |
 | `AssetBrowserPanel.tsx` | Name collision only — not this hero panel | PARTIAL (explorer/host tree) | No “99% seed disk” claim |
 | `MuscularRigPanel.tsx` | **MISSING** | PARTIAL (Law III web apply; Euphoria HELD) | No |
 | `AudioHrtfPanel.tsx` | **MISSING** | PARTIAL (MetaSounds CORE; HRTF AAA HELD) | No |
-| `TerminalConsolePanel.tsx` | **MISSING** — IDE terminal PARTIAL | PARTIAL (host PTY HELD / sandbox) | No “telepathic terminal” |
+| `TerminalConsolePanel.tsx` | **MISSING** — IDE terminal PARTIAL; Forge duplex + sandbox node-pty first-light (`ptyApplied:true` when live IPty); agents never host PTY | PARTIAL (sandbox PTY first-light; E2B remote PTY HELD; host PTY human-lane only) | No “telepathic terminal” / Cursor terminal exceeded |
 | `HardwareProfilerPanel.tsx` | Name collision only — CapScore/honesty exist | PARTIAL | No Unreal Insights exceeded |
 | `WorldPartitionPanel.tsx` | **MISSING** | PARTIAL (`partitionStreamingReady`; UE parity HELD) | No zero-loading-screen |
 | `MultiplayerNetcodePanel.tsx` | **MISSING** | PARTIAL (rollback soak; GGPO/Agones HELD) | No dual-240 marketing |
@@ -35,6 +35,15 @@
 | AI/Agent chat + diff review (`AIChatPanelPro.tsx`, `AIChatOpsSidebar.tsx`, `AIChatPendingDiffTray.tsx`, `InlineAIChat*`) | **Exists and functional** — Nexus phase strip, ledger receipts, Trava II undo banner, cost meter, per-agent fleet status all wired to real state (2026-08-08 chat-ux-audit) | **PARTIAL vs Cursor/Copilot Chat.** Fixed this pass: `AIChatOpsSidebar` per-file "Approve"/"Reject" was silently applying/rejecting the **wrong** pending diff (`newContent` passed where `filePath` was expected) — Trava II partial-apply was broken, not cosmetic; corrected. Fixed: `useRealtimeVoiceSession`'s `lastBlockedReason` (rate-limit/provider/invalid-input) was captured but never rendered — a failed voice turn failed silently; now surfaced as an alert in the live overlay. **Trava II undo banner (2026-08-08 p2f-3):** was theater — no `projectId`, fresh empty memory store per click; now binds `ensureProjectFusionYjsStore(projectId)` and fail-closes with honesty copy when unbound / no revert point. **Still PARTIAL:** server→client FusionTx undo without shared Y.Doc. **Streaming (2026-08-08 debt-closure):** `useInlineAIChatSession` now consumes real `/api/ai/stream` chunks via `streamPlainChat` (incremental assistant bubble; advanced chat is fallback only if stream fails) — not a typewriter over a completed fetch. **Still real gap (P1):** advanced multi-agent chat-advanced path itself remains non-streaming JSON; text, no mid-flight visible cancel. This is the largest remaining gap vs. Cursor/Copilot Chat/Devin-class chat. `AIChatPendingDiffTray`'s compact strip is intentionally all-or-nothing (file list hidden until "Open diff"); full per-file review exists one click away in `AIChatOpsSidebar`, so this is P1 polish not a blocker. | No claim that inline chat streams "in real time" or is "as fluid as Cursor" until incremental streaming ships. AI-native/J.1+J.2+J.12 marketing claims: none found in audited scope (clean). |
 
 **Acceptance columns required before any §2 “Parity Exceeded” line may be treated as DONE:** claim · code paths · status · benchmark · golden/video · RTX 3060 budget · disk budget · blocked_by · last proof · marketing yes/no.
+
+### Competitor gap (honesty — 2026-08-08; §1 below is aspirational)
+
+| Competitor | Spec §1 claim tone | Product truth today | Marketing |
+|---|---|---|---|
+| **Cursor** | MoA hub / zero truncation / Composer exceeded | Governed apply + Nexus real; Composer surpass **false** in code; L.8/L.13 soaks open; J.12 STOPPED | **Forbidden** |
+| **v0** | Instant iteration / Universal IDE | PreviewOrchestrator + FusionTx MagicWand; live E2B HMR + create-next-app soak open | **Forbidden** |
+| **Unreal** | Nanite/Lumen/Niagara/Chaos exceeded | R3F + kernel soaks; G.3 ~15%; Spec hero panels mostly MISSING/DELETED | **Forbidden** |
+| **Devin / Copilot** | Autonomous / telepathic | Sandbox agents + ledger; advanced chat streaming PARTIAL; no long-horizon Devin loop | **Forbidden** |
 
 **Disk constraint (this workstation):** C: critically low free space; prefer `E:\aethel-target-gnu` / D: for cargo targets; no ONNX/weight dumps without Founder drop + content-addressed cache.
 
@@ -552,4 +561,4 @@ When the user requests Claude to execute visual UI changes, Claude MUST follow t
 ### SPECIFICATION SUMMARY (honest)
 This document provides the **target** UI/UX architecture, 15 panel acceptance outlines, hotkeys, design-token *direction*, docking/CRDT goals, and Claude implementation guidelines.
 
-It does **not** certify that those panels exist, that competitor parity is shipped, or that glass/cyan/violet aesthetics override the live design system (`var(--aethel-*)` in product code). Treat §1 “Parity Exceeded” rows as **aspirational tests**, not current product truth. Execution queue remains Master Map + Progress Consolidation Wave.
+It does **not** certify that those panels exist, that competitor parity is shipped, or that glass/cyan/violet aesthetics override the live design system (`var(--aethel-*)` in product code). Treat §1 “Parity Exceeded” rows as **aspirational tests**, not current product truth. **Not ready to sell** as Universal IDE / AI-native / UE-surplus. Execution queue remains Master Map §0b/§0c + Progress Remaining OPEN / Top-15.

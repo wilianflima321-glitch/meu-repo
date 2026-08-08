@@ -37,6 +37,7 @@
 | 2026-08-08 l4-duplex | L.4 ForgeTerminalBridge duplex deepen (stdin↔stdout pipes) | **PARTIAL** L.4 duplex; tests **10/10**; sandbox PTY **HELD**; Hub checkout HELD |
 | 2026-08-08 l4-l2-l9 | L.4 ForgeTerminalBridge + L.2/L.9 commit/CI gate | **PARTIAL** L.4/L.2/L.9; targeted **20/20**; Hub checkout HELD |
 | 2026-08-08 creative-tools-ux-audit | Creative 3D editing tools UX audit (viewport/timeline/material/animation/VFX/audio/preview vs Unreal/Blender/Unity) — see Changelog below | 10 files fixed + 2 extracted; `qa:no-hex-in-components` + mojibake scan green; typecheck/lint/vitest **BLOCKED** (`node_modules` incomplete — no `tsc`/`eslint`/`vitest` binaries, not reinstalled per instruction) |
+| 2026-08-08 docs-honesty-gap | Ruthless docs honesty — competitor gap + Top-15 market debts; fix CW6 `composerSurpassClaim` doc-lie; Spec §0 Timeline/Terminal sync | Docs only (Progress/Map/Index/UX Spec); **not ready to sell** Universal IDE / AI-native / Hub checkout; Hub HELD; Onda G deferred |
 | 2026-08-08 docs-authority-sync | Documentation authority sync — Progress ↔ Master Map §0b/§0c ↔ Index scorecard; Remaining OPEN P0/P1/P2 + DONE-but-PARTIAL | Docs only; no product code; P2b Anti-MOCK **fully cleared**; Hub checkout HELD; Onda G deferred |
 | 2026-08-08 l10-web-shippath | L.10 web ship-path hardcoded-color batch (viewport/preview/agents/settings/billing/dashboard/studio) | **PARTIAL** deepen; scanner **904→797** (−107); ship-path dirs **0**; Hub checkout HELD |
 | 2026-08-08 l10-terminal-editor | L.10 terminal/editor/theme CSS-var palette batch | **PARTIAL** deepen; scanner **797→424** (−373); terminal/themes/editor/design-tokens **0**; Hub checkout HELD |
@@ -1078,29 +1079,58 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ---
 
-## Remaining OPEN ranked (next sessions — 2026-08-08 post CW3 DONE-core + CW1-bench + timeline-event + L.10/L.12/L.13/L.8/CW4/R18)
+## Remaining OPEN ranked (next sessions — 2026-08-08 honesty pass)
 
-Ruthless honesty after **CW3 DONE-core** (render-path classify + present-root + fail-closed marketing; UE RHI/WebGPU viewport still HELD), **CW1 15-slot hero bench CLOSED** (product depth still PARTIAL), Timeline material UNHELD + event cue bus PARTIAL, L.10 green, L.12 100% soak, L.9 UX, L.13 farm+Monaco+Python matrix, L.4 sandbox PTY, L.8 Vite HMR first-light, **CW4 DONE**, **R18 DONE**, Law XV Instant Play bake **DONE**, J.4 BYOK PARTIAL. **P2b Anti-MOCK BLOCKER/HIGH/MEDIUM = 0 OPEN.** Do not invent new MD files — execute from this table + Master Map §0b.
+**Verdict:** Platform cores + Anti-MOCK clearance are real. Product is **not ready to sell** as Universal IDE, AI-native IDE, Cursor/v0/UE surplus, or Hub checkout. Do not invent new MD files — execute from this table + Master Map §0b/§0c.
 
 | Pri | ID | Item | Why next | Honest status |
 |-----|-----|------|----------|---------------|
-| **P0** | R1 | **H.1+ Treasury / `hubCheckoutAudited`** | Hub Buy/Coins still fail-closed by design — wedge monetize blocked | **HELD** — technical modules 4–7 + semantics probes SHIPPED; flip blocked on Founder/legal certificate (ids 8–10) + Stripe env |
-| **P0** | R4 | **L.8 E2B remote HMR / live soak** | Blocks honest Universal IDE / v0-class claim | **PARTIAL** — remote detect path real (`hmr:true` only with key + getHost + Vite/Next probe + client bridge); live E2B soak still open |
-| **P1** | R6 | **L.13 live Monaco desktop acceptance + Python binary soak** | Tauri farm + didChange/diagnostics/hover/definition/completion + L.C matrix **wired**; live Python HELD without binary | **PARTIAL** — matrix DONE-core; host acceptance still OPEN (`AETHEL_LSP_PYTHON`) |
-| **P1** | R7 | **L.4 E2B remote PTY / docker TTY** | Local sandbox node-pty first-light DONE when module loads | **PARTIAL** — `ptyApplied:true` on live IPty; E2B remote PTY API **HELD** (unwired) |
-| **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | USDZ browser preview only | **PARTIAL** USDZ; stage HELD |
-| **P1** | R10 | **L.9 live create-next-app / L-ACC-04 soak** | Wizard+client UX core DONE | **PARTIAL** — interactive UX DONE; live scaffold soak still open |
-| **P1** | R11 | **J.4 native sqlite-vec soak** | BYOK+CostGuard + JS cosine PARTIAL landed | **PARTIAL** — native `vec0` / loadExtension still **HELD** |
-| **P1** | R12 | **CW5 Storybook / Figma token government** | L.10 `qa:hardcoded-colors` DONE-core; CW1 bench CLOSED | **PARTIAL** — Storybook empire + full Figma government still OPEN (**HELD vs Figma**) |
-| **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Auto-attach browser WebM/PNG DONE-core | **DONE-core**; cinematic **HELD** |
-| **P2** | R14 | **Onda G nuclear (Nanite/Lumen/Entropy)** | Founder ADIADO until platform exit | **DEFERRED** (~15% scaffold) |
-| **P2** | R15 | **J.11 ACP / J.12 OrchestratorProd** | Founder STOP; WT scaffolds ≠ ship | **STOPPED** |
-| **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | G.2 + H.1+ gates | **HELD** |
-| **P2** | R17 | **MaterialX / OpenVDB production + Outliner/Properties LoC>500 split** | Draft/hygiene; IDE deepen | **HELD / OPEN** |
+| **P0** | R1 | **H.1+ Treasury / `hubCheckoutAudited` flip** | Wedge monetize (Hub Buy/Coins) blocked | **HELD** — tech modules 4–7 + probes SHIPPED; needs Founder/legal certificate (ids 8–10) + Stripe env |
+| **P0** | R4 | **L.8 live E2B remote HMR soak** | Blocks honest v0/Universal IDE claim | **PARTIAL** — detect path real; live soak open |
+| **P1** | R6 | **L.13 live Monaco desktop + Python binary** | Cursor-class desktop IDE gap | **PARTIAL** — farm/matrix wired; host acceptance OPEN |
+| **P1** | R10 | **L.9 live create-next-app / L-ACC-04 soak** | Scaffold UX ≠ live generate loop | **PARTIAL** — wizard DONE; soak open |
+| **P1** | R7 | **L.4 E2B remote PTY / docker TTY** | Terminal parity vs Cursor | **PARTIAL** — local sandbox PTY first-light; remote HELD |
+| **P1** | R8 | **J.7 OpenUSD / USDA / USDC stage** | Asset interchange vs UE/Pixar | **PARTIAL** USDZ only; stage HELD |
+| **P1** | R11 | **J.4 native sqlite-vec soak** | Semantic recall depth | **PARTIAL** — BYOK+JS cosine; `vec0` HELD |
+| **P1** | R12 | **CW5 Storybook / Figma token government** | Design-system government | **PARTIAL** — L.10 colors 0; Figma HELD |
+| **P1** | R9 | **J.9 cinematic VisualEvidence (#63)** | Evidence depth | **DONE-core** browser; cinematic HELD |
+| **P1** | R19 | **Advanced chat streaming + FusionTx cross-isolate undo** | Cursor/Copilot chat fluidity | **PARTIAL** — inline stream DONE; chat-advanced JSON; undo without shared Y.Doc |
+| **P2** | R14 | **Onda G nuclear (Nanite/Lumen/Entropy)** | AAA desktop long pole | **DEFERRED** (~15% scaffold) |
+| **P2** | R15 | **J.11 ACP / J.12 OrchestratorProd** | AI-native marketing gate | **STOPPED** (Founder) |
+| **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | LiveOps/commerce depth | **HELD** (G.2 + H.1+) |
+| **P2** | R17 | **MaterialX / OpenVDB + Outliner/Properties LoC split** | S1/S7 deepen | **HELD / OPEN** |
+| **P2** | R20 | **CW2/CW7 kernel scale + disk austerity** | Lab→product consolidation | **PARTIAL** |
 
-**Recently closed (keep for ledger; not next-executor work):** **R13 CW3 DONE-core** (catalog + present-root + fail-closed marketing; UE RHI residual → DONE-but-PARTIAL); R2 Law XV bake Instant Play **DONE**; R3 CW4 exception-only+LWW **DONE**; R5 `qa:hardcoded-colors` **DONE-core**; R18 Prisma `demoPlayUrl` + anon→auth playtime **DONE** (migrate deploy needs `DATABASE_URL`); **CW1 15-slot hero bench CLOSED** (product depth PARTIAL — not 15/15 ship certificate).
+**Recently closed (ledger only):** R13 CW3 DONE-core; R2 Law XV bake; R3 CW4; R5 L.10 colors; R18 Prisma `demoPlayUrl`; CW1 15-slot bench (product PARTIAL).
 
-**Top 10 for next executor (copy-paste):** R4 L.8 live E2B soak (remote detect landed) → R6 L.13 live acceptance → R10 L.9 live create-next-app soak → R7 L.4 E2B remote PTY → R8 J.7 OpenUSD → R11 J.4 native sqlite-vec soak (BYOK path PARTIAL) → R12 CW5 Storybook/Figma → R1 H.1+ Founder/legal certificate (technical 4–7 DONE; `hubCheckoutAudited` still false) → R16 Hub Coins/Agones (still HELD) → R17 MaterialX/OpenVDB + LoC split. Hub checkout **HELD**.
+### Competitor gap (honest — 2026-08-08)
+
+| Competitor | Aethel leads / ties (real) | Aethel loses (block supremacy claim) |
+|---|---|---|
+| **Cursor** | CostGuard + L.5 dual-stack apply; RepoGraphRAG 100% slice; Nexus evidence | Composer UX; live E2B HMR; desktop LSP soak; J.12 STOPPED → **no AI-native / Composer-surpass** |
+| **v0** | PreviewOrchestrator + FusionTx MagicWand; honest `hmr:false` default | Live scaffold+HMR soak → **no Universal IDE / v0-class** |
+| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material | Nanite/Lumen/Chaos/RHI (~15%); Spec heroes MISSING → **no UE parity** |
+| **Devin / Copilot** | Sandbox-only agents; ledger receipts; fleet strip | Long-horizon autonomy; advanced streaming chat → **no Devin-class** |
+
+### Top 15 remaining debts (market supremacy rank)
+
+1. **R1** H.1+ human/legal certificate → `hubCheckoutAudited`  
+2. **R4** L.8 live E2B HMR soak  
+3. **R6** L.13 desktop LSP live acceptance (+ Python binary)  
+4. **R10** L.9 live create-next-app soak  
+5. **R7** L.4 E2B remote PTY  
+6. **R19** Advanced chat streaming + shared-Yjs Fusion undo  
+7. **R8** J.7 OpenUSD stage (beyond USDZ)  
+8. **R11** J.4 native sqlite-vec  
+9. **R12** CW5 Storybook/Figma government  
+10. **R9** J.9 cinematic #63  
+11. **R15** J.12 (only if Founder lifts STOP) — else AI-native stays blocked  
+12. **R16** Hub Coins mint / Agones (after H.1+ / G.2)  
+13. **R17** MaterialX/OpenVDB + LoC>500 splits  
+14. **R20** CW2 load-scale + CW7 disk austerity  
+15. **R14** Onda G nuclear — **deferred** until platform exit  
+
+**Copy-paste next executor:** R1 (Founder cert path) → R4 → R6 → R10 → R7 → R19 → R8 → R11 → R12. Hub checkout **HELD**. No Onda G. No J.12 without Founder.
 
 ### DONE-but-PARTIAL (self-critique — do not market as full DONE)
 
@@ -1110,25 +1140,27 @@ Ruthless honesty after **CW3 DONE-core** (render-path classify + present-root + 
 | **J.9** DONE-core + auto-attach | Browser WebM/PNG path real; headless = PNG/patch-hash | Cinematic #63 engine capture; CI WebM |
 | **L.5** DONE (TS+lint+Rust via L.1) | Rust runs in `local-isolated`; network kernel isolation HELD | e2b/firecracker soak; OS firewall isolation |
 | **L.7** DONE-core | MagicWand→FusionTx + L.8 autoProvision | v0 multi-file generate+HMR IDE loop |
-| **L.8 / L.4 / L.9 / L.13** | Real cores; often still labeled PARTIAL correctly | L.8 E2B remote detect landed (live soak open); L.4 E2B remote PTY; L.9 live scaffold soak; L.13 live Monaco acceptance (matrix shipped; Python binary HELD) |
+| **L.8 / L.4 / L.9 / L.13** | Real cores; labeled PARTIAL correctly | L.8 live E2B soak; L.4 remote PTY; L.9 live soak; L.13 host acceptance (Python binary HELD) |
 | **L.4** | Sandbox node-pty first-light + pipe fallback | E2B remote PTY / docker TTY still HELD |
-| **L.12** | L-ACC-05 soak **DONE** (100% who-imports/neighborhood on monorepo slice) | Cursor-class full IR; R11 native sqlite-vec still HELD (BYOK embed path PARTIAL); not Universal IDE alone |
+| **L.12** | L-ACC-05 soak **DONE** (100% who-imports/neighborhood on monorepo slice) | Cursor-class full IR; R11 native sqlite-vec HELD; not Universal IDE alone |
 | **L.1** local-isolated DONE | Real sandbox; e2b env-gated; firecracker HELD | Kernel-level network isolation |
-| **Instant Play chain SHIPPED** | Packer→registry→html→host + Law XV bake + R18 Prisma honesty columns + anon→auth playtime handoff | Hub checkout / H.1+ still HELD |
+| **Instant Play chain SHIPPED** | Packer→registry→html→host + Law XV bake + R18 Prisma + anon→auth playtime | Hub checkout / H.1+ still HELD; `migrate deploy` needs `DATABASE_URL` |
 | **RTv1-b** | Instant Play + I.2 + Law XV bake live | H.1+ / checkout still block full train |
+| **H.1+ audit probe SHIPPED** | `evaluateTreasuryAudit` + modules 4–7 + fail-closed Showcase UI | Human/legal certificate; `hubCheckoutAudited` **false** |
 | **CW4** DONE | LWW + exception-only allowlist + expired legacy mirror; open chrome debt 0 | Keep allowlist discipline; no new raw localStorage chrome |
-| **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | `composerSurpassClaim` = posture; tree-sitter web wire false; J.11/J.12 STOPPED |
-| **Timeline persist + authoring + scrub apply PARTIAL** | `cinematics/main.timeline.json` + Add Track/Keyframe + live pos/rot/scale/visibility/**material color** scrub + **event cue bus** + **keyframe drag-move** + **visibility.opacity channel UI** | Material **UNHELD** via `ISceneService.setColor` → Zustand → R3F `object.color`; event lane **PARTIAL** editor bus (`subscribeTimelineEventCues` — not GAS/gameplay); multi-channel curve editor; clip trim handles; SequencerIdePanel local demo path |
-| **CW1 15-slot hero bench DONE-core** | Executable bench + truth-matrix wire; Spec mock heroes absent | Product depth / Spec-named hero invent still forbidden (CW0); AAA parity HELD; not a 15/15 ship certificate |
-| **CW3 DONE-core** | Catalog + present-root + `r3f-webgl2` live + `marketingAllowed:false`; badge fail-closed | WebView exclusive + unified RHI + WebGPU viewport + desktop present-in-product **HELD** (not dual-live marketing) |
+| **CW6** apply-path DONE | Multi-file AST/L.5 swarm live | Code `COMPOSER_SURPASS_CLAIM=false` (doc previously lied `true`); tree-sitter web wire false; J.11/J.12 STOPPED |
+| **Timeline persist + authoring + scrub PARTIAL** | Persist + Add Track/Keyframe + live pos/rot/scale/visibility/**material color** + **event cue bus** + drag-move + opacity channel | Event = editor bus not GAS; curve editor; clip trim; SequencerIdePanel demo path |
+| **CW1 15-slot hero bench DONE-core** | Executable bench + truth-matrix wire; Spec mock heroes absent | Product depth / Spec-named hero invent forbidden (CW0); not 15/15 ship |
+| **CW3 DONE-core** | Catalog + present-root + `r3f-webgl2` + `marketingAllowed:false` | Unified RHI + WebGPU viewport + desktop present-in-product **HELD** |
 | **FusionTx handoff DONE** | `aethel.fusion-tx-handoff.v1` arms client store | Undo without shared Y.Doc still PARTIAL |
-| **AI-native / Universal IDE marketing** | Explicitly **not** certified | Needs J.12 (or Founder alt) + L.8 HMR + L.13 desktop |
+| **AI-native / Universal IDE / ready-to-sell** | Explicitly **not** certified | Needs H.1+ cert + L.8 soak + L.13 acceptance + (J.12 or Founder alt) |
 
 ---
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-08-08 docs-honesty-gap | **Docs-only honesty alignment (no new MD; no product code).** Ruthless critique: (overclaim) Master Map CW6 still implied Composer-surpass posture while code `COMPOSER_SURPASS_CLAIM=false`; Master UX §0 Timeline still said scrub OPEN after scrub/material UNHELD; “Universal IDE / AI-native / ready to sell” must stay marketing-forbidden. (underclaim) Instant Play+I.2+Law XV+R18, L.10 green, L.12 100%, H.1+ tech modules, Timeline material/event bus, L.8 remote detect — already shipped as DONE-core/PARTIAL correctly in Progress but under-signaled in Index scorecard narrative. Synced Progress Remaining OPEN + Top-15 + competitor gap; Master Map §0c gap table + 1.4n; Index scorecard; Master UX §0 Timeline/Terminal + competitor table. Hub checkout HELD. Onda G deferred. J.11/J.12 STOPPED. |
 | 2026-08-08 cw3-done-core | Commit: `a81aada3c`. **R13 / CW3 DONE-core — render-path honesty closed; UE RHI residual HELD.** Investigated: catalog + `cw3-present-root-v1` + `evaluateRendererHonesty` + spend-l5 (`r3f-webgl2`, `marketingAllowed:false`) + consolidation `render.path.*` already fail-closed green. **Real gap closed:** `RendererHonestyBadge` marketed `WebGPU Target Active` + `Unified RHI Acquired` on adapter probe and defaulted `webgpuRole` to `exclusive_rhi`; desktop LIVE used non-existent `livePath.desktopPresented`. **Fix:** adapter_probe_only default; desktop LIVE only when `presentRoot.desktopWgpuRole === 'live_present'`; honest adapter-probed copy; AAA marketing blocked line. Tests: CW3+spend-l5+consolidation+3A **33/33**. Pruned R13 from Remaining OPEN. Hub checkout HELD. No Onda G. |
 | 2026-08-08 cw1-hero-bench | Commit: `113e1b2f7`. **CW1 15-slot hero panel bench CLOSED (DONE-core; product PARTIAL).** `master-ux-hero-panel-bench.ts`: Spec §0 ×15 claim/path/status/bench/marketing; maps only real ship surfaces (SceneViewport, AIChat/Fleet, Blueprint/VS, Timeline3D+Sequencer, AssetBrowser, ControlRig, SoundCue, MultiTerminal, ResourceMonitor+honesty, settings, FacialAnimation, NiagaraVFX); WorldPartition/Netcode/Voronoi = HELD (no Spec hero UI invent). Forbidden mock hero paths absent; CreativeWorkbench + IDE region + studio-tool dock ids only (`dockRegistered` &lt;15). Truth matrix `master-ux.hero-panels` → `cw1_hero_panel_product_depth` / `benchColumns=CLOSED`. Tests: hero-bench+consolidation-truth **10/10**. Remaining OPEN: R12 = CW5 Storybook/Figma only. Hub checkout HELD. No Onda G. |
 | 2026-08-08 timeline-event-cue-bus | Commit: `e728e2dd6`. **Timeline event lane PARTIAL — honest editor cue bus.** `timeline-event-cue-bus.ts`: `subscribeTimelineEventCues` / `clearTimelineEventCueSubscribers` / `emitTimelineEventCues`; typed `{ trackId, nodeId?, cueName, value?, timeMs/timeSec }`. Scrub sample edge-triggers crossings (not while parked); wire emits on live path only — **demoMode never emits**. `CanvasViewportSurface` status chip + logger consumer (EN, tokens). Documented: GAS/gameplay/physics bind separate. Tests: scene-apply+cue-bus+authoring+setColor **32/32**. Hub checkout HELD. No Onda G. |
