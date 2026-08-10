@@ -9,15 +9,10 @@
 //! single `draw_indirect` call reading that GPU-written count, so the CPU
 //! never even learns how many objects were actually visible.
 //!
-//! Scope note: this implements frustum culling for real (every object is
-//! tested against all 6 frustum planes on the GPU) and wires up the
-//! structure a full Hi-Z occlusion pass would plug into (the `depth_pyramid`
-//! binding + `occlusion_enabled` flag below). The actual Hi-Z mip-chain
-//! generation pass (downsampling last frame's depth buffer into a pyramid of
-//! max-depth mips) is not included here — that is a renderer-integration
-//! task that needs an existing depth target to build from, which this
-//! standalone module doesn't own. Nanite-style virtualized geometry/cluster
-//! LOD selection is a much larger, separate system on top of this.
+//! Scope note: frustum culling is real on the GPU. Hi-Z occlusion **sampling**
+//! is wired when a depth pyramid texture is bound and `occlusion_enabled=1`
+//! (next-frame evidence on secondary_winit). Full Nanite/HZB product occlusion
+//! and Micro-Poly AAA remain HELD — see `gpu_hiz.rs` honesty docs.
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -62,6 +57,7 @@ struct CullingFrustum {
 @group(0) @binding(1) var<uniform> frustum: CullingFrustum;
 @group(0) @binding(2) var<storage, read_write> visible_indices: array<u32>;
 @group(0) @binding(3) var<storage, read_write> visible_count: atomic<u32>;
+@group(0) @binding(4) var depth_pyramid: texture_2d<f32>;
 
 fn sphere_in_frustum(center: vec3<f32>, radius: f32) -> bool {
     for (var i: u32 = 0u; i < 6u; i = i + 1u) {
@@ -72,6 +68,36 @@ fn sphere_in_frustum(center: vec3<f32>, radius: f32) -> bool {
         }
     }
     return true;
+}
+
+fn hiz_occluded(center: vec3<f32>, radius: f32) -> bool {
+    if (frustum.occlusion_enabled == 0u) {
+        return false;
+    }
+    // Match draw NDC mapping (center.xy / 25) → UV.
+    let ndc = center.xy / 25.0;
+    let uv = ndc * 0.5 + vec2<f32>(0.5, 0.5);
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+        return false;
+    }
+    let level0 = textureDimensions(depth_pyramid, 0);
+    let radius_ndc = max(radius / 25.0, 0.001);
+    let radius_px = radius_ndc * f32(level0.x) * 0.5;
+    var mip_i: i32 = 0;
+    if (radius_px > 1.0) {
+        mip_i = i32(floor(log2(radius_px)));
+    }
+    let max_mip = i32(textureNumLevels(depth_pyramid)) - 1;
+    mip_i = clamp(mip_i, 0, max_mip);
+    let dims = textureDimensions(depth_pyramid, mip_i);
+    let coord = vec2<i32>(
+        clamp(i32(uv.x * f32(dims.x)), 0, i32(dims.x) - 1),
+        clamp(i32(uv.y * f32(dims.y)), 0, i32(dims.y) - 1),
+    );
+    let max_z = textureLoad(depth_pyramid, coord, mip_i).r;
+    // Fixture depth proxy matches draw clip.z = 0.5 + center.z/50.
+    let obj_near = clamp(0.5 + center.z / 50.0 - radius / 50.0, 0.0, 1.0);
+    return obj_near > (max_z + 0.002);
 }
 
 @compute @workgroup_size(64)
@@ -85,12 +111,9 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (!sphere_in_frustum(object.center, object.radius)) {
         return;
     }
-
-    // Hi-Z occlusion test plugs in here: sample `depth_pyramid` at the
-    // object's screen-space AABB mip level and reject if fully occluded.
-    // Left as a pass-through (nothing is occlusion-rejected yet) until a
-    // depth pyramid binding is wired in by the renderer that owns the
-    // previous frame's depth target.
+    if (hiz_occluded(object.center, object.radius)) {
+        return;
+    }
 
     let slot = atomicAdd(&visible_count, 1u);
     visible_indices[slot] = index;
@@ -98,9 +121,10 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 "#;
 
 // `dispatch` / `GpuCullingPersistentPass` are exercised by IPC soaks and by the
-// secondary-window engine frame skeleton in `wgpu_renderer.rs` (cull → pack
-// DrawIndirectArgs → draw_indirect → clear/submit/present). Product WebView
-// exclusive present + Hi-Z + true MULTI_DRAW_INDIRECT AAA remain HELD.
+// secondary-window engine frame skeleton in `wgpu_renderer.rs` (cull → optional
+// Hi-Z sample → pack DrawIndirectArgs → draw_indirect → depth → pyramid build
+// → present). Product WebView exclusive present + `hiz_ready` AAA + true
+// MULTI_DRAW_INDIRECT remain HELD.
 pub struct GpuCullingPipeline {
     pub pipeline: wgpu::ComputePipeline,
     pub bind_group_layout: wgpu::BindGroupLayout,
@@ -114,12 +138,12 @@ pub struct GpuCullingPersistentPass {
     /// Kept alive for bind-group storage lifetime (not read after create).
     #[allow(dead_code)]
     object_buffer: wgpu::Buffer,
-    #[allow(dead_code)]
     frustum_buffer: wgpu::Buffer,
     visible_indices_buffer: wgpu::Buffer,
     visible_count_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
     object_count: u32,
+    frustum: CullingFrustum,
 }
 
 impl GpuCullingPersistentPass {
@@ -127,6 +151,7 @@ impl GpuCullingPersistentPass {
         device: &wgpu::Device,
         objects: &[ObjectBounds],
         frustum: CullingFrustum,
+        pyramid_view: &wgpu::TextureView,
     ) -> Result<Self, String> {
         use wgpu::util::DeviceExt;
 
@@ -185,6 +210,10 @@ impl GpuCullingPersistentPass {
                     binding: 3,
                     resource: visible_count_buffer.as_entire_binding(),
                 },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(pyramid_view),
+                },
             ],
         });
 
@@ -196,16 +225,20 @@ impl GpuCullingPersistentPass {
             visible_count_buffer,
             bind_group,
             object_count: objects.len() as u32,
+            frustum,
         })
     }
 
-    /// Zero visible counter then encode one frustum cull pass into `encoder`.
-    /// No map/readback — safe to call on a present hot path before submit.
+    /// Zero visible counter then encode one frustum (+ optional Hi-Z) cull pass.
     pub fn encode_cull(
         &self,
         queue: &wgpu::Queue,
         encoder: &mut wgpu::CommandEncoder,
+        occlusion_enabled: bool,
     ) {
+        let mut frustum = self.frustum;
+        frustum.occlusion_enabled = u32::from(occlusion_enabled);
+        queue.write_buffer(&self.frustum_buffer, 0, bytemuck::bytes_of(&frustum));
         queue.write_buffer(&self.visible_count_buffer, 0, bytemuck::bytes_of(&0u32));
         let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("Aethel Cull Persist Pass"),
@@ -314,6 +347,16 @@ impl GpuCullingPipeline {
                     },
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 4,
+                    visibility: wgpu::ShaderStages::COMPUTE,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: false },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
             ],
         });
 
@@ -378,6 +421,41 @@ impl GpuCullingPipeline {
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
         });
 
+        let dummy_hiz = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Aethel Cull Dispatch Dummy Hi-Z"),
+            size: wgpu::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::R32Float,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+        queue.write_texture(
+            wgpu::ImageCopyTexture {
+                texture: &dummy_hiz,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            bytemuck::bytes_of(&1.0_f32),
+            wgpu::ImageDataLayout {
+                offset: 0,
+                bytes_per_row: Some(4),
+                rows_per_image: Some(1),
+            },
+            wgpu::Extent3d {
+                width: 1,
+                height: 1,
+                depth_or_array_layers: 1,
+            },
+        );
+        let dummy_view = dummy_hiz.create_view(&wgpu::TextureViewDescriptor::default());
+
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Aethel Culling Bind Group"),
             layout: &self.bind_group_layout,
@@ -386,6 +464,10 @@ impl GpuCullingPipeline {
                 wgpu::BindGroupEntry { binding: 1, resource: frustum_buffer.as_entire_binding() },
                 wgpu::BindGroupEntry { binding: 2, resource: visible_indices_buffer.as_entire_binding() },
                 wgpu::BindGroupEntry { binding: 3, resource: visible_count_buffer.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(&dummy_view),
+                },
             ],
         });
 
@@ -618,7 +700,22 @@ pub fn run_gpu_culling_frustum_soak_frames(frames: Option<u32>) -> GpuCullingSoa
     };
 
     let frustum = identity_frustum(total_objects);
-    let persist = match GpuCullingPersistentPass::new(&device, &objects, frustum) {
+    let hiz = match crate::gpu_hiz::DepthPyramidHiz::new_dummy_far(&device) {
+        Ok(h) => h,
+        Err(e) => {
+            let mut r = fail_gpu_culling_report(
+                frames_requested,
+                vec![format!("dummy Hi-Z pyramid init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            return r;
+        }
+    };
+    let persist = match GpuCullingPersistentPass::new(&device, &objects, frustum, hiz.pyramid_view())
+    {
         Ok(p) => p,
         Err(e) => {
             let mut r = fail_gpu_culling_report(frames_requested, vec![e]);
@@ -637,7 +734,7 @@ pub fn run_gpu_culling_frustum_soak_frames(frames: Option<u32>) -> GpuCullingSoa
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Aethel Cull Multi-Frame Encoder"),
         });
-        persist.encode_cull(&queue, &mut encoder);
+        persist.encode_cull(&queue, &mut encoder, false);
         queue.submit(Some(encoder.finish()));
         device.poll(wgpu::Maintain::Wait);
         frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);

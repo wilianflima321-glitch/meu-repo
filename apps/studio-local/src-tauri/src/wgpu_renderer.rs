@@ -10,14 +10,13 @@
 //!   owns the HWND; mounting a wgpu surface without exclusive ownership is identity
 //!   only, never product viewport replacement).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   **engine frame skeleton** (`encode_cull` → pack `DrawIndirectArgs` →
-//!   clear + `draw_indirect` → `queue.submit` → `SurfaceTexture::present`) with
-//!   **no CPU readback** on the hot path. Final cull count may be read **after**
-//!   the loop for evidence only.
-//! - `live_present` in web honesty flips only when this probe returns
-//!   `presented: true` **and** `submitted: true` (desktop honesty status stays fallback).
-//! - Never Nanite/Lumen/UE-RHI / Micro-Poly / MULTI_DRAW_INDIRECT AAA marketing
-//!   from mount or probe alone.
+//!   **engine frame skeleton** (`encode_cull` [+ next-frame Hi-Z sample] →
+//!   pack `DrawIndirectArgs` → clear + depth + `draw_indirect` → build depth
+//!   pyramid → `queue.submit` → `SurfaceTexture::present`) with **no CPU
+//!   readback** on the hot path. Final cull count may be read **after** the
+//!   loop for evidence only.
+//! - `hiz_ready` / Nanite / Micro-Poly AAA stay **false** — pyramid substrate ≠
+//!   product RHI occlusion. WebView exclusive present remains HELD.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -31,6 +30,7 @@ use winit::window::WindowBuilder;
 use crate::gpu_culling::{
     identity_frustum, soak_fixture_objects, GpuCullingPersistentPass, GpuCullingPipeline,
 };
+use crate::gpu_hiz::DepthPyramidHiz;
 use crate::gpu_indirect_draw::IndirectDrawScaffold;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
@@ -101,6 +101,18 @@ pub struct RendererPresentProbeReport {
     pub bindless_layout_scaffold: bool,
     /// Always false — full bindless descriptor heap / UE RHI bindless AAA HELD.
     pub bindless_aaa_ready: bool,
+    /// Mip levels in the secondary Hi-Z R32Float pyramid (0 if not built).
+    pub hiz_pyramid_mips: u32,
+    /// Total max-downsample compute passes across presented frames.
+    pub hiz_downsample_passes: u32,
+    /// Frames where cull ran with `occlusion_enabled=1` (next-frame sample).
+    pub hiz_cull_sampled_frames: u32,
+    /// Instant ms spent in Hi-Z copy+downsample (sum over frames). Never fabricated.
+    pub hiz_build_ms_total: f64,
+    /// True when mip_count≥2, downsample ran, and ≥1 next-frame cull sample.
+    pub hiz_substrate_proven: bool,
+    /// Always false — product RHI / Nanite HZB / shipping occlusion not claimed.
+    pub hiz_ready: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -199,9 +211,9 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit swapchain present + single draw_indirect only — not IDE viewport replacement".into(),
+        "Probe proves secondary winit swapchain present + single draw_indirect + Hi-Z pyramid substrate only".into(),
+        "hiz_ready stays false — substrate ≠ Nanite/HZB product occlusion".into(),
         "True MULTI_DRAW_INDIRECT batch / Nanite/Lumen/virtualized geometry still HELD".into(),
-        "CPU texture readback / staging copies for capture remain HELD if needed later".into(),
     ]
 }
 
@@ -233,6 +245,12 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         multi_draw_indirect_aaa_ready: false,
         bindless_layout_scaffold: false,
         bindless_aaa_ready: false,
+        hiz_pyramid_mips: 0,
+        hiz_downsample_passes: 0,
+        hiz_cull_sampled_frames: 0,
+        hiz_build_ms_total: 0.0,
+        hiz_substrate_proven: false,
+        hiz_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -244,14 +262,21 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
     }
 }
 
-/// Cull → pack indirect → clear + draw_indirect → submit + present. No map/readback.
+struct EngineFrameOutcome {
+    hiz_downs: u32,
+    hiz_build_ms: f64,
+}
+
+/// Cull → pack → clear+depth+draw_indirect → Hi-Z pyramid build → present.
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
-    cull: Option<&GpuCullingPersistentPass>,
-    indirect: Option<&IndirectDrawScaffold>,
-) -> Result<(), String> {
+    cull: &GpuCullingPersistentPass,
+    indirect: &IndirectDrawScaffold,
+    hiz: &DepthPyramidHiz,
+    occlusion_enabled: bool,
+) -> Result<EngineFrameOutcome, String> {
     let frame = surface
         .get_current_texture()
         .map_err(|e| format!("get_current_texture failed: {e}"))?;
@@ -261,15 +286,11 @@ fn present_one_engine_frame(
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("aethel-engine-frame-encoder"),
     });
-    if let Some(pass) = cull {
-        pass.encode_cull(queue, &mut encoder);
-    }
-    if let Some(ind) = indirect {
-        ind.encode_pack(&mut encoder);
-    }
+    cull.encode_cull(queue, &mut encoder, occlusion_enabled);
+    indirect.encode_pack(&mut encoder);
     {
         let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("aethel-present-probe-clear-draw"),
+            label: Some("aethel-present-probe-clear-draw-depth"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
                 resolve_target: None,
@@ -283,17 +304,28 @@ fn present_one_engine_frame(
                     store: wgpu::StoreOp::Store,
                 },
             })],
-            depth_stencil_attachment: None,
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: hiz.depth_view(),
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(1.0),
+                    store: wgpu::StoreOp::Store,
+                }),
+                stencil_ops: None,
+            }),
             occlusion_query_set: None,
             timestamp_writes: None,
         });
-        if let Some(ind) = indirect {
-            ind.encode_draw_indirect(&mut rpass);
-        }
+        indirect.encode_draw_indirect(&mut rpass);
     }
+    let t_hiz = std::time::Instant::now();
+    let hiz_downs = hiz.encode_build(&mut encoder);
+    let hiz_build_ms = t_hiz.elapsed().as_secs_f64() * 1000.0;
     queue.submit(std::iter::once(encoder.finish()));
     frame.present();
-    Ok(())
+    Ok(EngineFrameOutcome {
+        hiz_downs,
+        hiz_build_ms,
+    })
 }
 
 fn configure_surface(
@@ -356,7 +388,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
 
     let window = match WindowBuilder::new()
         .with_title("Aethel Present Probe")
-        .with_inner_size(PhysicalSize::new(64, 64))
+        .with_inner_size(PhysicalSize::new(128, 128))
         .with_visible(false)
         .build(&event_loop)
     {
@@ -447,12 +479,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
 
     let (objects, expected_visible) = soak_fixture_objects();
     let frustum = identity_frustum(objects.len() as u32);
-    let cull_pass = match GpuCullingPersistentPass::new(&device, &objects, frustum) {
-        Ok(p) => p,
+
+    let hiz = match DepthPyramidHiz::new(&device, size.width.max(2), size.height.max(2)) {
+        Ok(h) => h,
         Err(e) => {
             let mut r = fail_report(
                 frames_requested,
-                vec![format!("GpuCullingPersistentPass init failed: {e}")],
+                vec![format!("DepthPyramidHiz init failed: {e}")],
             );
             r.adapter_acquired = true;
             r.device_created = true;
@@ -463,6 +496,24 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             return r;
         }
     };
+
+    let cull_pass =
+        match GpuCullingPersistentPass::new(&device, &objects, frustum, hiz.pyramid_view()) {
+            Ok(p) => p,
+            Err(e) => {
+                let mut r = fail_report(
+                    frames_requested,
+                    vec![format!("GpuCullingPersistentPass init failed: {e}")],
+                );
+                r.adapter_acquired = true;
+                r.device_created = true;
+                r.adapter_name = adapter_name;
+                r.backend = backend;
+                r.surface_kind = "secondary_winit".into();
+                r.surface_configured = true;
+                return r;
+            }
+        };
 
     let indirect = match IndirectDrawScaffold::new(&device, surface_format, &cull_pass, &objects) {
         Ok(s) => s,
@@ -484,23 +535,36 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut frames_presented = 0u32;
     let mut cull_dispatches = 0u32;
     let mut indirect_draws = 0u32;
+    let mut hiz_downsample_passes = 0u32;
+    let mut hiz_cull_sampled_frames = 0u32;
+    let mut hiz_build_ms_total = 0.0_f64;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
-    for _ in 0..frames_requested {
+    for frame_i in 0..frames_requested {
+        // Frame 0 builds pyramid with occlusion off; frame ≥1 samples prior Hi-Z.
+        let occlusion_enabled = frame_i > 0;
         let t0 = std::time::Instant::now();
         match present_one_engine_frame(
             &device,
             &queue,
             &surface,
-            Some(&cull_pass),
-            Some(&indirect),
+            &cull_pass,
+            &indirect,
+            &hiz,
+            occlusion_enabled,
         ) {
-            Ok(()) => {
+            Ok(outcome) => {
                 submitted = true;
                 frames_presented = frames_presented.saturating_add(1);
                 cull_dispatches = cull_dispatches.saturating_add(1);
                 indirect_draws = indirect_draws.saturating_add(1);
+                hiz_downsample_passes =
+                    hiz_downsample_passes.saturating_add(outcome.hiz_downs);
+                hiz_build_ms_total += outcome.hiz_build_ms;
+                if occlusion_enabled {
+                    hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
+                }
                 frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);
             }
             Err(e) => {
@@ -516,8 +580,15 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     } else {
         0
     };
-    let cull_frustum_ok = cull_visible_final == expected_visible && cull_dispatches > 0;
+    // With Hi-Z sampling, last-frame visible may be ≤ expected frustum-only count.
+    let cull_frustum_ok = cull_visible_final > 0
+        && cull_visible_final <= expected_visible
+        && cull_dispatches > 0;
     let indirect_draw_wired = presented_ok(frames_presented, indirect_draws) && cull_frustum_ok;
+    let hiz_substrate_proven = hiz.mip_count >= 2
+        && hiz_downsample_passes > 0
+        && hiz_cull_sampled_frames > 0
+        && frames_presented > 1;
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -540,10 +611,14 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cull→pack→draw_indirect→submit→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
-            "Cull dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (expected {expected_visible}); frustum_ok={cull_frustum_ok}"
+            "Cull dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}"
+        ));
+        reasons.push(format!(
+            "Hi-Z mips={} downs={hiz_downsample_passes} sampled_frames={hiz_cull_sampled_frames} build_ms_total={hiz_build_ms_total:.3}; hiz_substrate_proven={hiz_substrate_proven}; hiz_ready=false",
+            hiz.mip_count
         ));
         reasons.push(format!(
             "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}"
@@ -552,7 +627,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
         );
         reasons.push(
-            "True MULTI_DRAW_INDIRECT / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
+            "hiz_ready / MULTI_DRAW_INDIRECT AAA / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
                 .into(),
         );
     } else {
@@ -589,6 +664,12 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         multi_draw_indirect_aaa_ready: false,
         bindless_layout_scaffold: indirect_draw_wired,
         bindless_aaa_ready: false,
+        hiz_pyramid_mips: if presented { hiz.mip_count } else { 0 },
+        hiz_downsample_passes,
+        hiz_cull_sampled_frames,
+        hiz_build_ms_total,
+        hiz_substrate_proven,
+        hiz_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -597,7 +678,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: secondary winit cull→draw_indirect frame skeleton proven — live_present eligible; UE RHI / WebView exclusive / MULTI_DRAW_INDIRECT AAA / Nanite/Lumen/Micro-Poly still HELD".into()
+            "Desktop soak: secondary winit cull→draw_indirect→Hi-Z pyramid substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -683,6 +764,8 @@ mod tests {
         assert!(!r.lumen_ready);
         assert!(!r.micro_poly_aaa_ready);
         assert!(!r.unreal_rhi_parity_ready);
+        assert!(!r.hiz_ready);
+        assert!(!r.hiz_substrate_proven);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
         assert!(!r.multi_draw_indirect_aaa_ready);
@@ -697,7 +780,7 @@ mod tests {
     #[test]
     fn present_probe_soak_is_honest() {
         // Integration soak: may fail on headless CI without GPU — must never fake success.
-        let r = run_renderer_present_probe(Some(2));
+        let r = run_renderer_present_probe(Some(3));
         assert_eq!(r.letter, "cw3-present");
         assert!(!r.nanite_ready);
         assert!(!r.lumen_ready);
@@ -705,6 +788,7 @@ mod tests {
         assert!(!r.unreal_rhi_parity_ready);
         assert!(!r.multi_draw_indirect_aaa_ready);
         assert!(!r.bindless_aaa_ready);
+        assert!(!r.hiz_ready);
         assert!(r.webview_exclusive_present_held);
         assert!(!r.cpu_readback_on_hot_path);
         assert!(r.frames_requested <= MAX_PRESENT_SOAK_FRAMES);
@@ -719,7 +803,12 @@ mod tests {
             assert!(r.engine_frame_loop_with_cull);
             assert_eq!(r.cull_dispatches, r.frames_presented);
             assert!(r.frame_ms_total >= 0.0);
-            // indirect_draw_wired only when frustum evidence also matched
+            assert!(r.hiz_pyramid_mips >= 2);
+            assert!(r.hiz_downsample_passes > 0);
+            if r.frames_presented > 1 {
+                assert!(r.hiz_cull_sampled_frames > 0);
+                assert!(r.hiz_substrate_proven);
+            }
             if r.cull_frustum_ok {
                 assert!(r.indirect_draw_wired);
                 assert!(r.bindless_layout_scaffold);
@@ -729,6 +818,7 @@ mod tests {
         } else {
             assert_eq!(r.frames_presented, 0);
             assert!(!r.indirect_draw_wired);
+            assert!(!r.hiz_substrate_proven);
             assert!(!r.reasons.is_empty());
         }
         assert!(!r.held_vs_ue_rhi.is_empty());
@@ -741,5 +831,6 @@ mod tests {
         assert!(!r.unreal_rhi_parity_ready);
         assert!(!r.micro_poly_aaa_ready);
         assert!(!r.multi_draw_indirect_aaa_ready);
+        assert!(!r.hiz_ready);
     }
 }

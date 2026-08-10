@@ -146,9 +146,9 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 state: NativeKernelState::NeedsReview,
                 evidence_refs: vec!["src-tauri/src/gpu_culling.rs"],
                 blocker: Some(
-                    "Frustum cull + single draw_indirect proven on secondary_winit frame skeleton (measured Instant); product WebView exclusive present + MULTI_DRAW_INDIRECT AAA still HELD.",
+                    "Hi-Z depth pyramid substrate + next-frame cull sample proven on secondary_winit (measured Instant); hiz_ready stays false; product WebView exclusive + MULTI_DRAW_INDIRECT AAA still HELD.",
                 ),
-                next_action: "Hi-Z depth pyramid next-frame occlusion, then WebView/product present path or MULTI_DRAW_INDIRECT batch (CW3 Path A residual).",
+                next_action: "Product WebView/exclusive present path or MULTI_DRAW_INDIRECT batch; never flip hiz_ready without AAA Parity fixtures.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

@@ -74,7 +74,7 @@ fn vs_main(
     // Fixture centers live in ~[-50,50]; map into a visible NDC band.
     let ndc = (obj.center.xy / 25.0) + corners[vid];
     var out: VsOut;
-    out.clip_pos = vec4<f32>(ndc, 0.0, 1.0);
+    out.clip_pos = vec4<f32>(ndc, clamp(0.5 + obj.center.z / 50.0, 0.01, 0.99), 1.0);
     let t = f32(obj_idx) * 0.08;
     out.color = vec3<f32>(0.25 + t, 0.55, 0.85 - t * 0.5);
     return out;
@@ -244,7 +244,13 @@ impl IndirectDrawScaffold {
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 ..Default::default()
             },
-            depth_stencil: None,
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: wgpu::TextureFormat::Depth32Float,
+                depth_write_enabled: true,
+                depth_compare: wgpu::CompareFunction::Less,
+                stencil: wgpu::StencilState::default(),
+                bias: wgpu::DepthBiasState::default(),
+            }),
             multisample: wgpu::MultisampleState::default(),
             multiview: None,
         });
