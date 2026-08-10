@@ -239,12 +239,22 @@ export function buildConsolidationTruthMatrix(
     {
       id: 'render.parity.3b2',
       claim:
-        '3B.2 screenshot/hash parity harness EXISTS (GF-PARITY-3B2-001) — frameGraphLive HELD; G.3% locked 15; band 15→30 HELD pending PP-01/03',
+        '3B.2 screenshot/hash parity harness EXISTS (GF-PARITY-3B2-001) — optional engine desktop fingerprint ingest; frameGraphLive HELD; G.3% locked 15; band 15→30 HELD pending PP-01/03',
       path: 'lib/production/frame-parity-harness-3b2.ts',
       status: 'PARTIAL',
       marketingAllowed: false,
-      lastEvidence: 'harnessExists=true|g3Band15To30Passed=false|frameGraphLive=false|fixture=GF-PARITY-3B2-001',
+      lastEvidence: 'harnessExists=true|g3Band15To30Passed=false|frameGraphLive=false|fixture=GF-PARITY-3B2-001|engineIngest=optional',
       gatedNames: ['Nanite', 'Lumen', 'frameGraphLive', 'WebGPU present', 'G.3% uplift'],
+    },
+    {
+      id: 'render.g3-band-15-30-critic',
+      claim:
+        'Critic 15→30 checklist machine-readable (PP-03/session/60s/3B.2/CapScore) — g3Band15To30Passed=false; Progress % bump refused; G.3% locked 15',
+      path: 'lib/production/g3-band-15-to-30-critic-checklist.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      lastEvidence: 'checklist=G3-BAND-15-30-CHECKLIST|g3Band15To30Passed=false|bumpAllowed=false',
+      gatedNames: ['Nanite', 'Lumen', 'G.3% uplift', '15→30 band pass'],
     },
     {
       id: 'render.gf-mesh-001',

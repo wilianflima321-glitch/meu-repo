@@ -12,6 +12,10 @@ import { evaluateFrameParityHarnessReadiness } from '@/lib/production/frame-pari
 import { evaluateGfMesh001Readiness } from '@/lib/production/gf-mesh-001-visibility-fixture'
 import { evaluateGfMesh001PbrReadiness } from '@/lib/production/gf-mesh-001-material-pbr-fixture'
 import { evaluateHizOcclusionWinReadiness } from '@/lib/production/hiz-occlusion-win-harness'
+import {
+  evaluateG3Band15To30CriticChecklist,
+  refuseG3ProgressPercentBump,
+} from '@/lib/production/g3-band-15-to-30-critic-checklist'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/renderer-honesty/route')
@@ -63,10 +67,45 @@ export async function GET(req: NextRequest) {
       maxBufferSize: Number(sp.get('maxBuffer')) || 268_435_456,
     },
   })
-  const frameParity = evaluateFrameParityHarnessReadiness()
+  const frameParity = evaluateFrameParityHarnessReadiness({
+    engineDesktop: (() => {
+      const contentHash = sp.get('desktopFrameHash') ?? sp.get('engineFrameHash')
+      if (!contentHash) return null
+      const w = Number(sp.get('desktopFrameW') ?? sp.get('engineFrameW'))
+      const h = Number(sp.get('desktopFrameH') ?? sp.get('engineFrameH'))
+      const frameIndex = Number(sp.get('desktopFrameIndex') ?? sp.get('engineFrameIndex'))
+      return {
+        contentHash,
+        width: Number.isFinite(w) ? w : undefined,
+        height: Number.isFinite(h) ? h : undefined,
+        sceneId: sp.get('desktopSceneId') ?? sp.get('engineSceneId') ?? undefined,
+        frameIndex: Number.isFinite(frameIndex) ? frameIndex : undefined,
+        evidenceFingerprint: sp.get('desktopEvidenceFp') ?? undefined,
+      }
+    })(),
+  })
   const gfMesh001 = evaluateGfMesh001Readiness()
   const gfMeshPbr = evaluateGfMesh001PbrReadiness()
   const hizWin = evaluateHizOcclusionWinReadiness()
+  const g3Band1530 = evaluateG3Band15To30CriticChecklist({
+    pp03PersistentLoopProven: parseBool('pp03PersistentLoop'),
+    sessionOwnedByProduct: parseBool('sessionOwnedByProduct'),
+    soak60sNoPassDrop: parseBool('soak60sNoPassDrop'),
+    soakDurationSec: (() => {
+      const n = Number(sp.get('soakDurationSec'))
+      return Number.isFinite(n) ? n : undefined
+    })(),
+    soakEvidenceFingerprint: sp.get('soakEvidenceFp') ?? undefined,
+    productPresentReady: parseBool('productPresentReady'),
+    cargoCheckGreen: parseBool('cargoCheckGreen'),
+    cargoClippyGreen: parseBool('cargoClippyGreen'),
+    changelogIndexSynced: parseBool('changelogIndexSynced'),
+    criticCitationSha: sp.get('criticCitationSha') ?? undefined,
+  })
+  const bumpRefuse = refuseG3ProgressPercentBump({
+    proposedPercent: Number(sp.get('proposeG3Percent') ?? 30),
+    checklist: g3Band1530,
+  })
 
   // Desktop present evidence — only from explicit probe params (never invent).
   // Fail-closed: presented without submitted must not flip live_present.
@@ -115,11 +154,13 @@ export async function GET(req: NextRequest) {
     gfMesh001Ready: gfMesh001.ready,
     gfMeshPbrReady: gfMeshPbr.ready,
     hizWinReady: hizWin.ready,
+    g3Band1530Ready: g3Band1530.ready,
+    g3Band15To30Passed: false,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity+gf-mesh-001+pbr+hiz-win',
+    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity+gf-mesh-001+pbr+hiz-win+g3-critic-15-30',
     report,
     /** CW3 — operator present root mirrored at top level for Studio/IDE chrome. */
     presentRoot: report.presentRoot ?? null,
@@ -133,7 +174,7 @@ export async function GET(req: NextRequest) {
       marketingAllowed: false,
       reason: gpuSoak.reason,
     },
-    /** G.% ladder 15→30 gate #4 — harness exists; band still HELD. */
+    /** G.% ladder 15→30 gate #4 — harness exists; optional engine desktop fingerprint ingest. */
     frameParity3b2: {
       letter: frameParity.letter,
       fixtureId: frameParity.fixtureId,
@@ -149,6 +190,24 @@ export async function GET(req: NextRequest) {
       lumenMarketingAllowed: false,
       webgpuProductPresentReady: false,
       reason: frameParity.reason,
+    },
+    /** G.% ladder 15→30 Critic checklist — machine-readable; band NOT passed; % bump refused. */
+    g3Band15To30Critic: {
+      letter: g3Band1530.letter,
+      checklistId: g3Band1530.checklistId,
+      ready: g3Band1530.ready,
+      status: g3Band1530.status,
+      passCount: g3Band1530.passCount,
+      heldCount: g3Band1530.heldCount,
+      failCount: g3Band1530.failCount,
+      gates: g3Band1530.gates,
+      evidenceFingerprint: g3Band1530.evidenceFingerprint,
+      g3CodeDepthPercent: g3Band1530.g3CodeDepthPercent,
+      g3Band15To30Passed: false,
+      naniteReady: false,
+      lumenReady: false,
+      progressPercentBump: bumpRefuse,
+      reason: g3Band1530.reason,
     },
     /** G.% ladder 30→50 prep — GF-MESH-001 on disk + golden visibility; band HELD. */
     gfMesh001: {

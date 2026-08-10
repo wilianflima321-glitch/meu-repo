@@ -44,6 +44,21 @@ export type FrameParityRejectCode =
   | 'webgpu_present_claim_forbidden'
   | 'strict_hash_mismatch'
   | 'all_zero_pixels'
+  | 'invalid_engine_fingerprint'
+
+/** Optional engine/desktop frame hash ingest (honesty API query params). */
+export type EngineDesktopFrameFingerprintInput = {
+  /** SHA-256 hex of frame content (64 hex chars preferred; ≥16 accepted). */
+  contentHash: string
+  width?: number
+  height?: number
+  sceneId?: string
+  frameIndex?: number
+  evidenceFingerprint?: string
+  hashDurationMs?: number
+  /** Instant / engine capture timestamp ISO — optional. */
+  capturedAt?: string
+}
 
 export type FrameParityCompareMode = 'strict' | 'fail_open_measured'
 
@@ -313,6 +328,84 @@ export function fingerprintFrameBuffer(input: {
 }
 
 /**
+ * Ingest engine/desktop frame fingerprint by content hash (no pixel theater).
+ * Fail-closed on empty / theater / invalid hash. Used by honesty API when
+ * desktop/engine provides a fingerprint; absent → fail-open measured upstream.
+ */
+export function ingestDesktopFrameFingerprintFromEngine(
+  input: EngineDesktopFrameFingerprintInput,
+): FrameFingerprintResult {
+  const contentHash = input.contentHash?.trim() ?? ''
+  const sceneId = input.sceneId?.trim() || FRAME_PARITY_HARNESS_FIXTURE_ID
+
+  if (!contentHash || contentHash.length < 16) {
+    return {
+      ok: false,
+      code: 'invalid_engine_fingerprint',
+      message: '3B.2 ingest refused — desktop/engine contentHash missing or too short',
+      success: false,
+    }
+  }
+
+  if (isTheaterSceneId(sceneId) || isTheaterSceneId(contentHash)) {
+    return {
+      ok: false,
+      code: 'theater_payload',
+      message: '3B.2 ingest refused — theater/placeholder desktop/engine fingerprint',
+      success: false,
+    }
+  }
+
+  if (!/^[a-fA-F0-9]+$/.test(contentHash)) {
+    return {
+      ok: false,
+      code: 'invalid_engine_fingerprint',
+      message: '3B.2 ingest refused — desktop/engine contentHash must be hex',
+      success: false,
+    }
+  }
+
+  const width = Math.max(1, Math.floor(input.width ?? 1))
+  const height = Math.max(1, Math.floor(input.height ?? 1))
+  const frameIndex = Number.isFinite(input.frameIndex) ? Math.floor(input.frameIndex!) : 0
+  const normalizedHash = contentHash.toLowerCase()
+  const evidenceFingerprint =
+    input.evidenceFingerprint?.trim().slice(0, 16) || normalizedHash.slice(0, 16)
+
+  if (isTheaterSceneId(evidenceFingerprint)) {
+    return {
+      ok: false,
+      code: 'theater_payload',
+      message: '3B.2 ingest refused — theater evidenceFingerprint',
+      success: false,
+    }
+  }
+
+  const fingerprint: FrameFingerprint = {
+    surface: 'desktop_present',
+    width,
+    height,
+    byteLength: width * height * 4,
+    contentHash: normalizedHash,
+    evidenceFingerprint,
+    sceneId,
+    frameIndex,
+    capturedAt: input.capturedAt?.trim() || new Date().toISOString(),
+    hashDurationMs: Math.max(0, Number(input.hashDurationMs) || 0),
+  }
+
+  log.info('frame_parity_engine_ingest', {
+    surface: fingerprint.surface,
+    sceneId: fingerprint.sceneId,
+    evidenceFingerprint: fingerprint.evidenceFingerprint,
+    width: fingerprint.width,
+    height: fingerprint.height,
+  })
+
+  return { ok: true, fingerprint }
+}
+
+/**
  * Compare web preview vs desktop present hashes.
  * fail_open_measured: desktop missing → ok with match=null (ladder gate #4 allows measured HELD).
  * strict: both required; mismatch → fail-closed.
@@ -441,10 +534,13 @@ export function compareWebVsDesktopParity(input: {
 }
 
 /**
- * End-to-end soak: rasterize fixture → fingerprint web (+ optional desktop twin) → compare.
+ * End-to-end soak: rasterize fixture → fingerprint web (+ optional desktop twin
+ * or engine-ingested fingerprint) → compare.
  */
 export function proveFrameParityHarnessSoak(input?: {
   includeDesktopTwin?: boolean
+  /** Prefer engine/desktop hash when provided (honesty API ingest). */
+  engineDesktop?: EngineDesktopFrameFingerprintInput | null
   mode?: FrameParityCompareMode
   seed?: number
   now?: () => number
@@ -482,7 +578,26 @@ export function proveFrameParityHarnessSoak(input?: {
   }
 
   let desktopFp: FrameFingerprint | null = null
-  if (input?.includeDesktopTwin) {
+
+  if (input?.engineDesktop?.contentHash) {
+    const ingested = ingestDesktopFrameFingerprintFromEngine(input.engineDesktop)
+    if (!ingested.ok) {
+      return {
+        ok: false,
+        code: ingested.code,
+        message: ingested.message,
+        success: false,
+        harnessExists: true,
+        frameGraphLive: false,
+        g3CodeDepthPercent: G3_CODE_DEPTH_PERCENT_LOCKED,
+        g3Band15To30Passed: false,
+        naniteMarketingAllowed: false,
+        lumenMarketingAllowed: false,
+        webgpuProductPresentReady: false,
+      }
+    }
+    desktopFp = ingested.fingerprint
+  } else if (input?.includeDesktopTwin) {
     // Same deterministic buffer tagged as desktop_present — proves compare path.
     // Real product present still HELD (engine PP-01/03).
     const desk = fingerprintFrameBuffer({
@@ -515,14 +630,33 @@ export function proveFrameParityHarnessSoak(input?: {
   return compareWebVsDesktopParity({
     web: webFp.fingerprint,
     desktop: desktopFp,
-    mode: input?.mode ?? (desktopFp ? 'strict' : 'fail_open_measured'),
+    mode:
+      input?.mode ??
+      (desktopFp ? (input?.engineDesktop ? 'fail_open_measured' : 'strict') : 'fail_open_measured'),
     claimsWebGpuProductPresent: false,
   })
 }
 
-export function evaluateFrameParityHarnessReadiness(): FrameParityHarnessReadiness {
+export type FrameParityReadinessOptions = {
+  /** Optional desktop/engine fingerprint from honesty query params. */
+  engineDesktop?: EngineDesktopFrameFingerprintInput | null
+}
+
+export function evaluateFrameParityHarnessReadiness(
+  options: FrameParityReadinessOptions = {},
+): FrameParityHarnessReadiness {
+  const engineDesktop = options.engineDesktop ?? null
+  const hasEngine = Boolean(engineDesktop?.contentHash?.trim())
+
+  // Self-check always runs with twin (harness existence). Engine ingest is additive.
   const soak = proveFrameParityHarnessSoak({ includeDesktopTwin: true, mode: 'strict' })
   const failOpen = proveFrameParityHarnessSoak({ includeDesktopTwin: false })
+  const withEngine = hasEngine
+    ? proveFrameParityHarnessSoak({
+        engineDesktop,
+        mode: 'fail_open_measured',
+      })
+    : null
 
   if (!soak.ok || !failOpen.ok) {
     return {
@@ -544,13 +678,41 @@ export function evaluateFrameParityHarnessReadiness(): FrameParityHarnessReadine
     }
   }
 
+  if (withEngine && !withEngine.ok) {
+    return {
+      harnessExists: true,
+      letter: FRAME_PARITY_HARNESS_LETTER,
+      fixtureId: FRAME_PARITY_HARNESS_FIXTURE_ID,
+      status: 'HELD',
+      ready: false,
+      evidenceFingerprint: soak.evidenceFingerprint,
+      frameGraphLive: false,
+      g3CodeDepthPercent: G3_CODE_DEPTH_PERCENT_LOCKED,
+      g3Band15To30Passed: false,
+      band15To30HeldReason:
+        '15→30 band HELD — engine desktop fingerprint ingest refused (theater/invalid); PP-01/03 + 60s soak still open',
+      naniteMarketingAllowed: false,
+      lumenMarketingAllowed: false,
+      webgpuProductPresentReady: false,
+      reason: withEngine.message,
+    }
+  }
+
+  const evidenceFingerprint =
+    withEngine && withEngine.ok ? withEngine.evidenceFingerprint : soak.evidenceFingerprint
+  const ingestNote = withEngine && withEngine.ok
+    ? withEngine.failOpenMeasured
+      ? 'engine desktop fingerprint ingested (measured compare)'
+      : `engine desktop fingerprint ingested (match=${String(withEngine.match)})`
+    : 'desktop/engine fingerprint absent (fail-open measured)'
+
   return {
     harnessExists: true,
     letter: FRAME_PARITY_HARNESS_LETTER,
     fixtureId: FRAME_PARITY_HARNESS_FIXTURE_ID,
     status: 'PARTIAL',
     ready: true,
-    evidenceFingerprint: soak.evidenceFingerprint,
+    evidenceFingerprint,
     frameGraphLive: false,
     g3CodeDepthPercent: G3_CODE_DEPTH_PERCENT_LOCKED,
     g3Band15To30Passed: false,
@@ -559,6 +721,6 @@ export function evaluateFrameParityHarnessReadiness(): FrameParityHarnessReadine
     naniteMarketingAllowed: false,
     lumenMarketingAllowed: false,
     webgpuProductPresentReady: false,
-    reason: soak.claim,
+    reason: `${soak.claim}; ${ingestNote}`,
   }
 }
