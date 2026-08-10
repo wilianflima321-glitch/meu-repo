@@ -1,6 +1,7 @@
 /**
  * Letter cv — Destruction / GPU fracture honesty aggregator.
  * `gpuFractureReady` soak-gated; Chaos parity always HELD.
+ * FractureGraph strain evidence is PARTIAL and never flips AAA.
  */
 
 import {
@@ -14,6 +15,13 @@ import {
   proveGpuFractureReady,
   type GpuFractureComputeSoakResult,
 } from '@/lib/destruction/gpu-fracture'
+import {
+  CHAOS_DESTRUCTION_AAA_READY,
+  CHAOS_DESTRUCTION_MARKETING_ALLOWED,
+  UNREAL_CHAOS_PARITY_READY,
+  probeChaosDestructionEvidenceReadiness,
+  runChaosDestructionEvidenceSoak,
+} from '@/lib/destruction/chaos-destruction-evidence'
 import { FRACTURE_GEOMETRY_SHIP_STATUS } from '@/lib/destruction-fracture-generator'
 import { FRAGMENT_PHYSICS_SHIP_STATUS } from '@/lib/destruction-fragment-physics'
 
@@ -24,6 +32,9 @@ export interface DestructionHonestyReport {
   chaosParityReady: false
   chaosParityHeld: true
   chaosParityMarketingAllowed: false
+  chaosDestructionEvidenceReady: boolean
+  chaosDestructionAaaReady: false
+  unrealChaosParityReady: false
   fortune3d: 'HELD'
   dest001ConvexHull: 'SHIPPED'
   fragmentRapier: 'SHIPPED' | 'HELD'
@@ -50,6 +61,8 @@ export function probeDestructionHonesty(input?: {
   })
   const gpuFractureReady = plan.gpuFractureReady || proveGpuFractureReady()
   const letter = GPU_FRACTURE_LETTER
+  const chaosEvidence = probeChaosDestructionEvidenceReadiness()
+  const soakEvidence = runChaosDestructionEvidenceSoak()
 
   return {
     letter,
@@ -58,6 +71,9 @@ export function probeDestructionHonesty(input?: {
     chaosParityReady: CHAOS_PARITY_READY,
     chaosParityHeld: CHAOS_PARITY_HELD,
     chaosParityMarketingAllowed: CHAOS_PARITY_MARKETING_ALLOWED,
+    chaosDestructionEvidenceReady: chaosEvidence.ready && soakEvidence.ok,
+    chaosDestructionAaaReady: CHAOS_DESTRUCTION_AAA_READY,
+    unrealChaosParityReady: UNREAL_CHAOS_PARITY_READY,
     fortune3d: FRACTURE_GEOMETRY_SHIP_STATUS.fortune3d,
     dest001ConvexHull: FRACTURE_GEOMETRY_SHIP_STATUS.cellGeometry,
     fragmentRapier: FRAGMENT_PHYSICS_SHIP_STATUS.rapier,
@@ -72,6 +88,10 @@ export function probeDestructionHonesty(input?: {
         ? 'gpuFractureReady CLOSED (letter cv) — WebGPU debris soak; GT730 Zero-UI; Chaos parity HELD'
         : 'gpuFractureReady pending soak — CPU debris Zero-UI active',
       FRACTURE_GEOMETRY_SHIP_STATUS.note,
+      chaosEvidence.note,
+      CHAOS_DESTRUCTION_MARKETING_ALLOWED
+        ? 'Chaos marketing unexpectedly allowed'
+        : 'Chaos AAA / Unreal Chaos parity marketing HELD',
     ],
   }
 }

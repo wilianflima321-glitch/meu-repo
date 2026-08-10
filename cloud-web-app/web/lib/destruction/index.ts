@@ -56,3 +56,15 @@ export {
   probeDestructionHonesty,
   type DestructionHonestyReport,
 } from '@/lib/destruction/destruction-honesty'
+
+export {
+  CHAOS_DESTRUCTION_AAA_READY,
+  UNREAL_CHAOS_PARITY_READY,
+  CHAOS_DESTRUCTION_MARKETING_ALLOWED,
+  buildChaosEvidenceFixture,
+  runChaosDestructionEvidenceSoak,
+  claimChaosDestructionAaa,
+  claimUnrealChaosParity,
+  probeChaosDestructionEvidenceReadiness,
+  type ChaosDestructionEvidence,
+} from '@/lib/destruction/chaos-destruction-evidence'

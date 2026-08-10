@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const report = evaluateAudioHonesty()
+  const report = await evaluateAudioHonesty()
   log.info('audio_honesty_api', {
     metasounds: report.metasoundsCompiler.status,
+    graphEvidence: report.metasoundsGraphEvidence.status,
     voice: report.voiceGenerateAudible.status,
     hrtf: report.fullHrtfAaa.status,
   })
