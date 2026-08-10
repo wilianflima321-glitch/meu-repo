@@ -70,3 +70,12 @@ export {
   probeCompetitiveRollbackHonesty,
   type CompetitiveRollbackHonesty,
 } from './competitive-rollback-honesty'
+
+export {
+  GGPO_LIVE_FROM_TICK_EVIDENCE,
+  DESYNC_FREE_MARKETING_ALLOWED,
+  runAuthoritativeTickEvidence,
+  probeAuthoritativeTickEvidenceReadiness,
+  captureAuthoritativeTickTape,
+  type AuthoritativeTickEvidenceResult,
+} from './authoritative-tick-evidence'

@@ -568,3 +568,14 @@ export type {
   UsdPayloadKind,
   UsdStageIntakeResult,
 } from '@/lib/production/usd-stage-intake'
+export {
+  OPEN_USD_STAGE_READY,
+  USD_STAGE_COMPOSE_WIRED,
+  composeUsdStagePreview,
+  probeUsdStageComposeReadiness,
+} from '@/lib/production/usd-stage-compose'
+export type {
+  UsdStageComposeArtifact,
+  UsdStageComposeRejectCode,
+  UsdStageComposeResult,
+} from '@/lib/production/usd-stage-compose'

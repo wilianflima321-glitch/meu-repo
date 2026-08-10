@@ -19,6 +19,7 @@ import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-va
 import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
 import { probeBlindBrainVaultReadiness } from '@/lib/server/quant/blind-brain-vault'
 import { probeFixGatewaySpikeReadiness } from '@/lib/server/quant/fix-gateway-spike'
+import { probeAuthoritativeTickEvidenceReadiness } from '@/lib/netcode/authoritative-tick-evidence'
 
 export const VANGUARD_QUANT_FINANCE_READY = false as const
 export const FIX_PROTOCOL_READY = false as const
@@ -48,6 +49,8 @@ export interface SharedSubstrateHonestyReport {
   /** SF7 — FIX framing spike only (licensed L2 / C2T / SBE still false). */
   sf7FixFramingSpikeReady: boolean
   sf7Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF1 deepen — fixed-point ticks → session tape evidence (ggpoLive always false). */
+  sf1AuthoritativeTickEvidenceReady: boolean
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
@@ -149,6 +152,14 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     )
   }
 
+  const authTick = probeAuthoritativeTickEvidenceReadiness()
+  const sf1AuthoritativeTickEvidenceReady = authTick.ready
+  if (!sf1AuthoritativeTickEvidenceReady) {
+    notes.push('sf1AuthoritativeTickEvidenceReady HELD — fixed-point→tape evidence probe failed')
+  } else {
+    notes.push(`sf1AuthoritativeTickEvidenceReady PARTIAL — ${authTick.note}`)
+  }
+
   const worm = probeSignedWormReadiness()
   const sf2SignedWormReady = worm.ready && worm.chainValid
   const sf2Status: SharedSubstrateHonestyReport['sf2Status'] = worm.status
@@ -229,6 +240,7 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sharedSubstrateReady,
     sf1SessionTapeReady,
     sf1Status,
+    sf1AuthoritativeTickEvidenceReady,
     sf2SignedWormReady,
     sf2Status,
     sf3MonotonicTimebaseReady,

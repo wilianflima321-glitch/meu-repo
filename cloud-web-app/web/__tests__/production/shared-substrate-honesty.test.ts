@@ -18,6 +18,7 @@ describe('shared substrate honesty', () => {
     expect(report.evidenceAuditChainReady).toBe(true)
     expect(report.sf1SessionTapeReady).toBe(true)
     expect(report.sf1Status).toBe('PARTIAL')
+    expect(report.sf1AuthoritativeTickEvidenceReady).toBe(true)
     expect(report.sf2SignedWormReady).toBe(true)
     expect(report.sf2Status).toBe('PARTIAL')
     expect(report.sf3MonotonicTimebaseReady).toBe(true)
