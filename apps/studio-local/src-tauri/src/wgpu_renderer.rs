@@ -22,6 +22,7 @@
 //! - WebView exclusive present remains **HELD** (Chromium owns HWND) —
 //!   see `gpu_frame_graph::WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON`.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -44,13 +45,15 @@ use crate::gpu_frame_graph::{
     SECONDARY_FRAME_GRAPH_PASS_ORDER, WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON,
 };
 use crate::gpu_fsr::FsrTemporalUpsample;
+use crate::gpu_soak_scale::{select_soak_scale_budget, SoakFidelityTier, SoakScaleBudget};
 use crate::gpu_vsm::VsmShadowAtlas;
 use crate::gpu_culling::GpuCullingPipeline;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
 const DEFAULT_PRESENT_SOAK_FRAMES: u32 = 3;
 const MAX_PRESENT_SOAK_FRAMES: u32 = 8;
-const PRESENT_PROBE_TIMEOUT: Duration = Duration::from_secs(45);
+/// Higher-res CapScore soaks need headroom beyond the old 128² toy path.
+const PRESENT_PROBE_TIMEOUT: Duration = Duration::from_secs(90);
 
 // Held for identity/lifetime (surface must outlive present) and future present-loop
 // wiring (CW3 Path A secondary-window present already proves the technique in
@@ -88,6 +91,19 @@ pub struct RendererPresentProbeReport {
     pub backend: String,
     /// `secondary_winit` | `tauri_webview` | `none`
     pub surface_kind: String,
+    /// CapScore proxy used to gate soak resolution (desktop adapter — not web CapScore).
+    pub soak_capability_score: u32,
+    /// `low` | `mid` | `high` fidelity tier selected for this soak.
+    pub soak_fidelity_tier: String,
+    pub soak_present_width: u32,
+    pub soak_present_height: u32,
+    pub soak_estimated_vram_bytes: u64,
+    pub soak_vram_budget_bytes: u64,
+    pub soak_max_texture_dimension_2d: u32,
+    pub soak_max_buffer_size: u64,
+    /// True when CapScore ladder refused all tiers (fail-closed OOM).
+    pub soak_oom_refused: bool,
+    pub soak_scale_note: String,
     /// Hot path never maps textures / readbacks for this probe.
     pub cpu_readback_on_hot_path: bool,
     /// True when submit→present had no intermediate CPU image copy.
@@ -347,6 +363,16 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         adapter_name: String::new(),
         backend: String::new(),
         surface_kind: "none".into(),
+        soak_capability_score: 0,
+        soak_fidelity_tier: String::new(),
+        soak_present_width: 0,
+        soak_present_height: 0,
+        soak_estimated_vram_bytes: 0,
+        soak_vram_budget_bytes: 0,
+        soak_max_texture_dimension_2d: 0,
+        soak_max_buffer_size: 0,
+        soak_oom_refused: false,
+        soak_scale_note: String::new(),
         cpu_readback_on_hot_path: false,
         zero_copy_hot_path: false,
         webview_exclusive_present_held: true,
@@ -512,6 +538,27 @@ fn configure_surface(
     Ok(format)
 }
 
+fn tier_label(tier: SoakFidelityTier) -> &'static str {
+    match tier {
+        SoakFidelityTier::Low => "low",
+        SoakFidelityTier::Mid => "mid",
+        SoakFidelityTier::High => "high",
+    }
+}
+
+fn stamp_soak_budget(report: &mut RendererPresentProbeReport, budget: &SoakScaleBudget) {
+    report.soak_capability_score = budget.capability_score;
+    report.soak_fidelity_tier = tier_label(budget.tier).into();
+    report.soak_present_width = budget.present_width;
+    report.soak_present_height = budget.present_height;
+    report.soak_estimated_vram_bytes = budget.estimated_vram_bytes;
+    report.soak_vram_budget_bytes = budget.vram_budget_bytes;
+    report.soak_max_texture_dimension_2d = budget.max_texture_dimension_2d;
+    report.soak_max_buffer_size = budget.max_buffer_size;
+    report.soak_oom_refused = budget.oom_refused;
+    report.soak_scale_note = budget.note.clone();
+}
+
 /// Blocking present soak on a dedicated thread (owns its own winit EventLoop).
 fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentProbeReport {
     present_probe_on_secondary_window_ex(
@@ -519,8 +566,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         SecondaryPresentOptions {
             visible: false,
             title: "Aethel Present Probe",
-            width: 128,
-            height: 128,
+            persistent: None,
         },
     )
 }
@@ -528,8 +574,31 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
 struct SecondaryPresentOptions {
     visible: bool,
     title: &'static str,
-    width: u32,
-    height: u32,
+    /// When set, loop until stop or max_frames (TICKET-PP-03 persistent).
+    persistent: Option<PersistentPresentHooks>,
+}
+
+/// Hooks for every-frame persistent present (engine-owned surface).
+pub struct PersistentPresentHooks {
+    pub stop: Arc<AtomicBool>,
+    pub live: Arc<Mutex<crate::engine_owned_present_loop::PersistentPresentLiveMetrics>>,
+    pub max_frames: u32,
+    pub prove_frames: u32,
+}
+
+/// Engine-owned persistent present — CapScore-gated; does not flip product_present_ready.
+pub fn run_engine_owned_persistent_present(
+    hooks: PersistentPresentHooks,
+) -> RendererPresentProbeReport {
+    let frames_cap = hooks.max_frames.clamp(1, hooks.max_frames.max(1));
+    present_probe_on_secondary_window_ex(
+        frames_cap,
+        SecondaryPresentOptions {
+            visible: true,
+            title: "Aethel Engine — Persistent Present (PP-03; not WebView exclusive)",
+            persistent: Some(hooks),
+        },
+    )
 }
 
 /// Engine-owned OS window present (visible) — still not WebView exclusive / product viewport.
@@ -544,8 +613,7 @@ pub fn run_engine_owned_os_window_present_probe(frames: Option<u32>) -> Renderer
                 SecondaryPresentOptions {
                     visible: true,
                     title: "Aethel Engine — Engine-Owned Present (not WebView exclusive)",
-                    width: 320,
-                    height: 240,
+                    persistent: None,
                 },
             );
             let _ = tx.send(report);
@@ -568,7 +636,12 @@ fn present_probe_on_secondary_window_ex(
     frames_requested: u32,
     opts: SecondaryPresentOptions,
 ) -> RendererPresentProbeReport {
-    let frames_requested = frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES);
+    let is_persistent = opts.persistent.is_some();
+    let frames_requested = if is_persistent {
+        frames_requested.clamp(1, 8_000)
+    } else {
+        frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES)
+    };
 
     let mut event_loop_builder = EventLoopBuilder::new();
     let event_loop = match event_loop_builder.build() {
@@ -584,40 +657,93 @@ fn present_probe_on_secondary_window_ex(
         }
     };
 
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::PRIMARY,
+        ..Default::default()
+    });
+
+    let adapter_for_budget =
+        match pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::HighPerformance,
+            compatible_surface: None,
+            force_fallback_adapter: false,
+        })) {
+            Some(a) => a,
+            None => {
+                return fail_report(
+                    frames_requested,
+                    vec!["No wgpu adapter for CapScore soak scale selection".into()],
+                );
+            }
+        };
+
+    let budget = select_soak_scale_budget(&adapter_for_budget);
+    if let Some(hooks) = opts.persistent.as_ref() {
+        if let Ok(mut live) = hooks.live.lock() {
+            live.present_width = budget.present_width;
+            live.present_height = budget.present_height;
+            live.capability_score = budget.capability_score;
+            live.fidelity_tier = tier_label(budget.tier).into();
+            live.oom_refused = budget.oom_refused;
+            live.frames_cap = hooks.max_frames;
+            live.adapter_name = adapter_for_budget.get_info().name;
+            live.backend = format!("{:?}", adapter_for_budget.get_info().backend);
+            live.product_present_ready = false;
+            live.webview_exclusive_present_ready = false;
+            live.note = budget.note.clone();
+        }
+    }
+    if budget.oom_refused {
+        let mut r = fail_report(
+            frames_requested,
+            vec![
+                budget.note.clone(),
+                "Soak resolution OOM fail-closed — presented stays false".into(),
+            ],
+        );
+        stamp_soak_budget(&mut r, &budget);
+        r.adapter_acquired = true;
+        let info = adapter_for_budget.get_info();
+        r.adapter_name = info.name;
+        r.backend = format!("{:?}", info.backend);
+        return r;
+    }
+
     let window = match WindowBuilder::new()
         .with_title(opts.title)
-        .with_inner_size(PhysicalSize::new(opts.width, opts.height))
+        .with_inner_size(PhysicalSize::new(
+            budget.present_width,
+            budget.present_height,
+        ))
         .with_visible(opts.visible)
         .build(&event_loop)
     {
         Ok(w) => w,
         Err(e) => {
-            return fail_report(
+            let mut r = fail_report(
                 frames_requested,
                 vec![
                     format!("secondary winit window create failed: {e}"),
                     "Present soak HELD — no controlled surface".into(),
                 ],
             );
+            stamp_soak_budget(&mut r, &budget);
+            return r;
         }
     };
-
-    let size = window.inner_size();
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-        backends: wgpu::Backends::PRIMARY,
-        ..Default::default()
-    });
 
     let surface = match instance.create_surface(&window) {
         Ok(s) => s,
         Err(e) => {
-            return fail_report(
+            let mut r = fail_report(
                 frames_requested,
                 vec![
                     format!("create_surface on secondary winit failed: {e}"),
                     "Present soak HELD — surface create failed".into(),
                 ],
             );
+            stamp_soak_budget(&mut r, &budget);
+            return r;
         }
     };
 
@@ -627,12 +753,7 @@ fn present_probe_on_secondary_window_ex(
         force_fallback_adapter: false,
     })) {
         Some(a) => a,
-        None => {
-            return fail_report(
-                frames_requested,
-                vec!["No wgpu adapter compatible with secondary surface".into()],
-            );
-        }
+        None => adapter_for_budget,
     };
 
     let info = adapter.get_info();
@@ -658,6 +779,7 @@ fn present_probe_on_secondary_window_ex(
                 frames_requested,
                 vec![format!("request_device failed: {e}")],
             );
+            stamp_soak_budget(&mut r, &budget);
             r.adapter_acquired = true;
             r.adapter_name = adapter_name;
             r.backend = backend;
@@ -667,11 +789,15 @@ fn present_probe_on_secondary_window_ex(
         }
     };
 
-    let surface_format = match configure_surface(&device, &adapter, &surface, size.width, size.height)
+    let present_w = budget.present_width;
+    let present_h = budget.present_height;
+
+    let surface_format = match configure_surface(&device, &adapter, &surface, present_w, present_h)
     {
         Ok(f) => f,
         Err(e) => {
             let mut r = fail_report(frames_requested, vec![e]);
+            stamp_soak_budget(&mut r, &budget);
             r.adapter_acquired = true;
             r.device_created = true;
             r.adapter_name = adapter_name;
@@ -705,7 +831,7 @@ fn present_probe_on_secondary_window_ex(
     let meshlet_cook_cooked_triangles = cook_receipt.cooked_triangle_count;
     let frustum = identity_frustum(clusters.len() as u32);
 
-    let hiz = match DepthPyramidHiz::new(&device, size.width.max(2), size.height.max(2)) {
+    let hiz = match DepthPyramidHiz::new(&device, present_w.max(2), present_h.max(2)) {
         Ok(h) => h,
         Err(e) => {
             let mut r = fail_report(
@@ -774,7 +900,13 @@ fn present_probe_on_secondary_window_ex(
         }
     };
 
-    let micropoly = match MicropolyRasterScaffold::new(&device, &soft_tris, &meshlets) {
+    let micropoly = match MicropolyRasterScaffold::new_with_extent(
+        &device,
+        &soft_tris,
+        &meshlets,
+        budget.micro_poly_width,
+        budget.micro_poly_height,
+    ) {
         Ok(m) => m,
         Err(e) => {
             let mut r = fail_report(
@@ -816,7 +948,11 @@ fn present_probe_on_secondary_window_ex(
         }
     };
 
-    let mut fsr = match FsrTemporalUpsample::new(&device) {
+    let mut fsr = match FsrTemporalUpsample::new_with_edges(
+        &device,
+        budget.fsr_input_edge,
+        budget.fsr_scale,
+    ) {
         Ok(f) => f,
         Err(e) => {
             let mut r = fail_report(
@@ -896,8 +1032,18 @@ fn present_probe_on_secondary_window_ex(
     let mut soak_pass_ms: Vec<f64> = vec![0.0; SECONDARY_FRAME_GRAPH_PASS_ORDER.len()];
     let mut submitted = false;
     let mut last_err: Option<String> = None;
-    let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
+    let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested.min(512) as usize);
+    let prove_frames = opts
+        .persistent
+        .as_ref()
+        .map(|h| h.prove_frames)
+        .unwrap_or(0);
     for frame_i in 0..frames_requested {
+        if let Some(hooks) = opts.persistent.as_ref() {
+            if hooks.stop.load(Ordering::SeqCst) {
+                break;
+            }
+        }
         // Frame 0 builds pyramid with occlusion off; frame ≥1 samples prior Hi-Z.
         let occlusion_enabled = frame_i > 0;
         let t0 = std::time::Instant::now();
@@ -940,10 +1086,50 @@ fn present_probe_on_secondary_window_ex(
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
-                frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);
+                let frame_elapsed_ms = t0.elapsed().as_secs_f64() * 1000.0;
+                frame_ms.push(frame_elapsed_ms);
+                if let Some(hooks) = opts.persistent.as_ref() {
+                    if let Ok(mut live) = hooks.live.lock() {
+                        live.running = true;
+                        live.frames_presented = frames_presented;
+                        live.last_frame_ms = frame_elapsed_ms;
+                        live.frame_ms_total += frame_elapsed_ms;
+                        live.frame_ms_min = if frames_presented == 1 {
+                            frame_elapsed_ms
+                        } else {
+                            live.frame_ms_min.min(frame_elapsed_ms)
+                        };
+                        live.frame_ms_max = live.frame_ms_max.max(frame_elapsed_ms);
+                        live.frame_ms_mean =
+                            live.frame_ms_total / f64::from(frames_presented.max(1));
+                        live.frame_graph_ms_last = g.frame_ms_total;
+                        live.frame_graph_pass_timings = g.passes.clone();
+                        live.present_width = budget.present_width;
+                        live.present_height = budget.present_height;
+                        live.capability_score = budget.capability_score;
+                        live.fidelity_tier = tier_label(budget.tier).into();
+                        live.persistent_loop_proven =
+                            frames_presented >= prove_frames && g.all_passes_completed;
+                        live.product_present_ready = false;
+                        live.webview_exclusive_present_ready = false;
+                        live.note = format!(
+                            "Persistent present frame {frames_presented}/{} — CapScore {} {}x{}; product_present_ready=false",
+                            hooks.max_frames,
+                            budget.capability_score,
+                            budget.present_width,
+                            budget.present_height
+                        );
+                    }
+                }
             }
             Err(e) => {
-                last_err = Some(e);
+                last_err = Some(e.clone());
+                if let Some(hooks) = opts.persistent.as_ref() {
+                    if let Ok(mut live) = hooks.live.lock() {
+                        live.last_error = e;
+                        live.running = false;
+                    }
+                }
                 break;
             }
         }
@@ -1156,6 +1342,17 @@ fn present_probe_on_secondary_window_ex(
             radiance.probe_count
         ));
         reasons.push(format!(
+            "CapScore soak scale: score={} tier={} present={}x{} est_vram={} budget={} max_tex={} — {}",
+            budget.capability_score,
+            tier_label(budget.tier),
+            budget.present_width,
+            budget.present_height,
+            budget.estimated_vram_bytes,
+            budget.vram_budget_bytes,
+            budget.max_texture_dimension_2d,
+            budget.note
+        ));
+        reasons.push(format!(
             "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}; meshlet_cull_ms_total={meshlet_cull_ms_total:.3}"
         ));
         reasons.push(
@@ -1183,6 +1380,16 @@ fn present_probe_on_secondary_window_ex(
         adapter_name,
         backend,
         surface_kind: "secondary_winit".into(),
+        soak_capability_score: budget.capability_score,
+        soak_fidelity_tier: tier_label(budget.tier).into(),
+        soak_present_width: budget.present_width,
+        soak_present_height: budget.present_height,
+        soak_estimated_vram_bytes: budget.estimated_vram_bytes,
+        soak_vram_budget_bytes: budget.vram_budget_bytes,
+        soak_max_texture_dimension_2d: budget.max_texture_dimension_2d,
+        soak_max_buffer_size: budget.max_buffer_size,
+        soak_oom_refused: false,
+        soak_scale_note: budget.note.clone(),
         cpu_readback_on_hot_path: false,
         zero_copy_hot_path: presented,
         webview_exclusive_present_held: true,
@@ -1472,10 +1679,17 @@ mod tests {
             assert!(!r.fsr_aaa_ready);
             if r.fsr_substrate_proven {
                 assert!(r.fsr_scale >= 2);
+                assert!(r.fsr_input_edge >= 32);
+                assert!(r.fsr_output_edge >= 64);
                 assert!(r.fsr_output_texels_written > 0);
                 assert!(r.fsr_history_samples_blended > 0);
                 assert!(r.fsr_reactive_mask_texels > 0);
             }
+            assert!(!r.soak_oom_refused);
+            assert!(r.soak_present_width >= 640);
+            assert!(r.soak_present_height >= 360);
+            assert!(!r.soak_fidelity_tier.is_empty());
+            assert!(r.soak_capability_score > 0);
             assert!(!r.entropy_aaa_ready);
             assert!(!r.chaos_aaa_ready);
             if r.entropy_substrate_proven {

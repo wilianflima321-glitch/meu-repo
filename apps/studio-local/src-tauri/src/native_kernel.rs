@@ -167,13 +167,15 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 state: NativeKernelState::NeedsReview,
                 evidence_refs: vec![
                     "src-tauri/src/product_present_adapter.rs",
+                    "src-tauri/src/engine_owned_present_loop.rs",
+                    "src-tauri/src/gpu_soak_scale.rs",
                     "src-tauri/src/gpu_frame_graph.rs",
                     "src-tauri/src/wgpu_renderer.rs",
                 ],
                 blocker: Some(
-                    "Engine-owned secondary_winit can present the frame graph; product_present_ready and webview_exclusive_present_ready stay false (Chromium owns Tauri HWND). TICKET-PP-01..04 required for Studio product viewport exclusive present.",
+                    "TICKET-PP-03 PARTIAL: persistent CapScore-gated engine-owned frame-graph loop + Instant IPC exists; product_present_ready/webview_exclusive stay false (Chromium HWND; not Studio session viewport). PP-01 native child, PP-02 carve-out, PP-04 parity, 15→30 ladder gates still open. G.3 stays ~15%.",
                 ),
-                next_action: "Close TICKET-PP-01..04 before flipping product_present_ready; never claim WebView exclusive from identity mount.",
+                next_action: "Wire persistent loop to Studio session lifetime + PP-02/PP-04 before any product_present_ready or G.% uplift; never claim WebView exclusive from identity mount.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

@@ -13,8 +13,10 @@ use wgpu::util::DeviceExt;
 
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
 
-/// Soft-raster target resolution (substrate — not product viewport).
+/// Soft-raster target resolution default (substrate — CapScore soak overrides).
+#[allow(dead_code)]
 pub const MICROPOLY_WIDTH: u32 = 64;
+#[allow(dead_code)]
 pub const MICROPOLY_HEIGHT: u32 = 64;
 
 /// One cooked triangle tagged with owning meshlet (48 bytes, 16-aligned).
@@ -223,21 +225,36 @@ pub struct MicropolyRasterScaffold {
 }
 
 impl MicropolyRasterScaffold {
+    /// Default 64² soft-raster — CapScore soak uses [`Self::new_with_extent`].
+    #[allow(dead_code)]
     pub fn new(
         device: &wgpu::Device,
         tris: &[MicropolyTri],
         cull: &MeshletCullScaffold,
     ) -> Result<Self, String> {
+        Self::new_with_extent(device, tris, cull, MICROPOLY_WIDTH, MICROPOLY_HEIGHT)
+    }
+
+    /// Soft-raster at CapScore-gated soak extent (still not Micro-Poly AAA).
+    pub fn new_with_extent(
+        device: &wgpu::Device,
+        tris: &[MicropolyTri],
+        cull: &MeshletCullScaffold,
+        width: u32,
+        height: u32,
+    ) -> Result<Self, String> {
         if tris.is_empty() {
             return Err("MicropolyRasterScaffold requires non-empty triangle soup".into());
         }
+        let width = width.max(8);
+        let height = height.max(8);
         let params = RasterParams {
-            width: MICROPOLY_WIDTH,
-            height: MICROPOLY_HEIGHT,
+            width,
+            height,
             tri_count: tris.len() as u32,
             _pad: 0,
         };
-        let pix = (MICROPOLY_WIDTH * MICROPOLY_HEIGHT) as usize;
+        let pix = (width * height) as usize;
 
         let clear_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Aethel Micropoly Clear"),

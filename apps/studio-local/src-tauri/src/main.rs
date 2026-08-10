@@ -27,6 +27,8 @@ mod gpu_fsr;
 mod gpu_micropoly_raster;
 mod gpu_radiance_probes;
 mod gpu_vsm;
+mod gpu_soak_scale;
+mod engine_owned_present_loop;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;
@@ -380,6 +382,9 @@ fn main() {
         .manage(Mutex::new(scene_graph::SceneGraphState::default()))
         .manage(std::sync::Arc::new(hardware_profiler::GpuIdentityState::default()))
         .manage(std::sync::Arc::new(wgpu_renderer::PresentProbeState::default()))
+        .manage(std::sync::Arc::new(
+            engine_owned_present_loop::PersistentPresentLoopState::default(),
+        ))
         .manage(Mutex::new(mmap_commands::MmapRegistry::default()))
         .manage(Mutex::new(lsp_farm::LspFarmRegistry::default()))
         .manage(wasm_runtime::WasmHostState::default())
@@ -396,6 +401,9 @@ fn main() {
             product_present_adapter::product_present_honesty_probe,
             product_present_adapter::product_present_try_webview_attach,
             product_present_adapter::product_present_engine_owned_soak,
+            engine_owned_present_loop::product_present_persistent_start,
+            engine_owned_present_loop::product_present_persistent_stop,
+            engine_owned_present_loop::product_present_persistent_status,
             physics_commands::poll_physics_state,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,
@@ -439,6 +447,12 @@ fn main() {
             aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
             aethel_studio_local::plugin_sandbox::export_vibe_embedding,
             aethel_studio_local::plugin_sandbox::register_user_aesthetic_override,
+            // Onda M — WASM Shield real wasmtime instantiate + Law #48 host-PTY deny
+            aethel_studio_local::wasm_shield::probe_wasm_shield_cmd,
+            aethel_studio_local::wasm_shield::wasm_shield_agent_pty_deny_cmd,
+            // GAS binary IPC soak / round-trip metrics (GAS_60HZ_BINARY_IPC_READY stays false)
+            aethel_studio_local::gameplay_ability_system::probe_gas_binary_ipc_tick_cmd,
+            aethel_studio_local::gameplay_ability_system::gas_binary_ipc_roundtrip_cmd,
             // Agent/runtime probes (functional backend — not full kernel-wire surface)
             local_runtime_health,
             local_runtime_probe,

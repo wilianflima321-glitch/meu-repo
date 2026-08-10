@@ -390,6 +390,67 @@ pub fn probe_gas_binary_ipc_tick() -> GasBinaryIpcTickSoakReport {
     run_gas_binary_ipc_tick_soak()
 }
 
+/// IPC-shaped round-trip report — encode → byte buffer → decode with Instant.
+/// Does **not** flip `GAS_60HZ_BINARY_IPC_READY` (no product duplex channel).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GasBinaryIpcRoundtripReport {
+    pub gas_60hz_binary_ipc_ready: bool,
+    pub ipc_shaped_roundtrip_ok: bool,
+    pub roundtrip_ns: u128,
+    pub frame_bytes: usize,
+    pub toward_60hz_budget: bool,
+    pub soak: GasBinaryIpcTickSoakReport,
+    pub evidence_kind: &'static str,
+}
+
+pub const GAS60_IPC_ROUNDTRIP_KIND: &str = "gas_binary_ipc_cmd_roundtrip_shaped";
+
+/// Measure encode→buffer→decode as the IPC payload shape (Tauri `Response` bytes).
+pub fn run_gas_binary_ipc_roundtrip() -> GasBinaryIpcRoundtripReport {
+    let soak = run_gas_binary_ipc_tick_soak();
+    let (mut world, ids) = soak_fixture_world();
+    world.tick(SOAK_DT);
+    let cues = world.drain_cue_queue();
+    let t0 = Instant::now();
+    let encoded = encode_gas_binary_tick(&world, &ids, 1, SOAK_DT, &cues);
+    // Simulate IPC Response payload handoff: owned Vec<u8> crossing a boundary.
+    let payload = encoded;
+    let decoded = decode_gas_binary_tick(&payload);
+    let roundtrip_ns = t0.elapsed().as_nanos();
+    let ok = decoded
+        .as_ref()
+        .map(|f| f.header.magic == GAS_TICK_MAGIC && f.entities.len() == ids.len())
+        .unwrap_or(false);
+    GasBinaryIpcRoundtripReport {
+        gas_60hz_binary_ipc_ready: GAS_60HZ_BINARY_IPC_READY,
+        ipc_shaped_roundtrip_ok: ok && soak.in_process_duplex_ok,
+        roundtrip_ns,
+        frame_bytes: payload.len(),
+        toward_60hz_budget: roundtrip_ns > 0 && roundtrip_ns < HZ60_BUDGET_NS,
+        soak,
+        evidence_kind: GAS60_IPC_ROUNDTRIP_KIND,
+    }
+}
+
+/// Tauri IPC — GAS binary tick Instant soak (READY stays false).
+#[tauri::command]
+pub fn probe_gas_binary_ipc_tick_cmd() -> GasBinaryIpcTickSoakReport {
+    let mut report = run_gas_binary_ipc_tick_soak();
+    // Hard fail-closed: never advertise product 60Hz duplex from this command.
+    report.gas_60hz_binary_ipc_ready = false;
+    report
+}
+
+/// Tauri IPC — encode/decode round-trip metrics without flipping READY.
+#[tauri::command]
+pub fn gas_binary_ipc_roundtrip_cmd() -> GasBinaryIpcRoundtripReport {
+    let mut report = run_gas_binary_ipc_roundtrip();
+    report.gas_60hz_binary_ipc_ready = false;
+    report.soak.gas_60hz_binary_ipc_ready = false;
+    report
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -435,5 +496,15 @@ mod tests {
         let r = probe_gas_binary_ipc_tick();
         assert!(!r.gas_60hz_binary_ipc_ready);
         assert!(r.in_process_duplex_ok);
+    }
+
+    #[test]
+    fn ipc_shaped_roundtrip_ready_stays_false() {
+        let r = run_gas_binary_ipc_roundtrip();
+        assert!(!r.gas_60hz_binary_ipc_ready);
+        assert!(r.ipc_shaped_roundtrip_ok);
+        assert!(r.toward_60hz_budget);
+        assert!(r.frame_bytes >= HEADER_BYTES);
+        assert_eq!(r.evidence_kind, GAS60_IPC_ROUNDTRIP_KIND);
     }
 }

@@ -207,19 +207,36 @@ pub struct FsrTemporalUpsample {
 }
 
 impl FsrTemporalUpsample {
+    /// Default toy edges (32→64) — CapScore soak uses [`Self::new_with_edges`].
+    #[allow(dead_code)]
     pub fn new(device: &wgpu::Device) -> Result<Self, String> {
+        Self::new_with_edges(device, FSR_INPUT_EDGE, FSR_SCALE)
+    }
+
+    /// Scaled FSR substrate for CapScore-gated soak (still not FSR3 AAA).
+    pub fn new_with_edges(
+        device: &wgpu::Device,
+        input_edge: u32,
+        scale: u32,
+    ) -> Result<Self, String> {
+        let scale = scale.max(1);
+        let input_edge = input_edge.max(8);
+        let output_edge = input_edge.saturating_mul(scale);
+        if output_edge == 0 {
+            return Err("FSR output_edge must be > 0".into());
+        }
         let params = FsrParams {
-            input_edge: FSR_INPUT_EDGE,
-            output_edge: FSR_OUTPUT_EDGE,
-            scale: FSR_SCALE,
+            input_edge,
+            output_edge,
+            scale,
             frame_index: 1,
             jitter: [0.0, 0.0],
             history_weight: 0.85,
             reactive_threshold: 0.08,
         };
 
-        let input_len = (FSR_INPUT_EDGE * FSR_INPUT_EDGE) as usize;
-        let output_len = (FSR_OUTPUT_EDGE * FSR_OUTPUT_EDGE) as usize;
+        let input_len = (input_edge * input_edge) as usize;
+        let output_len = (output_edge * output_edge) as usize;
         let input_init = vec![[0.0_f32; 4]; input_len];
         let output_init = vec![[0.0_f32; 4]; output_len];
         let reactive_init = vec![0.0_f32; output_len];
@@ -408,9 +425,9 @@ impl FsrTemporalUpsample {
             fill_bind_group,
             upsample_pipeline,
             upsample_bind_group,
-            input_edge: FSR_INPUT_EDGE,
-            output_edge: FSR_OUTPUT_EDGE,
-            scale: FSR_SCALE,
+            input_edge,
+            output_edge,
+            scale,
             frame_index: 1,
         })
     }

@@ -66,6 +66,10 @@ pub struct ProductPresentHonestyReport {
     pub surface_kind: String,
     pub frames_presented: u32,
     pub frame_graph_executed: bool,
+    pub soak_present_width: u32,
+    pub soak_present_height: u32,
+    pub soak_fidelity_tier: String,
+    pub soak_capability_score: u32,
     pub adapter_name: String,
     pub backend: String,
     /// Always false — never flip AAA from present adapter.
@@ -93,6 +97,12 @@ fn inventory_baseline() -> Vec<HwndInventoryEntry> {
             exclusive_wgpu_present_allowed: true,
             note: "Engine-owned winit HWND — ScalableRenderGraph-style present allowed; not Studio product WebView viewport.".into(),
         },
+        HwndInventoryEntry {
+            surface_id: "engine.secondary_winit.persistent_present".into(),
+            owner_kind: HwndOwnerKind::EngineOwnedWinit,
+            exclusive_wgpu_present_allowed: true,
+            note: "TICKET-PP-03: persistent every-frame frame-graph present on engine-owned OS window (CapScore-gated); product_present_ready stays false until Studio session / PP-02.".into(),
+        },
     ]
 }
 
@@ -116,6 +126,10 @@ pub fn probe_product_present_honesty() -> ProductPresentHonestyReport {
         surface_kind: "inventory_only".into(),
         frames_presented: 0,
         frame_graph_executed: false,
+        soak_present_width: 0,
+        soak_present_height: 0,
+        soak_fidelity_tier: String::new(),
+        soak_capability_score: 0,
         adapter_name: String::new(),
         backend: String::new(),
         nanite_ready: false,
@@ -182,6 +196,10 @@ fn from_present_probe(probe: RendererPresentProbeReport) -> ProductPresentHonest
         },
         frames_presented: probe.frames_presented,
         frame_graph_executed: probe.frame_graph_executed,
+        soak_present_width: probe.soak_present_width,
+        soak_present_height: probe.soak_present_height,
+        soak_fidelity_tier: probe.soak_fidelity_tier,
+        soak_capability_score: probe.soak_capability_score,
         adapter_name: probe.adapter_name,
         backend: probe.backend,
         nanite_ready: false,
@@ -243,7 +261,7 @@ mod tests {
         assert!(!r.nanite_ready);
         assert!(!r.lumen_ready);
         assert!(!r.engine_owned_os_window_present_proven);
-        assert_eq!(r.hwnd_inventory.len(), 2);
+        assert_eq!(r.hwnd_inventory.len(), 3);
         assert!(!r.engineering_tickets.is_empty());
         assert!(r
             .hwnd_inventory
