@@ -1143,14 +1143,32 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 **Recently closed (ledger only):** R13 CW3 DONE-core; R2 Law XV bake; R3 CW4; R5 L.10 colors; R18 Prisma `demoPlayUrl`; CW1 15-slot bench (product PARTIAL).
 
-### Competitor gap (honest — 2026-08-08)
+### Top-1 Market Gap Matrix (2026-08-10 — binding honesty; Engine / IDE / Hub / Quant / AI)
+
+**Founder aspiration:** #1 all areas — Unreal-level engine, Cursor/v0-class creation IDE, Hub indie vitrine, institutional-grade dual-use Quant, evidence-backed AI.  
+**Harsh reality:** Planning is ~100% A.0. **Product is not Top-1 anywhere that ships money or AAA pixels.** Lab soak-kernels ≠ shipped product. **Reject:** “Unreal 100% today”, “AI-native IDE”, “Universal IDE”, “Vanguard investment-grade”, “retail HFT on Wi-Fi”.
+
+| Area | Competitor bar | DONE-core (honest) | HELD / PARTIAL (blocks Top-1) | Overclaim risk (forbidden marketing) | Verdict vs Top-1 |
+|------|----------------|--------------------|------------------------------|--------------------------------------|------------------|
+| **Engine** | UE5 Nanite/Lumen/Chaos/RHI/Sequencer | Web Instant Play + Law XV bake; R3F authoring; Timeline scrub/material; CW3 present-root fail-closed; kernel soaks (letter probes) | G.3 ~**15%** scaffold; Nanite/Lumen/Entropy AAA flags false; UE single RHI / desktop live present residual; OpenUSD stage; Spec hero panels MISSING; CW2 load-scale PARTIAL | “UE parity / exceeded”, “Nanite/Lumen shipped”, “G.3 CLOSED”, Onda G “7/7” as nuclear acceptance | **Far behind** — deferred long pole |
+| **IDE (Forge L)** | Cursor Composer + LSP; v0 HMR loop | L.1/L.2/L.5/L.10/L.12 DONE-core; L.7 MagicWand→FusionTx; CW6 multi-file AST/L.5 apply (`COMPOSER_SURPASS_CLAIM=false`) | L.8 live E2B HMR soak; L.9 live create-next-app p95; L.4 remote PTY; L.13 desktop LSP+Python; Firecracker HELD | “Universal IDE”, “surpass Cursor Composer”, “v0-class” | **Cores real; market claim false** |
+| **Hub (RTv1)** | Steam/Epic/Roblox discovery+checkout | I.5/I.6 Showcase; Instant Play+I.2; F.2 playtime; discovery/reviews/social cores; H.0 revenue-lane code | `hubCheckoutAudited` **false**; Hub Coins mint; Agones; G.2 cross-play marketing | “Checkout live”, “Coins economy shipped”, “cross-play” | **Ops partial; monetize HELD** |
+| **Quant (Onda N)** | Jane Street / coloc HFT / licensed L2 | N1–N5 + §23 + Dual-Mode **fail-closed PARTIAL**; SF1–SF3 PARTIAL; honesty APIs | FIX/SBE, live broker, licensed L2, ORT RPA, Blind Brain AES vault, GPU mux hot-swap, Cap'n Proto evidence | “Investment-grade”, “retail HFT”, “50ms GPU swap”, “untouchable”, ToS-safe RPA bots | **Spec+guards only; 0% institutional** |
+| **AI (Onda J)** | Cursor/Devin + Creative Fusion | Law XVI Bridge+CostGuard+FusionTx; MoA/Heal; J.5–J.10 cores; J.9 previz DONE-core | J.11/J.12 **STOPPED**; J.7 OpenUSD HELD; J.4 native sqlite-vec PARTIAL; CDP/WebRTC HELD; undo without shared Y.Doc PARTIAL | “AI-native IDE”, “video→GTA”, “Devin-class autonomy” | **Governed creative OK; autonomy blocked** |
+
+**Unreal 100% today = FALSE CLAIM.** Evidence required before any **G.% uplift** in Progress/Index/scorecards (see AAA Parity §G.% evidence gates). Kernel letter CLOSED ≠ G.3 acceptance.
+
+**Cross-links:** Master Map §0c competitor table · Index scorecard · AAA Parity G acceptance · Quant Spec honesty banner · §Onda N below.
+
+### Competitor gap (honest — 2026-08-08; refreshed 2026-08-10 Quant)
 
 | Competitor | Aethel leads / ties (real) | Aethel loses (block supremacy claim) |
 |---|---|---|
 | **Cursor** | CostGuard + L.5 dual-stack apply; RepoGraphRAG 100% slice; Nexus evidence | Composer UX; live E2B HMR; desktop LSP soak; J.12 STOPPED → **no AI-native / Composer-surpass** |
 | **v0** | PreviewOrchestrator + FusionTx MagicWand; honest `hmr:false` default; L.9 soak harness (no fake p95) | Live scaffold+HMR soak (≥20 measured) → **no Universal IDE / v0-class** |
-| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material + in-process GAS cue bind | Nanite/Lumen/Chaos/RHI (~15%); OpenUSD stage HELD; Spec heroes MISSING → **no UE parity** |
+| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material + in-process GAS cue bind | Nanite/Lumen/Chaos/RHI (~15%); OpenUSD stage HELD; Spec heroes MISSING → **no UE parity / no “Unreal 100%”** |
 | **Devin / Copilot** | Sandbox-only agents; ledger receipts; fleet strip | Long-horizon autonomy; advanced streaming chat → **no Devin-class** |
+| **Institutional quant** | Fail-closed N1–N5/§23/Dual-Mode + SF1–SF3 substrate honesty | FIX/L2/colocation/live broker/ORT RPA → **`investmentGrade=false`; no Vanguard ship** |
 
 ### Top 15 remaining debts (market supremacy rank)
 
