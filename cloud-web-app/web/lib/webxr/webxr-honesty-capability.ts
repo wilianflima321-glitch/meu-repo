@@ -17,8 +17,11 @@ export type WebXrHonestyReport = {
 /**
  * P2b HIGH #17 — never flip XR marketing from technical wire flags alone.
  * Technical shipStatus may advance; marketing requires an explicit Founder lift.
+ * Substrate evidence: lib/webxr/spatial-xr-substrate-evidence.ts (PARTIAL; Spatial XR product HELD).
  */
 export const WEBXR_MARKETING_SHIP_ALLOWED = false
+/** Alias — Spatial XR product marketing (Onda K) stays fail-closed. */
+export const SPATIAL_XR_MARKETING_SHIP_ALLOWED = false as const
 
 export function evaluateWebXrHonesty(input: {
   webxrApiAvailable: boolean
@@ -28,7 +31,7 @@ export function evaluateWebXrHonesty(input: {
   /** True when a Studio component starts WebXRSystem sessions */
   viewportEntryWired: boolean
 }): WebXrHonestyReport {
-  const evidenceRefs = ['webxr:honesty-v1']
+  const evidenceRefs = ['webxr:honesty-v1', 'webxr:spatial-xr-substrate-v1']
   if (!input.webxrApiAvailable) {
     return {
       ...input,
@@ -46,6 +49,7 @@ export function evaluateWebXrHonesty(input: {
         ...evidenceRefs,
         input.foveationWiredInFrameLoop ? 'webxr:foveation-live' : 'webxr:foveation-held',
         input.viewportEntryWired ? 'webxr:viewport-entry' : 'webxr:viewport-held',
+        'webxr:spatial-xr-marketing-held',
       ],
     }
   }
@@ -53,12 +57,13 @@ export function evaluateWebXrHonesty(input: {
     ...input,
     shipStatus: 'IMPLEMENTED',
     // Technical wires proven ≠ Spatial XR marketing certificate (P2b HIGH #17).
-    marketingAllowed: WEBXR_MARKETING_SHIP_ALLOWED,
+    marketingAllowed: WEBXR_MARKETING_SHIP_ALLOWED && SPATIAL_XR_MARKETING_SHIP_ALLOWED,
     evidenceRefs: [
       ...evidenceRefs,
       'webxr:session-live',
       'webxr:foveation-live',
       'webxr:marketing-held',
+      'webxr:spatial-xr-marketing-held',
     ],
   }
 }
