@@ -44,3 +44,14 @@ export * from './tag-registry';
 export * from './cue';
 export * from './effect-pool';
 export * from './gas-world';
+export * from './gas-ipc-honesty';
+export {
+  UNREAL_GAS_AAA_READY,
+  GAS_AAA_MARKETING_ALLOWED,
+  GAS_60HZ_BINARY_IPC_READY,
+  runGasAbilityEvidenceSoak,
+  claimUnrealGasAaa,
+  claimGas60HzBinaryIpc,
+  probeGasAbilityEvidenceReadiness,
+  type GasAbilityEvidence,
+} from './gas-ability-evidence';

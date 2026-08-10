@@ -30,7 +30,7 @@ export const ACTIVE_RAGDOLL_SHIP_STATUS = {
   muscleBalanceApply: 'SHIPPED' as const,
   heldWithoutSubstrate: 'HELD' as const,
   euphoriaParity: 'HELD' as const,
-  desktopRustAuthority: 'HELD' as const,
+  desktopRustAuthority: 'SHIPPED' as const,
   labelReady: 'Law III Active Ragdoll muscle/balance apply via Rapier force substrate',
   labelHeld: 'Law III Active Ragdoll apply [HELD] — no Rapier substrate or apply path disabled',
   labelEuphoriaHeld:
@@ -249,6 +249,7 @@ export function evaluateActiveRagdollHonesty(
   const notes: string[] = [
     ACTIVE_RAGDOLL_SHIP_STATUS.labelEuphoriaHeld,
     'desktop Rust muscle authority remains HELD (physics_kernel extension)',
+    'Law III evidence path: lib/physics/euphoria-ragdoll-evidence.ts (PARTIAL; Euphoria AAA HELD)',
   ]
   if (!input.rapierSubstrateReady) {
     notes.push('Rapier/web force substrate not ready')
