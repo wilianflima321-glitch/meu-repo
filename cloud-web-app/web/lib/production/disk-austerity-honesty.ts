@@ -1,5 +1,5 @@
 /**
- * CW7 — Disk austerity honesty probe (docs + example config; not CI-enforced).
+ * CW7 — Disk austerity honesty probe (docs + scripts + example config; not CI-enforced).
  * Fail-closed: do not claim DONE without orphan prune + CAS cook + single-target CI.
  */
 
@@ -16,7 +16,7 @@ export type DiskAusterityArtifact = {
   id: string
   relativePath: string
   exists: boolean
-  kind: 'doc' | 'example-config' | 'env'
+  kind: 'doc' | 'example-config' | 'env' | 'script'
 }
 
 export type DiskAusterityHonestyReport = {
@@ -25,6 +25,9 @@ export type DiskAusterityHonestyReport = {
   cargoTargetDirEnv: string | null
   cargoTargetDirMatchesRecommended: boolean
   artifacts: DiskAusterityArtifact[]
+  /** Script present in repo — not the same as CI enforcement. */
+  orphanPruneScriptPresent: boolean
+  cargoTargetCheckScriptPresent: boolean
   orphanPruneEnforced: false
   casCookEnforced: false
   ciSingleTargetEnforced: false
@@ -81,17 +84,42 @@ export function probeDiskAusterityHonesty(): DiskAusterityHonestyReport {
       '../../apps/studio-local/src-tauri/DISK_AUSTERITY.md',
       'doc',
     ),
+    probeArtifact(
+      'cargo-target-check-script',
+      '../../scripts/check-cargo-target.mjs',
+      'script',
+    ),
+    probeArtifact(
+      'cargo-prune-orphans-script',
+      '../../scripts/cargo-prune-orphans.mjs',
+      'script',
+    ),
   ]
+
+  const orphanPruneScriptPresent = artifacts.some(
+    (a) => a.id === 'cargo-prune-orphans-script' && a.exists,
+  )
+  const cargoTargetCheckScriptPresent = artifacts.some(
+    (a) => a.id === 'cargo-target-check-script' && a.exists,
+  )
 
   const notes = [
     'Copy .cargo/config.toml.example → gitignored config.toml locally (never commit E: path to CI).',
     'Set CARGO_TARGET_DIR=E:/aethel-target-gnu for single cargo target on workstation.',
+    orphanPruneScriptPresent
+      ? 'scripts/cargo-prune-orphans.mjs present — manual prune path; not CI-enforced (casCookEnforced=false).'
+      : 'Orphan prune script missing from repo.',
+    cargoTargetCheckScriptPresent
+      ? 'scripts/check-cargo-target.mjs present — soft-pass without config; ciSingleTargetEnforced=false.'
+      : 'Cargo target check script missing from repo.',
     'Orphan prune + CAS cook + CI-enforced single target remain OPEN — CW7 not DONE.',
   ]
 
   log.info('disk_austerity_honesty_probed', {
     docsPresent: artifacts.filter((a) => a.kind === 'doc' && a.exists).length,
     examplePresent: artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists),
+    orphanPruneScriptPresent,
+    cargoTargetCheckScriptPresent,
     cargoTargetDirSet: Boolean(cargoTargetDirEnv),
   })
 
@@ -101,6 +129,8 @@ export function probeDiskAusterityHonesty(): DiskAusterityHonestyReport {
     cargoTargetDirEnv,
     cargoTargetDirMatchesRecommended,
     artifacts,
+    orphanPruneScriptPresent,
+    cargoTargetCheckScriptPresent,
     orphanPruneEnforced: false,
     casCookEnforced: false,
     ciSingleTargetEnforced: false,

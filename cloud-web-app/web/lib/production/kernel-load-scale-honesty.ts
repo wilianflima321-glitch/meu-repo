@@ -1,9 +1,15 @@
 /**
  * CW2 — Kernel load-scale honesty catalog (web-side; Rust soaks live in kernel).
  * Documents micro-soak N≥2048 gates without claiming Chaos/Unreal AAA surpass.
+ * Cross-links web Chaos fracture evidence fingerprint (still AAA HELD).
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  CHAOS_DESTRUCTION_AAA_READY,
+  UNREAL_CHAOS_PARITY_READY,
+  runChaosDestructionEvidenceSoak,
+} from '@/lib/destruction/chaos-destruction-evidence'
 
 const log = createComponentLogger('kernel-load-scale-honesty')
 
@@ -26,6 +32,9 @@ export type KernelLoadScaleHonestyReport = {
   minPeerN: typeof CW2_LOAD_SCALE_MIN_N
   wallBudgetSec: typeof CW2_SOAK_WALL_BUDGET_SEC
   peers: KernelLoadScalePeer[]
+  /** Web FractureGraph evidence soak (≠ Rust N≥2048 Chaos AAA). */
+  webChaosEvidenceFingerprint: string | null
+  webChaosEvidenceOk: boolean
   /** GPU memory matrix + full RTX 3060 soak — not proven from web. */
   gpuMemoryMatrixReady: false
   chaosDestructionAaaReady: false
@@ -80,15 +89,29 @@ export function probeKernelLoadScaleHonesty(): KernelLoadScaleHonestyReport {
     },
   ]
 
+  const chaosWeb = runChaosDestructionEvidenceSoak()
+  const webChaosEvidenceOk =
+    chaosWeb.ok === true &&
+    chaosWeb.value.chaosDestructionAaaReady === false &&
+    chaosWeb.value.unrealChaosParityReady === false &&
+    CHAOS_DESTRUCTION_AAA_READY === false &&
+    UNREAL_CHAOS_PARITY_READY === false
+  const webChaosEvidenceFingerprint = chaosWeb.ok ? chaosWeb.value.fingerprint : null
+
   const notes = [
     'Micro-soaks N≥2048 executed in packages/aethel-kernel-rust (cargo test on E: target).',
     'Web catalog does not re-run Rust soaks — desktop Tauri IPC evidence required for ready flip.',
+    webChaosEvidenceOk
+      ? `Web Chaos FractureGraph evidence fingerprint=${webChaosEvidenceFingerprint} (AAA still HELD).`
+      : 'Web Chaos FractureGraph evidence soak failed — matrix stays PARTIAL.',
     'Chaos Destruction / DualSPHysics / full LBM / RTX 3060 GPU memory matrix remain HELD.',
   ]
 
   log.info('kernel_load_scale_honesty_probed', {
     peers: peers.length,
     minN: CW2_LOAD_SCALE_MIN_N,
+    webChaosEvidenceOk,
+    webChaosEvidenceFingerprint,
   })
 
   return {
@@ -97,6 +120,8 @@ export function probeKernelLoadScaleHonesty(): KernelLoadScaleHonestyReport {
     minPeerN: CW2_LOAD_SCALE_MIN_N,
     wallBudgetSec: CW2_SOAK_WALL_BUDGET_SEC,
     peers,
+    webChaosEvidenceFingerprint,
+    webChaosEvidenceOk,
     gpuMemoryMatrixReady: false,
     chaosDestructionAaaReady: false,
     unrealChaosParityReady: false,

@@ -2,7 +2,8 @@
  * J.7 deepen — fail-closed USD stage compose from intake + hierarchy wireframe.
  *
  * Never: OpenUSD/Hydra claim, capsule-as-character, or success:true with empty artifact.
- * USDA → hierarchy boxes only; USDZ → ZIP preview eligibility only; USDC → HELD.
+ * USDA → hierarchy boxes only; USDZ → ZIP preview eligibility only;
+ * USDC → crate bootstrap/TOC seal only (mesh stage HELD).
  */
 
 import { createHash } from 'node:crypto'
@@ -18,6 +19,13 @@ import {
   type OpenUsdStageHeldReason,
   type UsdStageIntakeResult,
 } from '@/lib/production/usd-stage-intake'
+import {
+  OPEN_USD_CRATE_MESH_READY,
+  USDC_MESH_STAGE_READY,
+  buildUsdcCrateHeaderFixture,
+  sealUsdcCrateHeaderReceipt,
+  type UsdcCrateHeaderReceipt,
+} from '@/lib/production/usdc-crate-substrate'
 import {
   parseUsdaHierarchyPreview,
   type UsdaHierarchyBox,
@@ -37,6 +45,8 @@ export type UsdStageComposeRejectCode =
   | 'openusd_stage_held'
   | 'hierarchy_parse_failed'
   | 'intake_held'
+  | 'usdc_crate_mesh_held'
+  | 'usdc_crate_corrupt'
 
 export type UsdStageComposeArtifact = {
   format: UsdBrowserFormatId
@@ -59,6 +69,7 @@ export type UsdStageComposeResult =
       intake: UsdStageIntakeResult
       hierarchy: UsdaHierarchyPreview | null
       artifact: UsdStageComposeArtifact
+      crateHeader: UsdcCrateHeaderReceipt | null
       message: string
     }
   | {
@@ -70,6 +81,7 @@ export type UsdStageComposeResult =
       intake: UsdStageIntakeResult | null
       hierarchy: UsdaHierarchyPreview | null
       artifact: null
+      crateHeader: UsdcCrateHeaderReceipt | null
       message: string
     }
 
@@ -90,11 +102,12 @@ export function composeUsdStagePreview(input: {
   shipKind?: UsdShipKind
   geometryProxy?: 'capsule' | 'box' | 'sphere' | 'none'
   claimFullUsdStage?: boolean
+  claimUsdcMeshStage?: boolean
 }): UsdStageComposeResult {
   const view = input.bytes instanceof Uint8Array ? input.bytes : new Uint8Array(input.bytes)
   const intake = evaluateUsdStageIntake({ format: input.format, bytes: view })
 
-  if (input.claimFullUsdStage === true) {
+  if (input.claimFullUsdStage === true || input.claimUsdcMeshStage === true) {
     log.warn('usd_stage_compose_openusd_claim_blocked', { format: input.format })
     return {
       success: false,
@@ -105,7 +118,8 @@ export function composeUsdStagePreview(input: {
       intake,
       hierarchy: null,
       artifact: null,
-      message: 'Full OpenUSD/Hydra stage claim rejected — compose is wireframe/preview only.',
+      crateHeader: null,
+      message: 'Full OpenUSD/Hydra / USDC mesh stage claim rejected — compose is wireframe/TOC only.',
     }
   }
 
@@ -128,6 +142,7 @@ export function composeUsdStagePreview(input: {
         intake,
         hierarchy: null,
         artifact: null,
+        crateHeader: null,
         message: gate.message,
       }
     }
@@ -143,21 +158,62 @@ export function composeUsdStagePreview(input: {
       intake,
       hierarchy: null,
       artifact: null,
+      crateHeader: null,
       message: intake.message,
     }
   }
 
   if (intake.payloadKind === 'usdc_crate' || input.format === 'usdc') {
+    const sealed = sealUsdcCrateHeaderReceipt(view)
+    if (!sealed.ok) {
+      // Magic-only short fixtures remain intake_held; corrupt bootstrap → usdc_crate_corrupt.
+      const code: UsdStageComposeRejectCode =
+        sealed.code === 'header_too_short' || sealed.code === 'invalid_magic'
+          ? 'intake_held'
+          : 'usdc_crate_corrupt'
+      return {
+        success: false,
+        openUsdStageClaimable: false,
+        openUsdStageReady: false,
+        code,
+        heldReason: intake.heldReason,
+        intake,
+        hierarchy: null,
+        artifact: null,
+        crateHeader: null,
+        message: `${intake.message} Crate header: ${sealed.message}`,
+      }
+    }
+    if (USDC_MESH_STAGE_READY || OPEN_USD_CRATE_MESH_READY || sealed.value.meshStageReady) {
+      return {
+        success: false,
+        openUsdStageClaimable: false,
+        openUsdStageReady: false,
+        code: 'usdc_crate_mesh_held',
+        heldReason: 'usdc_crate_unsupported',
+        intake,
+        hierarchy: null,
+        artifact: null,
+        crateHeader: sealed.value,
+        message: 'USDC mesh stage flag leak — refuse compose success.',
+      }
+    }
+    // Header/TOC sealed — still fail-closed for mesh (Law XVI: no empty mesh success).
+    log.info('usd_stage_compose_usdc_toc_held', {
+      fingerprint: sealed.value.fingerprint,
+      sectionCount: sealed.value.sectionCount,
+    })
     return {
       success: false,
       openUsdStageClaimable: false,
       openUsdStageReady: false,
-      code: 'intake_held',
-      heldReason: intake.heldReason,
+      code: 'usdc_crate_mesh_held',
+      heldReason: 'usdc_crate_unsupported',
       intake,
       hierarchy: null,
       artifact: null,
-      message: intake.message,
+      crateHeader: sealed.value,
+      message: `USDC crate TOC sealed (${sealed.value.sectionCount} sections, fp=${sealed.value.fingerprint}) — mesh stage HELD.`,
     }
   }
 
@@ -172,10 +228,10 @@ export function composeUsdStagePreview(input: {
         intake,
         hierarchy: null,
         artifact: null,
+        crateHeader: null,
         message: intake.message,
       }
     }
-    // USDZ preview eligible — success only with non-empty ZIP bytes (already checked).
     const artifact: UsdStageComposeArtifact = {
       format: 'usdz',
       primCount: 0,
@@ -187,7 +243,6 @@ export function composeUsdStagePreview(input: {
       previewKind: 'usdz_zip_preview_only',
       contentFingerprint: createHash('sha256').update(view).digest('hex').slice(0, 16),
     }
-    // Non-empty bytes + live ZIP = non-empty compose artifact (preview receipt, not mesh stage).
     if (artifact.contentFingerprint.length < 8) {
       return {
         success: false,
@@ -197,6 +252,7 @@ export function composeUsdStagePreview(input: {
         intake,
         hierarchy: null,
         artifact: null,
+        crateHeader: null,
         message: 'USDZ compose produced empty fingerprint — fail-closed (Law XVI).',
       }
     }
@@ -208,6 +264,7 @@ export function composeUsdStagePreview(input: {
       intake,
       hierarchy: null,
       artifact,
+      crateHeader: null,
       message: `${intake.message} Compose receipt fingerprint=${artifact.contentFingerprint}.`,
     }
   }
@@ -222,6 +279,7 @@ export function composeUsdStagePreview(input: {
       intake,
       hierarchy: null,
       artifact: null,
+      crateHeader: null,
       message: intake.message,
     }
   }
@@ -237,6 +295,7 @@ export function composeUsdStagePreview(input: {
       intake,
       hierarchy,
       artifact: null,
+      crateHeader: null,
       message:
         hierarchy.summary ||
         'USDA hierarchy compose failed — refuse success:true with empty prim/box artifact.',
@@ -268,6 +327,7 @@ export function composeUsdStagePreview(input: {
     intake,
     hierarchy,
     artifact,
+    crateHeader: null,
     message: `Compose OK: ${artifact.primCount} prims / ${artifact.boxCount} boxes — hierarchy wireframe only; OpenUSD HELD.`,
   }
 }
@@ -277,6 +337,7 @@ export function probeUsdStageComposeReadiness(): {
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   ready: boolean
   openUsdStageReady: false
+  usdcMeshStageReady: false
   path: string
   note: string
 } {
@@ -303,9 +364,15 @@ def Xform "Root" {
     bytes: new TextEncoder().encode(usda),
     claimFullUsdStage: true,
   })
-  const crate = composeUsdStagePreview({
+  const magicOnly = composeUsdStagePreview({
     format: 'usdc',
     bytes: new Uint8Array([0x50, 0x58, 0x52, 0x2d, 0x55, 0x53, 0x44, 0x43]),
+  })
+  const crateFixture = composeUsdStagePreview({
+    format: 'usdc',
+    bytes: buildUsdcCrateHeaderFixture({
+      sections: [{ name: 'TOKENS', offset: 88, size: 0 }],
+    }),
   })
 
   const ready =
@@ -317,17 +384,23 @@ def Xform "Root" {
     capsule.success === false &&
     capsule.code === 'proxy_capsule_forbidden' &&
     openClaim.success === false &&
-    crate.success === false &&
-    OPEN_USD_STAGE_READY === false
+    magicOnly.success === false &&
+    crateFixture.success === false &&
+    crateFixture.code === 'usdc_crate_mesh_held' &&
+    crateFixture.crateHeader?.meshStageReady === false &&
+    (crateFixture.crateHeader?.sectionCount ?? 0) >= 1 &&
+    OPEN_USD_STAGE_READY === false &&
+    USDC_MESH_STAGE_READY === false
 
   return {
     id: 'J7-compose',
     status: ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
     ready,
     openUsdStageReady: false,
+    usdcMeshStageReady: false,
     path: 'lib/production/usd-stage-compose.ts',
     note: ready
-      ? 'USDA hierarchy compose receipt with non-empty boxes; empty/capsule/OpenUSD claims fail-closed; openUsdStageReady=false.'
+      ? 'USDA hierarchy compose + USDC TOC seal fail-closed (mesh HELD); empty/capsule/OpenUSD claims refused.'
       : 'J.7 stage compose probe failed.',
   }
 }

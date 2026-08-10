@@ -22,13 +22,15 @@ describe('CW7 disk austerity honesty', () => {
     expect(report.heldReason).toBe('cw7_orphan_prune_cas_ci_open')
   })
 
-  it('finds trackable docs and example config from web cwd', () => {
+  it('finds trackable docs, example config, and austerity scripts from web cwd', () => {
     const report = probeDiskAusterityHonesty()
     expect(report.artifacts.some((a) => a.id === 'kernel-rust-disk-doc' && a.exists)).toBe(true)
     expect(report.artifacts.some((a) => a.id === 'studio-local-disk-doc' && a.exists)).toBe(true)
     expect(
       report.artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists),
     ).toBe(true)
+    expect(report.orphanPruneScriptPresent).toBe(true)
+    expect(report.cargoTargetCheckScriptPresent).toBe(true)
     expect(CW7_RECOMMENDED_TARGET_DIR).toContain('aethel-target-gnu')
   })
 })

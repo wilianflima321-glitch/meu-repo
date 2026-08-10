@@ -9,6 +9,7 @@ import {
   composeUsdStagePreview,
   probeUsdStageComposeReadiness,
 } from '@/lib/production/usd-stage-compose'
+import { buildUsdcCrateHeaderFixture } from '@/lib/production/usdc-crate-substrate'
 
 const SAMPLE_USDA = `#usda 1.0
 def Xform "Root" {
@@ -66,12 +67,27 @@ describe('J.7 USD stage compose', () => {
     expect(result.code).toBe('openusd_stage_held')
   })
 
-  it('fail-closes USDC crate compose', () => {
+  it('fail-closes USDC magic-only as intake_held', () => {
     const crate = new Uint8Array([0x50, 0x58, 0x52, 0x2d, 0x55, 0x53, 0x44, 0x43])
     const result = composeUsdStagePreview({ format: 'usdc', bytes: crate })
     expect(result.success).toBe(false)
     if (result.success) return
     expect(result.code).toBe('intake_held')
+    expect(result.crateHeader).toBeNull()
+  })
+
+  it('seals USDC TOC header but refuses mesh stage success', () => {
+    const bytes = buildUsdcCrateHeaderFixture({
+      sections: [{ name: 'TOKENS', offset: 88, size: 0 }],
+    })
+    const result = composeUsdStagePreview({ format: 'usdc', bytes })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.code).toBe('usdc_crate_mesh_held')
+    expect(result.crateHeader).not.toBeNull()
+    expect(result.crateHeader?.meshStageReady).toBe(false)
+    expect(result.crateHeader?.sectionCount).toBe(1)
+    expect(result.crateHeader?.sections[0]?.name).toBe('TOKENS')
   })
 
   it('USDZ ZIP compose succeeds as preview-only with fingerprint', () => {
@@ -90,5 +106,6 @@ describe('J.7 USD stage compose', () => {
     expect(probe.ready).toBe(true)
     expect(probe.status).toBe('PARTIAL')
     expect(probe.openUsdStageReady).toBe(false)
+    expect(probe.usdcMeshStageReady).toBe(false)
   })
 })

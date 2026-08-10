@@ -304,7 +304,7 @@ export function buildConsolidationTruthMatrix(
       marketingAllowed: false,
       heldReason: cw2.heldReason,
       note: `Peers: ${cw2.peers.map((p) => `${p.id}@${p.soakN}`).join(', ')}; GPU memory matrix OPEN.`,
-      lastEvidence: `minN=${cw2.minPeerN};wallSec=${cw2.wallBudgetSec};chaosAaa=${cw2.chaosDestructionAaaReady};gpuMatrix=${cw2.gpuMemoryMatrixReady}`,
+      lastEvidence: `minN=${cw2.minPeerN};wallSec=${cw2.wallBudgetSec};chaosAaa=${cw2.chaosDestructionAaaReady};gpuMatrix=${cw2.gpuMemoryMatrixReady};webChaosOk=${cw2.webChaosEvidenceOk};webChaosFp=${cw2.webChaosEvidenceFingerprint ?? 'none'}`,
       gatedNames: ['Chaos', 'DualSPHysics', 'Unreal Mass', 'Nanite'],
     },
     {
@@ -315,7 +315,7 @@ export function buildConsolidationTruthMatrix(
       marketingAllowed: false,
       heldReason: cw7.heldReason,
       note: cw7.notes[2],
-      lastEvidence: `status=${cw7.overallStatus};cargoTargetDir=${cw7.cargoTargetDirEnv ?? 'unset'};example=${cw7.artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists)};orphanPrune=${cw7.orphanPruneEnforced}`,
+      lastEvidence: `status=${cw7.overallStatus};cargoTargetDir=${cw7.cargoTargetDirEnv ?? 'unset'};example=${cw7.artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists)};orphanPruneScript=${cw7.orphanPruneScriptPresent};cargoTargetCheckScript=${cw7.cargoTargetCheckScriptPresent};orphanPrune=${cw7.orphanPruneEnforced};casCook=${cw7.casCookEnforced};ciSingle=${cw7.ciSingleTargetEnforced}`,
       gatedNames: ['CAS cook', 'orphan prune'],
     },
     {

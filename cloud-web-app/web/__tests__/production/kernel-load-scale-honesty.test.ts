@@ -20,6 +20,8 @@ describe('CW2 kernel load-scale honesty', () => {
     expect(report.chaosDestructionAaaReady).toBe(false)
     expect(report.gpuMemoryMatrixReady).toBe(false)
     expect(report.heldReason).toBe('cw2_gpu_matrix_chaos_aaa_open')
+    expect(report.webChaosEvidenceOk).toBe(true)
+    expect(report.webChaosEvidenceFingerprint).toBeTruthy()
 
     for (const peer of report.peers) {
       expect(peer.soakN).toBeGreaterThanOrEqual(CW2_LOAD_SCALE_MIN_N)
