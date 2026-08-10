@@ -16,4 +16,10 @@ as text-to-3d to fake green. Do **not** flip `nativeOnnxReady` without:
 
 Until then: `probeNativeOnnxFixtureHonesty().stamp === 'HELD'`, BYOK clay (letter cb) remains.
 
-See `lib/native-gen/onnx-fixture-honesty.ts` + `__tests__/native-gen/onnx-fixture-honesty-da.test.ts`.
+**Top-8 #3 (`creative-onnx-session.ts`):** fail-closed session when model bytes missing
+(finance-onnx pattern). Optional `loadOrtFixtureEvidence` may set local `ortFixtureLoaded`
+for plumbing evidence only — **never** flips `nativeOnnxReady` or Meshy/Tripo parity.
+Identity / mock theater fixtures are refused.
+
+See `lib/native-gen/onnx-fixture-honesty.ts` + `__tests__/native-gen/onnx-fixture-honesty-da.test.ts`
++ `lib/native-gen/creative-onnx-session.ts`.

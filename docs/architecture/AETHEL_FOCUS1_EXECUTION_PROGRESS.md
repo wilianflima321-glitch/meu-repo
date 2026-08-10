@@ -109,8 +109,10 @@
 | 2026-08-10 creative-gen-honesty | Docs+honesty — Creative Generation Honesty Matrix (Mini-IA / Maestro / Nexus / Bridge vs Meshy·Tripo·UEFN); top-8 deepen moves | Docs only; no UI; J.11/J.12 STOPPED; Hub checkout HELD; `nativeOnnxReady` false |
 | 2026-08-10 maestro-creative-quality | Commit: `0569829c2`. Backend-only — Maestro creative pulse + CapScore quality-tier binding (Mini-IA allowlist) | **PARTIAL** — Intent→CostGuard→Nexus→Fusion scopes; J.12 OrchestratorProd **STOPPED**; no UE/Meshy-Tripo clay claim; vitest **10/10**; Hub checkout **false**; `investmentGrade` untouched |
 | 2026-08-10 clay-refine-wf-barrier | Commit: `99dc84fe5`. Backend-only — clay→refine evidence fingerprints + World Forge Maestro success barrier | **PARTIAL** — empty/theater/critic fail-closed; terrain+PCG required for success; pulse wire; `nativeOnnxReady` **false**; vitest **6/6** (+ pulse regression); Hub checkout **false** |
+| 2026-08-10 creative-ort-fixture | Backend-only — Top-8 #3 creative ORT fail-closed + `ortFixtureLoaded` evidence | **PARTIAL** — session refuses without model bytes; fixture loader never flips `nativeOnnxReady`/Meshy; vitest **5/5** (+ da **8/8**); Hub checkout **false** |
 | 2026-08-10 gas-entropy-rapier | Commit: `784d13b46`. Kernel/Desktop — GAS binary tick Instant metrics + Entropy×Rapier ≥256 bodies | **PARTIAL** — `GAS_60HZ_BINARY_IPC_READY`/`chaos_destruction_aaa_ready` **false**; G.3 stays ~15% |
 | 2026-08-10 collapse-dual-bridge | Commit: `d36a9b3fb`. Backend-only — Honesty Matrix #2 collapse dual Bridge (`lib/ai` → production re-export + fail-closed legacy class) | **DONE-core** — single CostGuard choke; expensive generate routes still HTTP Bridge; J.12 **STOPPED**; `nativeOnnxReady` untouched; vitest collapse+Law XVI+HTTP **27/27**; Hub checkout **false**; `investmentGrade` untouched |
+| 2026-08-10 honesty-7-8-j7-fusion | Commit: `b608fb8b6`. Backend-only — Honesty Matrix #7 J.7 refined GLB/USDZ cook + #8 Fusion atomic revert + CW6 creative apply receipt | **PARTIAL** deepen — cook receipt fail-closed capsule/empty/OpenUSD; shared-Y.Doc undo evidence; fileValidation blocks write theater; OpenUSD/USDC mesh/Meshy surpass **HELD**; vitest **23/23** targeted; Hub/investmentGrade/G.3/`nativeOnnxReady` untouched |
 
 ---
 
@@ -127,7 +129,7 @@
 | Video scaffold Trava III | `video-to-scaffold-extractor.ts` | |
 | GraphOperator J.5 | `graph-operator.ts` | Bridge+FusionTx+Critic |
 | VideoToMechanic J.6 | `video-to-mechanic-operator.ts` + `POST /api/ai/video/scaffold` | scaffold only |
-| UsdIntegrator J.7 | `usd-integrator.ts` + `usd-stage-intake.ts` | no capsule; USDZ preview **PARTIAL** (Three USDZLoader); USDA/USD/USDC **HELD**; `evaluateUsdStageIntake` fail-closed + OpenUSD HELD reasons |
+| UsdIntegrator J.7 | `usd-integrator.ts` + `usd-stage-intake.ts` + `usd-refined-mesh-cook.ts` | no capsule; USDZ preview **PARTIAL**; refined GLB cook receipt **PARTIAL**; USDA/USD/USDC OpenUSD **HELD** |
 | BrowserOperator J.8 | `browser-operator.ts` + `POST /api/agents/browser-operator/research` | governed fetch; CDP farm HELD |
 | LiveVoice J.10 | `live-voice-operator.ts` + `POST /api/agents/live-voice/direction` | PTT/generate?play; duplex WebRTC HELD |
 | LazyInspector #66 | `lazy-inspector.ts` + apply `preflight.ts` | `LAZY_INSPECTOR_REJECT` |
@@ -138,6 +140,7 @@
 | Creative quality tier | `creative-quality-tier-binding.ts` | CapScore/cloud → draft\|standard\|high\|cloud_max; UE/Meshy-Tripo claims **false** |
 | Clay→refine evidence | `mesh-quality/clay-refine-evidence.ts` | Fingerprint on bw critic-pass; empty/theater fail-closed |
 | World Forge Maestro barrier | `world-forge-maestro-barrier.ts` | Refuse success without heightfield+PCG; pulse+conveyor wire |
+| Creative ORT session | `native-gen/creative-onnx-session.ts` | Fail-closed without bytes; `ortFixtureLoaded` only — never `nativeOnnxReady` |
 | Anti-lazy prompt | `lib/ai/fusion-anti-lazy-system.ts` | |
 
 ### Focus 1B
@@ -1250,12 +1253,12 @@ Ranked for **product generative superiority**, not new MD or UI chrome. **Forbid
 
 1. **Unify creative dispatch under Maestro plan** — **PARTIAL first-light:** `maestro-creative-pulse.ts` (CostGuard→Nexus→Fusion scopes; Mini-IA allowlist; J.12 refuse). Still needed: wire pulse → cb/cd/bw conveyors + Bridge provider dispatch as nucleus (not plan-only). Do **not** wait for J.12; do **not** invent ACP.
 2. **Collapse dual Bridge surfaces** — **DONE-core (2026-08-10):** `lib/production/creative-artifact-bridge.ts` only choke; `lib/ai/creative-*` re-export production + fail-closed legacy class; vitest `collapse-dual-creative-bridge` + Law XVI + HTTP choke.
-3. **Native ORT text-to-3d fixture path (letter da/cu)** — Founder-licensed weights + runtime soak → only then flip `nativeOnnxReady`; until then keep silent BYOK clay fallback (Zero-UI).
+3. **Native ORT text-to-3d fixture path (letter da/cu)** — **PARTIAL** (`creative-onnx-session.ts`): fail-closed session without model bytes; `ortFixtureLoaded` local evidence only; **never** flips `nativeOnnxReady` / Meshy parity. Still open: Founder-licensed weights + ORT runtime + cu soak → only then flip `nativeOnnxReady`.
 4. **Clay→refine evidence ledger** — **PARTIAL** (`clay-refine-evidence.ts` + bw conveyor seal): fingerprint receipts (provider, triangles, critic, CapScore); fail-closed empty/theater/critic REJECT. Still open: live bx poll→ledger soak.
 5. **World Forge Maestro barrier** — **PARTIAL** (`world-forge-maestro-barrier.ts` + conveyor gate + pulse `worldForgeEvidence`): refuse success without heightfield+PCG; Fusion abort / LoRA empty / bake refuse / theater fail-closed. Still open: multi-stage CostGuard spend across conveyor.
 6. **CapScore-aware quality ladder for gen** — **PARTIAL first-light:** `creative-quality-tier-binding.ts` (draft|standard|high|cloud_max; competitor claims **false**). Still needed: bind budgets into native-gen + world-forge conveyor hot paths (not pulse-only).
-7. **J.7 Meshy→USD cook runtime (not OpenUSD theater)** — deepen compose/intake so refined GLB/USDZ lands in viewport with honest HELD badges for USDA/USDC; refuse capsule / empty stage.
-8. **Shared-Y.Doc Fusion undo + apply swarm receipts** — finish Trava II cross-isolate gap + CW6 `fileValidation` so Mini-IA “simple apply” cannot present L.5 FAIL as success (Auto-Heal ≤3 already — enforce on creative write paths).
+7. **J.7 Meshy→USD cook runtime (not OpenUSD theater)** — **PARTIAL (2026-08-10 `b608fb8b6`):** `usd-refined-mesh-cook.ts` seals refined GLB cook receipt + optional USDZ preview ZIP; fail-closed capsule/empty/OpenUSD/USDC mesh; `OPEN_USD_COOK_STAGE_READY`/`MESH_CLAY_SURPASS_CLAIM` **false**. Viewport drop wire still OPEN; OpenUSD C++ HELD.
+8. **Shared-Y.Doc Fusion undo + apply swarm receipts** — **PARTIAL (2026-08-10 `b608fb8b6`):** `fusion-atomic-revert-evidence.ts` seals before/after hashes on shared-Y.Doc abort/revert; `creative-apply-fusion-receipt.ts` refuses write success on CW6 `fileValidation` deny / missing FusionTx / empty receipts. Cross-isolate production soak still OPEN.
 
 **Explicit non-moves:** resume J.11/J.12 without Founder; Meshy/Tripo marketing as “surpassed”; new exotic kernel letters as gen proof; UI redesign; Quant Mini-IA conflation with creative Mini-IA.
 
@@ -1480,6 +1483,7 @@ Ranked for **product superiority**, not more substrate files:
 
 | Date | Change |
 |------|--------|
+| 2026-08-10 creative-ort-fixture | Commit: *(pending)*. **Backend-only Top-8 #3 PARTIAL (no UI).** `creative-onnx-session.ts` — finance-onnx-style fail-closed session when model bytes missing; `loadOrtFixtureEvidence` sets local `ortFixtureLoaded` only (Identity/theater refused); wired into `probeNativeOnnxFixtureHonesty.ortFixtureLoaded`. **`nativeOnnxReady` stays false**; Meshy/Tripo parity **false**. Tests **5/5** (+ da honesty **8/8**). Hub / investmentGrade / G.3 / J.12 untouched. |
 | 2026-08-10 gf-mesh-pbr-hiz | Commit: `952f8bb8a`. **Web only (no UI).** G.% 30→50 prep deepen: (1) `gf-mesh-001-material-pbr-fixture.ts` — golden albedo/rough/metal/normal fingerprint for GF-MESH-001; **ID-color-only refused** fail-closed; (2) `hiz-occlusion-win-harness.ts` — measures frustum vs soft Hi-Z draw reduction (`GF-HIZ-WIN-001`); theater/invented/identity win fail-closed; `hiz_ready` **false**. Honesty `gfMesh001Pbr` + `hizOcclusionWin`; truth matrix rows. **G.3 stays 15%**; **15→30 HELD** (PP-01/03); **30→50 HELD**. Vitest **4/4**. No Nanite/Lumen claims. |
 | 2026-08-10 clay-refine-wf-barrier | Commit: `99dc84fe5`. **Backend-only Top-8 #4+#5 PARTIAL (no UI).** `clay-refine-evidence.ts` — durable SHA fingerprint on bw critic-pass; empty/theater/critic REJECT fail-closed; sealed from `game-ready-quality-pipeline`. `world-forge-maestro-barrier.ts` — refuse success without heightfield+PCG; Fusion abort / LoRA empty / bake refuse / theater fail-closed; wired into world-forge conveyor + Maestro creative pulse `worldForgeEvidence`. Competitor claims **false**; `nativeOnnxReady` **false**. Tests **6/6** (+ maestro pulse regression). Hub / investmentGrade / G.3 / J.12 untouched. |
 | 2026-08-10 collapse-dual-bridge | Commit: `d36a9b3fb`. **Backend-only Honesty Matrix #2 DONE-core (no UI).** Collapse dual Bridge: `lib/ai/creative-*` → thin re-export of `lib/production/*` + fail-closed legacy class; choke = `dispatchCreativeArtifact` + HTTP `creative-bridge-http-dispatch`. Vitest collapse+Law XVI+HTTP **27/27**. J.12 **STOPPED**; `nativeOnnxReady` / Hub / investmentGrade untouched. |

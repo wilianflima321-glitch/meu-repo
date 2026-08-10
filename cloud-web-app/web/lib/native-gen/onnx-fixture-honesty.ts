@@ -22,6 +22,10 @@ import {
   ONNX_ORT_SOAK_LETTER,
   type NativeOnnxOrtSoakResult,
 } from '@/lib/native-gen/onnx-ort-session'
+import {
+  describeOrtFixtureEvidenceState,
+  getOrtFixtureLoaded,
+} from '@/lib/native-gen/creative-onnx-session'
 import { selectGameReadyCharacterRoute } from '@/lib/native-gen/native-gen-ide-route'
 
 export const ONNX_FIXTURE_HONESTY_LETTER = 'da' as const
@@ -48,6 +52,11 @@ export interface OnnxFixtureHonestyProbe {
   wired: true
   /** Product gate — true only after real weights + ORT + cu soak. */
   nativeOnnxReady: boolean
+  /**
+   * Local evidence only (Top-8 #3) — fixture bytes loaded for plumbing.
+   * NEVER implies nativeOnnxReady / Meshy parity.
+   */
+  ortFixtureLoaded: boolean
   textTo3dWeightsOnDisk: boolean
   weightsPath: string | null
   ortRuntimePresent: boolean
@@ -55,6 +64,7 @@ export interface OnnxFixtureHonestyProbe {
   /** Always true until Founder licenses + drops redistributable weights. */
   redistributableTextTo3dFixtureUnavailable: true
   byokClayFallback: true
+  meshyTripoClayParityClaim: false
   stamp: 'IMPLEMENTED' | 'HELD'
   heldReason?: OnnxFixtureHeldReason
   notes: string[]
@@ -133,9 +143,17 @@ export function probeNativeOnnxFixtureHonesty(
     'letter da — commercial text-to-3d ONNX not redistributable (size/license) → no vendored tiny-text-to-3d.onnx',
     'letter da — Identity-only stubs must not fake text-to-3d or flip nativeOnnxReady',
     'letter da — ORT runtime not wired in web package (cargo local-ai / onnxruntime HELD)',
+    'Top-8 #3 — ortFixtureLoaded is local evidence only; never equals nativeOnnxReady',
     weights.note,
     runtime.note,
   ]
+
+  const fixtureState = describeOrtFixtureEvidenceState()
+  if (fixtureState.ortFixtureLoaded) {
+    notes.push(
+      `ortFixtureLoaded=true (${fixtureState.byteLength} B) — plumbing evidence only; nativeOnnxReady untouched`,
+    )
+  }
 
   if (!ready) {
     notes.push(
@@ -152,6 +170,7 @@ export function probeNativeOnnxFixtureHonesty(
     priorLetter: ONNX_ORT_SOAK_LETTER,
     wired: true,
     nativeOnnxReady: ready,
+    ortFixtureLoaded: getOrtFixtureLoaded(),
     textTo3dWeightsOnDisk,
     weightsPath: textTo3dWeightsOnDisk ? weights.path : null,
     ortRuntimePresent,
@@ -159,6 +178,7 @@ export function probeNativeOnnxFixtureHonesty(
     redistributableTextTo3dFixtureUnavailable:
       REDISTRIBUTABLE_TEXT_TO_3D_ONNX_UNAVAILABLE,
     byokClayFallback: true,
+    meshyTripoClayParityClaim: false,
     stamp: ready ? 'IMPLEMENTED' : 'HELD',
     heldReason,
     notes,
