@@ -85,4 +85,94 @@ describe('chargeback-handler', () => {
     expect(smoke.ok).toBe(true)
     expect(smoke.coins).toBe(0)
   })
+
+  it('reverses partial coins when balance < mintAmount (platform absorbs remainder)', async () => {
+    const coinStore = createMemoryAethelCoinLedgerStore()
+    const custodyStore = createMemoryItemCustodyStore()
+    await mintAethelCoins(coinStore, {
+      userId: 'buyer',
+      amount: 10,
+      reference: 'purchase:pi_partial',
+      entryType: 'purchase',
+    })
+    const placed = await placeItemInCustody(custodyStore, {
+      userId: 'buyer',
+      marketplaceItemId: 'item_partial',
+      contentHash: 'cas:partial',
+      purchaseReference: 'purchase:pi_partial',
+    })
+    expect(placed.ok).toBe(true)
+
+    const handler = createChargebackHandler({ coinStore, custodyStore })
+    const result = await handler.handleChargeback({
+      disputeId: 'dp_partial',
+      kind: 'stripe_dispute',
+      userId: 'buyer',
+      purchaseReference: 'purchase:pi_partial',
+      coinMintAmount: 40,
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.coinsReversed).toBe(10)
+    expect(await computeAethelCoinBalance(coinStore, 'buyer')).toBe(0)
+  })
+
+  it('skips owned past-custody items and reports skippedOwnedPastCustody', async () => {
+    const coinStore = createMemoryAethelCoinLedgerStore()
+    const custodyStore = createMemoryItemCustodyStore()
+    const placed = await placeItemInCustody(custodyStore, {
+      userId: 'buyer',
+      marketplaceItemId: 'item_owned',
+      contentHash: 'cas:owned',
+      purchaseReference: 'purchase:pi_owned',
+    })
+    expect(placed.ok).toBe(true)
+    if (!placed.ok) return
+
+    const owned: typeof placed.value = {
+      ...placed.value,
+      status: 'owned',
+      revocable: false,
+      revocableUntil: null,
+    }
+    await custodyStore.put(owned)
+
+    const handler = createChargebackHandler({ coinStore, custodyStore })
+    const result = await handler.handleChargeback({
+      disputeId: 'dp_owned',
+      kind: 'stripe_dispute',
+      userId: 'buyer',
+      purchaseReference: 'purchase:pi_owned',
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.revokedItemIds).toHaveLength(0)
+    expect(result.value.skippedOwnedPastCustody).toBe(1)
+  })
+
+  it('revokes multiple custodial items on same purchase reference', async () => {
+    const coinStore = createMemoryAethelCoinLedgerStore()
+    const custodyStore = createMemoryItemCustodyStore()
+    const ref = 'purchase:pi_multi'
+    for (const id of ['item_a', 'item_b']) {
+      const placed = await placeItemInCustody(custodyStore, {
+        userId: 'buyer',
+        marketplaceItemId: id,
+        contentHash: `cas:${id}`,
+        purchaseReference: ref,
+      })
+      expect(placed.ok).toBe(true)
+    }
+
+    const handler = createChargebackHandler({ coinStore, custodyStore })
+    const result = await handler.handleChargeback({
+      disputeId: 'dp_multi',
+      kind: 'stripe_dispute',
+      userId: 'buyer',
+      purchaseReference: ref,
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.revokedItemIds).toHaveLength(2)
+  })
 })

@@ -19,6 +19,7 @@ import {
   resolveForgeSandboxE2BPreviewUrl,
   getForgeSandboxPreviewSurface,
 } from '@/lib/production/forge-sandbox-executor'
+import { instrumentE2BRemoteHmrSoakSample } from '@/lib/production/l8-e2b-hmr-soak'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('e2b-remote-hmr')
@@ -150,6 +151,7 @@ export async function detectE2BRemoteHmr(input: {
   fetchImpl?: typeof fetch
   timeoutMs?: number
 }): Promise<E2BRemoteHmrDetectResult> {
+  const detectStartedAtMs = Date.now()
   const sessionId = input.sessionId?.trim()
   const port = resolvePreviewPort(
     input.port ?? getForgeSandboxPreviewSurface(sessionId || '')?.port,
@@ -284,6 +286,18 @@ export async function detectE2BRemoteHmr(input: {
     reason: result.reason,
     engine: result.engine,
     previewUrl,
+  })
+
+  instrumentE2BRemoteHmrSoakSample({
+    startedAtMs: detectStartedAtMs,
+    confirmedAtMs: Date.now(),
+    sessionId,
+    provider: 'e2b',
+    remoteHmrConfirmed: result.remoteHmrConfirmed,
+    reason: result.reason,
+    engine: result.engine,
+    previewUrl,
+    failureReason: result.remoteHmrConfirmed ? undefined : result.reason,
   })
 
   return result

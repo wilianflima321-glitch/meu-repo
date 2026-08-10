@@ -1,7 +1,7 @@
 /**
  * J.4 VectorIndex — public API
  * Continuous SQLite-backed retrieval for L.14 pack builder.
- * Native sqlite-vec = HELD; BYOK cloud embed = CostGuard-gated (Law XVI Trava I).
+ * Native sqlite-vec vec0 when probe-certified; BYOK cloud embed = CostGuard-gated (Law XVI Trava I).
  */
 
 export type {
@@ -40,6 +40,22 @@ export {
   stopVectorIndexWatcher,
   isVectorWatcherActive,
 } from './watcher'
-export { getVectorIndexDbPath, openVectorIndexDb } from './store'
-export { probeSqliteVecExtension } from './sqlite-vec-probe'
+export {
+  getVectorIndexDbPath,
+  openVectorIndexDb,
+  isVectorAnnReady,
+  annSearchChunkIds,
+} from './store'
+export { probeSqliteVecExtension, loadSqliteVecOntoDb } from './sqlite-vec-probe'
 export { buildVectorIndexReadiness } from './readiness'
+export {
+  J4_SEMANTIC_RECALL_MIN_RATE,
+  J4_SEMANTIC_RECALL_MIN_SAMPLES,
+  evaluateSemanticRecallSoak,
+  proveSemanticRecallReady,
+  scoreSemanticRecallSample,
+  getSemanticRecallSoakRecorder,
+  type SemanticRecallSample,
+  type SemanticRecallSoakReport,
+  type SemanticRecallReadyProbe,
+} from './semantic-recall-soak'

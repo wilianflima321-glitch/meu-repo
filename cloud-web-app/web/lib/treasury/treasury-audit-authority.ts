@@ -198,3 +198,77 @@ export function isHubCheckoutProductionRuntime(): boolean {
     process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production'
   )
 }
+
+/** Placeholder marker — template alone never unlocks hubCheckoutAudited. */
+export const TREASURY_CERTIFICATE_TEMPLATE_MARKER = '__TEMPLATE__' as const
+
+export interface HubCheckoutCertificateTemplate {
+  schemaVersion: typeof TREASURY_AUDIT_SCHEMA_VERSION
+  kind: typeof TREASURY_AUDIT_CERTIFICATE_KIND
+  /** Replace with Founder/legal auditor name before signing. */
+  auditor: string
+  /** Replace with ISO-8601 audit timestamp before signing. */
+  auditedAt: string
+  /** All three human checklist ids must remain present when signing. */
+  signedChecklistIds: readonly TreasuryHumanChecklistId[]
+  /** Replace with durable evidence refs (tickets, legal memos, Stripe dashboard links). */
+  evidenceRefs: string[]
+  notes: string
+  _template: typeof TREASURY_CERTIFICATE_TEMPLATE_MARKER
+}
+
+/**
+ * Evidence-only certificate template for Founder/legal sign-off path.
+ * validateTreasuryAuditCertificate rejects placeholders — never fake-unlocks Hub checkout.
+ */
+export function buildHubCheckoutCertificateTemplate(): HubCheckoutCertificateTemplate {
+  return {
+    schemaVersion: TREASURY_AUDIT_SCHEMA_VERSION,
+    kind: TREASURY_AUDIT_CERTIFICATE_KIND,
+    auditor: '<FOUNDER_OR_LEGAL_AUDITOR_NAME>',
+    auditedAt: '<ISO-8601_TIMESTAMP>',
+    signedChecklistIds: [...TREASURY_HUMAN_CHECKLIST_IDS],
+    evidenceRefs: ['<TICKET_OR_LEGAL_MEMO_URL>'],
+    notes:
+      'Replace all placeholders, then write to .aethel/treasury/audit/hub-checkout-certificate.json. ' +
+      'Template alone does NOT unlock hubCheckoutAudited — technical modules must also PASS.',
+    _template: TREASURY_CERTIFICATE_TEMPLATE_MARKER,
+  }
+}
+
+/** True when certificate object is an unsigned template (fail-closed for unlock). */
+export function isHubCheckoutCertificateTemplate(raw: unknown): raw is HubCheckoutCertificateTemplate {
+  return (
+    typeof raw === 'object' &&
+    raw !== null &&
+    (raw as HubCheckoutCertificateTemplate)._template === TREASURY_CERTIFICATE_TEMPLATE_MARKER
+  )
+}
+
+/**
+ * Ops instructions for H.1+ human certificate path (evidence only).
+ */
+export function describeHubCheckoutCertificatePath(cwd: string = process.cwd()): {
+  certificatePath: string
+  auditRoot: string
+  requiredHumanIds: readonly TreasuryHumanChecklistId[]
+  templateFilename: string
+  instructions: string[]
+} {
+  const auditRoot = getTreasuryAuditRoot(cwd)
+  const certificatePath = resolveHubCheckoutCertificatePath(cwd)
+  return {
+    certificatePath,
+    auditRoot,
+    requiredHumanIds: TREASURY_HUMAN_CHECKLIST_IDS,
+    templateFilename: HUB_CHECKOUT_CERTIFICATE_FILENAME,
+    instructions: [
+      'Copy buildHubCheckoutCertificateTemplate() output; replace all placeholders.',
+      'Ensure signedChecklistIds covers founder_treasury_signoff, legal_kyc_tax_review, coins_economy_policy.',
+      'Add non-empty evidenceRefs (tickets, legal memos, Stripe Connect audit links).',
+      'Write signed JSON to certificatePath — evaluateTreasuryAudit reads disk at runtime.',
+      'hubCheckoutAudited stays false until every technical + human checklist item PASSes.',
+      'FORCE_HUB_CHECKOUT and production ?checkout=1 never unlock.',
+    ],
+  }
+}

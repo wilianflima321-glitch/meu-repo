@@ -16,6 +16,9 @@ import {
   TREASURY_AUDIT_CERTIFICATE_KIND,
   TREASURY_AUDIT_SCHEMA_VERSION,
   TREASURY_HUMAN_CHECKLIST_IDS,
+  buildHubCheckoutCertificateTemplate,
+  describeHubCheckoutCertificatePath,
+  isHubCheckoutCertificateTemplate,
   validateTreasuryAuditCertificate,
   type TreasuryAuditEvidenceCertificate,
 } from '@/lib/treasury/treasury-audit-authority'
@@ -79,6 +82,16 @@ describe('H.1+ Treasury audit certificate validation', () => {
   it('accepts a complete certificate', () => {
     const result = validateTreasuryAuditCertificate(makeCertificate())
     expect(result.ok).toBe(true)
+  })
+
+  it('rejects unsigned template placeholders (never fake-unlock)', () => {
+    const template = buildHubCheckoutCertificateTemplate()
+    expect(isHubCheckoutCertificateTemplate(template)).toBe(true)
+    expect(validateTreasuryAuditCertificate(template).ok).toBe(false)
+    expect(describeHubCheckoutCertificatePath().requiredHumanIds).toEqual([
+      ...TREASURY_HUMAN_CHECKLIST_IDS,
+    ])
+    expect(describeHubCheckoutCertificatePath().instructions.length).toBeGreaterThan(0)
   })
 })
 
