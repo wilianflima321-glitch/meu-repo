@@ -135,6 +135,8 @@
 | Maestro / MoA / Heal | `maestro-delegation.ts`, `apex-moa-orchestrator.ts`, `auto-heal-loop.ts`, **`apex-mission-orchestrator.ts`**, **`apex-moa-provider-adapters.ts`**, **`auto-heal-apply.ts`**, **`critical-synthesizer.ts`** | **LIVE** via `enableApexMoA` + apply `enableAutoHeal` |
 | Maestro creative pulse | `maestro-creative-pulse.ts` | Intent→CostGuard→Nexus→Fusion scopes; Mini-IA allowlist; J.12 **STOPPED** fail-closed |
 | Creative quality tier | `creative-quality-tier-binding.ts` | CapScore/cloud → draft\|standard\|high\|cloud_max; UE/Meshy-Tripo claims **false** |
+| Clay→refine evidence | `mesh-quality/clay-refine-evidence.ts` | Fingerprint on bw critic-pass; empty/theater fail-closed |
+| World Forge Maestro barrier | `world-forge-maestro-barrier.ts` | Refuse success without heightfield+PCG; pulse+conveyor wire |
 | Anti-lazy prompt | `lib/ai/fusion-anti-lazy-system.ts` | |
 
 ### Focus 1B
