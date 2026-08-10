@@ -36,6 +36,7 @@ import {
 import { describeForgeSandboxHonestySync } from '@/lib/production/forge-sandbox-honesty'
 import { probeDiskAusterityHonesty } from '@/lib/production/disk-austerity-honesty'
 import { probeKernelLoadScaleHonesty } from '@/lib/production/kernel-load-scale-honesty'
+import { describeQuantFinanceHonestySync } from '@/lib/production/quant-finance-honesty'
 import {
   SWARM_MAX_HEAL_ROUNDS,
   SWARM_MAX_PARALLEL_CELLS,
@@ -180,6 +181,7 @@ export function buildConsolidationTruthMatrix(
   const forgeSandbox = describeForgeSandboxHonestySync()
   const cw7 = probeDiskAusterityHonesty()
   const cw2 = probeKernelLoadScaleHonesty()
+  const quantFinance = describeQuantFinanceHonestySync()
 
   const rows: ConsolidationTruthRow[] = [
     {
@@ -315,6 +317,18 @@ export function buildConsolidationTruthMatrix(
       note: cw7.notes[2],
       lastEvidence: `status=${cw7.overallStatus};cargoTargetDir=${cw7.cargoTargetDirEnv ?? 'unset'};example=${cw7.artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists)};orphanPrune=${cw7.orphanPruneEnforced}`,
       gatedNames: ['CAS cook', 'orphan prune'],
+    },
+    {
+      id: 'quant.finance.onda-n',
+      claim:
+        'Onda N Vanguard Quant — spec binding; zero production trading/HFT modules (investment-grade HELD)',
+      path: 'lib/production/quant-finance-honesty.ts',
+      status: 'NOT_IMPLEMENTED',
+      marketingAllowed: false,
+      heldReason: quantFinance.heldReason,
+      note: `vanguardQuantReady=${quantFinance.vanguardQuantReady}; capabilities NOT_IMPLEMENTED=${quantFinance.capabilities.filter((c) => c.status === 'NOT_IMPLEMENTED').length}/${quantFinance.capabilities.length}; legacy cli PaperExchange dead code.`,
+      lastEvidence: `letter=${quantFinance.letter};investmentGrade=${quantFinance.investmentGrade};stamp=${quantFinance.stamp}`,
+      gatedNames: ['Vanguard Quant', 'HFT', 'Wall Street', 'investment-grade'],
     },
     {
       id: 'ui.persistence.spine',

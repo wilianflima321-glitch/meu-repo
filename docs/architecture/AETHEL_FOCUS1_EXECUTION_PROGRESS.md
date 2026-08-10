@@ -66,6 +66,7 @@
 | 2026-08-10 j4-l4-backend | Backend-only — J.4 BYOK reindex→recall cert harness + L.4 E2B remote PTY probe/wire | **PARTIAL** deepen; J.4 mock BYOK cert **5/5** + recall/BYOK suites **18/18**; L.4 E2B PTY probe + wire **7/7** + L.4 bridge **12/12**; live OpenAI BYOK + live E2B PTY soak still open; `hubCheckoutAudited` **false** |
 | 2026-08-10 e2b-dep-j7-intake | Backend-only — `e2b` workspace install + J.7 `usd-stage-intake` fail-closed (OpenUSD HELD) | **PARTIAL** deepen; `e2b@^2.0.1` resolved in node_modules (`probeE2BRemotePtySdk` loadable); `usd-stage-intake.ts` byte classify + HELD reasons + `.usdc` intake; tests **38/38** targeted (e2b **7/7** + j7 intake **8/8** + regression); live E2B PTY soak + OpenUSD C++ stage **HELD**; Hub checkout **false** |
 | 2026-08-10 fc-cw2-cw7-backend | Backend-only — Firecracker honesty probe + CW2/CW7 truth matrix rows + swarm scale gate | **PARTIAL** deepen; `forge-sandbox-honesty.ts` + `/api/runtime/forge-sandbox-honesty` (firecracker **HELD** always); `kernel-load-scale-honesty.ts` + `disk-austerity-honesty.ts`; truth matrix rows `forge.sandbox.providers` / `kernel.load-scale.cw2` / `disk.austerity.cw7`; `SWARM_MAX_PARALLEL_CELLS=5` fail-closed; preview-runtime-readiness blocks `AETHEL_PREVIEW_PROVIDER=firecracker`; tests **22/22** new+matrix+swarm cap (+ L1 **11/11**); Hub checkout **false** |
+| 2026-08-10 onda-n-quant-honesty | Backend-only — Onda N Quant Finance honesty audit + fail-closed probe (letter **nf**) | **HELD** — spec v2.9 binding intent only; **zero** production trading/HFT modules; legacy cli PaperExchange dead code; `quant-finance-honesty.ts` + `/api/runtime/quant-finance-honesty` + CW1 row `quant.finance.onda-n`; tests **4/4**; investment-grade **false**; Hub checkout **false** |
 
 ---
 
@@ -1144,6 +1145,65 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 15. **R14** Onda G nuclear — **deferred** until platform exit
 
 **Copy-paste next executor:** R1 (Founder cert path) → R4 → R6 → R10 → R7 → R19 → R8 → R11 → R12. Hub checkout **HELD**. No Onda G. No J.12 without Founder.
+
+---
+
+## Onda N — Quantitative Finance honesty (2026-08-10)
+
+**Verdict:** **NOT investment-ready.** The Quant Finance Spec v2.9 is **binding architecture intent** with **~0% production implementation** in the live product tree. Do **not** market Vanguard Quant, HFT, Wall Street parity, or autonomous trading.
+
+| Gate | Status | Evidence |
+|------|--------|----------|
+| `vanguardQuantReady` | **false** | `lib/production/quant-finance-honesty.ts` letter **nf** |
+| `investmentGrade` | **false** | No paper quarantine, audit trail, licensed L2 feed, or exchange adapter |
+| Marketing Vanguard / HFT | **blocked** | CW1 row `quant.finance.onda-n` → NOT_IMPLEMENTED |
+| Live probe | **wired** | `GET /api/runtime/quant-finance-honesty` (auth required) |
+
+### Spec mandate → code reality (gap matrix)
+
+| Spec requirement (engine/platform) | Code status | Notes |
+|-----------------------------------|-------------|-------|
+| Deterministic sim / multi-timeframe tensors | **PARTIAL** | Game `simulation-tick` 60Hz + netcode fixed-point — not portfolio/backtest |
+| Market-data feed + SAB multiplex | **MISSING** | No WebSocket/FIX ingest in production |
+| Rust headless order kernel (<5ms claim) | **MISSING** | No order router in `aethel-kernel-rust` or studio-local |
+| FIX / SBE binary gateway | **MISSING** | Zero FIX session code |
+| Risk limits / kill-switch / max drawdown | **MISSING** | `high-risk-action-firewall.ts` blocks agent trade *text* only |
+| Paper-trading quarantine (§22.A) | **MISSING** | Legacy `aethel-cli-legacy` PaperExchange — dead code |
+| VectorIndex 20yr pattern backtest | **PARTIAL** | J.4 index = code/scene embeddings, not OHLCV |
+| Mini-IA ONNX + GPU tick ring | **HELD** | ORT fixture (letter da) HELD for text-to-3d; no finance model |
+| Maestro pulse + veto (VPIN/regime) | **PARTIAL** | Creative Maestro exists; no finance scheduler/veto |
+| Mathematical Evidence Report (Cap'n Proto) | **MISSING** | No zero-copy quant evidence bus |
+| Blind Brain key vault (Rust AES) | **MISSING** | BYOK = LLM keys; no exchange secret vault |
+| P2P market-data mesh | **MISSING** | Spec §17 red-team rejects; no libp2p market module |
+| Regulatory audit trail | **MISSING** | AI task ledger ≠ trade lifecycle audit |
+| Domain isolation finance vs games | **PARTIAL** | L.14 multi-surface context — no finance project vault type |
+| Law XVI CostGuard vs trading PnL | **CONFLICT** | CostGuard settles AI credits — not broker margin/PnL |
+| Hub Coins vs exchange capital | **CONFLICT** | H.0 Coins **HELD** — must not conflate with strategy capital |
+
+### Wedge / safety conflicts (do not ignore)
+
+1. **24-month wedge** = game creation DX + Hub + Creative Fusion — Onda N is **post-ship Vanguard**, not parallel to RTv1 checkout.
+2. **§9 anti-detection / §14 P2P mesh** describe behavior that violates broker ToS and may breach securities/market-abuse rules — **not shippable** without legal review.
+3. **"<1ms 20yr similarity"** and **"retail HFT on home Wi-Fi"** are physically/marketing inconsistent with §9.C colocation doctrine.
+4. **Synthetic tick interpolation (§14.C)** is simulated data — cannot feed investment-grade signals without explicit labeling.
+
+### Backend execution backlog (Onda N — ranked, no UI)
+
+| Pri | ID | Work | Acceptance |
+|-----|-----|------|------------|
+| **P0** | N0 | **Honesty probe + CW1 row** (letter nf) | **DONE-core** 2026-08-10 — probe + API + tests + truth matrix |
+| **P0** | N1 | Finance project domain type + L.14 vault isolation | Finance context never merges with game Yjs scopes; fail-closed type gate |
+| **P0** | N2 | Paper-trading kernel + walk-forward quarantine gate | No live capital until paper soak passes; migrate off cli-legacy types into `@/lib/production/` |
+| **P0** | N3 | Trade audit ledger (order intent → risk check → paper/live) | Append-only, clock-drift field, distinct from AI task-evidence-ledger |
+| **P1** | N4 | Market-data ingest adapter (read-only REST/WS sandbox) | Normalized tick schema + Z-score outlier filter (§12.C); no execution |
+| **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | Kernel rejects before network; pairs with N3 audit |
+| **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | Wire fe pattern to finance tick path; J.4 domain tag `market-pattern` |
+| **P2** | N7 | Maestro finance pulse scheduler + Mathematical Evidence schema | Cap'n Proto or FlatBuffers; Maestro veto only — Mini-IA no submit |
+| **P2** | N8 | ONNX finance fixture honesty (extend letter da) | Separate `financeOnnxReady` — do not flip text-to-3d gate |
+| **P2** | N9 | FIX/SBE gateway spike (colocation mode only) | Behind feature flag; retail mode hard-blocks microsecond ops |
+| **—** | N∞ | P2P mesh, anti-detection jitter, auto-sweep to cold wallet | **BLOCKED** — spec §17 + legal; do not implement without Founder + counsel |
+
+**Marketing rule:** `vanguardQuantReady` and `investmentGrade` stay **false** until N2+N3+N5 soak green on paper + human/legal sign-off for any live adapter.
 
 ### DONE-but-PARTIAL (self-critique — do not market as full DONE)
 
