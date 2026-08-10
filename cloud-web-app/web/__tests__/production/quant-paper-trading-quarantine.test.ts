@@ -80,20 +80,45 @@ describe('paper trading quarantine (N2)', () => {
     }
   })
 
-  it('routes orders to paper only — never live broker path', () => {
+  it('routes orders to paper only after N5 risk_check — never live broker path', () => {
     const session = createPaperTradingSession({
       projectId: 'proj-paper-3',
       strategyId: 'strat-gamma',
     })
-    const receipt = submitPaperOrder(session, {
-      symbol: 'AAPL',
-      side: 'buy',
-      quantity: 10,
-      limitPrice: 150,
-    })
+    const receipt = submitPaperOrder(
+      session,
+      {
+        symbol: 'AAPL',
+        side: 'buy',
+        quantity: 10,
+        limitPrice: 150,
+      },
+      {
+        notionalUsd: 1500,
+        leverageX100: 100,
+        currentDrawdownBps: 0,
+      },
+    )
     expect(receipt.ok).toBe(true)
     if (receipt.ok) {
       expect(receipt.value.mode).toBe('paper')
+      expect(receipt.value.riskCheck).toBe('pass')
+    }
+  })
+
+  it('rejects paper submit when N5 risk envelope fails', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-paper-4',
+      strategyId: 'strat-delta',
+    })
+    const blocked = submitPaperOrder(
+      session,
+      { symbol: 'AAPL', side: 'buy', quantity: 1, limitPrice: 10 },
+      { notionalUsd: 10, leverageX100: 9999, currentDrawdownBps: 0 },
+    )
+    expect(blocked.ok).toBe(false)
+    if (!blocked.ok) {
+      expect(blocked.code).toBe('risk_leverage_exceeded')
     }
   })
 })

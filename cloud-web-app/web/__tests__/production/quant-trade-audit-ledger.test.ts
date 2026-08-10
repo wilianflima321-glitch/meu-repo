@@ -9,8 +9,13 @@ import {
   createTradeAuditLedger,
   fingerprintTradeAuditLedger,
   recordTradeLifecycle,
+  recordTradeLifecycleWithOptionalWorm,
   verifyTradeAuditChain,
 } from '@/lib/server/quant/trade-audit-ledger'
+import {
+  createSignedWormStore,
+  createWormSigningMaterial,
+} from '@/lib/production/signed-worm-evidence-store'
 
 const sampleIntent = {
   symbol: 'MSFT',
@@ -89,5 +94,48 @@ describe('trade audit ledger (N3)', () => {
 
     expect(recorded.value.entries.at(-1)?.phase).toBe('reject')
     expect(verifyTradeAuditChain(recorded.value).valid).toBe(true)
+  })
+
+  it('optionally sinks lifecycle entries to SF2 WORM; cloud mirror needs consent', () => {
+    const ledger = createTradeAuditLedger({ projectId: 'proj-audit-worm' })
+    const signing = createWormSigningMaterial('n3-sf2')
+    const worm = createSignedWormStore({ projectId: 'proj-audit-worm', signing })
+    expect(worm.ok).toBe(true)
+    if (!worm.ok) return
+
+    const noConsent = recordTradeLifecycleWithOptionalWorm({
+      ledger,
+      strategyId: 'strat-delta',
+      orderIntent: sampleIntent,
+      riskVerdict: 'pass',
+      executionMode: 'paper',
+      clockDriftMs: 1,
+      wormSink: {
+        store: worm.value,
+        signing,
+        cloudMirror: true,
+        cloudConsent: false,
+        accountId: 'acct-1',
+      },
+    })
+    expect(noConsent.ok).toBe(false)
+    if (!noConsent.ok) {
+      expect(noConsent.code).toBe('cloud_consent_required')
+    }
+
+    const localOnly = recordTradeLifecycleWithOptionalWorm({
+      ledger,
+      strategyId: 'strat-delta',
+      orderIntent: sampleIntent,
+      riskVerdict: 'pass',
+      executionMode: 'paper',
+      clockDriftMs: 1,
+      wormSink: { store: worm.value, signing },
+    })
+    expect(localOnly.ok).toBe(true)
+    if (!localOnly.ok) return
+    expect(localOnly.value.ledger.entries).toHaveLength(3)
+    expect(localOnly.value.wormStore?.entries).toHaveLength(3)
+    expect(verifyTradeAuditChain(localOnly.value.ledger).valid).toBe(true)
   })
 })

@@ -66,8 +66,10 @@
 | 2026-08-10 j4-l4-backend | Backend-only — J.4 BYOK reindex→recall cert harness + L.4 E2B remote PTY probe/wire | **PARTIAL** deepen; J.4 mock BYOK cert **5/5** + recall/BYOK suites **18/18**; L.4 E2B PTY probe + wire **7/7** + L.4 bridge **12/12**; live OpenAI BYOK + live E2B PTY soak still open; `hubCheckoutAudited` **false** |
 | 2026-08-10 e2b-dep-j7-intake | Backend-only — `e2b` workspace install + J.7 `usd-stage-intake` fail-closed (OpenUSD HELD) | **PARTIAL** deepen; `e2b@^2.0.1` resolved in node_modules (`probeE2BRemotePtySdk` loadable); `usd-stage-intake.ts` byte classify + HELD reasons + `.usdc` intake; tests **38/38** targeted (e2b **7/7** + j7 intake **8/8** + regression); live E2B PTY soak + OpenUSD C++ stage **HELD**; Hub checkout **false** |
 | 2026-08-10 fc-cw2-cw7-backend | Backend-only — Firecracker honesty probe + CW2/CW7 truth matrix rows + swarm scale gate | **PARTIAL** deepen; `forge-sandbox-honesty.ts` + `/api/runtime/forge-sandbox-honesty` (firecracker **HELD** always); `kernel-load-scale-honesty.ts` + `disk-austerity-honesty.ts`; truth matrix rows `forge.sandbox.providers` / `kernel.load-scale.cw2` / `disk.austerity.cw7`; `SWARM_MAX_PARALLEL_CELLS=5` fail-closed; preview-runtime-readiness blocks `AETHEL_PREVIEW_PROVIDER=firecracker`; tests **22/22** new+matrix+swarm cap (+ L1 **11/11**); Hub checkout **false** |
+| 2026-08-10 dual-mode-execution | Backend-only — Dual-Mode Execution (Vanguard HFT API vs Manus RPA) fail-closed + Maestro guard | **PARTIAL** — `dual-mode-execution.ts`; RPA blocks HFT/scalping/&lt;15m; HFT needs local key+N2+EULA; `liveBrokerReady=false`; live ORT RPA **HELD**; `investmentGrade` **false**; vitest dual-mode + honesty; Hub checkout **false** |
 | 2026-08-10 section23-judicial | Backend-only — §23 Blindagem Judicial + GPU Priority Mux honesty (consent-gated telemetry; no silent spy) | **PARTIAL** — non-custodial + EULA phrase/attestation + consent shadow upload stub + mux **HELD**; live still needs N2+EULA and broker remains false; `investmentGrade` **false**; vitest §23 + honesty green; Hub checkout **false** |
-| 2026-08-10 n5-sf2-risk-worm | Backend-only — N5 Rust risk envelope + SF2 signed WORM evidence store | **PARTIAL** — `risk_envelope.rs` + IPC `probe_risk_envelope_cmd` + web mirror; `signed-worm-evidence-store.ts` HMAC + durable JSONL; honesty N1–N5 + SF1/SF2 PARTIAL; `investmentGrade` **false**; vitest **16/16**; cargo check+clippy green |
+| 2026-08-10 n5-sf2-integrate | Backend-only — deepen N5↔paper + N3↔SF2 WORM (consent-gated cloud) | **PARTIAL** — `submitPaperOrder` requires N5 `evaluateRisk`; `sinkTradeAuditEntryToWorm` + `appendWormEvidenceWithConsentGate`; honesty notes; `investmentGrade` **false**; vitest **26/26**; Hub checkout **false** |
+| 2026-08-10 n5-sf2-risk-worm | Backend-only — N5 Rust risk envelope + SF2 signed WORM evidence store | **PARTIAL** — `risk_envelope.rs` + IPC `probe_risk_envelope_cmd` + web mirror; `signed-worm-evidence-store.ts` HMAC + durable JSONL; honesty N1–N5 + SF1/SF2 PARTIAL; `investmentGrade` **false**; commits `76e194ed0` / `3d459cef6` |
 | 2026-08-10 sf1-n4-substrate | Backend-only — SF1 unified session tape + N4 market ingest stub + honesty wire | **PARTIAL** — `unified-session-tape.ts` (60Hz hash chain sim+paper) + Rust tape in `substrate_deterministic_replay.rs`; N4 `market-data-ingest.ts` fail-closed + Z-score; probes report SF1/N4 PARTIAL; `investmentGrade` **false**; vitest green |
 | 2026-08-10 engine-finance-substrate | Backend-only — Engine+Finance shared substrate audit + SF8 probe + evidence chain | **PARTIAL** deepen; Rust `substrate_deterministic_replay.rs` (check+clippy+2 tests green); web `shared-substrate-honesty.ts` + `/api/runtime/shared-substrate-honesty`; ledger `deterministic-replay`/`audit-chain` kinds; vitest **4/4**; Vanguard Quant/HFT **HELD**; Hub checkout **false** |
 | 2026-08-10 onda-n-quant-honesty | Backend-only — Onda N Quant Finance honesty audit + fail-closed probe (letter **nf**) | **HELD** — spec v2.9 binding intent only; **zero** production trading/HFT modules; legacy cli PaperExchange dead code; `quant-finance-honesty.ts` + `/api/runtime/quant-finance-honesty` + CW1 row `quant.finance.onda-n`; tests **4/4**; investment-grade **false**; Hub checkout **false** |
@@ -1173,24 +1175,26 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ## Onda N — Quantitative Finance honesty (2026-08-10)
 
-**Verdict:** **NOT investment-ready.** N1–N5 + §23 fail-closed cores **PARTIAL**; GPU mux / live broker / silent telemetry claims **HELD or redesigned**. Do **not** market Vanguard Quant, HFT, “untouchable” litigation shield, or 50ms GPU hot-swap.
+**Verdict:** **NOT investment-ready.** N1–N5 + §23 + **Dual-Mode Execution** fail-closed cores **PARTIAL**; GPU mux / live broker / live ORT RPA / silent telemetry claims **HELD or redesigned**. Do **not** market Vanguard Quant, retail HFT, “untouchable” litigation shield, 50ms GPU hot-swap, or ToS-safe RPA bots.
 
 | Gate | Status | Evidence |
 |------|--------|----------|
 | `vanguardQuantReady` | **false** | `lib/production/quant-finance-honesty.ts` letter **nf** |
-| `investmentGrade` | **false** | N1–N5 + §23 stubs; no broker, licensed L2, or legal sign-off |
+| `investmentGrade` | **false** | N1–N5 + §23 + Dual-Mode stubs; no broker, licensed L2, or legal sign-off |
 | Marketing Vanguard / HFT | **blocked** | CW1 row `quant.finance.onda-n` → **PARTIAL** |
 | Live probe | **wired** | `GET /api/runtime/quant-finance-honesty` (auth required) |
 | N1 vault isolation | **PARTIAL** | `lib/server/quant/finance-domain-vault.ts` |
-| N2 paper quarantine | **PARTIAL** | `paper-trading-kernel.ts` — live needs quarantine PASS **+** §23 EULA; `liveBrokerReady=false` |
-| N3 trade audit ledger | **PARTIAL** | `lib/server/quant/trade-audit-ledger.ts` |
+| N2 paper quarantine | **PARTIAL** | `paper-trading-kernel.ts` — submitPaper → N5 risk; live needs quarantine PASS **+** §23 EULA; `liveBrokerReady=false` |
+| N3 trade audit ledger | **PARTIAL** | `trade-audit-ledger.ts` + optional SF2 WORM sink (cloud consent-gated) |
 | N4 market-data ingest | **PARTIAL** | `market-data-ingest.ts` — fail-closed unlicensed |
-| N5 risk envelope | **PARTIAL** | `risk_envelope.rs` + IPC `probe_risk_envelope_cmd` + `risk-envelope.ts` — live hard-disabled |
-| SF2 signed WORM | **PARTIAL** | `signed-worm-evidence-store.ts` — HMAC + optional durable JSONL; Hub Coins isolated |
+| N5 risk envelope | **PARTIAL** | `risk_envelope.rs` + IPC + web mirror — wired into paper kernel; live hard-disabled |
+| SF2 signed WORM | **PARTIAL** | HMAC + durable JSONL + consent cloud gate; Hub Coins isolated; N3 sink |
 | §23 non-custodial | **PARTIAL** | `non-custodial-invariants.ts` — no exchange secret in platform DB |
 | §23 EULA + attestation | **PARTIAL** | `eula-risk-acceptance.ts` + `acceptance-attestation-store.ts` + `/api/runtime/quant-eula-attestation` |
 | §23 GPU Priority Mux | **HELD** | `gpu-priority-mux.ts` — `hotSwapReady=false`; no 50ms claim |
 | §23 shadow audit cloud | **PARTIAL (consent)** | `shadow-audit-telemetry.ts` — fail-closed unless consent===true; silent ON **forbidden** |
+| Dual-Mode Vanguard HFT API | **PARTIAL** | `dual-mode-execution.ts` — local key + N2 + EULA gates; `liveBrokerReady=false`; ms claims forbidden |
+| Dual-Mode Manus RPA | **PARTIAL** | Maestro auto-blocks HFT/scalping/&lt;15m; live ORT/CV RPA **HELD**; Broker ToS risk user-borne |
 
 ### Spec mandate → code reality (gap matrix)
 
@@ -1205,7 +1209,8 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | VectorIndex 20yr pattern backtest | **PARTIAL** | J.4 index = code/scene embeddings, not OHLCV |
 | Mini-IA ONNX + GPU tick ring | **HELD** | ORT fixture (letter da) HELD; no finance model |
 | GPU Priority Mux §23.A (~50ms) | **HELD** | Honesty interface only |
-| Maestro pulse + veto (VPIN/regime) | **PARTIAL** | Creative Maestro exists; no finance scheduler/veto |
+| Maestro pulse + veto (VPIN/regime) | **PARTIAL** | Creative Maestro exists; Dual-Mode finance guard wired; no finance scheduler/veto |
+| Dual-Mode Execution (API vs RPA) | **PARTIAL** | Policy + Maestro guard; no live adapters |
 | Mathematical Evidence Report (Cap'n Proto) | **MISSING** | No zero-copy quant evidence bus |
 | Blind Brain key vault (Rust AES) | **MISSING** | Non-custodial reject of platform secrets; vault HELD |
 | P2P market-data mesh | **MISSING** | Spec §17 red-team rejects; no libp2p market module |
@@ -1214,6 +1219,17 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | Law XVI CostGuard vs trading PnL | **CONFLICT** | CostGuard settles AI credits — not broker margin/PnL |
 | Hub Coins vs exchange capital | **CONFLICT** | H.0 Coins **HELD** — must not conflate with strategy capital |
 | Silent cloud shadow telemetry | **FORBIDDEN** | Consent-gated stub only (§23.0) |
+| Live ORT/CV Manus RPA | **HELD** | ToS / market-abuse — policy only |
+
+### Dual-Mode Execution critique (binding)
+
+| Topic | Verdict |
+|-------|---------|
+| HFT on home Wi-Fi vs colocation | **Honestly incompatible** — never ship ms/retail-HFT claims |
+| Broker ToS / market abuse (RPA/CV click) | **High risk** — live RPA HELD; user-borne if ever enabled |
+| Maestro multi-timeline same browser | **Unsafe without isolation** — guard rejects same-profile multi-timeline |
+| Shippable now | Policy + guards + honesty fields (**PARTIAL**) |
+| HELD | FIX, live broker, live ORT RPA, investmentGrade, Hub checkout |
 
 ### Wedge / safety conflicts (do not ignore)
 
@@ -1222,6 +1238,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 3. **"<1ms 20yr similarity"** and **"retail HFT on home Wi-Fi"** are physically/marketing inconsistent with §9.C colocation doctrine.
 4. **Synthetic tick interpolation (§14.C)** is simulated data — cannot feed investment-grade signals without explicit labeling.
 5. **§23 silent telemetry / “untouchable” litigation claims** — GDPR/LGPD reject silent cloud copies; evidence ≠ legal invulnerability.
+6. **Manus RPA** — browser automation is not a compliance shield; Dual-Mode must keep HFT off RPA and live ORT HELD.
 
 ### Backend execution backlog (Onda N — ranked, no UI)
 
@@ -1232,17 +1249,18 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **P0** | N2 | Paper-trading kernel + walk-forward quarantine gate | **DONE-core** 2026-08-10 — + §23 EULA required for live policy unlock |
 | **P0** | N3 | Trade audit ledger (order intent → risk check → paper/live) | **DONE-core** 2026-08-10 — `trade-audit-ledger.ts` hash chain + tests |
 | **P0** | N23 | §23 non-custodial + EULA + consent telemetry + mux honesty | **PARTIAL** 2026-08-10 — cores + APIs; mux/live broker/durable cloud WORM **HELD** |
+| **P0** | NDM | Dual-Mode Execution (Vanguard HFT API vs Manus RPA) + Maestro guard | **PARTIAL** 2026-08-10 — `dual-mode-execution.ts` + honesty; live adapters **HELD** |
 | **P1** | N4 | Market-data ingest adapter (read-only REST/WS sandbox) | **PARTIAL** 2026-08-10 — fail-closed + Z-score; no licensed feed |
-| **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | **PARTIAL** 2026-08-10 — `risk_envelope.rs` + IPC + web mirror; live hard-disabled; investmentGrade false |
-| **P1** | SF2 | Signed WORM evidence store | **PARTIAL** 2026-08-10 — HMAC-SHA256 + optional durable JSONL; Hub Coins isolated |
+| **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | **PARTIAL** 2026-08-10 — core `76e194ed0`; paper kernel wired (integrate deepen); live hard-disabled |
+| **P1** | SF2 | Signed WORM evidence store | **PARTIAL** 2026-08-10 — core `3d459cef6`; N3 sink + cloud consent gate; Hub Coins isolated |
 | **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | Wire fe pattern to finance tick path; J.4 domain tag `market-pattern` |
 | **P2** | N7 | Maestro finance pulse scheduler + Mathematical Evidence schema | Cap'n Proto or FlatBuffers; Maestro veto only — Mini-IA no submit |
 | **P2** | N8 | ONNX finance fixture honesty (extend letter da) | Separate `financeOnnxReady` — do not flip text-to-3d gate |
 | **P2** | N9 | FIX/SBE gateway spike (colocation mode only) | Behind feature flag; retail mode hard-blocks microsecond ops |
 | **P2** | N23b | Real ORT/wgpu GPU Priority Mux + measured eviction soak | Flip `hotSwapReady` only with evidence — never invent 50ms |
-| **—** | N∞ | P2P mesh, anti-detection jitter, auto-sweep to cold wallet, silent telemetry | **BLOCKED** — spec §17 + §23.0 + legal; do not implement without Founder + counsel |
+| **—** | N∞ | P2P mesh, anti-detection jitter, auto-sweep to cold wallet, silent telemetry, live ORT RPA | **BLOCKED** — spec §17 + §23.0 + Dual-Mode ToS + legal; do not implement without Founder + counsel |
 
-**Marketing rule:** `vanguardQuantReady` and `investmentGrade` stay **false** until N2+N3+N5 soak green on paper + human/legal sign-off for any live adapter.
+**Marketing rule:** `vanguardQuantReady` and `investmentGrade` stay **false** until N2+N3+N5 soak green on paper + human/legal sign-off for any live adapter. Dual-Mode does **not** unlock marketing.
 
 ### DONE-but-PARTIAL (self-critique — do not market as full DONE)
 

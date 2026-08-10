@@ -127,7 +127,7 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     notes.push('sf2SignedWormReady HELD — signed WORM chain/signature verify failed')
   } else {
     notes.push(
-      `sf2SignedWormReady PARTIAL — HMAC-signed WORM (${worm.entryCount} entries); durable optional; Hub Coins isolated`,
+      `sf2SignedWormReady PARTIAL — HMAC-signed WORM (${worm.entryCount} entries); durable optional; N3 trade-audit sink + cloud consent gate; Hub Coins isolated`,
     )
   }
 

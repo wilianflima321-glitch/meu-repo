@@ -1,11 +1,18 @@
 /**
  * N3 — Append-only trade audit ledger (intent → risk → paper/live).
  * Distinct from AI task-evidence-ledger — MiFID-style trade lifecycle only.
+ * Optional SF2 WORM sink for durable signed evidence (local always; cloud consent-gated).
  */
 
 import { createHash, randomUUID } from 'node:crypto'
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  appendWormEvidenceWithConsentGate,
+  type SignedWormStore,
+  type WormResult,
+  type WormSigningMaterial,
+} from '@/lib/production/signed-worm-evidence-store'
 
 const log = createComponentLogger('trade-audit-ledger')
 
@@ -280,4 +287,101 @@ export function recordTradeLifecycle(input: {
     note: `${input.executionMode} submit recorded`,
     now: input.now,
   })
+}
+
+/** Optional SF2 sink options — local durable always allowed; cloud mirror needs consent. */
+export type TradeAuditWormSinkOptions = {
+  store: SignedWormStore
+  signing: WormSigningMaterial
+  /** When true, attempt cloud mirror path (fail-closed without explicit consent). */
+  cloudMirror?: boolean
+  cloudConsent?: boolean | null
+  accountId?: string
+}
+
+/**
+ * Sink a single trade-audit entry into SF2 signed WORM.
+ * Local append always; cloudMirror requires consent === true (no silent telemetry).
+ */
+export function sinkTradeAuditEntryToWorm(
+  entry: TradeAuditEntry,
+  options: TradeAuditWormSinkOptions,
+): WormResult<SignedWormStore> {
+  const kind =
+    entry.phase === 'reject' || entry.riskVerdict === 'fail'
+      ? ('risk-reject' as const)
+      : ('trade-lifecycle' as const)
+
+  return appendWormEvidenceWithConsentGate(
+    options.store,
+    options.signing,
+    {
+      payload: {
+        kind,
+        title: `trade-audit:${entry.phase}`,
+        summary: [
+          entry.phase,
+          entry.strategyId,
+          entry.orderIntent.symbol,
+          entry.riskVerdict ?? 'none',
+          entry.executionMode,
+          `drift=${entry.clockDriftMs}ms`,
+          entry.note,
+        ].join('|'),
+        refs: [entry.id, entry.entryHash, entry.projectId],
+        actor: entry.strategyId,
+      },
+      cloudMirror: options.cloudMirror === true,
+      cloudConsent: options.cloudConsent,
+      accountId: options.accountId,
+    },
+  )
+}
+
+/**
+ * Record lifecycle and optionally sink each new entry to SF2 WORM.
+ * In-memory N3 ledger is always updated; WORM is opt-in via wormSink.
+ */
+export function recordTradeLifecycleWithOptionalWorm(input: {
+  ledger: TradeAuditLedger
+  strategyId: string
+  orderIntent: TradeOrderIntentSnapshot
+  riskVerdict: TradeRiskVerdict
+  executionMode: 'paper' | 'live' | 'none'
+  clockDriftMs: number
+  now?: string
+  wormSink?: TradeAuditWormSinkOptions
+}): TradeAuditResult<{ ledger: TradeAuditLedger; wormStore: SignedWormStore | null }> {
+  const recorded = recordTradeLifecycle({
+    ledger: input.ledger,
+    strategyId: input.strategyId,
+    orderIntent: input.orderIntent,
+    riskVerdict: input.riskVerdict,
+    executionMode: input.executionMode,
+    clockDriftMs: input.clockDriftMs,
+    now: input.now,
+  })
+  if (!recorded.ok) return recorded
+
+  let wormStore: SignedWormStore | null = input.wormSink?.store ?? null
+  if (input.wormSink) {
+    const prevCount = input.ledger.entries.length
+    const newEntries = recorded.value.entries.slice(prevCount)
+    let store = input.wormSink.store
+    for (const entry of newEntries) {
+      const sunk = sinkTradeAuditEntryToWorm(entry, { ...input.wormSink, store })
+      if (!sunk.ok) {
+        return { ok: false, code: sunk.code, message: sunk.message }
+      }
+      store = sunk.value
+    }
+    wormStore = store
+    log.info('trade_audit_sunk_to_sf2', {
+      ledgerId: recorded.value.ledgerId,
+      wormEntries: newEntries.length,
+      cloudMirror: input.wormSink.cloudMirror === true,
+    })
+  }
+
+  return { ok: true, value: { ledger: recorded.value, wormStore } }
 }

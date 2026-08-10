@@ -237,6 +237,49 @@ export function appendWormEvidence(
   return { ok: true, value: Object.freeze(next) }
 }
 
+/**
+ * Append WORM evidence with optional cloud-mirror consent gate (§23 / GDPR).
+ * Local durable JSONL always allowed. cloudMirror=true requires consent === true —
+ * never silent telemetry. Cloud durable vault remains HELD (local chain still appends).
+ */
+export function appendWormEvidenceWithConsentGate(
+  store: SignedWormStore,
+  signing: WormSigningMaterial,
+  input: {
+    payload: WormEvidencePayload
+    now?: string
+    cloudMirror?: boolean
+    cloudConsent?: boolean | null
+    accountId?: string
+  },
+): WormResult<SignedWormStore> {
+  if (input.cloudMirror === true) {
+    if (input.cloudConsent !== true) {
+      log.info('worm_cloud_mirror_blocked_no_consent', {
+        storeId: store.storeId,
+        accountId: input.accountId ?? null,
+      })
+      return {
+        ok: false,
+        code: 'cloud_consent_required',
+        message:
+          'cloud WORM mirror blocked — consent must be explicit true (no silent telemetry); local ledger unaffected',
+      }
+    }
+    // Consent granted: still fail-closed for real cloud vault — append local only + note.
+    log.info('worm_cloud_mirror_consent_ok_vault_held', {
+      storeId: store.storeId,
+      accountId: input.accountId ?? null,
+      cloudVaultHeld: true,
+    })
+  }
+
+  return appendWormEvidence(store, signing, {
+    payload: input.payload,
+    now: input.now,
+  })
+}
+
 export function verifyWormChain(
   store: SignedWormStore,
   signing: WormSigningMaterial,

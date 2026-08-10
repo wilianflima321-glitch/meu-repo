@@ -1,12 +1,19 @@
 /**
  * N2 — Paper-trading kernel interface + walk-forward quarantine gate.
  * Fail-closed: live capital stays disabled until quarantine PASS evidence exists.
+ * Every paper submit must pass N5 risk envelope (drawdown / leverage / kill-switch).
  */
 
 import { createHash, randomUUID } from 'node:crypto'
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import type { EulaAcceptanceRecord } from '@/lib/server/quant/eula-risk-acceptance'
+import {
+  createRiskEnvelopeLimits,
+  evaluateRisk,
+  type RiskEnvelopeLimits,
+  type RiskRejectCode,
+} from '@/lib/server/quant/risk-envelope'
 
 const log = createComponentLogger('paper-trading-kernel')
 
@@ -37,6 +44,17 @@ export interface PaperOrderReceipt {
   mode: 'paper'
   intent: PaperOrderIntent
   filledAt: string
+  /** N5 risk envelope passed before fill. */
+  riskCheck: 'pass'
+  notionalUsd: number
+}
+
+/** N5 inputs required on every paper submit (fail-closed — no bypass). */
+export interface PaperRiskCheckInput {
+  limits?: RiskEnvelopeLimits
+  notionalUsd: number
+  leverageX100: number
+  currentDrawdownBps: number
 }
 
 export interface QuarantineGateState {
@@ -154,10 +172,11 @@ export function evaluateWalkForwardQuarantine(input: {
   return gate
 }
 
-/** Paper-only submit — never routes to a live broker adapter. */
+/** Paper-only submit — N5 risk_check first; never routes to a live broker adapter. */
 export function submitPaperOrder(
   session: PaperTradingSession,
   intent: PaperOrderIntent,
+  risk: PaperRiskCheckInput,
   now?: string,
 ): PaperTradingResult<PaperOrderReceipt> {
   if (session.mode !== 'paper' || session.liveEnabled !== false) {
@@ -170,6 +189,40 @@ export function submitPaperOrder(
   if (intent.quantity <= 0 || !Number.isFinite(intent.quantity)) {
     return { ok: false, code: 'invalid_intent', message: 'quantity must be positive' }
   }
+  if (
+    !Number.isFinite(risk.notionalUsd) ||
+    risk.notionalUsd <= 0 ||
+    !Number.isFinite(risk.leverageX100) ||
+    !Number.isFinite(risk.currentDrawdownBps)
+  ) {
+    return {
+      ok: false,
+      code: 'invalid_risk_context',
+      message: 'N5 risk context required — notional/leverage/drawdown must be finite',
+    }
+  }
+
+  const limits = risk.limits ?? createRiskEnvelopeLimits()
+  const verdict = evaluateRisk(limits, {
+    strategyId: session.strategyId,
+    notionalUsd: risk.notionalUsd,
+    leverageX100: risk.leverageX100,
+    currentDrawdownBps: risk.currentDrawdownBps,
+    wantsLive: false,
+  })
+
+  if (!verdict.ok) {
+    log.info('paper_submit_rejected_by_n5', {
+      strategyId: session.strategyId,
+      code: verdict.code,
+    })
+    return {
+      ok: false,
+      code: `risk_${verdict.code}` as `risk_${RiskRejectCode}`,
+      message: `N5 risk envelope rejected: ${verdict.reason}`,
+    }
+  }
+
   return {
     ok: true,
     value: {
@@ -177,6 +230,8 @@ export function submitPaperOrder(
       mode: 'paper',
       intent,
       filledAt: now ?? new Date().toISOString(),
+      riskCheck: 'pass',
+      notionalUsd: risk.notionalUsd,
     },
   }
 }
@@ -236,7 +291,11 @@ export function attemptEnableLive(
 
 export interface PaperTradingKernel {
   createSession(projectId: string, strategyId: string): PaperTradingSession
-  submitPaper(session: PaperTradingSession, intent: PaperOrderIntent): PaperTradingResult<PaperOrderReceipt>
+  submitPaper(
+    session: PaperTradingSession,
+    intent: PaperOrderIntent,
+    risk: PaperRiskCheckInput,
+  ): PaperTradingResult<PaperOrderReceipt>
   evaluateQuarantine(
     strategyId: string,
     windowCount: number,
@@ -257,7 +316,7 @@ export interface PaperTradingKernel {
 export function createPaperTradingKernel(): PaperTradingKernel {
   return {
     createSession: (projectId, strategyId) => createPaperTradingSession({ projectId, strategyId }),
-    submitPaper: (session, intent) => submitPaperOrder(session, intent),
+    submitPaper: (session, intent, risk) => submitPaperOrder(session, intent, risk),
     evaluateQuarantine: (strategyId, windowCount, passRate) =>
       evaluateWalkForwardQuarantine({ strategyId, windowCount, passRate }),
     requestLiveEnable: (session, gate, eula) => attemptEnableLive(session, gate, eula),

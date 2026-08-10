@@ -11,6 +11,7 @@ import { describe, expect, it, afterEach } from 'vitest'
 import {
   WORM_DOMAIN,
   appendWormEvidence,
+  appendWormEvidenceWithConsentGate,
   createSignedWormStore,
   createWormSigningMaterial,
   loadAndVerifyDurableWorm,
@@ -129,5 +130,38 @@ describe('signed WORM evidence store (SF2)', () => {
     expect(p.hubCoinsIsolated).toBe(true)
     expect(p.durableRoundTrip).toBe(true)
     expect(p.entryCount).toBeGreaterThanOrEqual(2)
+  })
+
+  it('blocks cloud mirror without consent; allows local append', () => {
+    const signing = createWormSigningMaterial('consent')
+    const created = createSignedWormStore({ projectId: 'p-consent', signing })
+    expect(created.ok).toBe(true)
+    if (!created.ok) return
+
+    const blocked = appendWormEvidenceWithConsentGate(created.value, signing, {
+      payload: {
+        kind: 'audit-chain',
+        title: 'Cloud',
+        summary: 'mirror',
+        refs: [],
+        actor: 'test',
+      },
+      cloudMirror: true,
+      cloudConsent: false,
+      accountId: 'acct',
+    })
+    expect(blocked.ok).toBe(false)
+    if (!blocked.ok) expect(blocked.code).toBe('cloud_consent_required')
+
+    const local = appendWormEvidenceWithConsentGate(created.value, signing, {
+      payload: {
+        kind: 'audit-chain',
+        title: 'Local',
+        summary: 'ok',
+        refs: [],
+        actor: 'test',
+      },
+    })
+    expect(local.ok).toBe(true)
   })
 })

@@ -29,6 +29,7 @@ import { probeEulaRiskAcceptanceReadiness } from '@/lib/server/quant/eula-risk-a
 import { probeGpuPriorityMux } from '@/lib/server/quant/gpu-priority-mux'
 import { probeShadowAuditTelemetryReadiness } from '@/lib/server/quant/shadow-audit-telemetry'
 import { probeAcceptanceAttestationReadiness } from '@/lib/server/quant/acceptance-attestation-store'
+import { probeDualModeExecutionReadiness } from '@/lib/server/quant/dual-mode-execution'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 
@@ -91,6 +92,7 @@ export type QuantFinanceHonestyReport = {
     shadowAuditTelemetry: ReturnType<typeof probeShadowAuditTelemetryReadiness>
     acceptanceAttestation: ReturnType<typeof probeAcceptanceAttestationReadiness>
   }
+  dualModeExecution: ReturnType<typeof probeDualModeExecutionReadiness>
   wedgeConflict: string[]
   capabilities: QuantFinanceCapabilityRow[]
   reusableInfra: QuantFinanceCapabilityRow[]
@@ -108,6 +110,18 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
   const n2LiveBlocked = !attemptEnableLive(n2Session, n2Gate).ok && n2Session.liveEnabled === DEFAULT_LIVE_ENABLED
   const n2Kernel = createPaperTradingKernel()
   const n2QuarantineWorks = n2Kernel.evaluateQuarantine('probe-strat', 5, 0.8).status === 'PASS'
+  const n2RiskPass = n2Kernel.submitPaper(
+    n2Session,
+    { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
+    { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+  )
+  const n2RiskReject = n2Kernel.submitPaper(
+    n2Session,
+    { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
+    { notionalUsd: 10, leverageX100: 9999, currentDrawdownBps: 0 },
+  )
+  const n2RiskWired = n2RiskPass.ok === true && n2RiskReject.ok === false
+  const n2Ready = n2LiveBlocked && n2QuarantineWorks && n2RiskWired
 
   const n3Ledger = createTradeAuditLedger({ projectId: 'probe-n3' })
   const n3ChainValid = verifyTradeAuditChain(n3Ledger).valid
@@ -132,12 +146,12 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
     {
       id: 'N2',
       label: 'Paper-trading kernel + walk-forward quarantine',
-      status: n2LiveBlocked && n2QuarantineWorks ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      status: n2Ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
       path: 'lib/server/quant/paper-trading-kernel.ts',
-      ready: n2LiveBlocked && n2QuarantineWorks,
-      note: n2LiveBlocked
-        ? 'live=false default; live enable blocked until quarantine PASS — no broker adapter.'
-        : 'Quarantine gate probe failed.',
+      ready: n2Ready,
+      note: n2Ready
+        ? 'live=false default; submitPaper requires N5 evaluateRisk; quarantine PASS + EULA before live policy; no broker.'
+        : 'Quarantine or N5 risk wire probe failed.',
     },
     {
       id: 'N3',
@@ -146,7 +160,7 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
       path: 'lib/server/quant/trade-audit-ledger.ts',
       ready: n3ChainValid,
       note: n3ChainValid
-        ? 'Append-only hash chain with clockDriftMs — distinct from AI task-evidence-ledger.'
+        ? 'Append-only hash chain with clockDriftMs; optional SF2 WORM sink (cloud consent-gated).'
         : 'Audit chain probe failed.',
     },
     {
@@ -166,7 +180,7 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
       path: n5Probe.rustPath,
       ready: n5Ready,
       note: n5Ready
-        ? n5Probe.note
+        ? `${n5Probe.note} Wired into paper kernel submitPaper.`
         : 'Risk envelope probe failed.',
     },
   ]
@@ -344,6 +358,22 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       path: 'lib/server/quant/shadow-audit-telemetry.ts',
       note: 'Silent telemetry FORBIDDEN; consent≠true → upload fails; durable cloud WORM HELD.',
     },
+    {
+      id: 'dual-mode-vanguard-hft',
+      specSection: '§ Dual-Mode Execution',
+      label: 'Vanguard HFT API mode (local key + N2 + EULA; live HELD)',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/dual-mode-execution.ts',
+      note: 'Policy gates wired; liveBrokerReady=false; ms claims forbidden without colocation.',
+    },
+    {
+      id: 'dual-mode-manus-rpa',
+      specSection: '§ Dual-Mode Execution',
+      label: 'Manus RPA browser mode (swing/position ≥15m; HFT blocked)',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/dual-mode-execution.ts',
+      note: 'Maestro auto-blocks HFT/scalping; live ORT/CV RPA HELD; Broker ToS risk user-borne.',
+    },
   ]
 }
 
@@ -400,6 +430,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     shadowAuditTelemetry: probeShadowAuditTelemetryReadiness(),
     acceptanceAttestation: probeAcceptanceAttestationReadiness(),
   }
+  const dualModeExecution = probeDualModeExecutionReadiness()
 
   const notImplemented = capabilities.filter((c) => c.status === 'NOT_IMPLEMENTED').length
   const p0Ready = ondaNCores.filter((c) => c.ready).length
@@ -411,6 +442,9 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     '§23 silent shadow telemetry is GDPR/LGPD-illegal as default-ON — consent gate mandatory.',
     '§23 "empresa intocável" / untouchable-litigation claims are false — evidence ≠ legal invulnerability.',
     '§23 ~50ms invisible GPU hot-swap is unproven — mux reports HELD until ORT/wgpu eviction exists.',
+    'HFT-on-home-WiFi is not colocation — never claim ms arbitrage / spoofing-detect as shipped retail.',
+    'Manus RPA/CV clicking risks Broker ToS + market-abuse exposure — live ORT RPA HELD; user-borne.',
+    'Maestro multi-timeline in the same browser profile without isolation is unsafe for RPA click paths.',
   ]
 
   const notes = [
@@ -423,8 +457,11 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     `§23 GPU mux: ${section23.gpuPriorityMux.note}`,
     `§23 shadow audit: ${section23.shadowAuditTelemetry.note}`,
     `§23 attestation store: ${section23.acceptanceAttestation.note}`,
+    `Dual-Mode Vanguard HFT: ${dualModeExecution.vanguardHftApi.note}`,
+    `Dual-Mode Manus RPA: ${dualModeExecution.manusRpaBrowser.note}`,
     'N1–N5 fail-closed cores only — no FIX broker, licensed L2 feed, or live adapter.',
-    'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd.',
+    'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd; paper submitPaper calls evaluateRisk.',
+    'N3 optional SF2 WORM sink — local durable OK; cloudMirror requires explicit consent (no silent telemetry).',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
     'Investment-grade requires N2+N3+N5 paper soak + licensed market data + legal sign-off — HELD.',
@@ -448,6 +485,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     substrateSf1,
     substrateSf2,
     section23,
+    dualModeExecution,
     wedgeConflict,
     capabilities,
     reusableInfra,
