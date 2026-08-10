@@ -198,6 +198,7 @@ pub mod onnx_native_gen;
 pub mod physics_kernel;
 /// Plugin sandbox IPC — fail-closed HELD (P2b BLOCKER 12). No fake telemetry.
 pub mod plugin_sandbox;
+pub mod wasm_shield;
 pub mod policy;
 pub mod probe;
 pub mod runtime_engine;
