@@ -217,10 +217,10 @@ export async function probeWebHardwareProfileAsync(
         base.webgpuAvailable = true
         let adapterName = 'WebGPU adapter'
         try {
-          if (typeof adapter.requestAdapterInfo === 'function') {
-            const info = await adapter.requestAdapterInfo()
+          if (typeof (adapter as any).requestAdapterInfo === 'function') {
+            const info = await (adapter as any).requestAdapterInfo()
             adapterName = info?.device || info?.description || adapterName
-          } else if (adapter.info?.device) {
+          } else if ((adapter as any).info?.device) {
             adapterName = adapter.info.device
           }
         } catch {
@@ -306,5 +306,21 @@ export function scoreFromDesktopAdapterSample(input: {
     score: finalScore,
     confidence: name ? 'medium' : 'low',
     tier: tierFromCapabilityScore(finalScore),
+  }
+}
+
+/**
+ * Apply an explicit Capability Score onto a profile — always re-derives tier.
+ * Prevents stale tier + overridden score (Law XV fail-closed consumers).
+ */
+export function withCapabilityScore(
+  profile: HardwareStaticProfile,
+  capabilityScore: number
+): HardwareStaticProfile {
+  const score = clampScore(capabilityScore)
+  return {
+    ...profile,
+    capabilityScore: score,
+    tier: tierFromCapabilityScore(score),
   }
 }

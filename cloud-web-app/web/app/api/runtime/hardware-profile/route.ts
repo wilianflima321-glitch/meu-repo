@@ -7,6 +7,7 @@ import {
   resolveCullingPolicy,
 } from '@aethel/engine/render/hardware-profile'
 import { buildScalableRenderGraphReport } from '@aethel/engine/render/scalable-render-graph'
+import { proveGpuDeviceSoakReadiness } from '@aethel/engine/render/gpu-device-soak'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/hardware-profile/route')
@@ -51,33 +52,54 @@ export async function GET(req: NextRequest) {
   const srg = buildScalableRenderGraphReport(profile)
   const uma = deriveUMABudget(profile)
   const culling = resolveCullingPolicy(profile)
+  const gpuSoak = proveGpuDeviceSoakReadiness({
+    limits: {
+      maxTextureDimension2D: parseNum('maxTex') ?? 8192,
+      maxBufferSize: 268_435_456,
+    },
+  })
 
   log.info('hardware_profile_api', {
     score: profile.capabilityScore,
     tier: profile.tier,
     executableNodes: srg.executableNodeCount,
+    planAllowed: srg.planAllowed,
+    gpuSoakReady: gpuSoak.ready,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '3B.1',
+    focus: '3B.1+xv-capscore',
     profile,
     scalableRenderGraph: srg,
     umaBudget: uma,
     cullingPolicy: culling,
+    gpuDeviceSoak: {
+      letter: gpuSoak.letter,
+      ready: gpuSoak.ready,
+      status: gpuSoak.status,
+      evidenceFingerprint: gpuSoak.evidenceFingerprint,
+      aaaReady: false,
+      marketingAllowed: false,
+      reason: gpuSoak.reason,
+    },
     held: {
       frameGraph: true,
       gpuCullingInFrame: true,
       cookTorranceShader: true,
       dlssNativeWeb: true,
+      scalableRenderGraphAaa: true,
       reason:
-        '3B.2–3B.4 — full frame graph HELD; letter ci FSR spatial executor CLOSED (partial); DLSS web HELD; do not market dual live GPU',
+        '3B.2–3B.4 — full frame graph HELD; CapScore gate + letter ci FSR spatial CLOSED (partial); DLSS/AAA/Nanite/Lumen HELD; G.3% locked without ladder',
     },
     fsrSrg: {
       letter: 'ci',
       fsrExecutorLive: srg.fsrExecutorLive,
       executableNodeCount: srg.executableNodeCount,
       frameGraphLive: srg.frameGraphLive,
+      planAllowed: srg.planAllowed,
+      g3CodeDepthPercent: srg.g3CodeDepthPercent,
+      scalableRenderGraphAaaReady: false,
     },
   })
 }

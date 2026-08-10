@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAuth } from '@/lib/auth-server'
 import { evaluateRendererHonesty } from '@/lib/production/renderer-honesty-capability'
-import { buildHardwareStaticProfile } from '@aethel/engine/render/hardware-profile'
+import {
+  buildHardwareStaticProfile,
+  withCapabilityScore,
+} from '@aethel/engine/render/hardware-profile'
 import { buildScalableRenderGraphReport } from '@aethel/engine/render/scalable-render-graph'
+import { proveGpuDeviceSoakReadiness } from '@aethel/engine/render/gpu-device-soak'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/renderer-honesty/route')
@@ -47,7 +51,14 @@ export async function GET(req: NextRequest) {
     deviceMemoryGb: memRaw && Number.isFinite(Number(memRaw)) ? Number(memRaw) : undefined,
   })
   const capabilityScore = capabilityScoreParam ?? profile.capabilityScore
-  const srg = buildScalableRenderGraphReport({ ...profile, capabilityScore })
+  const gatedProfile = withCapabilityScore(profile, capabilityScore)
+  const srg = buildScalableRenderGraphReport(gatedProfile)
+  const gpuSoak = proveGpuDeviceSoakReadiness({
+    limits: {
+      maxTextureDimension2D: Number(sp.get('maxTex')) || 8192,
+      maxBufferSize: Number(sp.get('maxBuffer')) || 268_435_456,
+    },
+  })
 
   // Desktop present evidence — only from explicit probe params (never invent).
   // Fail-closed: presented without submitted must not flip live_present.
@@ -78,7 +89,7 @@ export async function GET(req: NextRequest) {
     capabilityScore,
   })
 
-  report.renderTier = profile.tier
+  report.renderTier = gatedProfile.tier
   report.scalableRenderGraphClaim = srg.claim
 
   log.info('renderer_honesty_api', {
@@ -86,24 +97,38 @@ export async function GET(req: NextRequest) {
     desktop: report.desktop.activePath,
     marketingAllowed: report.marketingAllowed,
     presentRoot: report.presentRoot?.canonicalPresentId,
-    webgpuPresentAllowed: report.webgpuPresentClaim?.allowed === true,
+    webgpuPresentAllowed: Boolean(report.webgpuPresentClaim?.allowed),
     capabilityScore,
-    tier: profile.tier,
+    tier: gatedProfile.tier,
+    planAllowed: srg.planAllowed,
+    gpuSoakReady: gpuSoak.ready,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '2A+3B.1+ci+cw3',
+    focus: '2A+3B.1+ci+cw3+xv-capscore',
     report,
     /** CW3 — operator present root mirrored at top level for Studio/IDE chrome. */
     presentRoot: report.presentRoot ?? null,
     scalableRenderGraph: srg,
+    gpuDeviceSoak: {
+      letter: gpuSoak.letter,
+      ready: gpuSoak.ready,
+      status: gpuSoak.status,
+      evidenceFingerprint: gpuSoak.evidenceFingerprint,
+      aaaReady: false,
+      marketingAllowed: false,
+      reason: gpuSoak.reason,
+    },
     fsrSrg: {
       letter: 'ci',
       fsrExecutorLive: srg.fsrExecutorLive,
       executableNodeCount: srg.executableNodeCount,
       frameGraphLive: false,
       dlssNativeWebAllowed: false,
+      planAllowed: srg.planAllowed,
+      g3CodeDepthPercent: srg.g3CodeDepthPercent,
+      scalableRenderGraphAaaReady: false,
     },
   })
 }
