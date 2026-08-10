@@ -18,6 +18,7 @@ mod entropy_gpu_particles;
 mod gpu_culling;
 mod gpu_hiz;
 mod gpu_indirect_draw;
+mod gpu_meshlet_cull;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;

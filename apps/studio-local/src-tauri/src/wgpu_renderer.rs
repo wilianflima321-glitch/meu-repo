@@ -10,13 +10,14 @@
 //!   owns the HWND; mounting a wgpu surface without exclusive ownership is identity
 //!   only, never product viewport replacement).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   **engine frame skeleton** (`encode_cull` [+ next-frame Hi-Z sample] →
-//!   pack `DrawIndirectArgs` → clear + depth + `draw_indirect` → build depth
-//!   pyramid → `queue.submit` → `SurfaceTexture::present`) with **no CPU
-//!   readback** on the hot path. Final cull count may be read **after** the
-//!   loop for evidence only.
-//! - `hiz_ready` / Nanite / Micro-Poly AAA stay **false** — pyramid substrate ≠
-//!   product RHI occlusion. WebView exclusive present remains HELD.
+//!   **engine frame skeleton** (meshlet-cluster `encode_cull` [+ next-frame
+//!   Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth + proxy
+//!   `draw_indirect` → build depth pyramid → `queue.submit` →
+//!   `SurfaceTexture::present`) with **no CPU readback** on the hot path.
+//!   Final meshlet visible count may be read **after** the loop for evidence.
+//! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
+//!   `multi_draw_indirect_aaa_ready` stay **false** — substrate ≠ AAA Parity.
+//!   WebView exclusive present remains HELD.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -27,11 +28,10 @@ use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowBuilder;
 
-use crate::gpu_culling::{
-    identity_frustum, soak_fixture_objects, GpuCullingPersistentPass, GpuCullingPipeline,
-};
+use crate::gpu_culling::identity_frustum;
 use crate::gpu_hiz::DepthPyramidHiz;
-use crate::gpu_indirect_draw::IndirectDrawScaffold;
+use crate::gpu_meshlet_cull::{soak_fixture_meshlets, MeshletCullScaffold};
+use crate::gpu_culling::GpuCullingPipeline;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
 const DEFAULT_PRESENT_SOAK_FRAMES: u32 = 3;
@@ -113,6 +113,19 @@ pub struct RendererPresentProbeReport {
     pub hiz_substrate_proven: bool,
     /// Always false — product RHI / Nanite HZB / shipping occlusion not claimed.
     pub hiz_ready: bool,
+    /// Meshlet clusters in the secondary Nanite-path fixture.
+    pub meshlet_cluster_count: u32,
+    /// Contract triangles-per-cluster (128) — not software-rasterized here.
+    pub meshlet_triangles_per_cluster: u32,
+    /// Visible meshlets after GPU cluster cull (post-loop readback).
+    pub meshlet_visible_final: u32,
+    pub meshlet_expected_visible: u32,
+    /// True when meshlet layout + cull → draw_indirect evidence passed.
+    pub meshlet_cull_substrate_proven: bool,
+    /// Instant ms spent in meshlet cull+pack encode (sum over frames).
+    pub meshlet_cull_ms_total: f64,
+    /// Adapter reports `Features::MULTI_DRAW_INDIRECT` (capability only).
+    pub multi_draw_indirect_feature_available: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -211,9 +224,10 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit swapchain present + single draw_indirect + Hi-Z pyramid substrate only".into(),
-        "hiz_ready stays false — substrate ≠ Nanite/HZB product occlusion".into(),
-        "True MULTI_DRAW_INDIRECT batch / Nanite/Lumen/virtualized geometry still HELD".into(),
+        "Probe proves secondary winit meshlet-cluster cull → single draw_indirect + Hi-Z pyramid only".into(),
+        "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
+        "hiz_ready / nanite_ready / micro_poly_aaa_ready stay false — substrate ≠ AAA Parity".into(),
+        "True MULTI_DRAW_INDIRECT batch / Nanite virtualized geometry still HELD".into(),
     ]
 }
 
@@ -251,6 +265,13 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         hiz_build_ms_total: 0.0,
         hiz_substrate_proven: false,
         hiz_ready: false,
+        meshlet_cluster_count: 0,
+        meshlet_triangles_per_cluster: 0,
+        meshlet_visible_final: 0,
+        meshlet_expected_visible: 0,
+        meshlet_cull_substrate_proven: false,
+        meshlet_cull_ms_total: 0.0,
+        multi_draw_indirect_feature_available: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -265,15 +286,15 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
 struct EngineFrameOutcome {
     hiz_downs: u32,
     hiz_build_ms: f64,
+    meshlet_cull_ms: f64,
 }
 
-/// Cull → pack → clear+depth+draw_indirect → Hi-Z pyramid build → present.
+/// Meshlet cull → pack → clear+depth+draw_indirect → Hi-Z pyramid → present.
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
-    cull: &GpuCullingPersistentPass,
-    indirect: &IndirectDrawScaffold,
+    meshlets: &MeshletCullScaffold,
     hiz: &DepthPyramidHiz,
     occlusion_enabled: bool,
 ) -> Result<EngineFrameOutcome, String> {
@@ -286,11 +307,13 @@ fn present_one_engine_frame(
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("aethel-engine-frame-encoder"),
     });
-    cull.encode_cull(queue, &mut encoder, occlusion_enabled);
-    indirect.encode_pack(&mut encoder);
+    let t_meshlet = std::time::Instant::now();
+    meshlets.encode_cull(queue, &mut encoder, occlusion_enabled);
+    meshlets.encode_pack(&mut encoder);
+    let meshlet_cull_ms = t_meshlet.elapsed().as_secs_f64() * 1000.0;
     {
         let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("aethel-present-probe-clear-draw-depth"),
+            label: Some("aethel-present-probe-meshlet-draw-depth"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
                 resolve_target: None,
@@ -315,7 +338,7 @@ fn present_one_engine_frame(
             occlusion_query_set: None,
             timestamp_writes: None,
         });
-        indirect.encode_draw_indirect(&mut rpass);
+        meshlets.encode_draw_indirect(&mut rpass);
     }
     let t_hiz = std::time::Instant::now();
     let hiz_downs = hiz.encode_build(&mut encoder);
@@ -325,6 +348,7 @@ fn present_one_engine_frame(
     Ok(EngineFrameOutcome {
         hiz_downs,
         hiz_build_ms,
+        meshlet_cull_ms,
     })
 }
 
@@ -440,10 +464,15 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let info = adapter.get_info();
     let adapter_name = info.name.clone();
     let backend = format!("{:?}", info.backend);
+    let multi_draw_indirect_feature_available = adapter
+        .features()
+        .contains(wgpu::Features::MULTI_DRAW_INDIRECT);
 
     let (device, queue) = match pollster::block_on(adapter.request_device(
         &wgpu::DeviceDescriptor {
             label: Some("Aethel Present Probe Device"),
+            // Portable path: do not require MULTI_DRAW_INDIRECT (often missing /
+            // non-portable on typical Windows wgpu). Capability is reported only.
             required_features: wgpu::Features::empty(),
             required_limits: wgpu::Limits::default(),
         },
@@ -459,6 +488,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.adapter_name = adapter_name;
             r.backend = backend;
             r.surface_kind = "secondary_winit".into();
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
             return r;
         }
     };
@@ -473,12 +503,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.adapter_name = adapter_name;
             r.backend = backend;
             r.surface_kind = "secondary_winit".into();
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
             return r;
         }
     };
 
-    let (objects, expected_visible) = soak_fixture_objects();
-    let frustum = identity_frustum(objects.len() as u32);
+    let (clusters, expected_visible) = soak_fixture_meshlets();
+    let frustum = identity_frustum(clusters.len() as u32);
 
     let hiz = match DepthPyramidHiz::new(&device, size.width.max(2), size.height.max(2)) {
         Ok(h) => h,
@@ -493,34 +524,23 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.backend = backend;
             r.surface_kind = "secondary_winit".into();
             r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
             return r;
         }
     };
 
-    let cull_pass =
-        match GpuCullingPersistentPass::new(&device, &objects, frustum, hiz.pyramid_view()) {
-            Ok(p) => p,
-            Err(e) => {
-                let mut r = fail_report(
-                    frames_requested,
-                    vec![format!("GpuCullingPersistentPass init failed: {e}")],
-                );
-                r.adapter_acquired = true;
-                r.device_created = true;
-                r.adapter_name = adapter_name;
-                r.backend = backend;
-                r.surface_kind = "secondary_winit".into();
-                r.surface_configured = true;
-                return r;
-            }
-        };
-
-    let indirect = match IndirectDrawScaffold::new(&device, surface_format, &cull_pass, &objects) {
-        Ok(s) => s,
+    let meshlets = match MeshletCullScaffold::new(
+        &device,
+        surface_format,
+        &clusters,
+        frustum,
+        hiz.pyramid_view(),
+    ) {
+        Ok(m) => m,
         Err(e) => {
             let mut r = fail_report(
                 frames_requested,
-                vec![format!("IndirectDrawScaffold init failed: {e}")],
+                vec![format!("MeshletCullScaffold init failed: {e}")],
             );
             r.adapter_acquired = true;
             r.device_created = true;
@@ -528,6 +548,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.backend = backend;
             r.surface_kind = "secondary_winit".into();
             r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
             return r;
         }
     };
@@ -538,6 +559,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut hiz_downsample_passes = 0u32;
     let mut hiz_cull_sampled_frames = 0u32;
     let mut hiz_build_ms_total = 0.0_f64;
+    let mut meshlet_cull_ms_total = 0.0_f64;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
@@ -549,8 +571,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             &device,
             &queue,
             &surface,
-            &cull_pass,
-            &indirect,
+            &meshlets,
             &hiz,
             occlusion_enabled,
         ) {
@@ -562,6 +583,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
                 hiz_downsample_passes =
                     hiz_downsample_passes.saturating_add(outcome.hiz_downs);
                 hiz_build_ms_total += outcome.hiz_build_ms;
+                meshlet_cull_ms_total += outcome.meshlet_cull_ms;
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
@@ -576,7 +598,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
 
     // Evidence-only readback after the present loop (not hot path).
     let cull_visible_final = if cull_dispatches > 0 {
-        cull_pass.readback_visible_count(&device, &queue)
+        meshlets.readback_visible_count(&device, &queue)
     } else {
         0
     };
@@ -585,6 +607,9 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && cull_visible_final <= expected_visible
         && cull_dispatches > 0;
     let indirect_draw_wired = presented_ok(frames_presented, indirect_draws) && cull_frustum_ok;
+    let meshlet_cull_substrate_proven = indirect_draw_wired
+        && meshlets.triangles_per_cluster == crate::gpu_meshlet_cull::MESHLET_TRIANGLES_PER_CLUSTER
+        && clusters.len() as u32 >= 8;
     let hiz_substrate_proven = hiz.mip_count >= 2
         && hiz_downsample_passes > 0
         && hiz_cull_sampled_frames > 0
@@ -611,17 +636,22 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via meshlet-cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
-            "Cull dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}"
+            "Meshlet clusters={} tri/cluster={}; dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}; meshlet_cull_substrate_proven={meshlet_cull_substrate_proven}",
+            clusters.len(),
+            meshlets.triangles_per_cluster
+        ));
+        reasons.push(format!(
+            "MULTI_DRAW_INDIRECT adapter feature available={multi_draw_indirect_feature_available}; multi_draw_indirect_aaa_ready=false (not requested; fail-closed without AAA Parity fixtures)"
         ));
         reasons.push(format!(
             "Hi-Z mips={} downs={hiz_downsample_passes} sampled_frames={hiz_cull_sampled_frames} build_ms_total={hiz_build_ms_total:.3}; hiz_substrate_proven={hiz_substrate_proven}; hiz_ready=false",
             hiz.mip_count
         ));
         reasons.push(format!(
-            "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}"
+            "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}; meshlet_cull_ms_total={meshlet_cull_ms_total:.3}"
         ));
         reasons.push(
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
@@ -670,6 +700,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         hiz_build_ms_total,
         hiz_substrate_proven,
         hiz_ready: false,
+        meshlet_cluster_count: clusters.len() as u32,
+        meshlet_triangles_per_cluster: meshlets.triangles_per_cluster,
+        meshlet_visible_final: cull_visible_final,
+        meshlet_expected_visible: expected_visible,
+        meshlet_cull_substrate_proven,
+        meshlet_cull_ms_total,
+        multi_draw_indirect_feature_available,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -678,7 +715,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: secondary winit cull→draw_indirect→Hi-Z pyramid substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: secondary winit meshlet-cluster cull→draw_indirect→Hi-Z substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -766,6 +803,8 @@ mod tests {
         assert!(!r.unreal_rhi_parity_ready);
         assert!(!r.hiz_ready);
         assert!(!r.hiz_substrate_proven);
+        assert!(!r.meshlet_cull_substrate_proven);
+        assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
         assert!(!r.multi_draw_indirect_aaa_ready);
@@ -803,6 +842,8 @@ mod tests {
             assert!(r.engine_frame_loop_with_cull);
             assert_eq!(r.cull_dispatches, r.frames_presented);
             assert!(r.frame_ms_total >= 0.0);
+            assert_eq!(r.meshlet_cluster_count, 8);
+            assert_eq!(r.meshlet_triangles_per_cluster, 128);
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);
             if r.frames_presented > 1 {
@@ -812,6 +853,7 @@ mod tests {
             if r.cull_frustum_ok {
                 assert!(r.indirect_draw_wired);
                 assert!(r.bindless_layout_scaffold);
+                assert!(r.meshlet_cull_substrate_proven);
             }
             assert!(!r.backend.is_empty());
             assert!(!r.adapter_name.is_empty());
@@ -819,6 +861,7 @@ mod tests {
             assert_eq!(r.frames_presented, 0);
             assert!(!r.indirect_draw_wired);
             assert!(!r.hiz_substrate_proven);
+            assert!(!r.meshlet_cull_substrate_proven);
             assert!(!r.reasons.is_empty());
         }
         assert!(!r.held_vs_ue_rhi.is_empty());

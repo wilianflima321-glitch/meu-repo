@@ -139,6 +139,8 @@ pub struct GpuCullingPersistentPass {
     #[allow(dead_code)]
     object_buffer: wgpu::Buffer,
     frustum_buffer: wgpu::Buffer,
+    /// Kept for IndirectDrawScaffold / bindless-layout substrate (meshlet path owns present soak).
+    #[allow(dead_code)]
     visible_indices_buffer: wgpu::Buffer,
     visible_count_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
@@ -251,11 +253,13 @@ impl GpuCullingPersistentPass {
     }
 
     /// Binding for indirect-pack compute (visible instance count).
+    #[allow(dead_code)] // retained for object-level IndirectDrawScaffold
     pub fn visible_count_binding(&self) -> wgpu::BindingResource<'_> {
         self.visible_count_buffer.as_entire_binding()
     }
 
     /// Binding for VS bindless-layout lookup (compacted visible object indices).
+    #[allow(dead_code)] // retained for object-level IndirectDrawScaffold
     pub fn visible_indices_binding(&self) -> wgpu::BindingResource<'_> {
         self.visible_indices_buffer.as_entire_binding()
     }

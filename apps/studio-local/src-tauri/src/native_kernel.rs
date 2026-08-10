@@ -144,11 +144,15 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 id: "gpu-driven-culling-contract",
                 label: "GPU-driven frustum compute culling contract",
                 state: NativeKernelState::NeedsReview,
-                evidence_refs: vec!["src-tauri/src/gpu_culling.rs"],
+                evidence_refs: vec![
+                    "src-tauri/src/gpu_culling.rs",
+                    "src-tauri/src/gpu_meshlet_cull.rs",
+                    "src-tauri/src/gpu_hiz.rs",
+                ],
                 blocker: Some(
-                    "Hi-Z depth pyramid substrate + next-frame cull sample proven on secondary_winit (measured Instant); hiz_ready stays false; product WebView exclusive + MULTI_DRAW_INDIRECT AAA still HELD.",
+                    "Meshlet-cluster cull substrate + Hi-Z next-frame sample proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
                 ),
-                next_action: "Product WebView/exclusive present path or MULTI_DRAW_INDIRECT batch; never flip hiz_ready without AAA Parity fixtures.",
+                next_action: "Product WebView/exclusive present or true MULTI_DRAW_INDIRECT when adapter feature + AAA Parity fixtures allow; never flip nanite/hiz/mdi AAA without fixtures.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

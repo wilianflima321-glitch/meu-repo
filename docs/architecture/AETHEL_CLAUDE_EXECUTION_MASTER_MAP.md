@@ -1012,7 +1012,7 @@ Law XVI + Bridge generate choke ? L.5 ? tree-authority ? **`chat-spend-session` 
 |---|------|------------|--------|
 | 3B.1 | Create/wire `scalable-render-graph` + `hardware-profile` (Capability Score) | Law XV; scores 0???100 | **DONE CORE 2026-07-11ab** ??? web probe + blueprint registry; Auto Fidelity + honesty wire; frame graph still HELD |
 | 3B.2 | wgpu frame graph feeds editor viewport (not surface-only) | Screenshot parity gate web preview vs desktop | **HELD** ??? wgpu surface probe only |
-| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit cull→pack→`draw_indirect`→depth→Hi-Z pyramid (`gpu_hiz.rs`) + next-frame cull sample; `hiz_ready`/product WebView/`MULTI_DRAW_INDIRECT` AAA / Micro-Poly **HELD** |
+| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit **meshlet-cluster** cull→pack→`draw_indirect`→depth→Hi-Z (`gpu_meshlet_cull.rs` + `gpu_hiz.rs`); `nanite_ready`/`hiz_ready`/`multi_draw_indirect_aaa_ready`/product WebView/Micro-Poly **HELD** |
 | 3B.4 | Live Cook-Torrance BRDF in material shaders | PBR sphere shows specular (ENG-007) | **HELD** |
 
 #### Round 3C ??? Advanced paths (P1 ??? only after 3A/3B)
@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4r | **Engine meshlet/cluster cull substrate PARTIAL (no UI):** `gpu_meshlet_cull.rs` 128-tri cluster layout + GPU cull→pack→proxy `draw_indirect` on secondary_winit (+ Hi-Z); `meshlet_cull_substrate_proven` evidence; **`nanite_ready`/`hiz_ready`/`multi_draw_indirect_aaa_ready` stay false**. MULTI_DRAW feature reported only (not required). G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4q | **Engine Hi-Z depth pyramid PARTIAL (no UI):** `gpu_hiz.rs` max-mip pyramid + next-frame cull sample on secondary_winit; `hiz_substrate_proven` evidence; **`hiz_ready`/nanite/micro_poly stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4p | **Engine draw_indirect scaffold PARTIAL (no UI):** `gpu_indirect_draw.rs` packs cull count → `DrawIndirectArgs` + VS storage bindless-layout + `draw_indirect` on secondary_winit present loop. `indirect_draw_wired` evidence-gated; `multi_draw_indirect_aaa_ready`/`nanite`/`micro_poly` stay false. **3B.3** deepened (still PARTIAL). G.3 stays ~15%. WebView exclusive present fail-closed (Chromium HWND). Gates: check+clippy green. |
 | 2026-08-10 | 1.4o | **Engine present+cull frame skeleton PARTIAL (no UI):** `GpuCullingPersistentPass` + secondary_winit cull+present loop with Instant metrics; **3B.3 → PARTIAL** (product WebView/MDI still HELD). G.3 stays ~15%. Gates: studio-local check+clippy green; test harness STATUS_ENTRYPOINT_NOT_FOUND unchanged. |

@@ -8,6 +8,12 @@
 //!   batch (`MULTI_DRAW_INDIRECT`), Nanite/Micro-Poly AAA, or UE RHI.
 //! - `multi_draw_indirect_aaa_ready` / `nanite_ready` / `micro_poly_aaa_ready`
 //!   stay **false** forever from this module alone.
+//!
+//! Present probe hot path now uses `gpu_meshlet_cull` (deeper Nanite-*path*
+//! scaffolding). This object-level scaffold remains as retained substrate API
+//! (`DrawIndirectArgs` + pack/draw) — not dead product code to delete mid-pass.
+
+#![allow(dead_code)] // retained object-level scaffold; meshlet path owns present soak
 
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
