@@ -4,7 +4,7 @@
 **Status:** **Binding** — Extensão da Aethel Engine para modelagem estocástica e operação autônoma no mercado financeiro.
 **Date:** 2026-08-10
 
-> **Implementation honesty (2026-08-10):** N1–N5 + §23 + **Dual-Mode Execution** fail-closed TypeScript cores under `lib/server/quant/` (vault, paper quarantine, trade audit, market ingest stub, risk envelope mirror, non-custodial, EULA, consent telemetry, GPU mux **HELD**, `dual-mode-execution.ts`). **No** FIX bridge, licensed L2 feed, real ORT/wgpu eviction, live broker adapter, or live ORT/CV RPA. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code**. Live probe: `GET /api/runtime/quant-finance-honesty` · Progress §Onda N · `vanguardQuantReady=false` · **investment-grade HELD**.
+> **Implementation honesty (2026-08-10):** N1–N5 + §23 + **Dual-Mode Execution** fail-closed TypeScript cores under `lib/server/quant/` (vault, paper quarantine, trade audit, market ingest stub, risk envelope mirror, non-custodial, EULA, consent telemetry, GPU mux **HELD**, `dual-mode-execution.ts`). **No** FIX bridge, licensed L2 feed, real ORT/wgpu eviction, live broker adapter, or live ORT/CV RPA. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code**. Live probe: `GET /api/runtime/quant-finance-honesty` · Progress §Onda N · Progress §**Top-1 Market Gap Matrix** (Quant row) · `vanguardQuantReady=false` · **investment-grade HELD** — not Jane Street / not retail HFT ship.
 
 ## 1. O Mandato HFT (High-Frequency Trading)
 A Aethel Engine não é apenas um motor de renderização visual. Suas bases matemáticas (álgebra linear SIMD, paralelismo livre de locks `rayon`, processamento na GPU `wgpu`) são estruturalmente idênticas às engines quantitativas usadas em *Wall Street*. 

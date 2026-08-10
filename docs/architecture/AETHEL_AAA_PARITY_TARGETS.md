@@ -19,12 +19,13 @@ Aethel **does not** concede the **AAA graphics crown** to Unreal Engine by defau
 | **Lumen** | Real-time global illumination (no lightmap bake) | **Aethel Radiance** |
 | **Chaos / Niagara** | GPU-driven destruction + particles | **Aethel Entropy** |
 
-**We do not ship these on Day 1.** Every Onda **A→F** foundation MUST expose **G-readiness hooks** so bindless heaps, indirect draws, compute queues, and Render Graph nodes can host these systems without rewrite.
+**We do not ship these on Day 1.** **“Unreal 100% today” is a false claim** — code depth remains ~**15% scaffold** until G acceptance suites pass (see §G.% evidence gates). Every Onda **A→F** foundation MUST expose **G-readiness hooks** so bindless heaps, indirect draws, compute queues, and Render Graph nodes can host these systems without rewrite.
 
 **Platform Reality (non-negotiable):**
 - **Full nuclear stack:** Desktop **wgpu** export, **enthusiast** blueprint (Law XV score 75+), RT-capable GPU when Radiance HW path enabled.
 - **Web / webgl2 / integrated:** **No** Micro-Poly/Radiance/Entropy parity claims — SSGI + baked-light + FSR only (Law XV).
 - **Zero-MVP:** No “Nanite” / “Lumen” / “Niagara” marketing labels until the corresponding nuclear module passes its **G acceptance suite**.
+- **ZERO-AI ACCEPTANCE GATE (Doutrina Determinística):** Se qualquer um dos pilares de renderização ou simulação de física (Micro-Poly, Radiance, Entropy) depender de uma chamada de rede ou de um modelo neural generativo LLM/VLM no *hot-loop* para resolver frames ou polígonos, o módulo **FALHA** instantaneamente. A Engine Aethel esmaga a Unreal via matemática brutal e Data-Oriented Design (Rust), sem recorrer a muletas de Inteligência Artificial. A IA pertence estritamente ao Workflow da IDE.
 
 **World Forge honesty (letter cc — 2026-07-13):** Planning ~100%; code depth still far behind G/S pillars. World Forge ships SDF→heightfield + PCG InstancedMesh scatter + CPU NavMesh — **not** Micro-Poly/Nanite cinema, **not** World Partition 50 km². Do not market “5M instances + Nanite” from Capability Score budgets.
 
@@ -288,6 +289,21 @@ export interface EntropyDestroyEvent {
 | Web GI | N/A | Baked + SSGI only | XV |
 
 **Honest claim after G.3 complete:** Desktop enthusiast exports **competitive with UE5.4** on geometry streaming, real-time GI, and GPU VFX/destruction — not “better in every dimension,” but **no free crown to Epic on graphics AAA**.
+
+### G.% code-depth evidence gates (2026-08-10 — binding; anti-hype)
+
+**FALSE CLAIM (forbidden in Progress / Index / marketing / scorecards):** “Unreal 100% today”, “UE parity shipped”, “G.3 CLOSED”, “Nanite/Lumen/Chaos ready”, or lifting Onda G from **~15% scaffold** without the gates below.
+
+| Claimed uplift | Minimum evidence (all required) | Until then |
+|----------------|---------------------------------|------------|
+| **G.3a ≥25%** (Micro-Poly first light) | Dogfood meshlet scene + soak-gated visibility (not debug ID colors) + `cargo test` micro-poly + golden visibility hash; **no** Nanite marketing label | Stay **~15% scaffold / DEFERRED** |
+| **G.3a acceptance** | AAA Parity §G acceptance checklist for Micro-Poly (1M+ meshlets @60 FPS RTX 3060 class; zero per-mesh CPU submit) | `nanite_*_ready` / marketing **false** |
+| **G.3b–c Radiance** | SW voxel path in Render Graph + Law XV enthusiast-only; HW RT optional with RT score gate; webgl2 **excluded** | `lumen_*_ready` / Radiance GI marketing **false** |
+| **G.3d–e Entropy** | GPU particles + destruction in graph; `chaosParityReady` stays false until Chaos-class soak | Niagara/Chaos parity marketing **false** |
+| **G.8 “competitive with UE5.4”** | Published GF-MESH/RAD/ENT JSON + Law XV hardware profile vs UE5.4 reference scenes — no anonymous “up to 2x” | No public AAA crown claim |
+| **Any Progress % bump** (e.g. 15%→30%) | Cite fixture IDs + commit + failing→passing soak in Changelog; Critic rejects % without evidence | Leave prior % |
+
+**Kernel letter CLOSED ≠ G.% uplift.** Soak probes (ga–hn, etc.) are lab evidence, not nuclear acceptance. Progress Top-1 Matrix + Index scorecard must stay aligned.
 
 ---
 
