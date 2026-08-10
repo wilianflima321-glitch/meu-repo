@@ -27,28 +27,47 @@ describe('quant finance honesty probe', () => {
     expect(report.heldReason).toBe('onda_n_p0_cores_partial_no_investment_grade')
   })
 
-  it('reports N1–N4 cores as PARTIAL after backend ship', () => {
+  it('reports N1–N5 cores as PARTIAL after backend ship', () => {
     const report = probeQuantFinanceHonesty()
-    expect(report.ondaNCores).toHaveLength(4)
+    expect(report.ondaNCores).toHaveLength(5)
     for (const core of report.ondaNCores) {
       expect(core.status).toBe('PARTIAL')
       expect(core.ready).toBe(true)
     }
     expect(report.substrateSf1.status).toBe('PARTIAL')
     expect(report.substrateSf1.ready).toBe(true)
+    expect(report.substrateSf2.status).toBe('PARTIAL')
+    expect(report.substrateSf2.ready).toBe(true)
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
     expect(byId['domain-isolation-l14']?.status).toBe('PARTIAL')
     expect(byId['paper-trading-quarantine']?.status).toBe('PARTIAL')
     expect(byId['regulatory-audit-trail']?.status).toBe('PARTIAL')
     expect(byId['market-data-feed']?.status).toBe('PARTIAL')
+    expect(byId['risk-limits-kernel']?.status).toBe('PARTIAL')
   })
 
-  it('marks non-ship execution paths NOT_IMPLEMENTED', () => {
+  it('marks non-ship execution paths NOT_IMPLEMENTED or HELD', () => {
     const report = describeQuantFinanceHonestySync()
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
 
     expect(byId['order-execution-kernel']?.status).toBe('NOT_IMPLEMENTED')
     expect(byId['fix-protocol-bridge']?.status).toBe('NOT_IMPLEMENTED')
+    expect(byId['gpu-priority-mux']?.status).toBe('HELD')
+    expect(byId['non-custodial-invariants']?.status).toBe('PARTIAL')
+    expect(byId['eula-risk-acceptance']?.status).toBe('PARTIAL')
+    expect(byId['shadow-audit-consent']?.status).toBe('PARTIAL')
+  })
+
+  it('reports §23 section probes without claiming invulnerability or 50ms mux', () => {
+    const report = probeQuantFinanceHonesty()
+    expect(report.section23.gpuPriorityMux.hotSwapReady).toBe(false)
+    expect(report.section23.gpuPriorityMux.claimed50msEvictionProven).toBe(false)
+    expect(report.section23.shadowAuditTelemetry.defaultConsentOn).toBe(false)
+    expect(report.section23.nonCustodial.ready).toBe(true)
+    expect(report.section23.eulaAcceptance.ready).toBe(true)
+    expect(report.section23.acceptanceAttestation.ready).toBe(true)
+    expect(report.wedgeConflict.some((line) => line.includes('GDPR'))).toBe(true)
+    expect(report.wedgeConflict.some((line) => line.includes('untouchable'))).toBe(true)
   })
 
   it('flags wedge conflicts and dead legacy trading code', () => {

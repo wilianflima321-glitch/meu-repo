@@ -5,6 +5,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  QUANT_RISK_ACCEPTANCE_PHRASE,
+  recordEulaRiskAcceptance,
+} from '@/lib/server/quant/eula-risk-acceptance'
+import {
   DEFAULT_LIVE_ENABLED,
   attemptEnableLive,
   createPaperTradingSession,
@@ -32,7 +36,7 @@ describe('paper trading quarantine (N2)', () => {
     }
   })
 
-  it('allows live enable only after walk-forward quarantine PASS', () => {
+  it('allows policy live enable only after quarantine PASS + EULA; broker stays HELD', () => {
     const session = createPaperTradingSession({
       projectId: 'proj-paper-2',
       strategyId: 'strat-beta',
@@ -53,8 +57,27 @@ describe('paper trading quarantine (N2)', () => {
     expect(passGate.status).toBe('PASS')
     expect(passGate.liveUnlocked).toBe(true)
 
-    const allowed = attemptEnableLive(session, passGate)
+    const withoutEula = attemptEnableLive(session, passGate)
+    expect(withoutEula.ok).toBe(false)
+    if (!withoutEula.ok) {
+      expect(withoutEula.code).toBe('eula_not_accepted')
+    }
+
+    const eula = recordEulaRiskAcceptance({
+      accountId: 'acct-beta',
+      hwid: 'hw-beta',
+      ipAddress: '127.0.0.1',
+      typedPhrase: QUANT_RISK_ACCEPTANCE_PHRASE,
+      now: '2026-08-10T15:00:00.000Z',
+    })
+    expect(eula.ok).toBe(true)
+    if (!eula.ok) return
+
+    const allowed = attemptEnableLive(session, passGate, eula.value)
     expect(allowed.ok).toBe(true)
+    if (allowed.ok) {
+      expect(allowed.value.liveBrokerReady).toBe(false)
+    }
   })
 
   it('routes orders to paper only — never live broker path', () => {

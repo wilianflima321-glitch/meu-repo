@@ -4,7 +4,7 @@
 **Status:** **Binding** — Extensão da Aethel Engine para modelagem estocástica e operação autônoma no mercado financeiro.
 **Date:** 2026-08-08
 
-> **Implementation honesty (2026-08-10):** N1–N3 P0 TypeScript fail-closed cores live under `lib/server/quant/` (vault isolation, paper quarantine, trade audit ledger). **No** FIX bridge, L2 feed, Rust risk kernel, or live broker adapter. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code** — not wired to `@/`. Live probe: `GET /api/runtime/quant-finance-honesty` · ledger: Progress §Onda N honesty · `vanguardQuantReady=false` · **investment-grade HELD**.
+> **Implementation honesty (2026-08-10):** N1–N5 + §23 fail-closed TypeScript cores under `lib/server/quant/` (vault, paper quarantine, trade audit, market ingest stub, risk envelope mirror, non-custodial, EULA, consent telemetry, GPU mux **HELD**). **No** FIX bridge, licensed L2 feed, real ORT/wgpu eviction, or live broker adapter. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code**. Live probe: `GET /api/runtime/quant-finance-honesty` · Progress §Onda N · `vanguardQuantReady=false` · **investment-grade HELD**.
 
 ## 1. O Mandato HFT (High-Frequency Trading)
 A Aethel Engine não é apenas um motor de renderização visual. Suas bases matemáticas (álgebra linear SIMD, paralelismo livre de locks `rayon`, processamento na GPU `wgpu`) são estruturalmente idênticas às engines quantitativas usadas em *Wall Street*. 
@@ -330,3 +330,61 @@ Ao submetermos todo o plano a um ataque de *Red Team* de última instância (pro
 ### D. Risco de Contraparte (Capital Auto-Sweep / Cold Storage)
 * **A Falha:** Blindamos a chave da API (Seção 13). Mas o que acontece se a própria Exchange (ex: o desastre da FTX) for à falência, ou congelar os saques amanhã de manhã? Ter a IA mais genial do mundo não serve de nada se o dinheiro estiver preso no banco que quebrou.
 * **A Solução (Risk-Sweep Bridge):** A Aethel Engine instaura a política de *Linha de Fogo Mínima*. O Maestro opera uma rotina de *Auto-Withdrawal*. A cada 24 horas, qualquer lucro excedente que ultrapasse a margem estrita de operação é sacado automaticamente, via API criptografada, direto para a sua Carteira Fria (Hardware Wallet) na rede Blockchain (DeFi/On-Chain). Se a Binance quebrar amanhã, apenas a margem tática mínima será afetada. Seu patrimônio base já estará trancado fora do alcance deles.
+
+## 23. Blindagem Judicial e Prioridade Absoluta de Hardware
+
+> **Honesty binding (2026-08-10 — §23 critique):** This section describes **architectural intent + evidence posture**, not shipped invulnerability. Code lives under `lib/server/quant/` (`non-custodial-invariants`, `eula-risk-acceptance`, `gpu-priority-mux`, `shadow-audit-telemetry`, `acceptance-attestation-store`). `investmentGrade=false`. Hub checkout **HELD**.
+
+### 23.0 Critique verdict (binding — lawyer + architect)
+
+| Claim in raw proposal | Verdict | Binding rule |
+|----------------------|---------|--------------|
+| GPU Priority Mux with ~50ms “invisible” hot-swap dumping game IA to system RAM | **HELD** | Interface + honesty probe only until real ORT/wgpu eviction + soak. **Forbidden** to market 50ms / invisible / Ring-0 OS priority as shipped. |
+| Finance absolute Ring-0 vs game Mini-IA exclusive VRAM at peak | **Sound intent / HELD execution** | Declare priority policy in mux interface; do not claim OS Ring-0 or guaranteed eviction latency. |
+| Non-custodial (user exchange keys local; Aethel = software not custodian) | **Sound** | Platform DB must never store raw exchange secrets; opaque `local:blind-brain:*` refs only. Still **not** a fiduciary/license waiver by itself. |
+| EULA unlock by typing exact risk phrase + hash(phrase\|hwid\|account\|ts) | **Sound evidence** | Exact-phrase gate required before any live *policy* unlock; live broker adapter remains **HELD**. |
+| IP + HWID → crypto hash → admin backend “blinds company forever” | **PARTIAL evidence / overclaim HELD** | Append-only attestation store is **evidence**, not “empresa intocável”. Courts can still pierce software disclaimers; regulated advice/custody claims remain blocked. |
+| Silent encrypted shadow copies of order/error logs to Aethel cloud | **REDESIGN — consent mandatory** | **Silent default-ON telemetry is GDPR/LGPD-illegal.** Cloud upload fail-closed unless `cloudAuditUploadConsent === true`. Local ledger may exist without cloud copy. |
+| “Untouchable in litigation” / “mathematical proof against any judge” | **FALSE — do not ship as marketing** | Build append-only evidence + consent records. Never claim legal invulnerability. |
+| Conflicts with Law XVI / Hub Coins | **CONFLICT if conflated** | CostGuard = AI credits; Hub Coins = H.0 HELD; strategy capital isolated (N1). §23 must not mix pools. |
+
+**Feasibility today:** Non-custodial checks, EULA phrase gate, attestation append-only store, consent-gated upload stub = **shippable fail-closed cores**. Real GPU eviction, Blind Brain AES vault, durable cloud WORM, live broker = **HELD**.
+
+### A. O Multiplexador de Prioridade (Game IA vs. Quant IA) — intent
+
+As duas Mini-IAs (Jogos e Investimentos) **não devem** compartilhar VRAM no pico se o mux estiver ativo.
+* **Priority policy (declared):** Finance has **software-declared** exclusive-tenant priority over game Mini-IA when both request GPU inference.
+* **Hot-Swap Cirúrgico (GPU Eviction):** **HELD.** Kernel Rust / ORT / wgpu eviction path does **not** exist yet. `probeGpuPriorityMux().hotSwapReady === false`. Do **not** claim ~50ms or “invisible” transition.
+* At peak, only one neural tenant should occupy VRAM **once** the mux is implemented — until then, treat concurrent finance+game GPU Mini-IA as unsupported.
+
+### B. Blindagem Contra Processos — evidence posture (not invulnerability)
+
+1. **Infraestrutura Non-Custodial:** Aethel must not retain user exchange funds or raw API secrets in platform DB. User supplies exchange keys to a **local** Blind Brain target (§13). This supports a *software vendor* posture — it does **not** alone defeat fiduciary / consumer / securities claims in every jurisdiction.
+2. **Trava EULA + Assinatura:** Before any live *policy* unlock, user must type the **exact** risk-acceptance phrase. Record `attestationHash = sha256(phrase|hwid|accountId|timestamp)` and `antiFraudBindingHash = sha256(ip|hwid|accountId)`. Append to admin attestation store. **Live broker remains HELD** until N2 quarantine + EULA + licensed adapter + legal sign-off.
+3. **Telemetria de Auditoria (consent-gated):** Local Proof-of-Execution ledger is first-class. Cloud copies of error/order digests are **opt-in only** (`cloudAuditUploadConsent === true`). Silent / invisible upload is **forbidden**. Consent withdrawal must stop future uploads. Evidence aids dispute defense; it does **not** make Aethel “untouchable.”
+
+### C. Anti-fraud attestation (admin-bound)
+
+On EULA accept: bind account ↔ anti-fraud hash and append to server append-only store (`acceptance-attestation-store`). Purpose = account integrity + dispute evidence. Not a substitute for counsel, licenses, or regulated product approvals.
+
+### D. Shadow audit — redesigned
+
+| Mode | Allowed? |
+|------|----------|
+| Local encrypted ledger on device | Yes (product) |
+| Cloud upload with explicit consent | Yes (stub today; durable WORM HELD) |
+| Silent default-ON cloud copy | **No — GDPR/LGPD reject** |
+| Marketing “invisible litigation shield” | **No** |
+
+### E. Implementation map (fail-closed cores)
+
+| Module | Path | Status |
+|--------|------|--------|
+| Non-custodial invariants | `lib/server/quant/non-custodial-invariants.ts` | PARTIAL |
+| EULA exact phrase + hashes | `lib/server/quant/eula-risk-acceptance.ts` | PARTIAL |
+| GPU Priority Mux probe | `lib/server/quant/gpu-priority-mux.ts` | **HELD** |
+| Consent-gated shadow upload | `lib/server/quant/shadow-audit-telemetry.ts` + `POST /api/runtime/quant-shadow-audit-upload` | PARTIAL stub |
+| Admin attestation store | `lib/server/quant/acceptance-attestation-store.ts` + `POST/GET /api/runtime/quant-eula-attestation` | PARTIAL stub |
+| Live enable gate | N2 `attemptEnableLive` requires quarantine PASS **and** EULA | PARTIAL; `liveBrokerReady=false` |
+
+**Marketing rule:** Never claim “empresa intocável”, “50ms invisible GPU swap shipped”, or silent audit cloud. `vanguardQuantReady` / `investmentGrade` stay **false**.

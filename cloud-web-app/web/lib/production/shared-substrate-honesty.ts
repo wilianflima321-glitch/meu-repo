@@ -13,6 +13,7 @@ import {
   verifyEvidenceAuditChain,
 } from '@/lib/production/task-evidence-ledger'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
+import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 
 export const VANGUARD_QUANT_FINANCE_READY = false as const
 export const FIX_PROTOCOL_READY = false as const
@@ -24,6 +25,9 @@ export interface SharedSubstrateHonestyReport {
   /** SF1 — fixed-tick session tape with hash chain (sim + paper trade anchors). */
   sf1SessionTapeReady: boolean
   sf1Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF2 — signed WORM evidence store (HMAC + optional durable JSONL). */
+  sf2SignedWormReady: boolean
+  sf2Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
@@ -37,6 +41,8 @@ export interface SharedSubstrateHonestyReport {
   evidenceLedgerFingerprint: string
   sessionTapeFingerprint: string
   sessionTapeEntryCount: number
+  wormFingerprint: string
+  wormEntryCount: number
   notes: string[]
 }
 
@@ -75,6 +81,7 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
   const notes: string[] = [
     'Shared substrate = determinism + replay + append-only evidence — not Vanguard Quant trading',
     'vanguardQuantFinanceReady=false — no FIX/order book/blind-brain vault in repo',
+    '§23 silent shadow telemetry FORBIDDEN — consent-gated only; GPU Priority Mux HELD',
   ]
 
   const replay = runDeterministicReplayFixture()
@@ -113,6 +120,17 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     )
   }
 
+  const worm = probeSignedWormReadiness()
+  const sf2SignedWormReady = worm.ready && worm.chainValid
+  const sf2Status: SharedSubstrateHonestyReport['sf2Status'] = worm.status
+  if (!sf2SignedWormReady) {
+    notes.push('sf2SignedWormReady HELD — signed WORM chain/signature verify failed')
+  } else {
+    notes.push(
+      `sf2SignedWormReady PARTIAL — HMAC-signed WORM (${worm.entryCount} entries); durable optional; Hub Coins isolated`,
+    )
+  }
+
   const sampleLedger = appendChainedTaskEvidence(
     createTaskEvidenceLedger({
       taskId: 'substrate-fingerprint',
@@ -144,6 +162,8 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sharedSubstrateReady,
     sf1SessionTapeReady,
     sf1Status,
+    sf2SignedWormReady,
+    sf2Status,
     deterministicWebReplayReady,
     competitiveRollbackSoakReady: competitive.competitiveRollbackSoakReady,
     evidenceAuditChainReady,
@@ -156,6 +176,8 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     evidenceLedgerFingerprint: fingerprintEvidenceLedger(sampleLedger),
     sessionTapeFingerprint: sessionTape.fingerprint,
     sessionTapeEntryCount: sessionTape.entryCount,
+    wormFingerprint: worm.fingerprint,
+    wormEntryCount: worm.entryCount,
     notes,
   }
 }

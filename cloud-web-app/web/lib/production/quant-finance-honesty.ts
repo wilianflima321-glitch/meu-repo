@@ -23,7 +23,14 @@ import {
   verifyTradeAuditChain,
 } from '@/lib/server/quant/trade-audit-ledger'
 import { probeMarketDataIngestReadiness } from '@/lib/server/quant/market-data-ingest'
+import { probeRiskEnvelopeReadiness } from '@/lib/server/quant/risk-envelope'
+import { probeNonCustodialReadiness } from '@/lib/server/quant/non-custodial-invariants'
+import { probeEulaRiskAcceptanceReadiness } from '@/lib/server/quant/eula-risk-acceptance'
+import { probeGpuPriorityMux } from '@/lib/server/quant/gpu-priority-mux'
+import { probeShadowAuditTelemetryReadiness } from '@/lib/server/quant/shadow-audit-telemetry'
+import { probeAcceptanceAttestationReadiness } from '@/lib/server/quant/acceptance-attestation-store'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
+import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 
 const log = createComponentLogger('quant-finance-honesty')
 
@@ -50,7 +57,7 @@ export type QuantFinanceCapabilityRow = {
 }
 
 export type OndaNCoreReadiness = {
-  id: 'N1' | 'N2' | 'N3' | 'N4'
+  id: 'N1' | 'N2' | 'N3' | 'N4' | 'N5'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -59,7 +66,7 @@ export type OndaNCoreReadiness = {
 }
 
 export type SubstrateSfReadiness = {
-  id: 'SF1'
+  id: 'SF1' | 'SF2'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -76,6 +83,14 @@ export type QuantFinanceHonestyReport = {
   heldReason: 'onda_n_p0_cores_partial_no_investment_grade'
   ondaNCores: OndaNCoreReadiness[]
   substrateSf1: SubstrateSfReadiness
+  substrateSf2: SubstrateSfReadiness
+  section23: {
+    nonCustodial: ReturnType<typeof probeNonCustodialReadiness>
+    eulaAcceptance: ReturnType<typeof probeEulaRiskAcceptanceReadiness>
+    gpuPriorityMux: ReturnType<typeof probeGpuPriorityMux>
+    shadowAuditTelemetry: ReturnType<typeof probeShadowAuditTelemetryReadiness>
+    acceptanceAttestation: ReturnType<typeof probeAcceptanceAttestationReadiness>
+  }
   wedgeConflict: string[]
   capabilities: QuantFinanceCapabilityRow[]
   reusableInfra: QuantFinanceCapabilityRow[]
@@ -99,6 +114,9 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
 
   const n4Probe = probeMarketDataIngestReadiness()
   const n4Ready = n4Probe.ready
+
+  const n5Probe = probeRiskEnvelopeReadiness()
+  const n5Ready = n5Probe.ready
 
   return [
     {
@@ -141,6 +159,16 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
         ? 'Fail-closed without licensed feed; synthetic fixtures require explicit labels — no invented prices.'
         : 'Market ingest probe failed.',
     },
+    {
+      id: 'N5',
+      label: 'Rust risk envelope (drawdown / leverage / kill-switch)',
+      status: n5Ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n5Probe.rustPath,
+      ready: n5Ready,
+      note: n5Ready
+        ? n5Probe.note
+        : 'Risk envelope probe failed.',
+    },
   ]
 }
 
@@ -159,12 +187,25 @@ function probeSubstrateSf1(): SubstrateSfReadiness {
   }
 }
 
+function probeSubstrateSf2(): SubstrateSfReadiness {
+  const worm = probeSignedWormReadiness()
+  return {
+    id: 'SF2',
+    label: 'Signed WORM evidence store (HMAC hash chain)',
+    status: worm.status,
+    path: worm.path,
+    ready: worm.ready,
+    note: worm.note,
+  }
+}
+
 /** Static capability matrix — paths verified absent from production tree (2026-08-10). */
 function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantFinanceCapabilityRow[] {
   const n1 = ondaNCores.find((c) => c.id === 'N1')
   const n2 = ondaNCores.find((c) => c.id === 'N2')
   const n3 = ondaNCores.find((c) => c.id === 'N3')
   const n4 = ondaNCores.find((c) => c.id === 'N4')
+  const n5 = ondaNCores.find((c) => c.id === 'N5')
 
   return [
     {
@@ -203,9 +244,9 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       id: 'risk-limits-kernel',
       specSection: '§5 / §12 / §13.C',
       label: 'Max drawdown / leverage / kill-switch in kernel',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'Agent high-risk firewall blocks trading text; no numeric risk kernel.',
+      status: n5?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n5?.path ?? null,
+      note: n5?.note ?? 'Agent high-risk firewall blocks trading text; no numeric risk kernel.',
     },
     {
       id: 'paper-trading-quarantine',
@@ -265,11 +306,43 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
     },
     {
       id: 'regulatory-audit-trail',
-      specSection: '§20 / §22',
+      specSection: '§20 / §22 / §23',
       label: 'Investment-grade audit trail (orders, fills, clock drift)',
       status: n3?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
       path: n3?.path ?? null,
       note: n3?.note ?? 'Task evidence ledger covers AI patches — not trade lifecycle or MiFID-style audit.',
+    },
+    {
+      id: 'non-custodial-invariants',
+      specSection: '§23.B',
+      label: 'Non-custodial — no exchange secret in platform DB',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/non-custodial-invariants.ts',
+      note: 'Fail-closed reject of raw secrets; Blind Brain vault still HELD.',
+    },
+    {
+      id: 'eula-risk-acceptance',
+      specSection: '§23.B/C',
+      label: 'EULA exact-phrase risk acceptance + attestation hash',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/eula-risk-acceptance.ts',
+      note: 'Phrase gate + hash(phrase|hwid|account|ts); does not unlock live broker.',
+    },
+    {
+      id: 'gpu-priority-mux',
+      specSection: '§23.A',
+      label: 'GPU Priority Mux (finance Ring-0 vs game Mini-IA)',
+      status: 'HELD',
+      path: 'lib/server/quant/gpu-priority-mux.ts',
+      note: 'Honesty interface only — ORT/wgpu 50ms eviction unproven; hotSwapReady=false.',
+    },
+    {
+      id: 'shadow-audit-consent',
+      specSection: '§23.D',
+      label: 'Consent-gated cloud shadow audit upload',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/shadow-audit-telemetry.ts',
+      note: 'Silent telemetry FORBIDDEN; consent≠true → upload fails; durable cloud WORM HELD.',
     },
   ]
 }
@@ -317,8 +390,16 @@ function buildReusableInfra(): QuantFinanceCapabilityRow[] {
 export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
   const ondaNCores = probeOndaNCores()
   const substrateSf1 = probeSubstrateSf1()
+  const substrateSf2 = probeSubstrateSf2()
   const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
+  const section23 = {
+    nonCustodial: probeNonCustodialReadiness(),
+    eulaAcceptance: probeEulaRiskAcceptanceReadiness(),
+    gpuPriorityMux: probeGpuPriorityMux(),
+    shadowAuditTelemetry: probeShadowAuditTelemetryReadiness(),
+    acceptanceAttestation: probeAcceptanceAttestationReadiness(),
+  }
 
   const notImplemented = capabilities.filter((c) => c.status === 'NOT_IMPLEMENTED').length
   const p0Ready = ondaNCores.filter((c) => c.ready).length
@@ -327,13 +408,23 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     'Hub Aethel Coins (H.0 HELD) must not be conflated with exchange margin or strategy PnL.',
     'Law XVI CostGuard settles AI creative credits — not broker order notional or drawdown limits.',
     'Spec §9 anti-detection / §14 P2P mesh conflict with regulated broker ToS and securities law.',
+    '§23 silent shadow telemetry is GDPR/LGPD-illegal as default-ON — consent gate mandatory.',
+    '§23 "empresa intocável" / untouchable-litigation claims are false — evidence ≠ legal invulnerability.',
+    '§23 ~50ms invisible GPU hot-swap is unproven — mux reports HELD until ORT/wgpu eviction exists.',
   ]
 
   const notes = [
     `capabilities: ${capabilities.length} tracked; NOT_IMPLEMENTED=${notImplemented}.`,
-    `onda N cores ready=${p0Ready}/4 (N1 vault, N2 paper quarantine, N3 trade audit, N4 ingest stub).`,
+    `onda N cores ready=${p0Ready}/5 (N1 vault, N2 paper quarantine, N3 trade audit, N4 ingest stub, N5 risk envelope).`,
     `SF1 session tape: ${substrateSf1.status} — ${substrateSf1.note}`,
-    'N1–N4 are TypeScript fail-closed cores only — no FIX broker, L2 feed, or Rust risk kernel.',
+    `SF2 signed WORM: ${substrateSf2.status} — ${substrateSf2.note}`,
+    `§23 non-custodial: ${section23.nonCustodial.note}`,
+    `§23 EULA: ${section23.eulaAcceptance.note}`,
+    `§23 GPU mux: ${section23.gpuPriorityMux.note}`,
+    `§23 shadow audit: ${section23.shadowAuditTelemetry.note}`,
+    `§23 attestation store: ${section23.acceptanceAttestation.note}`,
+    'N1–N5 fail-closed cores only — no FIX broker, licensed L2 feed, or live adapter.',
+    'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd.',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
     'Investment-grade requires N2+N3+N5 paper soak + licensed market data + legal sign-off — HELD.',
@@ -343,6 +434,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     vanguardQuantReady: VANGUARD_QUANT_READY,
     notImplemented,
     stamp: 'HELD',
+    gpuMuxReady: section23.gpuPriorityMux.hotSwapReady,
   })
 
   return {
@@ -354,6 +446,8 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     heldReason: 'onda_n_p0_cores_partial_no_investment_grade',
     ondaNCores,
     substrateSf1,
+    substrateSf2,
+    section23,
     wedgeConflict,
     capabilities,
     reusableInfra,

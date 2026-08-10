@@ -6,6 +6,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import type { EulaAcceptanceRecord } from '@/lib/server/quant/eula-risk-acceptance'
 
 const log = createComponentLogger('paper-trading-kernel')
 
@@ -181,13 +182,20 @@ export function submitPaperOrder(
 }
 
 /**
- * Fail-closed live enable — requires quarantine PASS with walk-forward evidence.
- * Default live=false forever until this returns ok.
+ * Fail-closed live enable — requires N2 quarantine PASS + §23 EULA acceptance.
+ * Even when policy gates pass, no live broker adapter exists (liveBrokerReady=false).
+ * Default live=false forever until both gates pass; broker still HELD.
  */
 export function attemptEnableLive(
   session: PaperTradingSession,
   gate: QuarantineGateState,
-): PaperTradingResult<{ liveEnabled: true; evidenceHash: string }> {
+  eula?: EulaAcceptanceRecord | null,
+): PaperTradingResult<{
+  liveEnabled: true
+  evidenceHash: string
+  eulaAttestationHash: string
+  liveBrokerReady: false
+}> {
   if (session.strategyId !== gate.strategyId) {
     return {
       ok: false,
@@ -202,15 +210,26 @@ export function attemptEnableLive(
       message: 'live capital blocked — walk-forward quarantine has not passed',
     }
   }
-  log.warn('live_enable_attempt_allowed_by_quarantine', {
+  if (!eula || !eula.attestationHash) {
+    return {
+      ok: false,
+      code: 'eula_not_accepted',
+      message: 'live capital blocked — EULA risk-acceptance phrase required (§23)',
+    }
+  }
+  log.warn('live_enable_policy_gates_passed_broker_held', {
     strategyId: gate.strategyId,
     evidenceHash: gate.walkForward.evidenceHash,
+    eulaAttestationHash: eula.attestationHash.slice(0, 16),
+    liveBrokerReady: false,
   })
   return {
     ok: true,
     value: {
       liveEnabled: true,
       evidenceHash: gate.walkForward.evidenceHash,
+      eulaAttestationHash: eula.attestationHash,
+      liveBrokerReady: false,
     },
   }
 }
@@ -226,7 +245,13 @@ export interface PaperTradingKernel {
   requestLiveEnable(
     session: PaperTradingSession,
     gate: QuarantineGateState,
-  ): PaperTradingResult<{ liveEnabled: true; evidenceHash: string }>
+    eula?: EulaAcceptanceRecord | null,
+  ): PaperTradingResult<{
+    liveEnabled: true
+    evidenceHash: string
+    eulaAttestationHash: string
+    liveBrokerReady: false
+  }>
 }
 
 export function createPaperTradingKernel(): PaperTradingKernel {
@@ -235,6 +260,6 @@ export function createPaperTradingKernel(): PaperTradingKernel {
     submitPaper: (session, intent) => submitPaperOrder(session, intent),
     evaluateQuarantine: (strategyId, windowCount, passRate) =>
       evaluateWalkForwardQuarantine({ strategyId, windowCount, passRate }),
-    requestLiveEnable: (session, gate) => attemptEnableLive(session, gate),
+    requestLiveEnable: (session, gate, eula) => attemptEnableLive(session, gate, eula),
   }
 }
