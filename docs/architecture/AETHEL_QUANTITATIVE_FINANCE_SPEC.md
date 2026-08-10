@@ -4,7 +4,7 @@
 **Status:** **Binding** — Extensão da Aethel Engine para modelagem estocástica e operação autônoma no mercado financeiro.
 **Date:** 2026-08-08
 
-> **Implementation honesty (2026-08-10):** This spec is **architecture intent only**. **Zero** production quant-finance modules exist under `cloud-web-app/web/` or `apps/studio-local/` (no FIX bridge, order kernel, market-data feed, paper quarantine, or audit trail). Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code** — not wired to `@/`. Live probe: `GET /api/runtime/quant-finance-honesty` · ledger: Progress §Onda N honesty · `vanguardQuantReady=false` · **investment-grade HELD**.
+> **Implementation honesty (2026-08-10):** N1–N3 P0 TypeScript fail-closed cores live under `lib/server/quant/` (vault isolation, paper quarantine, trade audit ledger). **No** FIX bridge, L2 feed, Rust risk kernel, or live broker adapter. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code** — not wired to `@/`. Live probe: `GET /api/runtime/quant-finance-honesty` · ledger: Progress §Onda N honesty · `vanguardQuantReady=false` · **investment-grade HELD**.
 
 ## 1. O Mandato HFT (High-Frequency Trading)
 A Aethel Engine não é apenas um motor de renderização visual. Suas bases matemáticas (álgebra linear SIMD, paralelismo livre de locks `rayon`, processamento na GPU `wgpu`) são estruturalmente idênticas às engines quantitativas usadas em *Wall Street*. 

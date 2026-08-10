@@ -66,8 +66,9 @@
 | 2026-08-10 j4-l4-backend | Backend-only — J.4 BYOK reindex→recall cert harness + L.4 E2B remote PTY probe/wire | **PARTIAL** deepen; J.4 mock BYOK cert **5/5** + recall/BYOK suites **18/18**; L.4 E2B PTY probe + wire **7/7** + L.4 bridge **12/12**; live OpenAI BYOK + live E2B PTY soak still open; `hubCheckoutAudited` **false** |
 | 2026-08-10 e2b-dep-j7-intake | Backend-only — `e2b` workspace install + J.7 `usd-stage-intake` fail-closed (OpenUSD HELD) | **PARTIAL** deepen; `e2b@^2.0.1` resolved in node_modules (`probeE2BRemotePtySdk` loadable); `usd-stage-intake.ts` byte classify + HELD reasons + `.usdc` intake; tests **38/38** targeted (e2b **7/7** + j7 intake **8/8** + regression); live E2B PTY soak + OpenUSD C++ stage **HELD**; Hub checkout **false** |
 | 2026-08-10 fc-cw2-cw7-backend | Backend-only — Firecracker honesty probe + CW2/CW7 truth matrix rows + swarm scale gate | **PARTIAL** deepen; `forge-sandbox-honesty.ts` + `/api/runtime/forge-sandbox-honesty` (firecracker **HELD** always); `kernel-load-scale-honesty.ts` + `disk-austerity-honesty.ts`; truth matrix rows `forge.sandbox.providers` / `kernel.load-scale.cw2` / `disk.austerity.cw7`; `SWARM_MAX_PARALLEL_CELLS=5` fail-closed; preview-runtime-readiness blocks `AETHEL_PREVIEW_PROVIDER=firecracker`; tests **22/22** new+matrix+swarm cap (+ L1 **11/11**); Hub checkout **false** |
+| 2026-08-10 engine-finance-substrate | Backend-only — Engine+Finance shared substrate audit + SF8 probe + evidence chain | **PARTIAL** deepen; Rust `substrate_deterministic_replay.rs` (check+clippy+2 tests green); web `shared-substrate-honesty.ts` + `/api/runtime/shared-substrate-honesty`; ledger `deterministic-replay`/`audit-chain` kinds; vitest **4/4**; Vanguard Quant/HFT **HELD**; Hub checkout **false** |
 | 2026-08-10 onda-n-quant-honesty | Backend-only — Onda N Quant Finance honesty audit + fail-closed probe (letter **nf**) | **HELD** — spec v2.9 binding intent only; **zero** production trading/HFT modules; legacy cli PaperExchange dead code; `quant-finance-honesty.ts` + `/api/runtime/quant-finance-honesty` + CW1 row `quant.finance.onda-n`; tests **4/4**; investment-grade **false**; Hub checkout **false** |
-| 2026-08-10 onda-n-p0-cores | Backend-only — Onda N N1 vault isolation + N2 paper quarantine + N3 trade audit ledger | **PARTIAL** — `lib/server/quant/` fail-closed TS cores; live blocked until walk-forward PASS; honesty probe reports ondaNCores **3/3**; tests **16/16** targeted; investment-grade **false**; Hub checkout **false** |
+| 2026-08-10 onda-n-p0-cores | Backend-only — Onda N N1 vault isolation + N2 paper quarantine + N3 trade audit ledger | **PARTIAL** — `lib/server/quant/` fail-closed TS cores; live blocked until walk-forward PASS; honesty probe reports ondaNCores **3/3**; tests **14/14** targeted; investment-grade **false**; Hub checkout **false** |
 | 2026-08-10 rust-backend-ipc-soak | Rust/backend IPC + compile hygiene (no UI) | **PARTIAL** deepen — functional agent/runtime probes re-registered; GPU culling dispatch IPC soak; kernel wgpu optional `wgpu-bridge`; gates green; studio-local test harness STATUS_ENTRYPOINT_NOT_FOUND unchanged; Onda G deferred |
 
 ---
@@ -1116,6 +1117,23 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **P2** | R16 | **Agones / cross-play marketing / Hub Coins mint** | LiveOps/commerce depth | **HELD** (G.2 + H.1+) |
 | **P2** | R17 | **MaterialX / OpenVDB + Outliner/Properties LoC split** | S1/S7 deepen | **UI track** (Outliner/Properties LoC) + **backend HELD** (MaterialX/OpenVDB bridges ~25%) |
 | **P2** | R20 | **CW2/CW7 kernel scale + disk austerity** | Lab→product consolidation | **PARTIAL** |
+
+### Engine + Finance shared substrate (2026-08-10 audit — backend only)
+
+**Verdict:** Dual-use **audit/replay/determinism substrate PARTIAL** — real web soak + Rust ADNA probe + evidence chain extension SHIPPED; **Vanguard Quant / HFT execution 0%** (spec-only). Not investment-grade for finance; indie platform substrate improving but not institutional.
+
+| Rank | ID | Substrate item | Games | Finance (Onda N) | Status |
+|------|-----|----------------|-------|------------------|--------|
+| **S1** | SF1 | **Deterministic tick + replay honesty** | Rollback/netcode | Backtest reproducibility | **PARTIAL** — `deterministic-rollback-replay.ts` + `competitive-rollback-soak` + Rust `substrate_deterministic_replay.rs` (ADNA + forward match); Rapier float default; no full session tape |
+| **S2** | SF2 | **Append-only evidence / audit ledger** | Agent Fusion receipts | Trade audit trail | **PARTIAL** — `task-evidence-ledger` + `deterministic-replay`/`audit-chain` kinds + chain verify; not durable WORM / not signed |
+| **S3** | SF3 | **Monotonic timebase / tick isolation** | SimulationTick vs RenderTick | Event-time ordering | **PARTIAL** — GameLoop competitive soak; Rust WorldSoA tick; no wall-clock PTP / exchange timestamp ingest |
+| **S4** | SF4 | **Domain isolation + sandbox** | L.1 local-isolated | Finance/game vault (L.14) | **PARTIAL** — Forge sandbox honesty fail-closed; Firecracker HELD; no quant project vault |
+| **S5** | SF5 | **Headless kernel execution** | Desktop wgpu mount probe | Orders without UI | **HELD** — wgpu present probe only; no headless FIX binary |
+| **S6** | SF6 | **Blind-brain key vault + kill switch** | N/A | Law XVI quant §13 | **HELD** — admin kill-switch in-memory; no AES order-signing vault |
+| **S7** | SF7 | **Institutional market data + execution** | N/A | FIX/SBE, L2 book, C2T | **HELD** — spec v2.9 only; legacy CLI orderbook stub in quarantine |
+| **S8** | SF8 | **Shared-substrate honesty API** | `/api/runtime/shared-substrate-honesty` | Same probe surface | **DONE-core** — fail-closed; `vanguardQuantFinanceReady` always false |
+
+**Copy-paste substrate executor:** SF1 deepen (Rust replay ↔ GameLoop wire + session tape) → SF2 (signed WORM ledger) → SF4 (L.14 project vault) → SF5/SF6 before any finance marketing. **Do not** claim HFT/colocation/P2P mesh until SF5–SF7 green.
 
 **Recently closed (ledger only):** R13 CW3 DONE-core; R2 Law XV bake; R3 CW4; R5 L.10 colors; R18 Prisma `demoPlayUrl`; CW1 15-slot bench (product PARTIAL).
 

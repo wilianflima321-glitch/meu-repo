@@ -1,0 +1,76 @@
+/**
+ * N2 — Paper-trading kernel + quarantine gate tests.
+ */
+
+import { describe, expect, it } from 'vitest'
+
+import {
+  DEFAULT_LIVE_ENABLED,
+  attemptEnableLive,
+  createPaperTradingSession,
+  createQuarantineGate,
+  evaluateWalkForwardQuarantine,
+  submitPaperOrder,
+} from '@/lib/server/quant/paper-trading-kernel'
+
+describe('paper trading quarantine (N2)', () => {
+  it('defaults live=false and blocks live enable without quarantine PASS', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-paper-1',
+      strategyId: 'strat-alpha',
+    })
+    const gate = createQuarantineGate('strat-alpha')
+
+    expect(session.liveEnabled).toBe(DEFAULT_LIVE_ENABLED)
+    expect(session.mode).toBe('paper')
+    expect(gate.liveUnlocked).toBe(false)
+
+    const blocked = attemptEnableLive(session, gate)
+    expect(blocked.ok).toBe(false)
+    if (!blocked.ok) {
+      expect(blocked.code).toBe('quarantine_not_passed')
+    }
+  })
+
+  it('allows live enable only after walk-forward quarantine PASS', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-paper-2',
+      strategyId: 'strat-beta',
+    })
+    const failGate = evaluateWalkForwardQuarantine({
+      strategyId: 'strat-beta',
+      windowCount: 1,
+      passRate: 0.9,
+    })
+    expect(failGate.status).toBe('FAIL')
+    expect(attemptEnableLive(session, failGate).ok).toBe(false)
+
+    const passGate = evaluateWalkForwardQuarantine({
+      strategyId: 'strat-beta',
+      windowCount: 5,
+      passRate: 0.75,
+    })
+    expect(passGate.status).toBe('PASS')
+    expect(passGate.liveUnlocked).toBe(true)
+
+    const allowed = attemptEnableLive(session, passGate)
+    expect(allowed.ok).toBe(true)
+  })
+
+  it('routes orders to paper only — never live broker path', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-paper-3',
+      strategyId: 'strat-gamma',
+    })
+    const receipt = submitPaperOrder(session, {
+      symbol: 'AAPL',
+      side: 'buy',
+      quantity: 10,
+      limitPrice: 150,
+    })
+    expect(receipt.ok).toBe(true)
+    if (receipt.ok) {
+      expect(receipt.value.mode).toBe('paper')
+    }
+  })
+})

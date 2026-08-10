@@ -321,13 +321,13 @@ export function buildConsolidationTruthMatrix(
     {
       id: 'quant.finance.onda-n',
       claim:
-        'Onda N Vanguard Quant — spec binding; zero production trading/HFT modules (investment-grade HELD)',
-      path: 'lib/production/quant-finance-honesty.ts',
-      status: 'NOT_IMPLEMENTED',
+        'Onda N Vanguard Quant — N1–N3 P0 cores PARTIAL; investment-grade HELD (no broker/L2/Rust risk)',
+      path: 'lib/server/quant/',
+      status: 'PARTIAL',
       marketingAllowed: false,
       heldReason: quantFinance.heldReason,
-      note: `vanguardQuantReady=${quantFinance.vanguardQuantReady}; capabilities NOT_IMPLEMENTED=${quantFinance.capabilities.filter((c) => c.status === 'NOT_IMPLEMENTED').length}/${quantFinance.capabilities.length}; legacy cli PaperExchange dead code.`,
-      lastEvidence: `letter=${quantFinance.letter};investmentGrade=${quantFinance.investmentGrade};stamp=${quantFinance.stamp}`,
+      note: `vanguardQuantReady=${quantFinance.vanguardQuantReady}; ondaNCores=${quantFinance.ondaNCores.filter((c) => c.ready).length}/${quantFinance.ondaNCores.length}; investmentGrade=${quantFinance.investmentGrade}; legacy cli PaperExchange dead code.`,
+      lastEvidence: `letter=${quantFinance.letter};stamp=${quantFinance.stamp};held=${quantFinance.heldReason}`,
       gatedNames: ['Vanguard Quant', 'HFT', 'Wall Street', 'investment-grade'],
     },
     {

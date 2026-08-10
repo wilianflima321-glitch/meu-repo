@@ -6,6 +6,22 @@
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import { ONNX_FIXTURE_HONESTY_WIRED } from '@/lib/native-gen/onnx-fixture-honesty'
+import {
+  assertFinanceDomainIsolated,
+  createFinanceProjectVault,
+  createGameProjectScope,
+} from '@/lib/server/quant/finance-domain-vault'
+import {
+  DEFAULT_LIVE_ENABLED,
+  attemptEnableLive,
+  createPaperTradingKernel,
+  createPaperTradingSession,
+  createQuarantineGate,
+} from '@/lib/server/quant/paper-trading-kernel'
+import {
+  createTradeAuditLedger,
+  verifyTradeAuditChain,
+} from '@/lib/server/quant/trade-audit-ledger'
 
 const log = createComponentLogger('quant-finance-honesty')
 
@@ -31,13 +47,23 @@ export type QuantFinanceCapabilityRow = {
   note: string
 }
 
+export type OndaNCoreReadiness = {
+  id: 'N1' | 'N2' | 'N3'
+  label: string
+  status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  path: string
+  ready: boolean
+  note: string
+}
+
 export type QuantFinanceHonestyReport = {
   letter: typeof QUANT_FINANCE_HONESTY_LETTER
   vanguardQuantReady: typeof VANGUARD_QUANT_READY
   investmentGrade: typeof QUANT_FINANCE_INVESTMENT_GRADE
   marketingAllowed: typeof QUANT_FINANCE_MARKETING_ALLOWED
   stamp: 'NOT_IMPLEMENTED' | 'HELD'
-  heldReason: 'onda_n_zero_production_modules'
+  heldReason: 'onda_n_p0_cores_partial_no_investment_grade'
+  ondaNCores: OndaNCoreReadiness[]
   wedgeConflict: string[]
   capabilities: QuantFinanceCapabilityRow[]
   reusableInfra: QuantFinanceCapabilityRow[]
@@ -45,16 +71,68 @@ export type QuantFinanceHonestyReport = {
   notes: string[]
 }
 
+function probeOndaNCores(): OndaNCoreReadiness[] {
+  const n1Vault = createFinanceProjectVault({ projectId: 'probe-n1', strategyCapitalUsd: 1000 })
+  const n1Game = createGameProjectScope('probe-n1')
+  const n1Isolated = assertFinanceDomainIsolated(n1Vault, n1Game).ok
+
+  const n2Session = createPaperTradingSession({ projectId: 'probe-n2', strategyId: 'probe-strat' })
+  const n2Gate = createQuarantineGate('probe-strat')
+  const n2LiveBlocked = !attemptEnableLive(n2Session, n2Gate).ok && n2Session.liveEnabled === DEFAULT_LIVE_ENABLED
+  const n2Kernel = createPaperTradingKernel()
+  const n2QuarantineWorks = n2Kernel.evaluateQuarantine('probe-strat', 5, 0.8).status === 'PASS'
+
+  const n3Ledger = createTradeAuditLedger({ projectId: 'probe-n3' })
+  const n3ChainValid = verifyTradeAuditChain(n3Ledger).valid
+
+  return [
+    {
+      id: 'N1',
+      label: 'Finance domain + vault isolation',
+      status: n1Isolated ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: 'lib/server/quant/finance-domain-vault.ts',
+      ready: n1Isolated,
+      note: n1Isolated
+        ? 'Fail-closed vault type + capital pool gates wired; no Rust Blind Brain yet.'
+        : 'Domain isolation probe failed.',
+    },
+    {
+      id: 'N2',
+      label: 'Paper-trading kernel + walk-forward quarantine',
+      status: n2LiveBlocked && n2QuarantineWorks ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: 'lib/server/quant/paper-trading-kernel.ts',
+      ready: n2LiveBlocked && n2QuarantineWorks,
+      note: n2LiveBlocked
+        ? 'live=false default; live enable blocked until quarantine PASS — no broker adapter.'
+        : 'Quarantine gate probe failed.',
+    },
+    {
+      id: 'N3',
+      label: 'Trade audit ledger (intent → risk → paper/live)',
+      status: n3ChainValid ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: 'lib/server/quant/trade-audit-ledger.ts',
+      ready: n3ChainValid,
+      note: n3ChainValid
+        ? 'Append-only hash chain with clockDriftMs — distinct from AI task-evidence-ledger.'
+        : 'Audit chain probe failed.',
+    },
+  ]
+}
+
 /** Static capability matrix — paths verified absent from production tree (2026-08-10). */
-function buildQuantFinanceCapabilities(): QuantFinanceCapabilityRow[] {
+function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantFinanceCapabilityRow[] {
+  const n1 = ondaNCores.find((c) => c.id === 'N1')
+  const n2 = ondaNCores.find((c) => c.id === 'N2')
+  const n3 = ondaNCores.find((c) => c.id === 'N3')
+
   return [
     {
       id: 'domain-isolation-l14',
       specSection: '§5.1 / §13',
       label: 'Finance vs game project isolation (L.14 sealed vault)',
-      status: 'PARTIAL',
-      path: 'lib/production/multi-surface-context-pack.ts',
-      note: 'Multi-surface context exists for IDE; no finance-specific vault or trading project type.',
+      status: n1?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n1?.path ?? null,
+      note: n1?.note ?? 'No finance vault type.',
     },
     {
       id: 'market-data-feed',
@@ -92,9 +170,9 @@ function buildQuantFinanceCapabilities(): QuantFinanceCapabilityRow[] {
       id: 'paper-trading-quarantine',
       specSection: '§22.A',
       label: 'Paper-trading walk-forward quarantine gate',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'Legacy PaperExchange in packages/aethel-cli-legacy is dead code — not wired.',
+      status: n2?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n2?.path ?? null,
+      note: n2?.note ?? 'Legacy PaperExchange in packages/aethel-cli-legacy is dead code — not wired.',
     },
     {
       id: 'backtest-vector-index',
@@ -148,9 +226,9 @@ function buildQuantFinanceCapabilities(): QuantFinanceCapabilityRow[] {
       id: 'regulatory-audit-trail',
       specSection: '§20 / §22',
       label: 'Investment-grade audit trail (orders, fills, clock drift)',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'Task evidence ledger covers AI patches — not trade lifecycle or MiFID-style audit.',
+      status: n3?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n3?.path ?? null,
+      note: n3?.note ?? 'Task evidence ledger covers AI patches — not trade lifecycle or MiFID-style audit.',
     },
   ]
 }
@@ -196,10 +274,12 @@ function buildReusableInfra(): QuantFinanceCapabilityRow[] {
  * Probe Onda N / Vanguard Quant readiness — sync, no I/O.
  */
 export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
-  const capabilities = buildQuantFinanceCapabilities()
+  const ondaNCores = probeOndaNCores()
+  const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
 
   const notImplemented = capabilities.filter((c) => c.status === 'NOT_IMPLEMENTED').length
+  const p0Ready = ondaNCores.filter((c) => c.ready).length
   const wedgeConflict = [
     '24-month wedge prioritizes game creation DX + Hub + Creative Fusion — Onda N is post-ship Vanguard.',
     'Hub Aethel Coins (H.0 HELD) must not be conflated with exchange margin or strategy PnL.',
@@ -209,10 +289,11 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
 
   const notes = [
     `capabilities: ${capabilities.length} tracked; NOT_IMPLEMENTED=${notImplemented}.`,
-    'Production tree has zero quant-finance modules under cloud-web-app/web/lib/**.',
+    `onda N P0 cores ready=${p0Ready}/3 (N1 vault isolation, N2 paper quarantine, N3 trade audit).`,
+    'N1–N3 are TypeScript fail-closed cores only — no FIX broker, L2 feed, or Rust risk kernel.',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
-    'Investment-grade requires paper quarantine + audit trail + licensed market data — all HELD.',
+    'Investment-grade requires N2+N3+N5 paper soak + licensed market data + legal sign-off — HELD.',
   ]
 
   log.info('quant_finance_honesty_probed', {
@@ -227,7 +308,8 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     investmentGrade: QUANT_FINANCE_INVESTMENT_GRADE,
     marketingAllowed: QUANT_FINANCE_MARKETING_ALLOWED,
     stamp: 'HELD',
-    heldReason: 'onda_n_zero_production_modules',
+    heldReason: 'onda_n_p0_cores_partial_no_investment_grade',
+    ondaNCores,
     wedgeConflict,
     capabilities,
     reusableInfra,
