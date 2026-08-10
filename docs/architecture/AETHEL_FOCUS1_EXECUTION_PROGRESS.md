@@ -101,6 +101,7 @@
 | 2026-08-10 top1-market-gap | Docs+honesty — Top-1 Market Gap Matrix (Engine/IDE/Hub/Quant/AI); reject Unreal 100%; G.% evidence gates; Map/Index scorecard sync | Docs only; no UI; Hub checkout HELD; `investmentGrade` false; Onda G deferred |
 | 2026-08-10 g3-evidence-ladder | Docs+honesty — harsh engine substrate critique; **G.% Evidence Ladder** 15→30→50→80→100; CapScore `g3CodeDepthPercent=15` lock; top-10 product moves | Docs + SRG honesty; **claim >15% = NO**; Hub checkout HELD; Onda G deferred |
 | 2026-08-10 lawxv-capscore-gpu-soak | Commit: `b6a5b219b`. Web Law XV — CapScore fail-closed SRG tier gate + GPU device soak evidence | **PARTIAL** — `capscore-tier-gate` + `gpu-device-soak` (adapter limits + Instant ms; no Math.random FPS); bake gate unchanged; AAA/Nanite/Lumen/`frameGraphLive` **false**; G.3 stays **15%**; vitest **22/22** targeted; Hub checkout **false** |
+| 2026-08-10 frame-parity-3b2 | Commit: *(pending)*. Web 3B.2 screenshot/hash parity harness (G.% ladder gate #4) | **PARTIAL** — harness EXISTS (`GF-PARITY-3B2-001`); fail-closed empty/mock; fail-open measured without desktop; `frameGraphLive` **false**; G.3 stays **15%**; band **15→30 HELD** (PP-01/03 + 60s soak); vitest **5/5**; Hub checkout **false** |
 | 2026-08-10 physics-fiber-kernel | Commit: `d8b7149c3`. Kernel/Rust only — Rapier fixed-dt determinism soak + fiber rayon SoA job system | **PARTIAL** — Instant soaks; `chaos_physics_aaa_ready`/`rayon_dots_aaa_ready` **false**; no Unreal claim; G.3 stays ~15% |
 
 ---
@@ -1231,7 +1232,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 Ranked for **product superiority**, not more substrate files:
 
 1. **TICKET-PP-01/03 — Product present loop** — persistent engine-owned (or native child HWND) present wired to Studio session; flip honesty only with evidence; kill secondary-window-as-product illusion.
-2. **3B.2 parity harness** — screenshot/hash gate web preview vs desktop present; unblocks `frameGraphLive` honesty path.
+2. **3B.2 parity harness** — screenshot/hash gate web preview vs desktop present; **EXISTS** (`frame-parity-harness-3b2.ts`, fixture `GF-PARITY-3B2-001`); `frameGraphLive` still HELD; does **not** alone unlock 15→30.
 3. **Wire frame graph → product present only** — stop adding passes to secondary_winit until #1 lands; cull Instant bag to cull→depth→Hi-Z→draw→present first.
 4. **GF-MESH-001 fixture + golden visibility** — dogfood meshlet scene on disk; first real G.3a gate.
 5. **Scale Micro-Poly off 64²** — visibility buffer / material resolve at dogfood resolution; retire soft-raster as acceptance path.

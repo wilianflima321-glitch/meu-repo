@@ -8,6 +8,7 @@ import {
 } from '@aethel/engine/render/hardware-profile'
 import { buildScalableRenderGraphReport } from '@aethel/engine/render/scalable-render-graph'
 import { proveGpuDeviceSoakReadiness } from '@aethel/engine/render/gpu-device-soak'
+import { evaluateFrameParityHarnessReadiness } from '@/lib/production/frame-parity-harness-3b2'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/renderer-honesty/route')
@@ -59,6 +60,7 @@ export async function GET(req: NextRequest) {
       maxBufferSize: Number(sp.get('maxBuffer')) || 268_435_456,
     },
   })
+  const frameParity = evaluateFrameParityHarnessReadiness()
 
   // Desktop present evidence — only from explicit probe params (never invent).
   // Fail-closed: presented without submitted must not flip live_present.
@@ -102,11 +104,13 @@ export async function GET(req: NextRequest) {
     tier: gatedProfile.tier,
     planAllowed: srg.planAllowed,
     gpuSoakReady: gpuSoak.ready,
+    frameParityHarnessExists: frameParity.harnessExists,
+    g3Band15To30Passed: frameParity.g3Band15To30Passed,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '2A+3B.1+ci+cw3+xv-capscore',
+    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity',
     report,
     /** CW3 — operator present root mirrored at top level for Studio/IDE chrome. */
     presentRoot: report.presentRoot ?? null,
@@ -119,6 +123,23 @@ export async function GET(req: NextRequest) {
       aaaReady: false,
       marketingAllowed: false,
       reason: gpuSoak.reason,
+    },
+    /** G.% ladder 15→30 gate #4 — harness exists; band still HELD. */
+    frameParity3b2: {
+      letter: frameParity.letter,
+      fixtureId: frameParity.fixtureId,
+      harnessExists: frameParity.harnessExists,
+      ready: frameParity.ready,
+      status: frameParity.status,
+      evidenceFingerprint: frameParity.evidenceFingerprint,
+      frameGraphLive: false,
+      g3CodeDepthPercent: frameParity.g3CodeDepthPercent,
+      g3Band15To30Passed: false,
+      band15To30HeldReason: frameParity.band15To30HeldReason,
+      naniteMarketingAllowed: false,
+      lumenMarketingAllowed: false,
+      webgpuProductPresentReady: false,
+      reason: frameParity.reason,
     },
     fsrSrg: {
       letter: 'ci',

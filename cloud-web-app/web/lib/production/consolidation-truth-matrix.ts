@@ -237,6 +237,16 @@ export function buildConsolidationTruthMatrix(
       gatedNames: ['Nanite', 'Lumen', 'WebGPU present', 'UE single pipeline'],
     },
     {
+      id: 'render.parity.3b2',
+      claim:
+        '3B.2 screenshot/hash parity harness EXISTS (GF-PARITY-3B2-001) — frameGraphLive HELD; G.3% locked 15; band 15→30 HELD pending PP-01/03',
+      path: 'lib/production/frame-parity-harness-3b2.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      lastEvidence: 'harnessExists=true|g3Band15To30Passed=false|frameGraphLive=false|fixture=GF-PARITY-3B2-001',
+      gatedNames: ['Nanite', 'Lumen', 'frameGraphLive', 'WebGPU present', 'G.3% uplift'],
+    },
+    {
       id: 'hub.rtv1',
       claim: hub.claim,
       path: 'lib/hub/hub-honesty-capability.ts',
