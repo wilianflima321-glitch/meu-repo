@@ -103,6 +103,7 @@
 | 2026-08-10 lawxv-capscore-gpu-soak | Commit: `b6a5b219b`. Web Law XV — CapScore fail-closed SRG tier gate + GPU device soak evidence | **PARTIAL** — `capscore-tier-gate` + `gpu-device-soak` (adapter limits + Instant ms; no Math.random FPS); bake gate unchanged; AAA/Nanite/Lumen/`frameGraphLive` **false**; G.3 stays **15%**; vitest **22/22** targeted; Hub checkout **false** |
 | 2026-08-10 frame-parity-3b2 | Commit: `db72420ea`. Web 3B.2 screenshot/hash parity harness (G.% ladder gate #4) | **PARTIAL** — harness EXISTS (`GF-PARITY-3B2-001`); fail-closed empty/mock; fail-open measured without desktop; `frameGraphLive` **false**; G.3 stays **15%**; band **15→30 HELD** (PP-01/03 + 60s soak); vitest **5/5** (+ matrix); Hub checkout **false** |
 | 2026-08-10 physics-fiber-kernel | Commit: `d8b7149c3`. Kernel/Rust only — Rapier fixed-dt determinism soak + fiber rayon SoA job system | **PARTIAL** — Instant soaks; `chaos_physics_aaa_ready`/`rayon_dots_aaa_ready` **false**; no Unreal claim; G.3 stays ~15% |
+| 2026-08-10 creative-gen-honesty | Docs+honesty — Creative Generation Honesty Matrix (Mini-IA / Maestro / Nexus / Bridge vs Meshy·Tripo·UEFN); top-8 deepen moves | Docs only; no UI; J.11/J.12 STOPPED; Hub checkout HELD; `nativeOnnxReady` false |
 
 ---
 
@@ -1183,11 +1184,71 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **IDE (Forge L)** | Cursor Composer + LSP; v0 HMR loop | L.1/L.2/L.5/L.10/L.12 DONE-core; L.7 MagicWand→FusionTx; CW6 multi-file AST/L.5 apply (`COMPOSER_SURPASS_CLAIM=false`) | L.8 live E2B HMR soak; L.9 live create-next-app p95; L.4 remote PTY; L.13 desktop LSP+Python; Firecracker HELD | “Universal IDE”, “surpass Cursor Composer”, “v0-class” | **Cores real; market claim false** |
 | **Hub (RTv1)** | Steam/Epic/Roblox discovery+checkout | I.5/I.6 Showcase; Instant Play+I.2; F.2 playtime; discovery/reviews/social cores; H.0 revenue-lane code | `hubCheckoutAudited` **false**; Hub Coins mint; Agones; G.2 cross-play marketing | “Checkout live”, “Coins economy shipped”, “cross-play” | **Ops partial; monetize HELD** |
 | **Quant (Onda N)** | Jane Street / coloc HFT / licensed L2 | N1–N9 + §23 + Dual-Mode **fail-closed PARTIAL**; SF1–SF7 PARTIAL (SF7=framing spike); honesty APIs | Live FIX session, SBE, live broker, licensed L2, ORT RPA, HSM Blind Brain, GPU mux hot-swap, Cap'n Proto evidence | “Investment-grade”, “retail HFT”, “50ms GPU swap”, “untouchable”, ToS-safe RPA bots | **Spec+guards + framing spike; 0% institutional execution** |
-| **AI (Onda J)** | Cursor/Devin + Creative Fusion | Law XVI Bridge+CostGuard+FusionTx; MoA/Heal; J.5–J.10 cores; J.9 previz DONE-core | J.11/J.12 **STOPPED**; J.7 OpenUSD HELD; J.4 native sqlite-vec PARTIAL; CDP/WebRTC HELD; undo without shared Y.Doc PARTIAL | “AI-native IDE”, “video→GTA”, “Devin-class autonomy” | **Governed creative OK; autonomy blocked** |
+| **AI (Onda J)** | Cursor/Devin + Creative Fusion; Meshy/Tripo clay; UEFN generative | Law XVI Bridge+CostGuard+FusionTx; MoA/Heal code path; J.5–J.10 cores; J.9 previz DONE-core; mesh refine conveyor **bw/bx** DONE-core | J.11/J.12 **STOPPED**; `nativeOnnxReady` **false**; Instant Meshes / OpenUSD HELD; no single Maestro DAG for games/films/apps; CDP/WebRTC HELD | “AI-native IDE”, “video→GTA”, “surpass Meshy/Tripo/UEFN”, “generate AAA game/film/app on any hardware”, “Devin-class autonomy” | **Governed creative OK; generative Top-1 false** — see §Creative Generation Honesty Matrix |
 
 **Unreal 100% today = FALSE CLAIM.** Evidence required before any **G.% uplift** in Progress/Index/scorecards (see §G.% Evidence Ladder below + AAA Parity §G.% evidence gates). Kernel letter CLOSED ≠ G.3 acceptance.
 
-**Cross-links (Top-1):** Master Map §0c competitor table · Index scorecard · AAA Parity G acceptance · Quant Spec honesty banner · §Onda N below · §G.% Evidence Ladder.
+**Cross-links (Top-1):** Master Map §0c competitor table · Index scorecard · AAA Parity G acceptance · Quant Spec honesty banner · §Onda N below · §G.% Evidence Ladder · §Creative Generation Honesty Matrix.
+
+### Creative Generation Honesty Matrix (2026-08-10 — binding; Mini-IA / Maestro / Nexus / Bridge)
+
+**Founder addendum (intent, not ship certificate):** Mini-IA = simple for users; **Maestro orchestrates all edits/creation**; quality must eventually surpass Meshy / UE generative / Tripo; games/films/apps at best quality on **user hardware OR cloud**; full MD robustness — **without hallucinating what ships today**.
+
+**Harsh verdict (code vs MD):** Custody chain **J.1–J.10 DONE-core** is real. **Full generative supremacy is not.** Apex Maestro+MoA+Heal is **LIVE for code missions** (`enableApexMoA`) — not a universal creator DAG. Nexus is operator **routing + plan chrome**, not Composer/Devin. CreativeBridge is the Law XVI choke — it does **not** invent Meshy-class clay or UEFN-class in-editor gen. J.11 ACP / J.12 OrchestratorProd remain **STOPPED** (working-tree scaffolds ≠ shipped). Dual bridge files (`lib/production/creative-artifact-bridge.ts` canonical; `lib/ai/creative-artifact-bridge.ts` parallel class) are a consolidation debt — do not market two chokes.
+
+#### Role map — intent vs code today
+
+| Role | MD / Founder intent | Code today (honest) | Must NOT claim |
+|------|---------------------|---------------------|----------------|
+| **Mini-IA** | Simple user face — prompt in, artifact out; no orchestration theater | No single product module named Mini-IA for creative. Closest: chat + studio gen panels (`native-gen-ide-*`, `world-forge-ide-*`) that prefer native when ready else BYOK clay. **Quant Mini-IA** (`finance-onnx-session.ts`) is a **different** fail-closed probe (`financeOnnxReady=false`; never flips `nativeOnnxReady`) | “One Mini-IA builds your AAA game/film/app”; finance Mini-IA as text-to-3d |
+| **Maestro** | Decompose + keep critical nucleus; orchestrate **all** edits/creation; peripherals → Adaptive MoA | `maestro-delegation.ts` plan builder; `apex-mission-orchestrator.ts` **LIVE** for code (MoA+Heal+L.5). World Forge has a Maestro **plan helper**, not full custody over every mesh/film/app job. Finance `maestro-finance-pulse.ts` = veto-only | “Maestro runs every creative domain end-to-end”; “perfect code in 5s”; J.12 prod orchestrator |
+| **Nexus** | J.2 squad UI + workforce topology; evidence of Maestro/Swarm/Heal phases | `nexus-squad-dispatch.ts` builds `MaestroDelegationPlan` + keyword `resolveNexusCreativeOperatorHint`; phase events for Activity Deck; CW6 apply swarm PARTIAL (`composerSurpassClaim=false`) | “Surpass Cursor Composer”; “Devin-class autonomy”; AI-native IDE (needs J.12 or Founder alt) |
+| **CreativeBridge** | Single choke: Intent → CostGuard → Provider → FusionTx → Evidence | `dispatchCreativeArtifact` + HTTP choke; Trava I free-tier platform-pay **deny**; empty artifact → fail; FusionTx required on write domains | Bypass Bridge; platform-pay free tier; `success:true` + empty preview; Tripo-only ship (`tripoOnlyShipAllowed:false`) |
+
+#### Pipeline matrix — games / films / apps / meshes
+
+| Pipeline | DONE-core (real) | PARTIAL | HELD | CapScore / hardware quality | Cloud vs local |
+|----------|------------------|---------|------|-----------------------------|----------------|
+| **Meshes (clay→game-ready)** | Law XVI Bridge/CostGuard; **bw** refine conveyor (retopo→LOD→UV→rig→PBR→collider→critic→pack); **bx** Tripo/Meshy/Luma poll→conveyor; **bz** remesh deepen; **cb** IDE route prefers native else BYOK | Live provider quality depends on BYOK; Instant Meshes commercial parity false; USDZ preview only | **`nativeOnnxReady=false`** (da/cu — no redistributable text-to-3d ONNX); Instant Meshes / XAtlas / Tripo-local ORT; OpenUSD/USDC mesh stage; V-HACD commercial | Law XV CapScore gates publish bake; GT730 fail-closed Zero-UI on native path; **G.3 ~15%** — desktop nuclear does not uplift mesh gen claims | **Cloud clay = BYOK** Meshy/Tripo/Luma via Bridge; **local native $0 path HELD** until weights+ORT soak |
+| **Games (world + playable)** | Terrain/landscape brushes an/be–bh; World Forge **cc/cd** math-PCG conveyor + FusionTx; GraphOperator J.5; VideoToMechanic **scaffold only** J.6; publish bake gate | Maestro does not own full game spine as one mission; LoRA clay / city-from-prompt false; gameplay auto-wire false | Nanite/Lumen/Entropy AAA; Agones; Hub Coins; “prompt→shipped AAA game” | CapScore + baked-lighting **mandatory** for Instant Play honesty; hardware quality = Law XV tier, not generative magic | Cloud: Bridge+credits/BYOK; local: PCG math works offline; LoRA/ONNX world enrich **HELD** |
+| **Films / cinematics** | J.9 VisualEvidence DONE-core; cinematic-beat via Bridge; Sequencer play-end attach WebM/PNG/`webmHeld`; doctrine #63 engine shoots (Veo demoted) | Headless CI WebM; shared-Y.Doc undo PARTIAL | Final footage / G.8 export; Veo-as-default; MetaSounds AAA cinema | Film pixels still ride web/desktop present — **not** G.8 crown; CapScore does not unlock “Hollywood from prompt” | Cloud provider voice/music via Bridge+CostGuard; offline final render **HELD** |
+| **Apps (web scaffolds)** | L.5 typecheck + LazyInspector; L.9 wizard + fail-closed soak harness; PreviewOrchestrator PARTIAL; FusionTx MagicWand path | Live create-next-app p95 soak open; L.8 live E2B HMR soak open | Firecracker; Universal IDE / v0-class marketing | App quality ≠ CapScore G.% — separate Forge soak gates | Cloud E2B when keyed; local sandbox PTY PARTIAL; remote PTY HELD |
+
+#### Travas + J.12 STOPPED — claim gates
+
+| Gate | Status | Implication |
+|------|--------|-------------|
+| **Trava I CostGuard** | **DONE-core** — free + no BYOK → `free_tier_platform_pay_forbidden` | Never market unlimited free generative; settle:0 on lazy/reject paths |
+| **Trava II FusionTx** | **DONE-core** write domains; undo without shared Y.Doc **PARTIAL** | Atomic Ctrl+Z only where shared doc proven — do not claim universal undo |
+| **Trava III Video→scaffold** | **DONE-core** BT/SM only | **Forbid** “video→GTA” / auto-physics combat forever until Founder reopens doctrine |
+| **J.11 ACP** | **STOPPED** | Dual bus / desktop Rust ACP unification **not** a ship surface |
+| **J.12 OrchestratorProd** | **STOPPED** — `orchestrator-prod.ts` scaffold only | Blocks “AI-native IDE” + production Maestro-DAG over ACP; Apex MoA code path is **not** a J.12 substitute for marketing |
+| **Empty success** | Refused in Bridge + pack/bake paths | Critic rejects `success:true` + empty artifact (Law XVI) |
+
+#### Competitor claims — forbidden until evidence
+
+| Competitor | What they ship (bar) | Aethel today | May claim only when |
+|------------|----------------------|--------------|---------------------|
+| **Meshy / Tripo** | Strong raw text-to-3d clay | BYOK clay ingest + **game-ready refine** wedge (bw/bx/bz); raw local clay **HELD** | Side-by-side: same prompt → Aethel ship-ready (LOD/rig/collider/pack) beats clay-only **and** `nativeOnnxReady` or documented BYOK parity soak published |
+| **UEFN / UE generative** | In-editor gen + MetaHuman-scale + PCG in shipping editor | Math-PCG World Forge + R3F authoring; no MetaHuman; G.3 ~15% | Product present + generative inside editor dogfood + OpenUSD — not letter kernels |
+| **Cursor / Devin** | Composer autonomy + long-horizon | CW6 PARTIAL; J.12 STOPPED | Founder lifts J.12 **or** explicit alternate + Composer soak evidence (`composerSurpassClaim` stays false until then) |
+
+#### Top 8 backend deepen moves (Maestro / Mini-IA — close real gaps; no marketing)
+
+Ranked for **product generative superiority**, not new MD or UI chrome. **Forbidden in all moves:** video→GTA, empty success, platform-pay free tier, flipping `nativeOnnxReady` without weights+ORT, claiming J.12 while STOPPED.
+
+1. **Unify creative dispatch under Maestro plan** — one `MaestroDelegationPlan` entry for mesh/world/cinematic/app jobs that already hit CreativeBridge (cb/cd/J.5–J.9); nucleus = Bridge+CostGuard+FusionTx; peripherals = poll/refine/pack. Do **not** wait for J.12; do **not** invent ACP.
+2. **Collapse dual Bridge surfaces** — make `lib/production/creative-artifact-bridge.ts` the only choke; quarantine or re-export `lib/ai/creative-artifact-bridge.ts` so Mini-IA cannot bypass CostGuard.
+3. **Native ORT text-to-3d fixture path (letter da/cu)** — Founder-licensed weights + runtime soak → only then flip `nativeOnnxReady`; until then keep silent BYOK clay fallback (Zero-UI).
+4. **Clay→refine evidence ledger** — publish fingerprint receipts (provider id, triangle budgets, critic pass/fail, CapScore tier) on every bx→bw run; fail-closed if critic REJECT or empty mesh.
+5. **World Forge Maestro barrier** — mission cannot mark success if FusionTx abort, LoRA HELD path returns empty world, or bake gate would refuse publish; wire CostGuard reserve to multi-stage conveyor spend.
+6. **CapScore-aware quality ladder for gen** — map Law XV Capability Score → max instance/LOD/texture budgets in native-gen + world-forge conveyors (local hardware best-effort); cloud BYOK unchanged but settle honest weights.
+7. **J.7 Meshy→USD cook runtime (not OpenUSD theater)** — deepen compose/intake so refined GLB/USDZ lands in viewport with honest HELD badges for USDA/USDC; refuse capsule / empty stage.
+8. **Shared-Y.Doc Fusion undo + apply swarm receipts** — finish Trava II cross-isolate gap + CW6 `fileValidation` so Mini-IA “simple apply” cannot present L.5 FAIL as success (Auto-Heal ≤3 already — enforce on creative write paths).
+
+**Explicit non-moves:** resume J.11/J.12 without Founder; Meshy/Tripo marketing as “surpassed”; new exotic kernel letters as gen proof; UI redesign; Quant Mini-IA conflation with creative Mini-IA.
+
+**Cross-links:** Top-1 AI row · AI Fusion Travas · Apex Swarm §0a Anti-Hype · letters bw/bx/bz/ca/cb/cc/cd/cu/da · STOPPED J.11/J.12 · Law XV CapScore.
 
 ### G.% Evidence Ladder (2026-08-10 — binding; Critic fail-closed)
 
@@ -1253,7 +1314,8 @@ Ranked for **product superiority**, not more substrate files:
 |---|---|---|
 | **Cursor** | CostGuard + L.5 dual-stack apply; RepoGraphRAG 100% slice; Nexus evidence | Composer UX; live E2B HMR; desktop LSP soak; J.12 STOPPED → **no AI-native / Composer-surpass** |
 | **v0** | PreviewOrchestrator + FusionTx MagicWand; honest `hmr:false` default; L.9 soak harness (no fake p95) | Live scaffold+HMR soak (≥20 measured) → **no Universal IDE / v0-class** |
-| **Unreal** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material + in-process GAS cue bind | Nanite/Lumen/Chaos/RHI (~15%); OpenUSD stage HELD; Spec heroes MISSING → **no UE parity / no “Unreal 100%”** |
+| **Unreal / UEFN gen** | Web Instant Play + bake gate; R3F authoring; Timeline scrub/material + in-process GAS cue bind; math-PCG World Forge | Nanite/Lumen/Chaos/RHI (~15%); OpenUSD stage HELD; MetaHuman/in-editor gen parity → **no UE parity / no “Unreal 100%” / no UEFN generative surpass** |
+| **Meshy / Tripo** | Game-ready refine conveyor (bw/bx/bz) + Bridge/CostGuard; `tripoOnlyShipAllowed:false` | Raw text-to-3d clay (`nativeOnnxReady=false`); Instant Meshes commercial → **no “surpass Meshy/Tripo”** until side-by-side ship-ready soak |
 | **Devin / Copilot** | Sandbox-only agents; ledger receipts; fleet strip | Long-horizon autonomy; advanced streaming chat → **no Devin-class** |
 | **Institutional quant** | Fail-closed N1–N5/§23/Dual-Mode + SF1–SF3 substrate honesty | FIX/L2/colocation/live broker/ORT RPA → **`investmentGrade=false`; no Vanguard ship** |
 
@@ -1407,6 +1469,7 @@ Ranked for **product superiority**, not more substrate files:
 
 | Date | Change |
 |------|--------|
+| 2026-08-10 creative-gen-honesty | **Docs+honesty only (no UI; no new MD).** Progress §**Creative Generation Honesty Matrix** — Mini-IA (simple UX) vs Maestro (orchestrate; code MoA LIVE ≠ universal DAG) vs Nexus (routing/chrome) vs CreativeBridge (Law XVI choke); pipelines games/films/apps/meshes DONE-core vs PARTIAL vs HELD; CapScore/cloud/local; Travas I–III; **J.11/J.12 STOPPED** implications; forbid Meshy/Tripo/UEFN surpass + video→GTA + empty success + platform-pay free tier. Top-1 AI row + competitor table refreshed. **Top 8** backend deepen moves (Maestro plan unify → Bridge dual-collapse → ORT fixture → clay ledger → World Forge barrier → CapScore gen budgets → J.7 cook → Fusion undo). Hub checkout HELD; `nativeOnnxReady` false; G.3 stays ~15%. |
 | 2026-08-10 spatial-xr-liveops-evidence | Commit: `3e11badcd`. **Backend-only Spatial XR + LiveOps F evidence PARTIAL (no UI).** XR: `spatial-xr-substrate-evidence.ts` — foveation enable/applyToLayer soak + honesty PARTIAL; `SPATIAL_XR_PRODUCT_READY`/`SPATIAL_XR_MARKETING_ALLOWED`/`WEBXR_VIEWPORT_ENTRY_*` **false**. LiveOps: `telemetry-gamesave-evidence.ts` — TelemetrySpool enqueue→markSynced + durable GameSave checksum upsert fingerprint; cloud GameSave / immortal actors marketing **false**. Tests **25/25**. Hub checkout / investmentGrade / FIX / DirectStorage / GPU_PSO / prior AAA untouched. |
 | 2026-08-10 materialx-openvdb-vs-wasm | Commit: `2cd0733f6`. **Backend-only R17 MaterialX + OpenVDB + Law VII VS→WASM publish gates PARTIAL (no UI).** Wired into `export-format-worker.publish.ts` + orchestrator re-exports: `materialx-standard-surface-substrate.ts` (standard_surface → PBR; `MATERIALX_PRODUCT_READY`/`LOOKDEV_AAA`/`MARKETING` **false**); `openvdb-header-substrate.ts` (VDB magic/version; Blosc/sparse-leaf/`OPENVDB_PRODUCT_READY`/`LUMEN_VDB_*` **false**); `sealVisualScriptBytecodeShipReceipt` / refuse on transpile (`VS_WASM_BYTECODE_SHIP_READY` **false**). Manifest + `aethelpack-cook.json` stamp product flags false. Tests **9/9** (`materialx-openvdb-vs-wasm-publish.test.ts`). Hub checkout / investmentGrade / FIX / DirectStorage / GPU_PSO / Spatial XR / prior AAA untouched. Remaining OPEN still mostly Founder/E2B/UI/Hub (R1/R4/R21 + soaks). |
 | 2026-08-10 r8-r20-usdc-cw | Commit: `1fdc94a74`. **Backend-only R8 USDC crate TOC + R20 CW2/CW7 deepen PARTIAL (no UI).** R8: `usdc-crate-substrate.ts` — PXR-USDC 88-byte bootstrap + TOC section directory seal; compose wires `usdc_crate_mesh_held` with receipt (`USDC_MESH_STAGE_READY`/`OPEN_USD_CRATE_MESH_READY` **false**; no capsule / no empty mesh success). R20: CW7 probes `scripts/check-cargo-target.mjs` + `cargo-prune-orphans.mjs` presence (`*Enforced` still **false**); CW2 cross-links web Chaos FractureGraph evidence fingerprint (AAA **false**); truth matrix lastEvidence updated. R11 live BYOK skipped (needs real key — not faked). Tests **21/21**. Hub checkout / investmentGrade / Agones/Coins untouched. **Backend queue drained pending R1/R4/UI** (see Remaining OPEN banner). |
