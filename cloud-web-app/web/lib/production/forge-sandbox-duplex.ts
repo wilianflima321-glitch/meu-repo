@@ -23,6 +23,7 @@ import {
   guardCommandAllowlist,
   normalizeCommandBasename,
 } from '@/lib/production/forge-sandbox-path-guard'
+import { getE2BRemotePtyDuplex, openE2BRemotePtyDuplex } from '@/lib/production/e2b-remote-pty'
 import { getForgeSandboxExecContext } from '@/lib/production/forge-sandbox-executor'
 
 const log = createComponentLogger('forge-sandbox-duplex')
@@ -30,7 +31,7 @@ const require = createRequire(import.meta.url)
 
 /** Honest capability claim when no live sandbox PTY is available. */
 export const FORGE_SANDBOX_PTY_HELD_REASON =
-  'sandbox_pty_unavailable — duplex using stdin/stdout pipes (node-pty spawn failed or disabled; E2B remote PTY API unwired); resize recorded only'
+  'sandbox_pty_unavailable — duplex using stdin/stdout pipes (node-pty spawn failed or disabled; E2B remote PTY gated — see probeE2BRemotePtySdk); resize recorded only'
 
 export const FORGE_SANDBOX_PTY_DISABLED_REASON =
   'sandbox_pty_disabled — AETHEL_FORGE_SANDBOX_PTY=0 forces pipe duplex'
@@ -491,9 +492,9 @@ function openPtyDuplex(input: {
  * Spawns an allowlisted process inside the sandbox — prefers real PTY when
  * node-pty is available; otherwise pipe duplex. Never host PTY / never shell.
  */
-export function openForgeSandboxDuplex(
+export async function openForgeSandboxDuplex(
   input: OpenForgeSandboxDuplexInput,
-): OpenForgeSandboxDuplexResult {
+): Promise<OpenForgeSandboxDuplexResult> {
   const ctx = getForgeSandboxExecContext(input.sessionId)
   if (!ctx) {
     return {
@@ -528,6 +529,29 @@ export function openForgeSandboxDuplex(
   const cols = Math.max(2, Math.floor(input.cols ?? 80))
   const rows = Math.max(1, Math.floor(input.rows ?? 24))
   const preferPty = input.preferPty !== false
+
+  // E2B sessions never spawn local children — remote PTY or fail-closed held reason.
+  if (ctx.provider === 'e2b') {
+    const e2bOpened = await openE2BRemotePtyDuplex({
+      sessionId: input.sessionId,
+      provider: ctx.provider,
+      cols,
+      rows,
+      cwd: cwdGuard.resolved,
+      command,
+      args,
+      preferPty,
+      appendEvidence: ctx.appendEvidence,
+      trackKillable: ctx.trackKillable,
+    })
+    if (e2bOpened.ok) return e2bOpened
+    return {
+      ok: false,
+      reason: e2bOpened.reason,
+      message: e2bOpened.message,
+    }
+  }
+
   const probe = probeForgeSandboxPtyAvailability()
 
   if (preferPty && probe.canAttempt) {
@@ -577,7 +601,7 @@ export function openForgeSandboxDuplex(
 }
 
 export function getForgeSandboxDuplex(duplexId: string): ForgeSandboxDuplexHandle | undefined {
-  return DUPLEX_HANDLES.get(duplexId)
+  return DUPLEX_HANDLES.get(duplexId) ?? getE2BRemotePtyDuplex(duplexId)
 }
 
 export function writeForgeSandboxDuplexStdin(duplexId: string, data: string): boolean {
@@ -614,6 +638,6 @@ export function __resetForgeSandboxDuplexForTests(): void {
 /** Test helper — force preferPty=false path without mutating process.env permanently. */
 export function __openForgeSandboxDuplexPipesOnlyForTests(
   input: Omit<OpenForgeSandboxDuplexInput, 'preferPty'>,
-): OpenForgeSandboxDuplexResult {
+): Promise<OpenForgeSandboxDuplexResult> {
   return openForgeSandboxDuplex({ ...input, preferPty: false })
 }

@@ -1,6 +1,27 @@
 export type E2BModule = typeof import('e2b')
 export type E2BFilePayload = string | ArrayBuffer
 
+export type E2BPtyCreateOpts = {
+  cols: number
+  rows: number
+  cwd?: string
+  envs?: Record<string, string>
+  user?: string
+  onData?: (data: string) => void
+}
+
+export type E2BPtyCommandHandle = {
+  pid: number
+  wait(): Promise<{ exitCode?: number }>
+}
+
+export type E2BPtyModule = {
+  create(opts: E2BPtyCreateOpts): Promise<E2BPtyCommandHandle>
+  sendInput(pid: number, data: Uint8Array): Promise<void>
+  resize(pid: number, size: { cols: number; rows?: number }): Promise<void>
+  kill(pid: number): Promise<boolean>
+}
+
 export interface E2BSandboxLike {
   sandboxId?: string
   files: {
@@ -11,6 +32,8 @@ export interface E2BSandboxLike {
   commands: {
     run(command: string, options?: { cwd?: string; timeoutMs?: number; background?: boolean }): Promise<unknown>
   }
+  /** E2B SDK ^2.0 — remote PTY (L.4 forge terminal). Absent on legacy handles. */
+  pty?: E2BPtyModule
   getHost(port: number): string
 }
 

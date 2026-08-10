@@ -747,6 +747,14 @@ export function getForgeSandboxSession(sessionId: string): ForgeSandboxSession |
   return RUNTIME_SESSIONS.get(sessionId)?.session
 }
 
+/** Live E2B sandbox handle for L.4 remote PTY / L.8 preview — null when missing or torn down. */
+export function getForgeSandboxE2BHandle(sessionId: string): E2BSandboxLike | null {
+  const state = RUNTIME_SESSIONS.get(sessionId)
+  if (!state || state.session.teardownAt) return null
+  if (state.session.provider !== 'e2b') return null
+  return state.e2bHandle ?? null
+}
+
 /**
  * L.8 helper — resolve a real E2B preview host from the live sandbox handle.
  * Returns null when the session is missing, already torn down, non-E2B, or has no handle.

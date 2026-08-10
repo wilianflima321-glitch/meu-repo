@@ -58,10 +58,17 @@ describe('L.4 ForgeTerminalBridge', () => {
     expect(split.law).toBe(48)
   })
 
-  it('documents duplex honesty — pty flag matches host probe (never fake)', () => {
+  it('documents duplex honesty — pty flag matches host probe (never fake)', async () => {
     const probe = probeForgeSandboxPtyAvailability()
-    const honesty = describeForgeTerminalDuplexHonesty()
-    expect(honesty.e2bRemotePty).toBe('HELD')
+    const { probeE2BRemotePtySdk } = await import('@/lib/production/e2b-remote-pty')
+    const e2bProbe = await probeE2BRemotePtySdk()
+    const honesty = describeForgeTerminalDuplexHonesty(e2bProbe)
+    expect(honesty.e2bRemotePtyMessage.length).toBeGreaterThan(0)
+    if (e2bProbe.canAttemptLive) {
+      expect(honesty.e2bRemotePty).toBe('ready')
+    } else {
+      expect(honesty.e2bRemotePty).not.toBe('ready')
+    }
     expect(honesty.pty).toBe(probe.canAttempt)
     expect(honesty.ptyModuleAvailable).toBe(probe.moduleAvailable || probe.canAttempt)
     if (probe.canAttempt) {
@@ -355,7 +362,7 @@ describe('L.4 ForgeTerminalBridge', () => {
     expect(opened.ok).toBe(true)
     if (!opened.ok) return
 
-    const openedDuplex = __openForgeSandboxDuplexPipesOnlyForTests({
+    const openedDuplex = await __openForgeSandboxDuplexPipesOnlyForTests({
       sessionId: opened.session.sessionId,
       command: 'node',
       args: ['-e', 'setTimeout(()=>{}, 1000)'],

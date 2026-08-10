@@ -7,7 +7,7 @@
  *
  * Duplex: prefers real sandbox PTY (node-pty inside L.1 confinement) when available;
  * otherwise stdin/stdout pipes. `ptyApplied:true` only with a live IPty.
- * E2B remote PTY API remains HELD (unwired).
+ * E2B remote PTY wired when SDK loadable + E2B_API_KEY + live sandbox handle.
  *
  * Lane split (binding):
  *  - `human-host-pty` — `/api/terminal/create` + Tauri `terminal_*` for human local shells only
@@ -31,6 +31,10 @@ import {
   writeForgeSandboxDuplexStdin,
   type ForgeSandboxDuplexHandle,
 } from '@/lib/production/forge-sandbox-duplex'
+import {
+  probeE2BRemotePtySdk,
+  type E2BRemotePtyProbe,
+} from '@/lib/production/e2b-remote-pty'
 import {
   createForgeSandboxSession,
   getForgeSandboxLedger,
@@ -322,13 +326,23 @@ export interface ForgeTerminalDuplexHonesty {
   stdinStdoutPipes: boolean
   resizeDeliversSigwinch: boolean
   held: string | null
-  e2bRemotePty: 'HELD'
+  e2bRemotePty: E2BRemotePtyProbe['reason'] | 'HELD'
+  e2bRemotePtyMessage: string
   claim: string
 }
 
 /** Documents max-real duplex vs pipe fallback (no fake PTY marketing). */
-export function describeForgeTerminalDuplexHonesty(): ForgeTerminalDuplexHonesty {
+export function describeForgeTerminalDuplexHonesty(
+  e2bProbe?: E2BRemotePtyProbe,
+): ForgeTerminalDuplexHonesty {
   const probe = probeForgeSandboxPtyAvailability()
+  const e2b = e2bProbe
+  const e2bStatus: ForgeTerminalDuplexHonesty['e2bRemotePty'] =
+    e2b?.canAttemptLive ? 'ready' : e2b?.reason ?? 'HELD'
+  const e2bMessage =
+    e2b?.message ??
+    'E2B remote PTY probe not run — SDK PTY documented (Sandbox.pty.create) but env/package gated'
+
   if (probe.canAttempt) {
     return {
       mode: 'sandbox-pty',
@@ -337,9 +351,10 @@ export function describeForgeTerminalDuplexHonesty(): ForgeTerminalDuplexHonesty
       stdinStdoutPipes: true,
       resizeDeliversSigwinch: true,
       held: null,
-      e2bRemotePty: 'HELD',
+      e2bRemotePty: e2bStatus,
+      e2bRemotePtyMessage: e2bMessage,
       claim:
-        'IDE Forge terminal duplex prefers sandbox node-pty (allowlisted + path-confined); pipe fallback if spawn fails; never human-host PTY; E2B remote PTY HELD',
+        'IDE Forge terminal duplex prefers sandbox node-pty (allowlisted + path-confined); E2B remote PTY when e2b session + SDK+key live; pipe fallback if spawn fails; never human-host PTY',
     }
   }
   return {
@@ -349,9 +364,10 @@ export function describeForgeTerminalDuplexHonesty(): ForgeTerminalDuplexHonesty
     stdinStdoutPipes: true,
     resizeDeliversSigwinch: false,
     held: probe.reason || FORGE_SANDBOX_PTY_HELD_REASON,
-    e2bRemotePty: 'HELD',
+    e2bRemotePty: e2bStatus,
+    e2bRemotePtyMessage: e2bMessage,
     claim:
-      'IDE Forge terminal duplex = allowlisted sandbox child stdin/stdout pipes; not host PTY; sandbox PTY unavailable on this host',
+      'IDE Forge terminal duplex = allowlisted sandbox child stdin/stdout pipes; E2B remote PTY env-gated; not host PTY; sandbox PTY unavailable on this host',
   }
 }
 
@@ -411,7 +427,7 @@ export async function attachForgeTerminalDuplex(
     }
   }
 
-  const opened = openForgeSandboxDuplex({
+  const opened = await openForgeSandboxDuplex({
     sessionId: input.sessionId,
     command: input.command,
     args: input.args,

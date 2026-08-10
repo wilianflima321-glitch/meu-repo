@@ -59,3 +59,11 @@ export {
   type SemanticRecallSoakReport,
   type SemanticRecallReadyProbe,
 } from './semantic-recall-soak'
+export {
+  evaluateJ4ByokEmbedGate,
+  runJ4ByokSemanticCertification,
+  createMockByokEmbedProviderForCert,
+  assertFreeTierStaysLocalHash,
+  type J4ByokEmbedGateVerdict,
+  type J4ByokSemanticCertReport,
+} from './j4-byok-semantic-cert'
