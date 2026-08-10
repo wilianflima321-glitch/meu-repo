@@ -10,6 +10,8 @@ import { buildScalableRenderGraphReport } from '@aethel/engine/render/scalable-r
 import { proveGpuDeviceSoakReadiness } from '@aethel/engine/render/gpu-device-soak'
 import { evaluateFrameParityHarnessReadiness } from '@/lib/production/frame-parity-harness-3b2'
 import { evaluateGfMesh001Readiness } from '@/lib/production/gf-mesh-001-visibility-fixture'
+import { evaluateGfMesh001PbrReadiness } from '@/lib/production/gf-mesh-001-material-pbr-fixture'
+import { evaluateHizOcclusionWinReadiness } from '@/lib/production/hiz-occlusion-win-harness'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/renderer-honesty/route')
@@ -63,6 +65,8 @@ export async function GET(req: NextRequest) {
   })
   const frameParity = evaluateFrameParityHarnessReadiness()
   const gfMesh001 = evaluateGfMesh001Readiness()
+  const gfMeshPbr = evaluateGfMesh001PbrReadiness()
+  const hizWin = evaluateHizOcclusionWinReadiness()
 
   // Desktop present evidence — only from explicit probe params (never invent).
   // Fail-closed: presented without submitted must not flip live_present.
@@ -109,11 +113,13 @@ export async function GET(req: NextRequest) {
     frameParityHarnessExists: frameParity.harnessExists,
     g3Band15To30Passed: frameParity.g3Band15To30Passed,
     gfMesh001Ready: gfMesh001.ready,
+    gfMeshPbrReady: gfMeshPbr.ready,
+    hizWinReady: hizWin.ready,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity+gf-mesh-001',
+    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity+gf-mesh-001+pbr+hiz-win',
     report,
     /** CW3 — operator present root mirrored at top level for Studio/IDE chrome. */
     presentRoot: report.presentRoot ?? null,
@@ -160,6 +166,36 @@ export async function GET(req: NextRequest) {
       g3Band30To50Passed: false,
       band30To50HeldReason: gfMesh001.band30To50HeldReason,
       reason: gfMesh001.reason,
+    },
+    /** G.% ladder 30→50 — golden PBR maps (refuse ID-color-only). */
+    gfMesh001Pbr: {
+      letter: gfMeshPbr.letter,
+      fixtureId: gfMeshPbr.fixtureId,
+      ready: gfMeshPbr.ready,
+      status: gfMeshPbr.status,
+      evidenceFingerprint: gfMeshPbr.evidenceFingerprint,
+      goldenPbrFingerprint: gfMeshPbr.goldenPbrFingerprint,
+      idColorOnly: false,
+      naniteReady: false,
+      lumenReady: false,
+      g3CodeDepthPercent: gfMeshPbr.g3CodeDepthPercent,
+      g3Band30To50Passed: false,
+      reason: gfMeshPbr.reason,
+    },
+    /** G.% ladder 30→50 — Hi-Z occlusion win measurement harness. */
+    hizOcclusionWin: {
+      letter: hizWin.letter,
+      fixtureId: hizWin.fixtureId,
+      ready: hizWin.ready,
+      status: hizWin.status,
+      evidenceFingerprint: hizWin.evidenceFingerprint,
+      occlusionWinRatio: hizWin.occlusionWinRatio,
+      meetsBandThreshold: hizWin.meetsBandThreshold,
+      hizReady: false,
+      naniteReady: false,
+      g3CodeDepthPercent: hizWin.g3CodeDepthPercent,
+      g3Band30To50Passed: false,
+      reason: hizWin.reason,
     },
     fsrSrg: {
       letter: 'ci',

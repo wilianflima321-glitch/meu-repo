@@ -257,6 +257,26 @@ export function buildConsolidationTruthMatrix(
       gatedNames: ['Nanite', 'Lumen', 'OpenUSD', 'G.3% uplift', 'capsule character'],
     },
     {
+      id: 'render.gf-mesh-001-pbr',
+      claim:
+        'GF-MESH-001-PBR golden albedo/rough/metal/normal — ID-color-only refused; Nanite/Lumen false; band 30→50 HELD',
+      path: 'lib/production/gf-mesh-001-material-pbr-fixture.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      lastEvidence: 'fixture=GF-MESH-001-PBR|idColorOnly=false|naniteReady=false',
+      gatedNames: ['Nanite', 'Lumen', 'ID-color materials', 'G.3% uplift'],
+    },
+    {
+      id: 'render.hiz-occlusion-win',
+      claim:
+        'Hi-Z occlusion win harness measures frustum vs Hi-Z draw reduction — hiz_ready false; band 30→50 HELD; G.3% locked 15',
+      path: 'lib/production/hiz-occlusion-win-harness.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      lastEvidence: 'fixture=GF-HIZ-WIN-001|hizReady=false|g3Band30To50Passed=false',
+      gatedNames: ['Nanite', 'hiz_ready', 'G.3% uplift'],
+    },
+    {
       id: 'hub.rtv1',
       claim: hub.claim,
       path: 'lib/hub/hub-honesty-capability.ts',
