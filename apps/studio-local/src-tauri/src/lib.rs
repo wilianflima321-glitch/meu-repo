@@ -191,6 +191,8 @@ pub mod kernel_svo_terrain_world_partition_wire;
 pub mod kernel_skeletal_rig_ragdoll_xpbd_wire;
 pub mod kernel_voronoi_destruction_3d_wire;
 pub mod kernel_micro_poly_cull_wire;
+/// N5 — risk envelope IPC (drawdown / leverage / kill-switch; live trading hard-disabled).
+pub mod kernel_risk_envelope_wire;
 pub mod native_kernel;
 pub mod onnx_native_gen;
 pub mod physics_kernel;

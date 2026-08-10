@@ -199,6 +199,7 @@ pub mod sonic_impedance_protocol;
 pub mod quantum_snapshot_dna;
 pub mod kernel_honesty;
 pub mod substrate_deterministic_replay;
+pub mod risk_envelope;
 pub mod desktop_soak;
 pub mod raymarching_volumetric_renderer;
 pub mod self_healing_runtime_daemon;

@@ -437,6 +437,7 @@ fn main() {
             aethel_studio_local::kernel_micro_poly_cull_wire::probe_micro_poly_cull_cmd,
             aethel_studio_local::kernel_position_based_dynamics_wire::probe_position_based_dynamics_cmd,
             aethel_studio_local::kernel_position_based_dynamics_wire::run_kernel_position_based_dynamics_soak_cmd,
+            aethel_studio_local::kernel_risk_envelope_wire::probe_risk_envelope_cmd,
             gpu_culling::probe_gpu_culling_frustum_soak_cmd,
         ])
         .run(tauri::generate_context!())
