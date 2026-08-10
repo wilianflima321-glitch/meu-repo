@@ -302,6 +302,7 @@ pub mod heterogeneous_hardware_fallback_matrix;
 
 
 pub mod physics_kernel;
+pub mod fiber_job_system;
 pub mod ipc_zero_copy_ws;
 #[cfg(feature = "wgpu-bridge")]
 pub mod nanite_wgpu_bridge;
