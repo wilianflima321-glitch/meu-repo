@@ -27,9 +27,9 @@ describe('quant finance honesty probe', () => {
     expect(report.heldReason).toBe('onda_n_p0_cores_partial_no_investment_grade')
   })
 
-  it('reports N1–N7 cores as PARTIAL after backend ship', () => {
+  it('reports N1–N8 cores as PARTIAL after backend ship', () => {
     const report = probeQuantFinanceHonesty()
-    expect(report.ondaNCores).toHaveLength(7)
+    expect(report.ondaNCores).toHaveLength(8)
     for (const core of report.ondaNCores) {
       expect(core.status).toBe('PARTIAL')
       expect(core.ready).toBe(true)
@@ -44,6 +44,8 @@ describe('quant finance honesty probe', () => {
     expect(report.substrateSf4.ready).toBe(true)
     expect(report.substrateSf5.status).toBe('PARTIAL')
     expect(report.substrateSf5.ready).toBe(true)
+    expect(report.substrateSf6.status).toBe('PARTIAL')
+    expect(report.substrateSf6.ready).toBe(true)
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
     expect(byId['domain-isolation-l14']?.status).toBe('PARTIAL')
     expect(byId['paper-trading-quarantine']?.status).toBe('PARTIAL')
@@ -53,6 +55,8 @@ describe('quant finance honesty probe', () => {
     expect(byId['backtest-vector-index']?.status).toBe('PARTIAL')
     expect(byId['maestro-pulse-orchestration']?.status).toBe('PARTIAL')
     expect(byId['mathematical-evidence-report']?.status).toBe('PARTIAL')
+    expect(byId['mini-ia-onnx-finance']?.status).toBe('PARTIAL')
+    expect(byId['blind-brain-key-vault']?.status).toBe('PARTIAL')
   })
 
   it('marks non-ship execution paths NOT_IMPLEMENTED or HELD', () => {

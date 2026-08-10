@@ -37,6 +37,8 @@ import { probeMaestroFinancePulseReadiness } from '@/lib/server/quant/maestro-fi
 import { probeMathematicalEvidenceReadiness } from '@/lib/server/quant/mathematical-evidence'
 import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-vault-pack'
 import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
+import { probeBlindBrainVaultReadiness } from '@/lib/server/quant/blind-brain-vault'
+import { probeFinanceOnnxReadiness } from '@/lib/server/quant/finance-onnx-session'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 import { probeMonotonicTimebaseReadiness } from '@/lib/production/monotonic-timebase'
@@ -66,7 +68,7 @@ export type QuantFinanceCapabilityRow = {
 }
 
 export type OndaNCoreReadiness = {
-  id: 'N1' | 'N2' | 'N3' | 'N4' | 'N5' | 'N6' | 'N7'
+  id: 'N1' | 'N2' | 'N3' | 'N4' | 'N5' | 'N6' | 'N7' | 'N8'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -75,7 +77,7 @@ export type OndaNCoreReadiness = {
 }
 
 export type SubstrateSfReadiness = {
-  id: 'SF1' | 'SF2' | 'SF3' | 'SF4' | 'SF5'
+  id: 'SF1' | 'SF2' | 'SF3' | 'SF4' | 'SF5' | 'SF6'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -96,6 +98,7 @@ export type QuantFinanceHonestyReport = {
   substrateSf3: SubstrateSfReadiness
   substrateSf4: SubstrateSfReadiness
   substrateSf5: SubstrateSfReadiness
+  substrateSf6: SubstrateSfReadiness
   section23: {
     nonCustodial: ReturnType<typeof probeNonCustodialReadiness>
     eulaAcceptance: ReturnType<typeof probeEulaRiskAcceptanceReadiness>
@@ -247,6 +250,17 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
           : 'N7 Maestro pulse or math evidence probe failed.',
       }
     })(),
+    (() => {
+      const n8 = probeFinanceOnnxReadiness()
+      return {
+        id: 'N8' as const,
+        label: 'Finance ONNX Mini-IA probe (fail-closed; no fake predictions)',
+        status: n8.status,
+        path: n8.path,
+        ready: n8.ready,
+        note: n8.note,
+      }
+    })(),
   ]
 }
 
@@ -313,6 +327,18 @@ function probeSubstrateSf5(): SubstrateSfReadiness {
   }
 }
 
+function probeSubstrateSf6(): SubstrateSfReadiness {
+  const sf6 = probeBlindBrainVaultReadiness()
+  return {
+    id: 'SF6',
+    label: 'Blind Brain AES vault (local wrap; HSM HELD)',
+    status: sf6.status,
+    path: sf6.path,
+    ready: sf6.ready,
+    note: sf6.note,
+  }
+}
+
 /** Static capability matrix — paths verified absent from production tree (2026-08-10). */
 function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantFinanceCapabilityRow[] {
   const n1 = ondaNCores.find((c) => c.id === 'N1')
@@ -322,6 +348,7 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
   const n5 = ondaNCores.find((c) => c.id === 'N5')
   const n6 = ondaNCores.find((c) => c.id === 'N6')
   const n7 = ondaNCores.find((c) => c.id === 'N7')
+  const n8 = ondaNCores.find((c) => c.id === 'N8')
 
   return [
     {
@@ -386,9 +413,9 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       id: 'mini-ia-onnx-finance',
       specSection: '§2.B / §11',
       label: 'Local finance ONNX + GPU tick ring buffer',
-      status: 'HELD',
-      path: 'lib/native-gen/onnx-ort-session.ts',
-      note: 'ORT fixture honesty HELD for text-to-3d; N6 CPU SPSC tick ring exists — no finance LoRA/VRAM ring.',
+      status: n8?.ready ? 'PARTIAL' : 'HELD',
+      path: n8?.path ?? 'lib/server/quant/finance-onnx-session.ts',
+      note: n8?.note ?? 'ORT fixture honesty HELD for text-to-3d; no finance Mini-IA probe.',
     },
     {
       id: 'maestro-pulse-orchestration',
@@ -412,9 +439,9 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       id: 'blind-brain-key-vault',
       specSection: '§13',
       label: 'Blind Brain — AES-256 exchange key vault (Rust)',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'BYOK stores LLM keys in browser; no exchange API secret vault in kernel.',
+      status: 'PARTIAL',
+      path: 'lib/server/quant/blind-brain-vault.ts',
+      note: 'SF6 AES-256-GCM local wrap/unwrap + kill-switch; HSM/production custody HELD — not Rust HSM.',
     },
     {
       id: 'p2p-market-data-mesh',
@@ -438,7 +465,7 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       label: 'Non-custodial — no exchange secret in platform DB',
       status: 'PARTIAL',
       path: 'lib/server/quant/non-custodial-invariants.ts',
-      note: 'Fail-closed reject of raw secrets; Blind Brain vault still HELD.',
+      note: 'Fail-closed reject of raw secrets; Blind Brain AES vault PARTIAL (HSM HELD).',
     },
     {
       id: 'eula-risk-acceptance',
@@ -530,6 +557,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
   const substrateSf3 = probeSubstrateSf3()
   const substrateSf4 = probeSubstrateSf4()
   const substrateSf5 = probeSubstrateSf5()
+  const substrateSf6 = probeSubstrateSf6()
   const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
   const section23 = {
@@ -558,12 +586,13 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
 
   const notes = [
     `capabilities: ${capabilities.length} tracked; NOT_IMPLEMENTED=${notImplemented}.`,
-    `onda N cores ready=${p0Ready}/7 (N1–N5 + N6 tick/market-pattern + N7 Maestro pulse).`,
+    `onda N cores ready=${p0Ready}/8 (N1–N7 + N8 finance ONNX probe).`,
     `SF1 session tape: ${substrateSf1.status} — ${substrateSf1.note}`,
     `SF2 signed WORM: ${substrateSf2.status} — ${substrateSf2.note}`,
     `SF3 monotonic timebase: ${substrateSf3.status} — ${substrateSf3.note}`,
     `SF4 quant L.14 vault pack: ${substrateSf4.status} — ${substrateSf4.note}`,
     `SF5 headless runtime: ${substrateSf5.status} — ${substrateSf5.note}`,
+    `SF6 Blind Brain AES vault: ${substrateSf6.status} — ${substrateSf6.note}`,
     `§23 non-custodial: ${section23.nonCustodial.note}`,
     `§23 EULA: ${section23.eulaAcceptance.note}`,
     `§23 GPU mux: ${section23.gpuPriorityMux.note}`,
@@ -571,13 +600,15 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     `§23 attestation store: ${section23.acceptanceAttestation.note}`,
     `Dual-Mode Vanguard HFT: ${dualModeExecution.vanguardHftApi.note}`,
     `Dual-Mode Manus RPA: ${dualModeExecution.manusRpaBrowser.note}`,
-    'N1–N7 fail-closed cores — no FIX broker, licensed L2 feed, or live adapter; investmentGrade=false.',
+    'N1–N8 fail-closed cores — no FIX broker, licensed L2 feed, or live adapter; investmentGrade=false.',
     'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd; paper/live-intent call Maestro then evaluateRisk.',
     'N6 SPSC tick ring + market-pattern VectorIndex domain — not 20yr/<1ms claim.',
     'N7 Maestro finance pulse veto-only — Mini-IA cannot submit; Cap\'n Proto math evidence HELD.',
+    'N8 finance ONNX refuses inference without model bytes; financeOnnxReady=false; does not flip text-to-3d gate.',
+    'SF6 Blind Brain AES-256-GCM local wrap — HSM/production custody HELD.',
     'N3 optional SF2 WORM sink — local durable OK; cloudMirror requires explicit consent (no silent telemetry).',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
-    `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
+    `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — text-to-3d da distinct from N8 financeOnnxReady.`,
     'Investment-grade requires N2+N3+N5 paper soak + licensed market data + legal sign-off — HELD.',
   ]
 
@@ -601,6 +632,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     substrateSf3,
     substrateSf4,
     substrateSf5,
+    substrateSf6,
     section23,
     dualModeExecution,
     wedgeConflict,

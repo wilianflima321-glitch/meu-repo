@@ -17,6 +17,7 @@ import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-vault-pack'
 import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
+import { probeBlindBrainVaultReadiness } from '@/lib/server/quant/blind-brain-vault'
 
 export const VANGUARD_QUANT_FINANCE_READY = false as const
 export const FIX_PROTOCOL_READY = false as const
@@ -40,6 +41,9 @@ export interface SharedSubstrateHonestyReport {
   /** SF5 — headless tick runtime without UI (no FIX). */
   sf5HeadlessRuntimeReady: boolean
   sf5Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF6 — Blind Brain AES vault (HSM still false). */
+  sf6BlindBrainVaultReady: boolean
+  sf6Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
@@ -92,7 +96,7 @@ function proveEvidenceAuditChainSample(): boolean {
 export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
   const notes: string[] = [
     'Shared substrate = determinism + replay + append-only evidence — not Vanguard Quant trading',
-    'vanguardQuantFinanceReady=false — no FIX/order book/blind-brain vault in repo',
+    'vanguardQuantFinanceReady=false — no FIX/order book/HFT; Blind Brain AES PARTIAL (HSM HELD)',
     '§23 silent shadow telemetry FORBIDDEN — consent-gated only; GPU Priority Mux HELD',
   ]
 
@@ -168,6 +172,15 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     notes.push(`sf5HeadlessRuntimeReady PARTIAL — ${sf5.note}`)
   }
 
+  const sf6 = probeBlindBrainVaultReadiness()
+  const sf6BlindBrainVaultReady = sf6.ready
+  const sf6Status: SharedSubstrateHonestyReport['sf6Status'] = sf6.status
+  if (!sf6BlindBrainVaultReady) {
+    notes.push('sf6BlindBrainVaultReady HELD — Blind Brain vault probe failed')
+  } else {
+    notes.push(`sf6BlindBrainVaultReady PARTIAL — ${sf6.note}`)
+  }
+
   const sampleLedger = appendChainedTaskEvidence(
     createTaskEvidenceLedger({
       taskId: 'substrate-fingerprint',
@@ -207,6 +220,8 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sf4Status,
     sf5HeadlessRuntimeReady,
     sf5Status,
+    sf6BlindBrainVaultReady,
+    sf6Status,
     deterministicWebReplayReady,
     competitiveRollbackSoakReady: competitive.competitiveRollbackSoakReady,
     evidenceAuditChainReady,
