@@ -102,6 +102,7 @@ export function probeRadianceWiringHonesty(
     'CLOUD-001 depth blend + god-rays path CLOSED (letter by) — not full volumetric AAA',
     'Radiance viewport enable+composite CLOSED (letter cf) — not HW RT / Radiance GI',
     'Radiance GI marketing forbidden until G-ACC suite + enthusiast desktop RT',
+    'Onda K neural radiance MLP-lite: lib/vanguard/neural-radiance-inference-honesty.ts (PARTIAL; Neural GI AAA HELD)',
   ]
   if (!input.bvhModulePresent) notes.push('BVH module missing')
   if (!input.denoiserModulePresent) notes.push('Denoiser module missing')
