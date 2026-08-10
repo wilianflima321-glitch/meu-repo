@@ -6,8 +6,17 @@
 
 import { z } from 'zod'
 import type { LoraClayGenreId } from '@/lib/world-forge/lora-clay-registry'
+import {
+  evaluateWorldForgeMaestroSuccessBarrier,
+  gateWorldForgeMissionSuccess,
+} from '@/lib/world-forge/world-forge-maestro-barrier'
 
 export const WORLD_FORGE_MAESTRO_WIRED = true as const
+
+export {
+  evaluateWorldForgeMaestroSuccessBarrier,
+  gateWorldForgeMissionSuccess,
+}
 
 export const SemanticWorldIntentSchema = z.object({
   environmentType: z.enum(['forest', 'ruin', 'mountain', 'urban', 'alien', 'ocean']),
@@ -52,8 +61,8 @@ export function buildWorldForgeMaestroPlan(input: {
     seed,
     biomePrompt: `${prompt} biome`,
     legoMeshes: [
-      { id: 'tree_01', foliageTypeId: 'type_tree', sockets: ['ground'] },
-      { id: 'rock_01', foliageTypeId: 'type_rock', sockets: ['ground'] },
+      { id: 'tree_01', foliageTypeId: 'type_tree', sockets: ['ground'], heroProp: false },
+      { id: 'rock_01', foliageTypeId: 'type_rock', sockets: ['ground'], heroProp: false },
     ],
     densityMode: 'hybrid',
     ecsPayloadRefId: id,

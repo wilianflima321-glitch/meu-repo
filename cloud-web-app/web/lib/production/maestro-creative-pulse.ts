@@ -29,6 +29,11 @@ import {
   type CreativeFidelityBand,
   type CreativeQualityTierBinding,
 } from '@/lib/production/creative-quality-tier-binding'
+import {
+  evaluateWorldForgeMaestroSuccessBarrier,
+  type WorldForgeArtifactEvidence,
+  type WorldForgeMaestroSuccessVerdict,
+} from '@/lib/world-forge/world-forge-maestro-barrier'
 
 const log = createComponentLogger('maestro-creative-pulse')
 
@@ -92,6 +97,11 @@ export interface MaestroCreativePulseInput {
   planId?: string
   riskScore?: number
   now?: string
+  /**
+   * Top-8 #5 — when present (game / world-layout), pulse refuses unless
+   * World Forge Maestro success barrier passes (terrain + PCG evidence).
+   */
+  worldForgeEvidence?: Omit<WorldForgeArtifactEvidence, 'projectId'> & { projectId?: string }
 }
 
 export type CreativePulseRejectCode =
@@ -103,6 +113,7 @@ export type CreativePulseRejectCode =
   | 'mini_ia_host_pty_forbidden'
   | 'mini_ia_live_broker_forbidden'
   | 'quality_tier_refused'
+  | 'world_forge_barrier_refused'
   | 'empty_intent'
 
 export type CreativePulseResult<T> =
@@ -130,6 +141,8 @@ export interface MaestroCreativePulseVerdict {
   orchestratorProdShipped: false
   j12Stopped: true
   reservationPreflightOk: true
+  /** Present when worldForgeEvidence was supplied and barrier passed. */
+  worldForgeBarrier?: WorldForgeMaestroSuccessVerdict
   reasons: string[]
   evidenceRefs: string[]
 }
@@ -272,6 +285,25 @@ export async function evaluateMaestroCreativePulse(
     }
   }
 
+  let worldForgeBarrier: WorldForgeMaestroSuccessVerdict | undefined
+  if (input.worldForgeEvidence) {
+    const barrier = evaluateWorldForgeMaestroSuccessBarrier({
+      ...input.worldForgeEvidence,
+      projectId: input.worldForgeEvidence.projectId ?? input.projectId,
+      claimedSuccess: true,
+      now: input.now,
+    })
+    if (!barrier.ok) {
+      return {
+        ok: false,
+        code: 'world_forge_barrier_refused',
+        message: barrier.message,
+        blockedReason: 'world_forge_barrier_refused',
+      }
+    }
+    worldForgeBarrier = barrier.value
+  }
+
   // Trava I — CostGuard preflight before any squad/provider path
   const reserved = await reserveCreativeCost(
     {
@@ -333,12 +365,16 @@ export async function evaluateMaestroCreativePulse(
     orchestratorProdShipped: false,
     j12Stopped: true,
     reservationPreflightOk: true,
+    worldForgeBarrier,
     reasons: [
       `Maestro creative pulse ALLOW — ${input.creationKind}/${input.domain}`,
       `CostGuard preflight ok (settle deferred to CreativeBridge)`,
       `Fidelity band ${quality.fidelityBand} (CapScore/hardware; no UE mesh claim)`,
       'J.12 OrchestratorProd STOPPED — Maestro+Nexus path only',
       'Mini-IA may not orchestrate or submit broker',
+      ...(worldForgeBarrier
+        ? [`World Forge barrier PASS fingerprint=${worldForgeBarrier.fingerprint}`]
+        : []),
       ...(requiresFusionWrite
         ? [`FusionTx scopes required: ${fusionScopes.join(',')}`]
         : ['No Fusion write for this domain']),
@@ -350,6 +386,7 @@ export async function evaluateMaestroCreativePulse(
       `quality:${quality.fidelityBand}`,
       'j12:stopped',
       'mini-ia:allowlist-only',
+      ...(worldForgeBarrier ? ['wf-maestro-barrier:pass'] : []),
     ],
   }
 

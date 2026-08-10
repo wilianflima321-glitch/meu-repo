@@ -34,6 +34,10 @@ import {
 } from '@/lib/world-forge/detour-navmesh'
 import { buildWorldForgeMaestroPlan } from '@/lib/world-forge/world-forge-maestro'
 import {
+  gateWorldForgeMissionSuccess,
+  type WorldForgeMaestroSuccessVerdict,
+} from '@/lib/world-forge/world-forge-maestro-barrier'
+import {
   WORLD_FORGE_LETTER,
   WORLD_FORGE_PIPELINE_ID,
   evaluateWorldForgeCapability,
@@ -108,6 +112,8 @@ export interface WorldForgeConveyorResult {
   unrealRecastParityReady: false
   streamingCarveReady: false
   fusionTxId?: string
+  /** Top-8 #5 — Maestro success barrier fingerprint when success allowed. */
+  maestroBarrier?: WorldForgeMaestroSuccessVerdict
 }
 
 export async function runWorldForgeConveyor(
@@ -249,6 +255,7 @@ export async function runWorldForgeConveyor(
     base.detourNav = detour.session
     base.detourNavReady = detour.detourNavReady
 
+    let fusionAborted = false
     // Law XVI Trava II — local $0 still FusionTx on viewport/manifest writes
     if (input.fusionStore) {
       try {
@@ -280,6 +287,7 @@ export async function runWorldForgeConveyor(
         })
         base.fusionTxId = fusionTxId
       } catch (err) {
+        fusionAborted = true
         if (fusionTxId) {
           await abortCreativeFusionTransaction(fusionTxId, input.fusionStore).catch(() => undefined)
         }
@@ -297,10 +305,24 @@ export async function runWorldForgeConveyor(
       (pcg.instanceCount > 0 || gate.zeroUiFallback) &&
       nav.navmesh.walkableCount > 0
 
-    base.success = mathOk
+    const gated = gateWorldForgeMissionSuccess({
+      projectId: input.projectId,
+      proposedSuccess: mathOk && !fusionAborted,
+      heightfield: base.heightfield,
+      foliage: base.foliage,
+      fusionAborted,
+      zeroUiFallback: gate.zeroUiFallback && pcg.instanceCount <= 0,
+    })
+
+    base.success = gated.success
     base.stages = stages
-    if (!mathOk) {
-      base.blockedReason = 'World Forge math path produced empty/unwalkable world'
+    if (gated.verdict) {
+      base.maestroBarrier = gated.verdict
+    }
+    if (!gated.success) {
+      base.blockedReason =
+        gated.blockedReason ??
+        (!mathOk ? 'World Forge math path produced empty/unwalkable world' : 'maestro_barrier_refused')
     }
 
     log.info('world_forge_conveyor_done', {
@@ -308,6 +330,7 @@ export async function runWorldForgeConveyor(
       zeroUi: base.zeroUi,
       instances: pcg.instanceCount,
       walkable: nav.navmesh.walkableCount,
+      barrier: gated.verdict?.fingerprint,
     })
 
     return base

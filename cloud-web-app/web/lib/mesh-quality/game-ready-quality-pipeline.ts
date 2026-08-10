@@ -21,6 +21,10 @@ import {
 } from '@/lib/mesh-quality/clay-provider-adapters'
 import { critiqueMeshTopology } from '@/lib/mesh-quality/mesh-topology-critic'
 import {
+  sealClayRefineEvidence,
+  type ClayRefineEvidenceReceipt,
+} from '@/lib/mesh-quality/clay-refine-evidence'
+import {
   DEFAULT_RETOPO_TARGET_TRIANGLES,
   MESH_QUALITY_PIPELINE_ID,
   MESH_QUALITY_PIPELINE_LETTER,
@@ -90,6 +94,8 @@ export interface GameReadyPipelineResult {
   colliders?: { convex: CookedCollider; trimesh: CookedCollider }
   packBytes?: Uint8Array
   packSha256?: string
+  /** Top-8 #4 — durable clay→refine fingerprint when critic passes. */
+  refineEvidence?: ClayRefineEvidenceReceipt
   semanticLandmarks?: SemanticLandmark[]
   facialMocapReadyHint?: boolean
   tripoOnlyShipAllowed: false
@@ -329,6 +335,30 @@ export async function runGameReadyQualityPipeline(
     stages: stages.length,
   })
 
+  const refineSeal = sealClayRefineEvidence({
+    projectId: input.projectId,
+    providerId: input.clayMesh ? 'preparsed' : (input.clayProvider ?? 'unknown'),
+    capabilityScore: input.capabilityScore ?? null,
+    triangleBudgetTarget: input.targetTriangles ?? DEFAULT_RETOPO_TARGET_TRIANGLES,
+    mesh,
+    criticApproved: true,
+    stages,
+    packSha256,
+  })
+  if (!refineSeal.ok) {
+    return blocked(`refine_evidence:${refineSeal.code}`, stages, notes, {
+      mesh,
+      lods: lods.lods,
+      rig,
+      pbr,
+      colliders: { convex: colliders.convex, trimesh: colliders.trimesh },
+      packBytes,
+      packSha256,
+      remeshQualityDeepened: retopo.remeshQualityDeepened,
+    })
+  }
+  notes.push(`clay-refine-evidence:${refineSeal.value.fingerprint}`)
+
   return {
     letter: MESH_QUALITY_PIPELINE_LETTER,
     pipelineId: MESH_QUALITY_PIPELINE_ID,
@@ -342,6 +372,7 @@ export async function runGameReadyQualityPipeline(
     colliders: { convex: colliders.convex, trimesh: colliders.trimesh },
     packBytes,
     packSha256,
+    refineEvidence: refineSeal.value,
     semanticLandmarks: retopo.semanticLandmarks,
     facialMocapReadyHint: retopo.facialMocapReadyHint,
     tripoOnlyShipAllowed: false,
