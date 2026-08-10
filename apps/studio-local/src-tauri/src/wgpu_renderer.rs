@@ -10,9 +10,9 @@
 //!   owns the HWND; mounting a wgpu surface without exclusive ownership is identity
 //!   only, never product viewport replacement).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   **engine frame skeleton** (meshlet-cluster `encode_cull` [+ next-frame
-//!   Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth + proxy
-//!   `draw_indirect` → build depth pyramid → `queue.submit` →
+//!   **engine frame skeleton** (offline meshlet cook → cluster `encode_cull`
+//!   [+ next-frame Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth +
+//!   proxy `draw_indirect` → build depth pyramid → `queue.submit` →
 //!   `SurfaceTexture::present`) with **no CPU readback** on the hot path.
 //!   Final meshlet visible count may be read **after** the loop for evidence.
 //! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
@@ -30,7 +30,8 @@ use winit::window::WindowBuilder;
 
 use crate::gpu_culling::identity_frustum;
 use crate::gpu_hiz::DepthPyramidHiz;
-use crate::gpu_meshlet_cull::{soak_fixture_meshlets, MeshletCullScaffold};
+use crate::gpu_meshlet_cook::cook_soak_meshlets;
+use crate::gpu_meshlet_cull::MeshletCullScaffold;
 use crate::gpu_culling::GpuCullingPipeline;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
@@ -124,6 +125,14 @@ pub struct RendererPresentProbeReport {
     pub meshlet_cull_substrate_proven: bool,
     /// Instant ms spent in meshlet cull+pack encode (sum over frames).
     pub meshlet_cull_ms_total: f64,
+    /// Instant ms for offline CPU meshlet cook (topology partition). Never fabricated.
+    pub meshlet_cook_ms: f64,
+    /// Input triangles fed to the offline cook.
+    pub meshlet_cook_input_triangles: u32,
+    /// Triangles assigned across cooked leaf clusters (must match input when proven).
+    pub meshlet_cook_cooked_triangles: u32,
+    /// True when offline cook topology was complete and clusters drove the soak.
+    pub meshlet_cook_proven: bool,
     /// Adapter reports `Features::MULTI_DRAW_INDIRECT` (capability only).
     pub multi_draw_indirect_feature_available: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
@@ -224,7 +233,7 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit meshlet-cluster cull → single draw_indirect + Hi-Z pyramid only".into(),
+        "Probe proves secondary winit offline meshlet cook → cluster cull → single draw_indirect + Hi-Z only".into(),
         "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
         "hiz_ready / nanite_ready / micro_poly_aaa_ready stay false — substrate ≠ AAA Parity".into(),
         "True MULTI_DRAW_INDIRECT batch / Nanite virtualized geometry still HELD".into(),
@@ -271,6 +280,10 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         meshlet_expected_visible: 0,
         meshlet_cull_substrate_proven: false,
         meshlet_cull_ms_total: 0.0,
+        meshlet_cook_ms: 0.0,
+        meshlet_cook_input_triangles: 0,
+        meshlet_cook_cooked_triangles: 0,
+        meshlet_cook_proven: false,
         multi_draw_indirect_feature_available: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
@@ -508,7 +521,27 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
-    let (clusters, expected_visible) = soak_fixture_meshlets();
+    let (cook_receipt, expected_visible) = match cook_soak_meshlets() {
+        Ok(v) => v,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("offline meshlet cook failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            return r;
+        }
+    };
+    let clusters = cook_receipt.clusters();
+    let meshlet_cook_ms = cook_receipt.cook_ms;
+    let meshlet_cook_input_triangles = cook_receipt.input_triangle_count;
+    let meshlet_cook_cooked_triangles = cook_receipt.cooked_triangle_count;
     let frustum = identity_frustum(clusters.len() as u32);
 
     let hiz = match DepthPyramidHiz::new(&device, size.width.max(2), size.height.max(2)) {
@@ -525,6 +558,9 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.surface_kind = "secondary_winit".into();
             r.surface_configured = true;
             r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
             return r;
         }
     };
@@ -549,6 +585,9 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             r.surface_kind = "secondary_winit".into();
             r.surface_configured = true;
             r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
             return r;
         }
     };
@@ -607,9 +646,14 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && cull_visible_final <= expected_visible
         && cull_dispatches > 0;
     let indirect_draw_wired = presented_ok(frames_presented, indirect_draws) && cull_frustum_ok;
+    let meshlet_cook_proven = cook_receipt.topology_complete
+        && meshlet_cook_input_triangles > 0
+        && meshlet_cook_input_triangles == meshlet_cook_cooked_triangles
+        && cook_receipt.cluster_count >= 2
+        && presented_ok(frames_presented, indirect_draws);
     let meshlet_cull_substrate_proven = indirect_draw_wired
-        && meshlets.triangles_per_cluster == crate::gpu_meshlet_cull::MESHLET_TRIANGLES_PER_CLUSTER
-        && clusters.len() as u32 >= 8;
+        && meshlet_cook_proven
+        && meshlets.triangles_per_cluster == crate::gpu_meshlet_cull::MESHLET_TRIANGLES_PER_CLUSTER;
     let hiz_substrate_proven = hiz.mip_count >= 2
         && hiz_downsample_passes > 0
         && hiz_cull_sampled_frames > 0
@@ -636,10 +680,14 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via meshlet-cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→meshlet-cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
-            "Meshlet clusters={} tri/cluster={}; dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}; meshlet_cull_substrate_proven={meshlet_cull_substrate_proven}",
+            "Offline cook ms={meshlet_cook_ms:.3}; input_tris={meshlet_cook_input_triangles} cooked_tris={meshlet_cook_cooked_triangles}; topology_complete={}; meshlet_cook_proven={meshlet_cook_proven}",
+            cook_receipt.topology_complete
+        ));
+        reasons.push(format!(
+            "Meshlet clusters={} tri/cluster_cap={}; dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}; meshlet_cull_substrate_proven={meshlet_cull_substrate_proven}",
             clusters.len(),
             meshlets.triangles_per_cluster
         ));
@@ -706,6 +754,10 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         meshlet_expected_visible: expected_visible,
         meshlet_cull_substrate_proven,
         meshlet_cull_ms_total,
+        meshlet_cook_ms,
+        meshlet_cook_input_triangles,
+        meshlet_cook_cooked_triangles,
+        meshlet_cook_proven,
         multi_draw_indirect_feature_available,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
@@ -715,7 +767,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: secondary winit meshlet-cluster cull→draw_indirect→Hi-Z substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: offline meshlet cook → cluster cull → draw_indirect → Hi-Z substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -804,6 +856,7 @@ mod tests {
         assert!(!r.hiz_ready);
         assert!(!r.hiz_substrate_proven);
         assert!(!r.meshlet_cull_substrate_proven);
+        assert!(!r.meshlet_cook_proven);
         assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
@@ -842,8 +895,15 @@ mod tests {
             assert!(r.engine_frame_loop_with_cull);
             assert_eq!(r.cull_dispatches, r.frames_presented);
             assert!(r.frame_ms_total >= 0.0);
-            assert_eq!(r.meshlet_cluster_count, 8);
+            assert!(r.meshlet_cluster_count >= 2);
             assert_eq!(r.meshlet_triangles_per_cluster, 128);
+            assert!(r.meshlet_cook_ms >= 0.0);
+            assert!(r.meshlet_cook_input_triangles > 0);
+            assert_eq!(
+                r.meshlet_cook_input_triangles,
+                r.meshlet_cook_cooked_triangles
+            );
+            assert!(r.meshlet_cook_proven);
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);
             if r.frames_presented > 1 {

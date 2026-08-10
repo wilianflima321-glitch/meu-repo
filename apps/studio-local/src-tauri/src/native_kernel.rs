@@ -146,13 +146,14 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 state: NativeKernelState::NeedsReview,
                 evidence_refs: vec![
                     "src-tauri/src/gpu_culling.rs",
+                    "src-tauri/src/gpu_meshlet_cook.rs",
                     "src-tauri/src/gpu_meshlet_cull.rs",
                     "src-tauri/src/gpu_hiz.rs",
                 ],
                 blocker: Some(
-                    "Meshlet-cluster cull substrate + Hi-Z next-frame sample proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
+                    "Offline meshlet cook + cluster cull + Hi-Z proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/micro_poly_aaa_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
                 ),
-                next_action: "Product WebView/exclusive present or true MULTI_DRAW_INDIRECT when adapter feature + AAA Parity fixtures allow; never flip nanite/hiz/mdi AAA without fixtures.",
+                next_action: "Product WebView/exclusive present or Nanite streaming/MDI when AAA Parity fixtures allow; never flip nanite/hiz/mdi AAA without fixtures.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

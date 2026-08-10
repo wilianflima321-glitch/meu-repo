@@ -195,7 +195,8 @@ fn fs_main(in: VsOut) -> @location(0) vec4<f32> {
 }
 "#;
 
-/// Fixture: 8 clusters, 4 inside identity frustum [-10,10]^3.
+/// Fixture: 8 hand-placed clusters (layout soak only; present path uses offline cook).
+#[allow(dead_code)]
 pub fn soak_fixture_meshlets() -> ([MeshletCluster; 8], u32) {
     let mk = |id: u32, center: [f32; 3], radius: f32| MeshletCluster {
         center,
