@@ -152,11 +152,12 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                     "src-tauri/src/gpu_radiance_probes.rs",
                     "src-tauri/src/gpu_micropoly_raster.rs",
                     "src-tauri/src/gpu_vsm.rs",
+                    "src-tauri/src/gpu_fsr.rs",
                 ],
                 blocker: Some(
-                    "Offline meshlet cook + cull + micro-poly soft-raster + VSM atlas + Hi-Z + radiance probes proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/micro_poly_aaa_ready/vsm_aaa_ready/lumen_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
+                    "Offline meshlet cook + cull + micro-poly + VSM + FSR temporal upsample + Hi-Z + radiance proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/micro_poly_aaa_ready/vsm_aaa_ready/fsr_aaa_ready/lumen_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
                 ),
-                next_action: "Product WebView/exclusive present or Lumen/Nanite/Micro-Poly/VSM AAA when Parity fixtures allow; never flip lumen/nanite/micro_poly/vsm AAA without fixtures.",
+                next_action: "Product WebView/exclusive present or Lumen/Nanite/Micro-Poly/VSM/FSR3 AAA when Parity fixtures allow; never flip lumen/nanite/micro_poly/vsm/fsr AAA without fixtures.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",
