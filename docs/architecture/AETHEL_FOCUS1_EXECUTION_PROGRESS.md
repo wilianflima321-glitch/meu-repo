@@ -1130,7 +1130,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ## Remaining OPEN ranked (next sessions — 2026-08-08 honesty pass)
 
-**Verdict:** Platform cores + Anti-MOCK clearance are real. Product is **not ready to sell** as Universal IDE, AI-native IDE, Cursor/v0/UE surplus, Hub checkout, or Vanguard Quant — and is **not Unreal-level today**. See §Top-1 Market Gap Matrix. Do not invent new MD files — execute from this table + Master Map §0b/§0c.
+**Verdict:** Platform cores + Anti-MOCK clearance are real. Product is **not ready to sell** as Universal IDE, AI-native IDE, Cursor/v0/UE surplus, Hub checkout, or Vanguard Quant — and is **not Unreal-level today**. Generative path does **not** surpass Meshy/Tripo/UEFN today (`nativeOnnxReady=false`; J.12 STOPPED). See §Top-1 Market Gap Matrix + §Creative Generation Honesty Matrix. Do not invent new MD files — execute from this table + Master Map §0b/§0c.
 
 > **Backend queue drained (2026-08-10 r8-r20):** Non-UI backend deepen of R8 (USDC TOC) + R20 (CW2/CW7 matrix) shipped. **Next honest backend work needs human blockers:** R1 Founder/legal Hub checkout, R4/R7/R10 live E2B/soaks, R11 live OpenAI BYOK key (do not fake), R21/R6/R12/R19 UI, R15 Founder STOP, R16 Agones/Coins, R14 Onda G deferred. R8 OpenUSD/Hydra mesh + R20 CI-enforced disk austerity remain PARTIAL/HELD — not theater-flipable without toolchain/CI.
 
