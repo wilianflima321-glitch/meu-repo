@@ -1012,7 +1012,7 @@ Law XVI + Bridge generate choke ? L.5 ? tree-authority ? **`chat-spend-session` 
 |---|------|------------|--------|
 | 3B.1 | Create/wire `scalable-render-graph` + `hardware-profile` (Capability Score) | Law XV; scores 0???100 | **DONE CORE 2026-07-11ab** ??? web probe + blueprint registry; Auto Fidelity + honesty wire; frame graph still HELD |
 | 3B.2 | wgpu frame graph feeds editor viewport (not surface-only) | Screenshot parity gate web preview vs desktop | **HELD** ??? wgpu surface probe only |
-| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit cook→meshlet cull→`draw_indirect`→Hi-Z→**radiance probe volume** (`gpu_radiance_probes.rs`); `nanite_ready`/`hiz_ready`/`lumen_ready`/`multi_draw_indirect_aaa_ready`/product WebView/Micro-Poly **HELD** |
+| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit cook→cull→`draw_indirect`→**micro-poly soft-raster**→Hi-Z→radiance (`gpu_micropoly_raster.rs`); `nanite_ready`/`hiz_ready`/`lumen_ready`/`micro_poly_aaa_ready`/`multi_draw_indirect_aaa_ready`/product WebView **HELD** |
 | 3B.4 | Live Cook-Torrance BRDF in material shaders | PBR sphere shows specular (ENG-007) | **HELD** |
 
 #### Round 3C ??? Advanced paths (P1 ??? only after 3A/3B)
@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4u | **Engine micro-poly soft-raster substrate PARTIAL (no UI):** `gpu_micropoly_raster.rs` cooked meshlet tris + cull visibility → 64² soft-raster; Instant metrics; `micro_poly_substrate_proven` evidence; **`micro_poly_aaa_ready`/`nanite_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4t | **Engine radiance/irradiance probe substrate PARTIAL (no UI):** `gpu_radiance_probes.rs` 4³ volume + GPU fill/sample on secondary_winit; Instant metrics; `radiance_probe_substrate_proven` evidence; **`lumen_ready`/`nanite_ready`/`micro_poly_aaa_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4s | **Engine offline meshlet cook PARTIAL (no UI):** `gpu_meshlet_cook.rs` face-adjacency BFS (≤64v/≤128tri) → `MeshletCluster` for `gpu_meshlet_cull` present soak; Instant `meshlet_cook_ms`; `meshlet_cook_proven` evidence; **`nanite_ready`/`micro_poly_aaa_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4r | **Engine meshlet/cluster cull substrate PARTIAL (no UI):** `gpu_meshlet_cull.rs` 128-tri cluster layout + GPU cull→pack→proxy `draw_indirect` on secondary_winit (+ Hi-Z); `meshlet_cull_substrate_proven` evidence; **`nanite_ready`/`hiz_ready`/`multi_draw_indirect_aaa_ready` stay false**. MULTI_DRAW feature reported only (not required). G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |

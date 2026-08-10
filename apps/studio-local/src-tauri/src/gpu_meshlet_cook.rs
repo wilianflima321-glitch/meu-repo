@@ -60,6 +60,43 @@ impl MeshletCookReceipt {
             .filter(|m| sphere_in_identity_frustum(m.cluster.center, m.cluster.radius))
             .count() as u32
     }
+
+    /// Flatten cooked topology into GPU soft-raster triangles (real verts, not random).
+    pub fn soft_triangles(&self, positions: &[f32]) -> Result<Vec<crate::gpu_micropoly_raster::MicropolyTri>, String> {
+        if !positions.len().is_multiple_of(3) {
+            return Err("positions length must be multiple of 3".into());
+        }
+        let mut out = Vec::with_capacity(self.cooked_triangle_count as usize);
+        for m in &self.meshlets {
+            let tris = m.triangle_indices.len() / 3;
+            for t in 0..tris {
+                let i0 = m.triangle_indices[t * 3] as usize;
+                let i1 = m.triangle_indices[t * 3 + 1] as usize;
+                let i2 = m.triangle_indices[t * 3 + 2] as usize;
+                let p0 = i0 * 3;
+                let p1 = i1 * 3;
+                let p2 = i2 * 3;
+                if p2 + 2 >= positions.len() {
+                    return Err(format!(
+                        "soft_triangles index out of range meshlet={} tri={t}",
+                        m.cluster.cluster_id
+                    ));
+                }
+                out.push(crate::gpu_micropoly_raster::MicropolyTri {
+                    v0: [positions[p0], positions[p0 + 1], positions[p0 + 2]],
+                    meshlet_id: m.cluster.cluster_id,
+                    v1: [positions[p1], positions[p1 + 1], positions[p1 + 2]],
+                    tri_id: t as u32,
+                    v2: [positions[p2], positions[p2 + 1], positions[p2 + 2]],
+                    _pad: 0,
+                });
+            }
+        }
+        if out.len() as u32 != self.cooked_triangle_count {
+            return Err("soft_triangles count mismatch vs cooked_triangle_count".into());
+        }
+        Ok(out)
+    }
 }
 
 /// Offline meshlet cooker (CPU). Emits leaf clusters only.

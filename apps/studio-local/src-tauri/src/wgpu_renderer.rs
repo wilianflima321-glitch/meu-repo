@@ -12,10 +12,10 @@
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
 //!   **engine frame skeleton** (offline meshlet cook → cluster `encode_cull`
 //!   [+ next-frame Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth +
-//!   proxy `draw_indirect` → build depth pyramid → radiance probe fill/sample →
-//!   `queue.submit` → `SurfaceTexture::present`) with **no CPU readback** on
-//!   the hot path. Final meshlet/probe sample counts may be read **after** the
-//!   loop for evidence.
+//!   proxy `draw_indirect` → software micro-poly soft-raster → build depth
+//!   pyramid → radiance probe fill/sample → `queue.submit` →
+//!   `SurfaceTexture::present`) with **no CPU readback** on the hot path.
+//!   Final meshlet/probe/micro-poly stats may be read **after** the loop.
 //! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
 //!   `multi_draw_indirect_aaa_ready` / `lumen_ready` stay **false** —
 //!   substrate ≠ AAA Parity. WebView exclusive present remains HELD.
@@ -31,8 +31,9 @@ use winit::window::WindowBuilder;
 
 use crate::gpu_culling::identity_frustum;
 use crate::gpu_hiz::DepthPyramidHiz;
-use crate::gpu_meshlet_cook::cook_soak_meshlets;
+use crate::gpu_meshlet_cook::{cook_soak_meshlets, soak_cook_input_mesh};
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
+use crate::gpu_micropoly_raster::MicropolyRasterScaffold;
 use crate::gpu_radiance_probes::{soak_probe_volume_params, RadianceProbeVolume};
 use crate::gpu_culling::GpuCullingPipeline;
 
@@ -147,6 +148,15 @@ pub struct RendererPresentProbeReport {
     pub radiance_sample_dark_luminance: f64,
     /// True when fill+sample ran and lit luminance > dark (fail-closed evidence).
     pub radiance_probe_substrate_proven: bool,
+    /// Cooked triangles fed to the software micro-poly soft-raster.
+    pub micro_poly_triangle_count: u32,
+    /// Soft-raster Instant ms (sum over frames).
+    pub micro_poly_ms_total: f64,
+    /// Post-loop soft-raster stats (visible tris / fragments).
+    pub micro_poly_triangles_visible: u32,
+    pub micro_poly_fragments_written: u32,
+    /// True when soft-raster consumed cull visibility and wrote fragments.
+    pub micro_poly_substrate_proven: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -245,10 +255,10 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit cook→meshlet cull→draw_indirect→Hi-Z→radiance probe fill/sample only".into(),
+        "Probe proves secondary winit cook→cull→draw_indirect→micro-poly soft-raster→Hi-Z→radiance probes only".into(),
         "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
         "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready stay false — substrate ≠ AAA Parity".into(),
-        "True Lumen / radiance-cascades AAA / MULTI_DRAW batch / Nanite virtualized geometry still HELD".into(),
+        "True Lumen / Nanite / Micro-Poly AAA / MULTI_DRAW batch still HELD".into(),
     ]
 }
 
@@ -302,6 +312,11 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         radiance_sample_lit_luminance: 0.0,
         radiance_sample_dark_luminance: 0.0,
         radiance_probe_substrate_proven: false,
+        micro_poly_triangle_count: 0,
+        micro_poly_ms_total: 0.0,
+        micro_poly_triangles_visible: 0,
+        micro_poly_fragments_written: 0,
+        micro_poly_substrate_proven: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -318,14 +333,17 @@ struct EngineFrameOutcome {
     hiz_build_ms: f64,
     meshlet_cull_ms: f64,
     radiance_probe_ms: f64,
+    micro_poly_ms: f64,
 }
 
-/// Meshlet cull → pack → clear+depth+draw_indirect → Hi-Z → radiance probes → present.
+/// Meshlet cull → pack → draw_indirect → micro-poly soft-raster → Hi-Z → radiance → present.
+#[allow(clippy::too_many_arguments)] // secondary frame skeleton stages; keep flat for soak evidence
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
     meshlets: &MeshletCullScaffold,
+    micropoly: &MicropolyRasterScaffold,
     hiz: &DepthPyramidHiz,
     radiance: &RadianceProbeVolume,
     occlusion_enabled: bool,
@@ -372,6 +390,9 @@ fn present_one_engine_frame(
         });
         meshlets.encode_draw_indirect(&mut rpass);
     }
+    let t_mp = std::time::Instant::now();
+    micropoly.encode_raster(queue, &mut encoder);
+    let micro_poly_ms = t_mp.elapsed().as_secs_f64() * 1000.0;
     let t_hiz = std::time::Instant::now();
     let hiz_downs = hiz.encode_build(&mut encoder);
     let hiz_build_ms = t_hiz.elapsed().as_secs_f64() * 1000.0;
@@ -385,6 +406,7 @@ fn present_one_engine_frame(
         hiz_build_ms,
         meshlet_cull_ms,
         radiance_probe_ms,
+        micro_poly_ms,
     })
 }
 
@@ -615,6 +637,48 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
+    let soft_tris = match cook_receipt.soft_triangles(&soak_cook_input_mesh().positions) {
+        Ok(t) => t,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("soft_triangles build failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
+            return r;
+        }
+    };
+
+    let micropoly = match MicropolyRasterScaffold::new(&device, &soft_tris, &meshlets) {
+        Ok(m) => m,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("MicropolyRasterScaffold init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
+            return r;
+        }
+    };
+
     let radiance = match RadianceProbeVolume::new(&device, soak_probe_volume_params()) {
         Ok(v) => v,
         Err(e) => {
@@ -644,6 +708,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut hiz_build_ms_total = 0.0_f64;
     let mut meshlet_cull_ms_total = 0.0_f64;
     let mut radiance_probe_ms_total = 0.0_f64;
+    let mut micro_poly_ms_total = 0.0_f64;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
@@ -656,6 +721,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             &queue,
             &surface,
             &meshlets,
+            &micropoly,
             &hiz,
             &radiance,
             occlusion_enabled,
@@ -670,6 +736,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
                 hiz_build_ms_total += outcome.hiz_build_ms;
                 meshlet_cull_ms_total += outcome.meshlet_cull_ms;
                 radiance_probe_ms_total += outcome.radiance_probe_ms;
+                micro_poly_ms_total += outcome.micro_poly_ms;
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
@@ -687,6 +754,16 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         meshlets.readback_visible_count(&device, &queue)
     } else {
         0
+    };
+    let micro_stats = if frames_presented > 0 {
+        micropoly.readback_stats(&device, &queue)
+    } else {
+        crate::gpu_micropoly_raster::MicropolyRasterStats {
+            triangles_considered: 0,
+            triangles_visible: 0,
+            fragments_written: 0,
+            depth_tests_passed: 0,
+        }
     };
     let radiance_samples = if frames_presented > 0 {
         radiance.readback_samples(&device, &queue)
@@ -724,6 +801,12 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && radiance_samples.len() >= 2
         && radiance_sample_lit_luminance > radiance_sample_dark_luminance
         && radiance_sample_lit_luminance > 0.0;
+    let micro_poly_substrate_proven = frames_presented > 0
+        && micropoly.triangle_count > 0
+        && micro_stats.triangles_considered == micropoly.triangle_count
+        && micro_stats.triangles_visible > 0
+        && micro_stats.fragments_written > 0
+        && cull_visible_final > 0;
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -746,7 +829,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→meshlet-cull→pack→draw_indirect→hiz→radiance-probes→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→cull→draw_indirect→micropoly→hiz→radiance→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
             "Offline cook ms={meshlet_cook_ms:.3}; input_tris={meshlet_cook_input_triangles} cooked_tris={meshlet_cook_cooked_triangles}; topology_complete={}; meshlet_cook_proven={meshlet_cook_proven}",
@@ -756,6 +839,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             "Meshlet clusters={} tri/cluster_cap={}; dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (frustum expected≤{expected_visible}); frustum_ok={cull_frustum_ok}; meshlet_cull_substrate_proven={meshlet_cull_substrate_proven}",
             clusters.len(),
             meshlets.triangles_per_cluster
+        ));
+        reasons.push(format!(
+            "Micro-poly soft-raster tris={} considered={} visible={} fragments={} ms_total={micro_poly_ms_total:.3}; micro_poly_substrate_proven={micro_poly_substrate_proven}; micro_poly_aaa_ready=false",
+            micropoly.triangle_count,
+            micro_stats.triangles_considered,
+            micro_stats.triangles_visible,
+            micro_stats.fragments_written
         ));
         reasons.push(format!(
             "MULTI_DRAW_INDIRECT adapter feature available={multi_draw_indirect_feature_available}; multi_draw_indirect_aaa_ready=false (not requested; fail-closed without AAA Parity fixtures)"
@@ -775,7 +865,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
         );
         reasons.push(
-            "hiz_ready / lumen_ready / MULTI_DRAW_INDIRECT AAA / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
+            "hiz_ready / lumen_ready / micro_poly_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
                 .into(),
         );
     } else {
@@ -834,6 +924,11 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         radiance_sample_lit_luminance,
         radiance_sample_dark_luminance,
         radiance_probe_substrate_proven,
+        micro_poly_triangle_count: micropoly.triangle_count,
+        micro_poly_ms_total,
+        micro_poly_triangles_visible: micro_stats.triangles_visible,
+        micro_poly_fragments_written: micro_stats.fragments_written,
+        micro_poly_substrate_proven,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -842,7 +937,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: cook→meshlet cull→draw_indirect→Hi-Z→radiance probe substrate proven as evidence — lumen_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: cook→cull→draw_indirect→micro-poly soft-raster→Hi-Z→radiance substrate proven as evidence — lumen/nanite/micro_poly_aaa/MDI AAA/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -933,6 +1028,7 @@ mod tests {
         assert!(!r.meshlet_cull_substrate_proven);
         assert!(!r.meshlet_cook_proven);
         assert!(!r.radiance_probe_substrate_proven);
+        assert!(!r.micro_poly_substrate_proven);
         assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
@@ -986,6 +1082,13 @@ mod tests {
                 assert!(r.radiance_sample_lit_luminance > r.radiance_sample_dark_luminance);
             }
             assert!(!r.lumen_ready);
+            assert!(!r.micro_poly_aaa_ready);
+            assert!(!r.nanite_ready);
+            if r.micro_poly_substrate_proven {
+                assert!(r.micro_poly_triangle_count > 0);
+                assert!(r.micro_poly_fragments_written > 0);
+                assert!(r.micro_poly_triangles_visible > 0);
+            }
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);
             if r.frames_presented > 1 {

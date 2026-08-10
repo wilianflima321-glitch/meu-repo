@@ -231,7 +231,6 @@ pub struct MeshletCullScaffold {
     visible_count_buffer: wgpu::Buffer,
     #[allow(dead_code)]
     clusters_buffer: wgpu::Buffer,
-    #[allow(dead_code)]
     visible_indices_buffer: wgpu::Buffer,
     pack_pipeline: wgpu::ComputePipeline,
     pack_bind_group: wgpu::BindGroup,
@@ -525,6 +524,16 @@ impl MeshletCullScaffold {
         pass.set_pipeline(&self.draw_pipeline);
         pass.set_bind_group(0, &self.draw_bind_group, &[]);
         pass.draw_indirect(&self.indirect_buffer, 0);
+    }
+
+    /// Binding for micro-poly soft-raster (compacted visible meshlet ids).
+    pub fn visible_indices_binding(&self) -> wgpu::BindingResource<'_> {
+        self.visible_indices_buffer.as_entire_binding()
+    }
+
+    /// Binding for micro-poly soft-raster (visible meshlet count).
+    pub fn visible_count_binding(&self) -> wgpu::BindingResource<'_> {
+        self.visible_count_buffer.as_entire_binding()
     }
 
     pub fn readback_visible_count(&self, device: &wgpu::Device, queue: &wgpu::Queue) -> u32 {
