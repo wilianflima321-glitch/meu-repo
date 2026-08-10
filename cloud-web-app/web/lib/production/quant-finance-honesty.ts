@@ -22,6 +22,8 @@ import {
   createTradeAuditLedger,
   verifyTradeAuditChain,
 } from '@/lib/server/quant/trade-audit-ledger'
+import { probeMarketDataIngestReadiness } from '@/lib/server/quant/market-data-ingest'
+import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 
 const log = createComponentLogger('quant-finance-honesty')
 
@@ -48,7 +50,16 @@ export type QuantFinanceCapabilityRow = {
 }
 
 export type OndaNCoreReadiness = {
-  id: 'N1' | 'N2' | 'N3'
+  id: 'N1' | 'N2' | 'N3' | 'N4'
+  label: string
+  status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  path: string
+  ready: boolean
+  note: string
+}
+
+export type SubstrateSfReadiness = {
+  id: 'SF1'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -64,6 +75,7 @@ export type QuantFinanceHonestyReport = {
   stamp: 'NOT_IMPLEMENTED' | 'HELD'
   heldReason: 'onda_n_p0_cores_partial_no_investment_grade'
   ondaNCores: OndaNCoreReadiness[]
+  substrateSf1: SubstrateSfReadiness
   wedgeConflict: string[]
   capabilities: QuantFinanceCapabilityRow[]
   reusableInfra: QuantFinanceCapabilityRow[]
@@ -84,6 +96,9 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
 
   const n3Ledger = createTradeAuditLedger({ projectId: 'probe-n3' })
   const n3ChainValid = verifyTradeAuditChain(n3Ledger).valid
+
+  const n4Probe = probeMarketDataIngestReadiness()
+  const n4Ready = n4Probe.ready
 
   return [
     {
@@ -116,7 +131,32 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
         ? 'Append-only hash chain with clockDriftMs — distinct from AI task-evidence-ledger.'
         : 'Audit chain probe failed.',
     },
+    {
+      id: 'N4',
+      label: 'Market-data ingest stub (read-only, Z-score outlier reject)',
+      status: n4Ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: 'lib/server/quant/market-data-ingest.ts',
+      ready: n4Ready,
+      note: n4Ready
+        ? 'Fail-closed without licensed feed; synthetic fixtures require explicit labels — no invented prices.'
+        : 'Market ingest probe failed.',
+    },
   ]
+}
+
+function probeSubstrateSf1(): SubstrateSfReadiness {
+  const tape = probeSessionTapeReadiness()
+  const ready = tape.ready && tape.chainValid
+  return {
+    id: 'SF1',
+    label: 'Unified session tape (fixed-tick hash chain)',
+    status: ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+    path: 'lib/production/unified-session-tape.ts',
+    ready,
+    note: ready
+      ? `${tape.entryCount} entries @ ${tape.tickHz}Hz — sim + paper trade anchors; no full GameLoop wire.`
+      : 'Session tape chain verify failed.',
+  }
 }
 
 /** Static capability matrix — paths verified absent from production tree (2026-08-10). */
@@ -124,6 +164,7 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
   const n1 = ondaNCores.find((c) => c.id === 'N1')
   const n2 = ondaNCores.find((c) => c.id === 'N2')
   const n3 = ondaNCores.find((c) => c.id === 'N3')
+  const n4 = ondaNCores.find((c) => c.id === 'N4')
 
   return [
     {
@@ -138,9 +179,9 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       id: 'market-data-feed',
       specSection: '§4 / §8 / §14',
       label: 'Level-2 order book + tick multiplex (SAB)',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'No WebSocket/FIX market-data bridge in cloud-web-app or studio-local.',
+      status: n4?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n4?.path ?? null,
+      note: n4?.note ?? 'No WebSocket/FIX market-data bridge in cloud-web-app or studio-local.',
     },
     {
       id: 'order-execution-kernel',
@@ -248,8 +289,8 @@ function buildReusableInfra(): QuantFinanceCapabilityRow[] {
       specSection: '§1',
       label: 'Deterministic fixed-point / rollback sim',
       status: 'PARTIAL',
-      path: 'lib/netcode/deterministic-rollback-replay.ts',
-      note: 'Game netcode determinism — not portfolio or backtest replay.',
+      path: 'lib/production/unified-session-tape.ts',
+      note: 'SF1 session tape records sim ticks + paper trades — not portfolio backtest replay.',
     },
     {
       id: 'high-risk-firewall',
@@ -275,6 +316,7 @@ function buildReusableInfra(): QuantFinanceCapabilityRow[] {
  */
 export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
   const ondaNCores = probeOndaNCores()
+  const substrateSf1 = probeSubstrateSf1()
   const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
 
@@ -289,8 +331,9 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
 
   const notes = [
     `capabilities: ${capabilities.length} tracked; NOT_IMPLEMENTED=${notImplemented}.`,
-    `onda N P0 cores ready=${p0Ready}/3 (N1 vault isolation, N2 paper quarantine, N3 trade audit).`,
-    'N1–N3 are TypeScript fail-closed cores only — no FIX broker, L2 feed, or Rust risk kernel.',
+    `onda N cores ready=${p0Ready}/4 (N1 vault, N2 paper quarantine, N3 trade audit, N4 ingest stub).`,
+    `SF1 session tape: ${substrateSf1.status} — ${substrateSf1.note}`,
+    'N1–N4 are TypeScript fail-closed cores only — no FIX broker, L2 feed, or Rust risk kernel.',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
     'Investment-grade requires N2+N3+N5 paper soak + licensed market data + legal sign-off — HELD.',
@@ -310,6 +353,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     stamp: 'HELD',
     heldReason: 'onda_n_p0_cores_partial_no_investment_grade',
     ondaNCores,
+    substrateSf1,
     wedgeConflict,
     capabilities,
     reusableInfra,

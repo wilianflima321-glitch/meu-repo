@@ -27,24 +27,26 @@ describe('quant finance honesty probe', () => {
     expect(report.heldReason).toBe('onda_n_p0_cores_partial_no_investment_grade')
   })
 
-  it('reports N1–N3 P0 cores as PARTIAL after backend ship', () => {
+  it('reports N1–N4 cores as PARTIAL after backend ship', () => {
     const report = probeQuantFinanceHonesty()
-    expect(report.ondaNCores).toHaveLength(3)
+    expect(report.ondaNCores).toHaveLength(4)
     for (const core of report.ondaNCores) {
       expect(core.status).toBe('PARTIAL')
       expect(core.ready).toBe(true)
     }
+    expect(report.substrateSf1.status).toBe('PARTIAL')
+    expect(report.substrateSf1.ready).toBe(true)
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
     expect(byId['domain-isolation-l14']?.status).toBe('PARTIAL')
     expect(byId['paper-trading-quarantine']?.status).toBe('PARTIAL')
     expect(byId['regulatory-audit-trail']?.status).toBe('PARTIAL')
+    expect(byId['market-data-feed']?.status).toBe('PARTIAL')
   })
 
-  it('marks non-P0 execution paths NOT_IMPLEMENTED', () => {
+  it('marks non-ship execution paths NOT_IMPLEMENTED', () => {
     const report = describeQuantFinanceHonestySync()
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
 
-    expect(byId['market-data-feed']?.status).toBe('NOT_IMPLEMENTED')
     expect(byId['order-execution-kernel']?.status).toBe('NOT_IMPLEMENTED')
     expect(byId['fix-protocol-bridge']?.status).toBe('NOT_IMPLEMENTED')
   })
