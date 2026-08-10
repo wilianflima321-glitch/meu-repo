@@ -21,6 +21,7 @@ mod gpu_indirect_draw;
 mod gpu_meshlet_cull;
 mod gpu_meshlet_cook;
 mod gpu_entropy_destruction;
+mod gpu_frame_graph;
 mod gpu_fsr;
 mod gpu_micropoly_raster;
 mod gpu_radiance_probes;
@@ -390,6 +391,7 @@ fn main() {
             wgpu_renderer::renderer_present_probe,
             wgpu_renderer::present_frame,
             wgpu_renderer::renderer_present_probe_last,
+            wgpu_renderer::renderer_frame_graph_timings_last,
             physics_commands::poll_physics_state,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,

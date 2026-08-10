@@ -154,11 +154,12 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                     "src-tauri/src/gpu_vsm.rs",
                     "src-tauri/src/gpu_fsr.rs",
                     "src-tauri/src/gpu_entropy_destruction.rs",
+                    "src-tauri/src/gpu_frame_graph.rs",
                 ],
                 blocker: Some(
-                    "Offline meshlet cook + cull + micro-poly + VSM + FSR temporal + Entropy fracture/debris + Hi-Z + radiance proven on secondary_winit (measured Instant); nanite_ready/hiz_ready/micro_poly_aaa_ready/vsm_aaa_ready/fsr_aaa_ready/entropy_aaa_ready/chaos_aaa_ready/lumen_ready/multi_draw_indirect_aaa_ready stay false; product WebView exclusive still HELD.",
+                    "Secondary_winit ScalableRenderGraph-style frame graph (ordered Instant pass bag) + substrates proven; nanite_ready/hiz_ready/micro_poly_aaa_ready/vsm_aaa_ready/fsr_aaa_ready/entropy_aaa_ready/chaos_aaa_ready/frame_graph_aaa_ready/lumen_ready/multi_draw_indirect_aaa_ready/scalable_render_graph_product_ready stay false; product WebView exclusive still HELD (Chromium HWND).",
                 ),
-                next_action: "Product WebView/exclusive present or Lumen/Nanite/Micro-Poly/VSM/FSR3/Chaos Entropy AAA when Parity fixtures allow; never flip AAA flags without fixtures.",
+                next_action: "Product WebView exclusive present or full SRG/UE RHI when Parity fixtures allow; never flip AAA flags or fabricate FPS.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

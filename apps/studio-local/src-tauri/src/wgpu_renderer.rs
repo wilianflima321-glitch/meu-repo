@@ -10,19 +10,17 @@
 //!   owns the HWND; mounting a wgpu surface without exclusive ownership is identity
 //!   only, never product viewport replacement).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   **engine frame skeleton** (offline meshlet cook → cluster `encode_cull`
-//!   [+ next-frame Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth +
-//!   proxy `draw_indirect` → software micro-poly soft-raster → VSM page
-//!   table + depth atlas → FSR temporal upsample (history + reactive mask)
-//!   → Entropy fracture/debris simulate → build depth pyramid → radiance
-//!   probe fill/sample → `queue.submit` → `SurfaceTexture::present`) with
-//!   **no CPU readback** on the hot path. Final meshlet/probe/micro-poly/
-//!   VSM/FSR/Entropy stats may be read **after** the loop.
+//!   **explicit ScalableRenderGraph-style frame graph** (meshlet cull →
+//!   pack → draw_indirect+depth → Hi-Z → radiance → micro-poly → VSM →
+//!   FSR → entropy → submit → present) with Instant per-pass metrics bag
+//!   and fail-closed if any listed pass drops. Final substrate stats may
+//!   be read **after** the loop.
 //! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
 //!   `multi_draw_indirect_aaa_ready` / `lumen_ready` / `vsm_aaa_ready` /
-//!   `fsr_aaa_ready` / `entropy_aaa_ready` / `chaos_aaa_ready` stay
-//!   **false** — substrate ≠ AAA Parity. WebView exclusive present remains
-//!   HELD.
+//!   `fsr_aaa_ready` / `entropy_aaa_ready` / `chaos_aaa_ready` /
+//!   `frame_graph_aaa_ready` stay **false** — substrate ≠ AAA Parity.
+//! - WebView exclusive present remains **HELD** (Chromium owns HWND) —
+//!   see `gpu_frame_graph::WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON`.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -40,6 +38,11 @@ use crate::gpu_meshlet_cull::MeshletCullScaffold;
 use crate::gpu_micropoly_raster::MicropolyRasterScaffold;
 use crate::gpu_radiance_probes::{soak_probe_volume_params, RadianceProbeVolume};
 use crate::gpu_entropy_destruction::EntropyDestructionScaffold;
+use crate::gpu_frame_graph::{
+    empty_timings_report, execute_secondary_frame_graph, timings_from_soak,
+    FrameGraphFrameMetrics, FrameGraphPassTiming, FrameGraphTimingsReport,
+    SECONDARY_FRAME_GRAPH_PASS_ORDER, WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON,
+};
 use crate::gpu_fsr::FsrTemporalUpsample;
 use crate::gpu_vsm::VsmShadowAtlas;
 use crate::gpu_culling::GpuCullingPipeline;
@@ -210,6 +213,22 @@ pub struct RendererPresentProbeReport {
     pub entropy_aaa_ready: bool,
     /// Always false — Unreal Chaos destruction AAA not claimed.
     pub chaos_aaa_ready: bool,
+    /// True when secondary ScalableRenderGraph-style pass list completed.
+    pub frame_graph_executed: bool,
+    /// Expected pass count from [`SECONDARY_FRAME_GRAPH_PASS_ORDER`].
+    pub frame_graph_pass_count: u32,
+    /// Instant ms sum for the last completed frame graph execute.
+    pub frame_graph_ms_total: f64,
+    /// Last-frame Instant per-pass timings (no fabricated FPS).
+    pub frame_graph_pass_timings: Vec<FrameGraphPassTiming>,
+    /// Soak-sum Instant per-pass timings across presented frames.
+    pub frame_graph_soak_pass_ms_totals: Vec<FrameGraphPassTiming>,
+    /// True when all listed passes completed on ≥1 presented frame.
+    pub frame_graph_substrate_proven: bool,
+    /// Always false — secondary graph ≠ product UE RHI / full SRG.
+    pub frame_graph_aaa_ready: bool,
+    /// Always false — product ScalableRenderGraph wire HELD (3B.2).
+    pub scalable_render_graph_product_ready: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -308,10 +327,11 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit cook→cull→draw_indirect→micro-poly→VSM→FSR→Entropy debris→Hi-Z→radiance only".into(),
+        "Probe proves secondary_winit ScalableRenderGraph-style ordered pass list (cull→pack→draw→Hi-Z→radiance→micro-poly→VSM→FSR→entropy→submit→present)".into(),
+        WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON.into(),
         "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
-        "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready / vsm_aaa_ready / fsr_aaa_ready / entropy_aaa_ready / chaos_aaa_ready stay false — substrate ≠ AAA Parity".into(),
-        "True Lumen / Nanite / Micro-Poly AAA / VSM AAA / FSR3 AAA / Chaos Entropy AAA / MULTI_DRAW batch still HELD".into(),
+        "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready / vsm_aaa_ready / fsr_aaa_ready / entropy_aaa_ready / chaos_aaa_ready / frame_graph_aaa_ready stay false — substrate ≠ AAA Parity".into(),
+        "True Lumen / Nanite / Micro-Poly AAA / VSM AAA / FSR3 AAA / Chaos Entropy AAA / product SRG / MULTI_DRAW batch still HELD".into(),
     ]
 }
 
@@ -396,6 +416,14 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         entropy_substrate_proven: false,
         entropy_aaa_ready: false,
         chaos_aaa_ready: false,
+        frame_graph_executed: false,
+        frame_graph_pass_count: 0,
+        frame_graph_ms_total: 0.0,
+        frame_graph_pass_timings: Vec::new(),
+        frame_graph_soak_pass_ms_totals: Vec::new(),
+        frame_graph_substrate_proven: false,
+        frame_graph_aaa_ready: false,
+        scalable_render_graph_product_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -408,18 +436,11 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
 }
 
 struct EngineFrameOutcome {
-    hiz_downs: u32,
-    hiz_build_ms: f64,
-    meshlet_cull_ms: f64,
-    radiance_probe_ms: f64,
-    micro_poly_ms: f64,
-    vsm_ms: f64,
-    fsr_ms: f64,
-    entropy_ms: f64,
+    graph: FrameGraphFrameMetrics,
 }
 
-/// Meshlet cull → pack → draw_indirect → micro-poly → VSM → FSR → Entropy → Hi-Z → radiance → present.
-#[allow(clippy::too_many_arguments)] // secondary frame skeleton stages; keep flat for soak evidence
+/// Secondary ScalableRenderGraph-style execute (ordered Instant pass bag).
+#[allow(clippy::too_many_arguments)]
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
@@ -433,77 +454,21 @@ fn present_one_engine_frame(
     radiance: &RadianceProbeVolume,
     occlusion_enabled: bool,
 ) -> Result<EngineFrameOutcome, String> {
-    let frame = surface
-        .get_current_texture()
-        .map_err(|e| format!("get_current_texture failed: {e}"))?;
-    let view = frame
-        .texture
-        .create_view(&wgpu::TextureViewDescriptor::default());
-    let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        label: Some("aethel-engine-frame-encoder"),
-    });
-    let t_meshlet = std::time::Instant::now();
-    meshlets.encode_cull(queue, &mut encoder, occlusion_enabled);
-    meshlets.encode_pack(&mut encoder);
-    let meshlet_cull_ms = t_meshlet.elapsed().as_secs_f64() * 1000.0;
-    {
-        let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("aethel-present-probe-meshlet-draw-depth"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.02,
-                        g: 0.03,
-                        b: 0.06,
-                        a: 1.0,
-                    }),
-                    store: wgpu::StoreOp::Store,
-                },
-            })],
-            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                view: hiz.depth_view(),
-                depth_ops: Some(wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(1.0),
-                    store: wgpu::StoreOp::Store,
-                }),
-                stencil_ops: None,
-            }),
-            occlusion_query_set: None,
-            timestamp_writes: None,
-        });
-        meshlets.encode_draw_indirect(&mut rpass);
-    }
-    let t_mp = std::time::Instant::now();
-    micropoly.encode_raster(queue, &mut encoder);
-    let micro_poly_ms = t_mp.elapsed().as_secs_f64() * 1000.0;
-    let t_vsm = std::time::Instant::now();
-    vsm.encode_update(queue, &mut encoder);
-    let vsm_ms = t_vsm.elapsed().as_secs_f64() * 1000.0;
-    let t_fsr = std::time::Instant::now();
-    fsr.encode_upsample(queue, &mut encoder);
-    let fsr_ms = t_fsr.elapsed().as_secs_f64() * 1000.0;
-    let t_ent = std::time::Instant::now();
-    entropy.encode_simulate(queue, &mut encoder);
-    let entropy_ms = t_ent.elapsed().as_secs_f64() * 1000.0;
-    let t_hiz = std::time::Instant::now();
-    let hiz_downs = hiz.encode_build(&mut encoder);
-    let hiz_build_ms = t_hiz.elapsed().as_secs_f64() * 1000.0;
-    let t_rad = std::time::Instant::now();
-    radiance.encode_fill_and_sample(queue, &mut encoder);
-    let radiance_probe_ms = t_rad.elapsed().as_secs_f64() * 1000.0;
-    queue.submit(std::iter::once(encoder.finish()));
-    frame.present();
+    let outcome = execute_secondary_frame_graph(
+        device,
+        queue,
+        surface,
+        meshlets,
+        micropoly,
+        vsm,
+        fsr,
+        entropy,
+        hiz,
+        radiance,
+        occlusion_enabled,
+    )?;
     Ok(EngineFrameOutcome {
-        hiz_downs,
-        hiz_build_ms,
-        meshlet_cull_ms,
-        radiance_probe_ms,
-        micro_poly_ms,
-        vsm_ms,
-        fsr_ms,
-        entropy_ms,
+        graph: outcome.metrics,
     })
 }
 
@@ -872,6 +837,9 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut vsm_ms_total = 0.0_f64;
     let mut fsr_ms_total = 0.0_f64;
     let mut entropy_ms_total = 0.0_f64;
+    let mut frame_graph_ms_total_last = 0.0_f64;
+    let mut last_graph_metrics = FrameGraphFrameMetrics::default();
+    let mut soak_pass_ms: Vec<f64> = vec![0.0; SECONDARY_FRAME_GRAPH_PASS_ORDER.len()];
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
@@ -897,15 +865,24 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
                 frames_presented = frames_presented.saturating_add(1);
                 cull_dispatches = cull_dispatches.saturating_add(1);
                 indirect_draws = indirect_draws.saturating_add(1);
+                let g = &outcome.graph;
                 hiz_downsample_passes =
-                    hiz_downsample_passes.saturating_add(outcome.hiz_downs);
-                hiz_build_ms_total += outcome.hiz_build_ms;
-                meshlet_cull_ms_total += outcome.meshlet_cull_ms;
-                radiance_probe_ms_total += outcome.radiance_probe_ms;
-                micro_poly_ms_total += outcome.micro_poly_ms;
-                vsm_ms_total += outcome.vsm_ms;
-                fsr_ms_total += outcome.fsr_ms;
-                entropy_ms_total += outcome.entropy_ms;
+                    hiz_downsample_passes.saturating_add(g.hiz_downs);
+                hiz_build_ms_total += g.pass_ms("hiz");
+                meshlet_cull_ms_total += g.pass_ms("meshlet_cull") + g.pass_ms("meshlet_pack");
+                radiance_probe_ms_total += g.pass_ms("radiance");
+                micro_poly_ms_total += g.pass_ms("micro_poly");
+                vsm_ms_total += g.pass_ms("vsm");
+                fsr_ms_total += g.pass_ms("fsr");
+                entropy_ms_total += g.pass_ms("entropy");
+                frame_graph_ms_total_last = g.frame_ms_total;
+                for p in &g.passes {
+                    let idx = p.order_index as usize;
+                    if idx < soak_pass_ms.len() {
+                        soak_pass_ms[idx] += p.ms;
+                    }
+                }
+                last_graph_metrics = g.clone();
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
@@ -1027,6 +1004,21 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && entropy_stats.chunks_active == entropy.chunk_count
         && entropy_stats.chunks_updated > 0
         && (entropy_stats.chunks_fractured > 0 || entropy_stats.debris_alive > 0);
+    let frame_graph_executed = frames_presented > 0 && last_graph_metrics.all_passes_completed;
+    let frame_graph_substrate_proven = frame_graph_executed
+        && last_graph_metrics.passes_completed == last_graph_metrics.passes_expected
+        && last_graph_metrics.passes_expected
+            == SECONDARY_FRAME_GRAPH_PASS_ORDER.len() as u32;
+    let soak_pass_totals: Vec<FrameGraphPassTiming> = SECONDARY_FRAME_GRAPH_PASS_ORDER
+        .iter()
+        .enumerate()
+        .map(|(i, id)| FrameGraphPassTiming {
+            pass_id: (*id).into(),
+            order_index: i as u32,
+            ms: soak_pass_ms.get(i).copied().unwrap_or(0.0),
+            completed: frames_presented > 0,
+        })
+        .collect();
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -1049,8 +1041,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→cull→draw_indirect→micropoly→vsm→fsr→entropy→hiz→radiance→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via ScalableRenderGraph-style frame graph (no CPU readback on hot path)"
         ));
+        reasons.push(format!(
+            "Frame graph passes_expected={} completed={} last_frame_ms={frame_graph_ms_total_last:.3}; frame_graph_substrate_proven={frame_graph_substrate_proven}; frame_graph_aaa_ready=false; scalable_render_graph_product_ready=false",
+            last_graph_metrics.passes_expected, last_graph_metrics.passes_completed
+        ));
+        reasons.push(WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON.into());
         reasons.push(format!(
             "Offline cook ms={meshlet_cook_ms:.3}; input_tris={meshlet_cook_input_triangles} cooked_tris={meshlet_cook_cooked_triangles}; topology_complete={}; meshlet_cook_proven={meshlet_cook_proven}",
             cook_receipt.topology_complete
@@ -1111,7 +1108,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
         );
         reasons.push(
-            "hiz_ready / lumen_ready / micro_poly_aaa_ready / vsm_aaa_ready / fsr_aaa_ready / entropy_aaa_ready / chaos_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
+            "hiz_ready / lumen_ready / micro_poly_aaa_ready / vsm_aaa_ready / fsr_aaa_ready / entropy_aaa_ready / chaos_aaa_ready / frame_graph_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
                 .into(),
         );
     } else {
@@ -1201,6 +1198,14 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         entropy_substrate_proven,
         entropy_aaa_ready: false,
         chaos_aaa_ready: false,
+        frame_graph_executed,
+        frame_graph_pass_count: last_graph_metrics.passes_expected,
+        frame_graph_ms_total: frame_graph_ms_total_last,
+        frame_graph_pass_timings: last_graph_metrics.passes.clone(),
+        frame_graph_soak_pass_ms_totals: soak_pass_totals,
+        frame_graph_substrate_proven,
+        frame_graph_aaa_ready: false,
+        scalable_render_graph_product_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -1209,7 +1214,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: cook→cull→draw_indirect→micro-poly→VSM→FSR→Entropy debris→Hi-Z→radiance substrate proven as evidence — lumen/nanite/micro_poly_aaa/vsm_aaa/fsr_aaa/entropy_aaa/chaos_aaa/MDI AAA/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: secondary_winit ScalableRenderGraph-style frame graph Instant pass bag proven as evidence — lumen/nanite/micro_poly_aaa/vsm_aaa/fsr_aaa/entropy_aaa/chaos_aaa/frame_graph_aaa/product SRG/MDI AAA/UE RHI/WebView exclusive still HELD; FPS not fabricated".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -1282,6 +1287,36 @@ pub fn renderer_present_probe_last(
     state.0.lock().ok().and_then(|g| g.clone())
 }
 
+/// Tauri: Instant frame-graph pass timings from last present soak (no fabricated FPS).
+#[tauri::command]
+pub fn renderer_frame_graph_timings_last(
+    state: tauri::State<'_, Arc<PresentProbeState>>,
+) -> FrameGraphTimingsReport {
+    let Some(report) = state.0.lock().ok().and_then(|g| g.clone()) else {
+        return empty_timings_report(
+            "No present probe stored — invoke renderer_present_probe first (fail-closed)",
+        );
+    };
+    let last = FrameGraphFrameMetrics {
+        passes: report.frame_graph_pass_timings.clone(),
+        frame_ms_total: report.frame_graph_ms_total,
+        passes_expected: report.frame_graph_pass_count,
+        passes_completed: report
+            .frame_graph_pass_timings
+            .iter()
+            .filter(|p| p.completed)
+            .count() as u32,
+        hiz_downs: report.hiz_downsample_passes,
+        all_passes_completed: report.frame_graph_substrate_proven,
+    };
+    timings_from_soak(
+        &last,
+        &report.frame_graph_soak_pass_ms_totals,
+        report.frames_presented,
+        report.presented && report.frame_graph_executed,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1308,6 +1343,10 @@ mod tests {
         assert!(!r.entropy_substrate_proven);
         assert!(!r.entropy_aaa_ready);
         assert!(!r.chaos_aaa_ready);
+        assert!(!r.frame_graph_executed);
+        assert!(!r.frame_graph_substrate_proven);
+        assert!(!r.frame_graph_aaa_ready);
+        assert!(!r.scalable_render_graph_product_ready);
         assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
@@ -1388,6 +1427,20 @@ mod tests {
             if r.entropy_substrate_proven {
                 assert!(r.entropy_chunk_count > 0);
                 assert!(r.entropy_chunks_updated > 0);
+            }
+            assert!(!r.frame_graph_aaa_ready);
+            assert!(!r.scalable_render_graph_product_ready);
+            if r.frame_graph_substrate_proven {
+                assert!(r.frame_graph_executed);
+                assert_eq!(
+                    r.frame_graph_pass_count,
+                    SECONDARY_FRAME_GRAPH_PASS_ORDER.len() as u32
+                );
+                assert_eq!(
+                    r.frame_graph_pass_timings.len(),
+                    SECONDARY_FRAME_GRAPH_PASS_ORDER.len()
+                );
+                assert!(r.frame_graph_pass_timings.iter().all(|p| p.completed));
             }
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);
