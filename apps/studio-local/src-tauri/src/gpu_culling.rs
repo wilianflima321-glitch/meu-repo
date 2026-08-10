@@ -97,12 +97,160 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 "#;
 
-// `dispatch` is exercised by the IPC soak probe below; it is not yet wired into
-// a live per-frame render loop (present/submit is still CW3 Path A secondary-window
-// only — see `wgpu_renderer.rs` present honesty docs).
+// `dispatch` / `GpuCullingPersistentPass` are exercised by IPC soaks and by the
+// secondary-window engine frame skeleton in `wgpu_renderer.rs` (clear+submit+present
+// with one cull encode per frame). Product WebView exclusive present + Hi-Z +
+// MultiDrawIndirect remain HELD — see present honesty docs. Never claim Nanite.
 pub struct GpuCullingPipeline {
     pub pipeline: wgpu::ComputePipeline,
     pub bind_group_layout: wgpu::BindGroupLayout,
+}
+
+/// Persistent GPU buffers for multi-frame cull encode without reallocating
+/// storage every frame (AAA hot-loop discipline for the soak skeleton).
+/// Readback is opt-in after the loop — not on the present hot path.
+pub struct GpuCullingPersistentPass {
+    pub pipeline: GpuCullingPipeline,
+    /// Kept alive for bind-group storage lifetime (not read after create).
+    #[allow(dead_code)]
+    object_buffer: wgpu::Buffer,
+    #[allow(dead_code)]
+    frustum_buffer: wgpu::Buffer,
+    #[allow(dead_code)]
+    visible_indices_buffer: wgpu::Buffer,
+    visible_count_buffer: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
+    object_count: u32,
+}
+
+impl GpuCullingPersistentPass {
+    pub fn new(
+        device: &wgpu::Device,
+        objects: &[ObjectBounds],
+        frustum: CullingFrustum,
+    ) -> Result<Self, String> {
+        use wgpu::util::DeviceExt;
+
+        if objects.is_empty() {
+            return Err("GpuCullingPersistentPass requires non-empty objects".into());
+        }
+        if frustum.object_count as usize != objects.len() {
+            return Err(format!(
+                "frustum.object_count {} != objects.len() {}",
+                frustum.object_count,
+                objects.len()
+            ));
+        }
+
+        let pipeline = GpuCullingPipeline::new(device);
+        let object_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Aethel Cull Persist Objects"),
+            contents: bytemuck::cast_slice(objects),
+            usage: wgpu::BufferUsages::STORAGE,
+        });
+        let frustum_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Aethel Cull Persist Frustum"),
+            contents: bytemuck::bytes_of(&frustum),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+        let visible_indices_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Aethel Cull Persist Visible Indices"),
+            size: (objects.len() * std::mem::size_of::<u32>()) as u64,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            mapped_at_creation: false,
+        });
+        let visible_count_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Aethel Cull Persist Visible Count"),
+            contents: bytemuck::bytes_of(&0u32),
+            usage: wgpu::BufferUsages::STORAGE
+                | wgpu::BufferUsages::COPY_SRC
+                | wgpu::BufferUsages::COPY_DST,
+        });
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Aethel Cull Persist Bind Group"),
+            layout: &pipeline.bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: object_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: frustum_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: visible_indices_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: visible_count_buffer.as_entire_binding(),
+                },
+            ],
+        });
+
+        Ok(Self {
+            pipeline,
+            object_buffer,
+            frustum_buffer,
+            visible_indices_buffer,
+            visible_count_buffer,
+            bind_group,
+            object_count: objects.len() as u32,
+        })
+    }
+
+    /// Zero visible counter then encode one frustum cull pass into `encoder`.
+    /// No map/readback — safe to call on a present hot path before submit.
+    pub fn encode_cull(
+        &self,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+    ) {
+        queue.write_buffer(&self.visible_count_buffer, 0, bytemuck::bytes_of(&0u32));
+        let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+            label: Some("Aethel Cull Persist Pass"),
+            timestamp_writes: None,
+        });
+        pass.set_pipeline(&self.pipeline.pipeline);
+        pass.set_bind_group(0, &self.bind_group, &[]);
+        let workgroups = self.object_count.div_ceil(64);
+        pass.dispatch_workgroups(workgroups, 1, 1);
+    }
+
+    /// Post-loop evidence only — maps the GPU atomic count (not present hot path).
+    pub fn readback_visible_count(
+        &self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) -> u32 {
+        let readback = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Aethel Cull Persist Count Readback"),
+            size: std::mem::size_of::<u32>() as u64,
+            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Aethel Cull Persist Readback Encoder"),
+        });
+        encoder.copy_buffer_to_buffer(
+            &self.visible_count_buffer,
+            0,
+            &readback,
+            0,
+            std::mem::size_of::<u32>() as u64,
+        );
+        queue.submit(Some(encoder.finish()));
+        let slice = readback.slice(..);
+        slice.map_async(wgpu::MapMode::Read, |_| {});
+        device.poll(wgpu::Maintain::Wait);
+        let count = {
+            let data = slice.get_mapped_range();
+            bytemuck::pod_read_unaligned::<u32>(&data)
+        };
+        readback.unmap();
+        count
+    }
 }
 
 impl GpuCullingPipeline {
@@ -181,6 +329,8 @@ impl GpuCullingPipeline {
     /// the surviving instance count back to the CPU (useful for debug HUDs
     /// and tests; the render pass itself should prefer `draw_indirect`
     /// straight off the GPU-written counter buffer to avoid this readback).
+    /// Multi-frame present soak prefers [`GpuCullingPersistentPass::encode_cull`].
+    #[allow(dead_code)] // retained readback API for tools/tests; hot path uses PersistentPass
     pub fn dispatch(
         &self,
         device: &Arc<wgpu::Device>,
@@ -286,6 +436,10 @@ impl GpuCullingPipeline {
     }
 }
 
+/// Default / clamp for multi-frame cull soak (bounded — not a game loop).
+pub const DEFAULT_CULL_SOAK_FRAMES: u32 = 8;
+pub const MAX_CULL_SOAK_FRAMES: u32 = 64;
+
 /// Structured evidence for GPU frustum culling soak (IPC + agent tooling).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -299,7 +453,15 @@ pub struct GpuCullingSoakReport {
     pub total_objects: u32,
     pub adapter_name: String,
     pub backend: String,
-    /// Always false — Hi-Z / indirect draw not wired to render pass.
+    /// Frames of persistent-pass encode+submit measured in this soak.
+    pub frames_dispatched: u32,
+    pub frames_requested: u32,
+    /// Wall-clock Instant metrics (ms) — never fabricated / never Math.random.
+    pub frame_ms_min: f64,
+    pub frame_ms_max: f64,
+    pub frame_ms_mean: f64,
+    pub frame_ms_total: f64,
+    /// Always false — Hi-Z / indirect draw not wired to product render pass.
     pub indirect_draw_wired: bool,
     pub nanite_ready: bool,
     pub micro_poly_aaa_ready: bool,
@@ -308,7 +470,7 @@ pub struct GpuCullingSoakReport {
     pub reasons: Vec<String>,
 }
 
-fn identity_frustum(count: u32) -> CullingFrustum {
+pub(crate) fn identity_frustum(count: u32) -> CullingFrustum {
     CullingFrustum {
         planes: [
             [1.0, 0.0, 0.0, 10.0],
@@ -324,7 +486,7 @@ fn identity_frustum(count: u32) -> CullingFrustum {
     }
 }
 
-fn fail_gpu_culling_report(reasons: Vec<String>) -> GpuCullingSoakReport {
+fn fail_gpu_culling_report(frames_requested: u32, reasons: Vec<String>) -> GpuCullingSoakReport {
     GpuCullingSoakReport {
         gpu_culling_frustum_ready: false,
         adapter_acquired: false,
@@ -335,6 +497,12 @@ fn fail_gpu_culling_report(reasons: Vec<String>) -> GpuCullingSoakReport {
         total_objects: 8,
         adapter_name: String::new(),
         backend: String::new(),
+        frames_dispatched: 0,
+        frames_requested,
+        frame_ms_min: 0.0,
+        frame_ms_max: 0.0,
+        frame_ms_mean: 0.0,
+        frame_ms_total: 0.0,
         indirect_draw_wired: false,
         nanite_ready: false,
         micro_poly_aaa_ready: false,
@@ -344,19 +512,55 @@ fn fail_gpu_culling_report(reasons: Vec<String>) -> GpuCullingSoakReport {
     }
 }
 
-/// Runs one real wgpu compute dispatch and verifies in-frustum vs out-frustum counts.
-pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
-    let objects = [
-        ObjectBounds { center: [0.0, 0.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [5.0, 0.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [0.0, 5.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [0.0, 0.0, 5.0], radius: 1.0 },
-        ObjectBounds { center: [50.0, 0.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [-50.0, 0.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [0.0, 50.0, 0.0], radius: 1.0 },
-        ObjectBounds { center: [0.0, 0.0, 50.0], radius: 1.0 },
-    ];
-    let expected_visible = 4u32;
+pub(crate) fn soak_fixture_objects() -> ([ObjectBounds; 8], u32) {
+    (
+        [
+            ObjectBounds {
+                center: [0.0, 0.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [5.0, 0.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [0.0, 5.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [0.0, 0.0, 5.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [50.0, 0.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [-50.0, 0.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [0.0, 50.0, 0.0],
+                radius: 1.0,
+            },
+            ObjectBounds {
+                center: [0.0, 0.0, 50.0],
+                radius: 1.0,
+            },
+        ],
+        4u32,
+    )
+}
+
+/// Multi-frame persistent cull soak with measured Instant timings + final count.
+/// Headless (no present). For present+cull skeleton see `wgpu_renderer`.
+pub fn run_gpu_culling_frustum_soak_frames(frames: Option<u32>) -> GpuCullingSoakReport {
+    use std::time::Instant;
+
+    let frames_requested = frames
+        .unwrap_or(DEFAULT_CULL_SOAK_FRAMES)
+        .clamp(1, MAX_CULL_SOAK_FRAMES);
+    let (objects, expected_visible) = soak_fixture_objects();
     let total_objects = objects.len() as u32;
 
     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
@@ -371,9 +575,10 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
     })) {
         Some(a) => a,
         None => {
-            return fail_gpu_culling_report(vec![
-                "No wgpu adapter available for GPU culling soak".into(),
-            ]);
+            return fail_gpu_culling_report(
+                frames_requested,
+                vec!["No wgpu adapter available for GPU culling soak".into()],
+            );
         }
     };
 
@@ -391,7 +596,10 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
     )) {
         Ok(dq) => dq,
         Err(e) => {
-            let mut r = fail_gpu_culling_report(vec![format!("request_device failed: {e}")]);
+            let mut r = fail_gpu_culling_report(
+                frames_requested,
+                vec![format!("request_device failed: {e}")],
+            );
             r.adapter_acquired = true;
             r.adapter_name = adapter_name;
             r.backend = backend;
@@ -399,13 +607,49 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
         }
     };
 
-    let device = Arc::new(device);
-    let queue = Arc::new(queue);
-    let pipeline = GpuCullingPipeline::new(&device);
     let frustum = identity_frustum(total_objects);
-    let visible = pipeline.dispatch(&device, &queue, &objects, frustum);
-    let visible_count = visible.len() as u32;
+    let persist = match GpuCullingPersistentPass::new(&device, &objects, frustum) {
+        Ok(p) => p,
+        Err(e) => {
+            let mut r = fail_gpu_culling_report(frames_requested, vec![e]);
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            return r;
+        }
+    };
+
+    let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
+    let mut frames_dispatched = 0u32;
+    for _ in 0..frames_requested {
+        let t0 = Instant::now();
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Aethel Cull Multi-Frame Encoder"),
+        });
+        persist.encode_cull(&queue, &mut encoder);
+        queue.submit(Some(encoder.finish()));
+        device.poll(wgpu::Maintain::Wait);
+        frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);
+        frames_dispatched = frames_dispatched.saturating_add(1);
+    }
+
+    let visible_count = persist.readback_visible_count(&device, &queue);
     let frustum_test_passed = visible_count == expected_visible;
+
+    let frame_ms_total: f64 = frame_ms.iter().sum();
+    let frame_ms_min = frame_ms.iter().copied().fold(f64::INFINITY, f64::min);
+    let frame_ms_max = frame_ms.iter().copied().fold(0.0_f64, f64::max);
+    let frame_ms_mean = if frames_dispatched > 0 {
+        frame_ms_total / f64::from(frames_dispatched)
+    } else {
+        0.0
+    };
+    let frame_ms_min = if frame_ms_min.is_finite() {
+        frame_ms_min
+    } else {
+        0.0
+    };
 
     let mut reasons = Vec::new();
     if !frustum_test_passed {
@@ -413,8 +657,14 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
             "expected {expected_visible} visible objects, got {visible_count}"
         ));
     }
+    reasons.push(format!(
+        "Measured {frames_dispatched}/{frames_requested} cull frame(s): min={frame_ms_min:.3}ms mean={frame_ms_mean:.3}ms max={frame_ms_max:.3}ms total={frame_ms_total:.3}ms (Instant; not fabricated)"
+    ));
+    reasons.push(
+        "Hi-Z / MultiDrawIndirect / Nanite / product WebView present remain HELD".into(),
+    );
 
-    let gpu_culling_frustum_ready = frustum_test_passed;
+    let gpu_culling_frustum_ready = frustum_test_passed && frames_dispatched == frames_requested;
     GpuCullingSoakReport {
         gpu_culling_frustum_ready,
         adapter_acquired: true,
@@ -425,12 +675,18 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
         total_objects,
         adapter_name,
         backend,
+        frames_dispatched,
+        frames_requested,
+        frame_ms_min,
+        frame_ms_max,
+        frame_ms_mean,
+        frame_ms_total,
         indirect_draw_wired: false,
         nanite_ready: false,
         micro_poly_aaa_ready: false,
         letter: "cull-soak".into(),
         note: if gpu_culling_frustum_ready {
-            "GPU frustum compute culling soak passed — gpuCullingFrustumReady true; Hi-Z/indirect-draw/Nanite AAA HELD"
+            "GPU frustum multi-frame persistent cull soak passed — metrics measured; Hi-Z/indirect-draw/Nanite AAA HELD"
                 .into()
         } else {
             "GPU frustum culling soak failed — see reasons".into()
@@ -439,10 +695,16 @@ pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
     }
 }
 
-/// Tauri IPC — GPU frustum culling soak (functional backend probe).
+/// Runs multi-frame soak (default frame count).
+#[allow(dead_code)] // IPC uses `run_gpu_culling_frustum_soak_frames`; wrapper kept for callers
+pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
+    run_gpu_culling_frustum_soak_frames(None)
+}
+
+/// Tauri IPC — GPU frustum culling multi-frame soak (functional backend probe).
 #[tauri::command]
-pub fn probe_gpu_culling_frustum_soak_cmd() -> GpuCullingSoakReport {
-    run_gpu_culling_frustum_soak()
+pub fn probe_gpu_culling_frustum_soak_cmd(frames: Option<u32>) -> GpuCullingSoakReport {
+    run_gpu_culling_frustum_soak_frames(frames)
 }
 
 #[cfg(test)]
@@ -479,5 +741,18 @@ mod tests {
         let frustum = identity_frustum(42);
         assert_eq!(frustum.object_count, 42);
         assert_eq!(frustum.occlusion_enabled, 0);
+    }
+
+    #[test]
+    fn multi_frame_soak_never_fakes_aaa_or_invents_metrics_shape() {
+        let r = fail_gpu_culling_report(8, vec!["unit".into()]);
+        assert!(!r.gpu_culling_frustum_ready);
+        assert!(!r.nanite_ready);
+        assert!(!r.micro_poly_aaa_ready);
+        assert!(!r.indirect_draw_wired);
+        assert_eq!(r.frames_dispatched, 0);
+        assert_eq!(r.frames_requested, 8);
+        assert_eq!(r.frame_ms_total, 0.0);
+        assert_eq!(r.letter, "cull-soak");
     }
 }

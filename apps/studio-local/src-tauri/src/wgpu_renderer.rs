@@ -8,11 +8,12 @@
 //! - Tauri main window hosts a Chromium WebView; exclusive native swapchain present
 //!   on that HWND remains **HELD** (WebView owns the pixels).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   clear → `queue.submit` → `SurfaceTexture::present` with **no CPU readback**
-//!   on the hot path.
+//!   **engine frame skeleton** (`GpuCullingPersistentPass::encode_cull` + clear →
+//!   `queue.submit` → `SurfaceTexture::present`) with **no CPU readback** on the
+//!   hot path. Final cull count may be read **after** the loop for evidence only.
 //! - `live_present` in web honesty flips only when this probe returns
 //!   `presented: true` **and** `submitted: true` (desktop honesty status stays fallback).
-//! - Never Nanite/Lumen/UE-RHI parity marketing from mount or probe alone.
+//! - Never Nanite/Lumen/UE-RHI / Micro-Poly AAA marketing from mount or probe alone.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -23,7 +24,9 @@ use winit::dpi::PhysicalSize;
 use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowBuilder;
 
-use crate::gpu_culling::GpuCullingPipeline;
+use crate::gpu_culling::{
+    identity_frustum, soak_fixture_objects, GpuCullingPersistentPass, GpuCullingPipeline,
+};
 
 /// Default soak frames for present probe (bounded — not a product game loop).
 const DEFAULT_PRESENT_SOAK_FRAMES: u32 = 3;
@@ -72,12 +75,25 @@ pub struct RendererPresentProbeReport {
     pub zero_copy_hot_path: bool,
     /// WebView HWND exclusive present remains blocked / unproven as product path.
     pub webview_exclusive_present_held: bool,
+    /// Engine skeleton: frustum cull encode ran each presented frame (no hot-path readback).
+    pub cull_dispatches: u32,
+    pub cull_visible_final: u32,
+    pub cull_expected_visible: u32,
+    pub cull_frustum_ok: bool,
+    /// Wall-clock Instant per cull+clear+submit+present frame (ms). Never fabricated.
+    pub frame_ms_min: f64,
+    pub frame_ms_max: f64,
+    pub frame_ms_mean: f64,
+    pub frame_ms_total: f64,
+    /// True when this soak ran the present+cull engine frame skeleton.
+    pub engine_frame_loop_with_cull: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
     /// Always false — never flip marketing from present soak.
     pub nanite_ready: bool,
     pub lumen_ready: bool,
+    pub micro_poly_aaa_ready: bool,
     pub unreal_rhi_parity_ready: bool,
     pub letter: String,
     pub note: String,
@@ -190,21 +206,32 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         cpu_readback_on_hot_path: false,
         zero_copy_hot_path: false,
         webview_exclusive_present_held: true,
+        cull_dispatches: 0,
+        cull_visible_final: 0,
+        cull_expected_visible: 0,
+        cull_frustum_ok: false,
+        frame_ms_min: 0.0,
+        frame_ms_max: 0.0,
+        frame_ms_mean: 0.0,
+        frame_ms_total: 0.0,
+        engine_frame_loop_with_cull: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
         lumen_ready: false,
+        micro_poly_aaa_ready: false,
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: "Present/submit probe fail-closed — never invent presented:true".into(),
     }
 }
 
-/// Clear + submit + present one frame. No `map_async` / buffer readback.
-fn present_one_frame(
+/// Cull encode (optional) + clear + submit + present one frame. No map/readback.
+fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
+    cull: Option<&GpuCullingPersistentPass>,
 ) -> Result<(), String> {
     let frame = surface
         .get_current_texture()
@@ -213,8 +240,11 @@ fn present_one_frame(
         .texture
         .create_view(&wgpu::TextureViewDescriptor::default());
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        label: Some("aethel-present-probe-encoder"),
+        label: Some("aethel-engine-frame-encoder"),
     });
+    if let Some(pass) = cull {
+        pass.encode_cull(queue, &mut encoder);
+    }
     {
         let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("aethel-present-probe-clear"),
@@ -386,14 +416,38 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         return r;
     }
 
+    let (objects, expected_visible) = soak_fixture_objects();
+    let frustum = identity_frustum(objects.len() as u32);
+    let cull_pass = match GpuCullingPersistentPass::new(&device, &objects, frustum) {
+        Ok(p) => p,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("GpuCullingPersistentPass init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            return r;
+        }
+    };
+
     let mut frames_presented = 0u32;
+    let mut cull_dispatches = 0u32;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
+    let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
     for _ in 0..frames_requested {
-        match present_one_frame(&device, &queue, &surface) {
+        let t0 = std::time::Instant::now();
+        match present_one_engine_frame(&device, &queue, &surface, Some(&cull_pass)) {
             Ok(()) => {
                 submitted = true;
                 frames_presented = frames_presented.saturating_add(1);
+                cull_dispatches = cull_dispatches.saturating_add(1);
+                frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);
             }
             Err(e) => {
                 last_err = Some(e);
@@ -402,11 +456,42 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     }
 
+    // Evidence-only readback after the present loop (not hot path).
+    let cull_visible_final = if cull_dispatches > 0 {
+        cull_pass.readback_visible_count(&device, &queue)
+    } else {
+        0
+    };
+    let cull_frustum_ok = cull_visible_final == expected_visible && cull_dispatches > 0;
+
+    let frame_ms_total: f64 = frame_ms.iter().sum();
+    let frame_ms_min = frame_ms
+        .iter()
+        .copied()
+        .fold(f64::INFINITY, f64::min);
+    let frame_ms_max = frame_ms.iter().copied().fold(0.0_f64, f64::max);
+    let frame_ms_mean = if frames_presented > 0 {
+        frame_ms_total / f64::from(frames_presented)
+    } else {
+        0.0
+    };
+    let frame_ms_min = if frame_ms_min.is_finite() {
+        frame_ms_min
+    } else {
+        0.0
+    };
+
     let presented = frames_presented > 0;
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via wgpu submit+present (no CPU readback)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via wgpu cull+clear+submit+present (no CPU readback on hot path)"
+        ));
+        reasons.push(format!(
+            "Cull dispatches={cull_dispatches}; post-loop visible={cull_visible_final} (expected {expected_visible}); frustum_ok={cull_frustum_ok}"
+        ));
+        reasons.push(format!(
+            "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}"
         ));
         reasons.push(
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
@@ -432,14 +517,24 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         cpu_readback_on_hot_path: false,
         zero_copy_hot_path: presented,
         webview_exclusive_present_held: true,
+        cull_dispatches,
+        cull_visible_final,
+        cull_expected_visible: expected_visible,
+        cull_frustum_ok,
+        frame_ms_min,
+        frame_ms_max,
+        frame_ms_mean,
+        frame_ms_total,
+        engine_frame_loop_with_cull: presented && cull_dispatches > 0,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
         lumen_ready: false,
+        micro_poly_aaa_ready: false,
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: secondary winit swapchain present proven — live_present eligible for honesty role; UE RHI / WebView exclusive / Nanite/Lumen still HELD".into()
+            "Desktop soak: secondary winit engine frame skeleton (cull+present) proven — live_present eligible for honesty role; UE RHI / WebView exclusive / Nanite/Lumen/Micro-Poly AAA still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -519,7 +614,10 @@ mod tests {
         assert!(!r.submitted);
         assert!(!r.nanite_ready);
         assert!(!r.lumen_ready);
+        assert!(!r.micro_poly_aaa_ready);
         assert!(!r.unreal_rhi_parity_ready);
+        assert!(!r.engine_frame_loop_with_cull);
+        assert_eq!(r.cull_dispatches, 0);
         assert!(r.webview_exclusive_present_held);
         assert!(!r.cpu_readback_on_hot_path);
         assert_eq!(r.letter, "cw3-present");
@@ -532,6 +630,7 @@ mod tests {
         assert_eq!(r.letter, "cw3-present");
         assert!(!r.nanite_ready);
         assert!(!r.lumen_ready);
+        assert!(!r.micro_poly_aaa_ready);
         assert!(!r.unreal_rhi_parity_ready);
         assert!(r.webview_exclusive_present_held);
         assert!(!r.cpu_readback_on_hot_path);
@@ -544,6 +643,9 @@ mod tests {
             assert!(r.frames_presented >= 1);
             assert_eq!(r.surface_kind, "secondary_winit");
             assert!(r.zero_copy_hot_path);
+            assert!(r.engine_frame_loop_with_cull);
+            assert_eq!(r.cull_dispatches, r.frames_presented);
+            assert!(r.frame_ms_total >= 0.0);
             assert!(!r.backend.is_empty());
             assert!(!r.adapter_name.is_empty());
         } else {
@@ -558,5 +660,6 @@ mod tests {
         let r = run_present_frame();
         assert_eq!(r.frames_requested, 1);
         assert!(!r.unreal_rhi_parity_ready);
+        assert!(!r.micro_poly_aaa_ready);
     }
 }

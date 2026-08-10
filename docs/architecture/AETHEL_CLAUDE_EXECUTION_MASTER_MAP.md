@@ -1012,7 +1012,7 @@ Law XVI + Bridge generate choke ? L.5 ? tree-authority ? **`chat-spend-session` 
 |---|------|------------|--------|
 | 3B.1 | Create/wire `scalable-render-graph` + `hardware-profile` (Capability Score) | Law XV; scores 0???100 | **DONE CORE 2026-07-11ab** ??? web probe + blueprint registry; Auto Fidelity + honesty wire; frame graph still HELD |
 | 3B.2 | wgpu frame graph feeds editor viewport (not surface-only) | Screenshot parity gate web preview vs desktop | **HELD** ??? wgpu surface probe only |
-| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **HELD** ??? library exists, not in-frame |
+| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit engine frame skeleton encodes cull each present frame + multi-frame Instant metrics (`GpuCullingPersistentPass`); product WebView exclusive + MultiDrawIndirect / Micro-Poly AAA **HELD** |
 | 3B.4 | Live Cook-Torrance BRDF in material shaders | PBR sphere shows specular (ENG-007) | **HELD** |
 
 #### Round 3C ??? Advanced paths (P1 ??? only after 3A/3B)
@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4o | **Engine present+cull frame skeleton PARTIAL (no UI):** `GpuCullingPersistentPass` + secondary_winit cull+present loop with Instant metrics; **3B.3 → PARTIAL** (product WebView/MDI still HELD). G.3 stays ~15%. Gates: studio-local check+clippy green; test harness STATUS_ENTRYPOINT_NOT_FOUND unchanged. |
 | 2026-08-08 | 1.4n | **Docs honesty alignment (no product code):** §0c competitor gap table; fix CW6 `composerSurpassClaim` doc-lie (`COMPOSER_SURPASS_CLAIM=false` in code); explicit **not ready to sell** Universal IDE / AI-native / Hub checkout; next queue = Progress Remaining OPEN + Top-15. Hub checkout HELD. Onda G deferred. |
 | 2026-08-08 | 1.4m | **Timeline event cue bus PARTIAL:** `subscribeTimelineEventCues` edge-trigger on scrub cross; demo silent; GAS/gameplay bind still OPEN. Hub checkout HELD. |
 | 2026-08-08 | 1.4l | **Timeline material scrub UNHELD:** `ISceneService.setColor` + WebIDEBackend → Zustand → R3F `object.color` (ViewportSceneObjectMesh). Event lane still HELD (no cue bus). Hub checkout HELD. |

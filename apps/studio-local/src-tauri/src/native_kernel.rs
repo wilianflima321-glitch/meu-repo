@@ -146,9 +146,9 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 state: NativeKernelState::NeedsReview,
                 evidence_refs: vec!["src-tauri/src/gpu_culling.rs"],
                 blocker: Some(
-                    "Frustum compute dispatch proven via IPC soak; not wired into live per-frame render loop or indirect draw.",
+                    "Frustum cull encode+present proven on secondary_winit engine frame skeleton (measured Instant); product WebView exclusive present + MultiDrawIndirect still HELD.",
                 ),
-                next_action: "Wire culling output into indirect draw after unified present loop (CW3 Path A product viewport).",
+                next_action: "Wire cull visible indices into MultiDrawIndirect after WebView/product present path (CW3 Path A residual).",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",
