@@ -20,6 +20,7 @@ mod gpu_hiz;
 mod gpu_indirect_draw;
 mod gpu_meshlet_cull;
 mod gpu_meshlet_cook;
+mod gpu_radiance_probes;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;

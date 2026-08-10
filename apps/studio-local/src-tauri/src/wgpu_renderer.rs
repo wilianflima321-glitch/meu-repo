@@ -12,12 +12,13 @@
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
 //!   **engine frame skeleton** (offline meshlet cook → cluster `encode_cull`
 //!   [+ next-frame Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth +
-//!   proxy `draw_indirect` → build depth pyramid → `queue.submit` →
-//!   `SurfaceTexture::present`) with **no CPU readback** on the hot path.
-//!   Final meshlet visible count may be read **after** the loop for evidence.
+//!   proxy `draw_indirect` → build depth pyramid → radiance probe fill/sample →
+//!   `queue.submit` → `SurfaceTexture::present`) with **no CPU readback** on
+//!   the hot path. Final meshlet/probe sample counts may be read **after** the
+//!   loop for evidence.
 //! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
-//!   `multi_draw_indirect_aaa_ready` stay **false** — substrate ≠ AAA Parity.
-//!   WebView exclusive present remains HELD.
+//!   `multi_draw_indirect_aaa_ready` / `lumen_ready` stay **false** —
+//!   substrate ≠ AAA Parity. WebView exclusive present remains HELD.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -32,6 +33,7 @@ use crate::gpu_culling::identity_frustum;
 use crate::gpu_hiz::DepthPyramidHiz;
 use crate::gpu_meshlet_cook::cook_soak_meshlets;
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
+use crate::gpu_radiance_probes::{soak_probe_volume_params, RadianceProbeVolume};
 use crate::gpu_culling::GpuCullingPipeline;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
@@ -135,6 +137,16 @@ pub struct RendererPresentProbeReport {
     pub meshlet_cook_proven: bool,
     /// Adapter reports `Features::MULTI_DRAW_INDIRECT` (capability only).
     pub multi_draw_indirect_feature_available: bool,
+    /// Probe cells in the secondary irradiance volume (dim³).
+    pub radiance_probe_count: u32,
+    /// Instant ms spent in GPU probe fill+sample (sum over frames).
+    pub radiance_probe_ms_total: f64,
+    /// Post-loop sample luminance at open (lit) world point.
+    pub radiance_sample_lit_luminance: f64,
+    /// Post-loop sample luminance at occluded (dark) world point.
+    pub radiance_sample_dark_luminance: f64,
+    /// True when fill+sample ran and lit luminance > dark (fail-closed evidence).
+    pub radiance_probe_substrate_proven: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -233,10 +245,10 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit offline meshlet cook → cluster cull → single draw_indirect + Hi-Z only".into(),
+        "Probe proves secondary winit cook→meshlet cull→draw_indirect→Hi-Z→radiance probe fill/sample only".into(),
         "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
-        "hiz_ready / nanite_ready / micro_poly_aaa_ready stay false — substrate ≠ AAA Parity".into(),
-        "True MULTI_DRAW_INDIRECT batch / Nanite virtualized geometry still HELD".into(),
+        "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready stay false — substrate ≠ AAA Parity".into(),
+        "True Lumen / radiance-cascades AAA / MULTI_DRAW batch / Nanite virtualized geometry still HELD".into(),
     ]
 }
 
@@ -285,6 +297,11 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         meshlet_cook_cooked_triangles: 0,
         meshlet_cook_proven: false,
         multi_draw_indirect_feature_available: false,
+        radiance_probe_count: 0,
+        radiance_probe_ms_total: 0.0,
+        radiance_sample_lit_luminance: 0.0,
+        radiance_sample_dark_luminance: 0.0,
+        radiance_probe_substrate_proven: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -300,15 +317,17 @@ struct EngineFrameOutcome {
     hiz_downs: u32,
     hiz_build_ms: f64,
     meshlet_cull_ms: f64,
+    radiance_probe_ms: f64,
 }
 
-/// Meshlet cull → pack → clear+depth+draw_indirect → Hi-Z pyramid → present.
+/// Meshlet cull → pack → clear+depth+draw_indirect → Hi-Z → radiance probes → present.
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
     meshlets: &MeshletCullScaffold,
     hiz: &DepthPyramidHiz,
+    radiance: &RadianceProbeVolume,
     occlusion_enabled: bool,
 ) -> Result<EngineFrameOutcome, String> {
     let frame = surface
@@ -356,12 +375,16 @@ fn present_one_engine_frame(
     let t_hiz = std::time::Instant::now();
     let hiz_downs = hiz.encode_build(&mut encoder);
     let hiz_build_ms = t_hiz.elapsed().as_secs_f64() * 1000.0;
+    let t_rad = std::time::Instant::now();
+    radiance.encode_fill_and_sample(queue, &mut encoder);
+    let radiance_probe_ms = t_rad.elapsed().as_secs_f64() * 1000.0;
     queue.submit(std::iter::once(encoder.finish()));
     frame.present();
     Ok(EngineFrameOutcome {
         hiz_downs,
         hiz_build_ms,
         meshlet_cull_ms,
+        radiance_probe_ms,
     })
 }
 
@@ -592,6 +615,27 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
+    let radiance = match RadianceProbeVolume::new(&device, soak_probe_volume_params()) {
+        Ok(v) => v,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("RadianceProbeVolume init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
+            return r;
+        }
+    };
+
     let mut frames_presented = 0u32;
     let mut cull_dispatches = 0u32;
     let mut indirect_draws = 0u32;
@@ -599,6 +643,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut hiz_cull_sampled_frames = 0u32;
     let mut hiz_build_ms_total = 0.0_f64;
     let mut meshlet_cull_ms_total = 0.0_f64;
+    let mut radiance_probe_ms_total = 0.0_f64;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
@@ -612,6 +657,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             &surface,
             &meshlets,
             &hiz,
+            &radiance,
             occlusion_enabled,
         ) {
             Ok(outcome) => {
@@ -623,6 +669,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
                     hiz_downsample_passes.saturating_add(outcome.hiz_downs);
                 hiz_build_ms_total += outcome.hiz_build_ms;
                 meshlet_cull_ms_total += outcome.meshlet_cull_ms;
+                radiance_probe_ms_total += outcome.radiance_probe_ms;
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
@@ -641,6 +688,19 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     } else {
         0
     };
+    let radiance_samples = if frames_presented > 0 {
+        radiance.readback_samples(&device, &queue)
+    } else {
+        Vec::new()
+    };
+    let radiance_sample_lit_luminance = radiance_samples
+        .first()
+        .map(|s| f64::from(s.luminance))
+        .unwrap_or(0.0);
+    let radiance_sample_dark_luminance = radiance_samples
+        .get(1)
+        .map(|s| f64::from(s.luminance))
+        .unwrap_or(0.0);
     // With Hi-Z sampling, last-frame visible may be ≤ expected frustum-only count.
     let cull_frustum_ok = cull_visible_final > 0
         && cull_visible_final <= expected_visible
@@ -658,6 +718,12 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && hiz_downsample_passes > 0
         && hiz_cull_sampled_frames > 0
         && frames_presented > 1;
+    let radiance_probe_substrate_proven = frames_presented > 0
+        && radiance.probe_count >= 8
+        && radiance_probe_ms_total >= 0.0
+        && radiance_samples.len() >= 2
+        && radiance_sample_lit_luminance > radiance_sample_dark_luminance
+        && radiance_sample_lit_luminance > 0.0;
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -680,7 +746,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→meshlet-cull→pack→draw_indirect→hiz→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→meshlet-cull→pack→draw_indirect→hiz→radiance-probes→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
             "Offline cook ms={meshlet_cook_ms:.3}; input_tris={meshlet_cook_input_triangles} cooked_tris={meshlet_cook_cooked_triangles}; topology_complete={}; meshlet_cook_proven={meshlet_cook_proven}",
@@ -699,13 +765,17 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             hiz.mip_count
         ));
         reasons.push(format!(
+            "Radiance probes={} fill+sample_ms_total={radiance_probe_ms_total:.3}; lit_lum={radiance_sample_lit_luminance:.4} dark_lum={radiance_sample_dark_luminance:.4}; radiance_probe_substrate_proven={radiance_probe_substrate_proven}; lumen_ready=false",
+            radiance.probe_count
+        ));
+        reasons.push(format!(
             "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}; meshlet_cull_ms_total={meshlet_cull_ms_total:.3}"
         ));
         reasons.push(
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
         );
         reasons.push(
-            "hiz_ready / MULTI_DRAW_INDIRECT AAA / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
+            "hiz_ready / lumen_ready / MULTI_DRAW_INDIRECT AAA / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
                 .into(),
         );
     } else {
@@ -759,6 +829,11 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         meshlet_cook_cooked_triangles,
         meshlet_cook_proven,
         multi_draw_indirect_feature_available,
+        radiance_probe_count: radiance.probe_count,
+        radiance_probe_ms_total,
+        radiance_sample_lit_luminance,
+        radiance_sample_dark_luminance,
+        radiance_probe_substrate_proven,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -767,7 +842,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: offline meshlet cook → cluster cull → draw_indirect → Hi-Z substrate proven as evidence — hiz_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: cook→meshlet cull→draw_indirect→Hi-Z→radiance probe substrate proven as evidence — lumen_ready/Nanite/Micro-Poly/MDI AAA/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -857,6 +932,7 @@ mod tests {
         assert!(!r.hiz_substrate_proven);
         assert!(!r.meshlet_cull_substrate_proven);
         assert!(!r.meshlet_cook_proven);
+        assert!(!r.radiance_probe_substrate_proven);
         assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
@@ -904,6 +980,12 @@ mod tests {
                 r.meshlet_cook_cooked_triangles
             );
             assert!(r.meshlet_cook_proven);
+            assert_eq!(r.radiance_probe_count, 64);
+            assert!(r.radiance_probe_ms_total >= 0.0);
+            if r.radiance_probe_substrate_proven {
+                assert!(r.radiance_sample_lit_luminance > r.radiance_sample_dark_luminance);
+            }
+            assert!(!r.lumen_ready);
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);
             if r.frames_presented > 1 {
