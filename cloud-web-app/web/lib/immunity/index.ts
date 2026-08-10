@@ -67,3 +67,31 @@ export {
   type AaaProductionHonestyReport,
   type AaaProductionHonestyInput,
 } from './aaa-production-capability'
+
+export {
+  GPU_PSO_CACHE_READY,
+  ZERO_STUTTER_FROM_PSO_VAULT,
+  createPsoVault,
+  sealPsoFingerprint,
+  exportPsoVaultToPackSlots,
+  claimGpuPsoCacheReady,
+  claimZeroStutterFromPsoVault,
+  assertPsoVaultNotEmptyForCook,
+  probePsoVaultReadiness,
+  type PsoVault,
+  type PsoVaultEntry,
+  type PsoFingerprintInput,
+} from './pso-vault'
+
+export {
+  WASM_MARKETPLACE_READY,
+  V8_WINIT_HOST_READY,
+  enforceWasmPluginLoad,
+  enforceAgentHostPtyDenied,
+  claimWasmMarketplaceReady,
+  listWasmShieldDenyEvidence,
+  clearWasmShieldDenyEvidenceForTests,
+  probeWasmShieldEnforceReadiness,
+  type WasmShieldDenyEvidence,
+  type WasmShieldEnforceResult,
+} from './wasm-shield-enforce'

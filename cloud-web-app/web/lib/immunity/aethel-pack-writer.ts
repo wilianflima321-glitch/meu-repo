@@ -46,6 +46,8 @@ export interface AethelPackWriteInput {
   projectId: string
   textures?: AethelPackTextureInput[]
   meshes?: AethelPackMeshInput[]
+  /** Optional PSO fingerprint slots from `pso-vault` — never invent GPU binaries. */
+  psoVault?: AethelPackManifest['psoVault']
   /** Override compression; default prefers Zstd when ensureZstdEncoder proven, else deflate. */
   compression?: AethelPackJsCompression
 }
@@ -194,7 +196,7 @@ export function writeAethelPack(input: AethelPackWriteInput): AethelPackWriteRes
     compression: manifestCompression,
     textures: textureSlots,
     meshes: meshSlots,
-    psoVault: [],
+    psoVault: input.psoVault ?? [],
     wasmModules: [],
     bakerArtifactsPresent: true,
     virtualTexturingReady: false,
@@ -209,6 +211,11 @@ export function writeAethelPack(input: AethelPackWriteInput): AethelPackWriteRes
     'BC7/ASTC native encode HELD — pack uses rgba8-fallback/ktx2-basis slots only on JS cook path',
   )
   warnings.push('Virtual texturing cook HELD — virtualTexturingReady=false')
+  if ((input.psoVault?.length ?? 0) > 0) {
+    warnings.push(
+      'PSO vault slots are fingerprint metadata only — GPU_PSO_CACHE_READY=false (Founder M.1)',
+    )
+  }
 
   if (errors.length > 0) {
     return {
