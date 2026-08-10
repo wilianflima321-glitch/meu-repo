@@ -1,12 +1,28 @@
 /**
  * Law XV — Scalable Render Graph blueprint registry.
  * Spec §3.4 — nodes are registered with honest execution status.
- * Block 3B.1 CORE: planner + letter ci FSR spatial executor.
+ * Block 3B.1 CORE: planner + letter ci FSR spatial executor + CapScore fail-closed gate.
  * Full frame graph (GBuffer/RT/SSR/…) remains HELD until 3B.2.
+ *
+ * G.3 code-depth % is fail-closed at scaffold until Progress §G.% Evidence Ladder
+ * band gates pass — never invent uplift from CapScore alone.
  */
+
+/** Locked scaffold depth — bump only when Progress ladder band gates pass (Critic). */
+export const G3_CODE_DEPTH_PERCENT_LOCKED = 15 as const
+
+/** Progress §G.% Evidence Ladder — do not raise claimed % without band pass. */
+export const G3_PERCENT_UPLIFT_REQUIRES_LADDER = true as const
 
 import type { HardwareStaticProfile, RenderTier } from '../hardware-profile'
 import { tierFromCapabilityScore } from '../hardware-profile'
+import {
+  selectScalableRenderTier,
+  type CapScoreTierSelection,
+  SCALABLE_RENDER_GRAPH_AAA_READY,
+  NANITE_MARKETING_ALLOWED,
+  LUMEN_MARKETING_ALLOWED,
+} from './capscore-tier-gate'
 
 export {
   FSR_SRG_EXECUTOR_LETTER,
@@ -22,6 +38,18 @@ export {
   type FsrSrgExecuteInput,
   type FsrSrgExecuteResult,
 } from './fsr-executor'
+
+export {
+  CAPSCORE_TIER_GATE_LETTER,
+  CAPSCORE_TIER_GATE_SHIPPED,
+  SCALABLE_RENDER_GRAPH_AAA_READY,
+  NANITE_MARKETING_ALLOWED,
+  LUMEN_MARKETING_ALLOWED,
+  selectScalableRenderTier,
+  requireCapScoreForRenderPlan,
+  type CapScoreGateRejectCode,
+  type CapScoreTierSelection,
+} from './capscore-tier-gate'
 
 export type RenderGraphNodeId =
   | 'GBuffer'
@@ -74,6 +102,24 @@ export interface ScalableRenderGraphReport {
   frameGraphLive: false
   /** True when FSR spatial executor is registered in this report. */
   fsrExecutorLive: boolean
+  /** CapScore gate result — fail-closed when score ignored/missing. */
+  capScoreGate: CapScoreTierSelection
+  /**
+   * When CapScore gate fails, plan is refused (empty blueprint, zero executables).
+   * Never success with ignored CapScore.
+   */
+  planAllowed: boolean
+  /** AAA / Nanite / Lumen marketing — always false until ladder gates. */
+  scalableRenderGraphAaaReady: false
+  naniteMarketingAllowed: false
+  lumenMarketingAllowed: false
+  /**
+   * Onda G.3 claimed code-depth % — locked until Progress §G.% Evidence Ladder
+   * band gates pass. CapScore / FSR spatial / secondary_winit substrates do NOT uplift.
+   */
+  g3CodeDepthPercent: typeof G3_CODE_DEPTH_PERCENT_LOCKED
+  /** Always true — Critic rejects Progress/Index % bumps without ladder evidence. */
+  g3PercentUpliftRequiresLadder: typeof G3_PERCENT_UPLIFT_REQUIRES_LADDER
   claim: string
 }
 
@@ -243,25 +289,81 @@ export function resolveActiveNodes(profile: HardwareStaticProfile): ResolvedRend
   return blueprint.nodes.map((id) => resolveNode(id, profile))
 }
 
+const EMPTY_BLUEPRINT = (tier: RenderTier): RenderGraphBlueprint => ({
+  tier,
+  nodes: [],
+})
+
+/**
+ * Build SRG report — CapScore gate first; refuse plan when score ignored/mismatched.
+ * Score always wins over stale profile.tier; explicit claimedTier must match score.
+ * G.3 % stays locked — CapScore deepen does not uplift.
+ */
 export function buildScalableRenderGraphReport(
-  profile: HardwareStaticProfile
+  profile: HardwareStaticProfile,
+  opts?: {
+    ignoreCapabilityScore?: boolean
+    /** Explicit marketing/UI claimed tier — must match CapScore or fail-closed. */
+    claimedTier?: RenderTier | null
+  }
 ): ScalableRenderGraphReport {
-  const blueprint = getBlueprintForScore(profile.capabilityScore)
-  const nodes = resolveActiveNodes(profile)
+  const heldMarketing = {
+    scalableRenderGraphAaaReady: SCALABLE_RENDER_GRAPH_AAA_READY,
+    naniteMarketingAllowed: NANITE_MARKETING_ALLOWED,
+    lumenMarketingAllowed: LUMEN_MARKETING_ALLOWED,
+  }
+
+  const capScoreGate = selectScalableRenderTier({
+    capabilityScore: profile.capabilityScore,
+    ignoreCapabilityScore: opts?.ignoreCapabilityScore,
+    claimedTier: opts?.claimedTier,
+  })
+
+  if (!capScoreGate.ok) {
+    return {
+      generatedAt: new Date().toISOString(),
+      capabilityScore: Number.isFinite(profile.capabilityScore) ? profile.capabilityScore : 0,
+      tier: profile.tier,
+      blueprint: EMPTY_BLUEPRINT(profile.tier),
+      nodes: [],
+      executableNodeCount: 0,
+      frameGraphLive: false,
+      fsrExecutorLive: false,
+      capScoreGate,
+      planAllowed: false,
+      g3CodeDepthPercent: G3_CODE_DEPTH_PERCENT_LOCKED,
+      g3PercentUpliftRequiresLadder: G3_PERCENT_UPLIFT_REQUIRES_LADDER,
+      claim: `Law XV CapScore gate FAIL_CLOSED (${capScoreGate.rejectCode}) — ScalableRenderGraph plan refused; AAA/Nanite/Lumen HELD; G.3 locked ${G3_CODE_DEPTH_PERCENT_LOCKED}%`,
+      ...heldMarketing,
+    }
+  }
+
+  const gatedProfile: HardwareStaticProfile = {
+    ...profile,
+    capabilityScore: capScoreGate.capabilityScore,
+    tier: capScoreGate.tier,
+  }
+  const blueprint = getBlueprintForScore(gatedProfile.capabilityScore)
+  const nodes = blueprint.nodes.map((id) => resolveNode(id, gatedProfile))
   const executableNodeCount = nodes.filter((n) => n.status === 'registered').length
   const fsrExecutorLive = nodes.some((n) => n.id === 'FSR' && n.status === 'registered')
 
   return {
     generatedAt: new Date().toISOString(),
-    capabilityScore: profile.capabilityScore,
-    tier: profile.tier,
+    capabilityScore: gatedProfile.capabilityScore,
+    tier: gatedProfile.tier,
     blueprint,
     nodes,
     executableNodeCount,
     frameGraphLive: false,
     fsrExecutorLive,
+    capScoreGate,
+    planAllowed: true,
+    g3CodeDepthPercent: G3_CODE_DEPTH_PERCENT_LOCKED,
+    g3PercentUpliftRequiresLadder: G3_PERCENT_UPLIFT_REQUIRES_LADDER,
     claim: fsrExecutorLive
-      ? `Law XV blueprint ${profile.tier} (score ${profile.capabilityScore}) — FSR spatial executor [CLOSED letter ci]; remaining nodes [HELD] until 3B.2; DLSS web HELD`
-      : `Law XV blueprint ${profile.tier} (score ${profile.capabilityScore}) — render nodes [HELD] until desktop frame graph (3B.2)`,
+      ? `Law XV blueprint ${gatedProfile.tier} (score ${gatedProfile.capabilityScore}) — CapScore gate PASS; FSR spatial executor [CLOSED letter ci]; remaining nodes [HELD] until 3B.2; DLSS web HELD; AAA/Nanite/Lumen HELD; G.3 code-depth locked ${G3_CODE_DEPTH_PERCENT_LOCKED}% (ladder required)`
+      : `Law XV blueprint ${gatedProfile.tier} (score ${gatedProfile.capabilityScore}) — CapScore gate PASS; render nodes [HELD] until desktop frame graph (3B.2); DLSS web HELD; G.3 code-depth locked ${G3_CODE_DEPTH_PERCENT_LOCKED}% (ladder required)`,
+    ...heldMarketing,
   }
 }

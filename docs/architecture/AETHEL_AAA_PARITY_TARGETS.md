@@ -294,16 +294,20 @@ export interface EntropyDestroyEvent {
 
 **FALSE CLAIM (forbidden in Progress / Index / marketing / scorecards):** “Unreal 100% today”, “UE parity shipped”, “G.3 CLOSED”, “Nanite/Lumen/Chaos ready”, or lifting Onda G from **~15% scaffold** without the gates below.
 
+**Authoritative band ladder:** [`AETHEL_FOCUS1_EXECUTION_PROGRESS.md`](./AETHEL_FOCUS1_EXECUTION_PROGRESS.md) §**G.% Evidence Ladder** (15→30→50→80→100). Critic rejects any Progress/Index % bump that does not cite **every** gate in the target band + commit SHAs + fixture IDs. CapScore SRG locks `g3CodeDepthPercent=15` until band pass.
+
 | Claimed uplift | Minimum evidence (all required) | Until then |
 |----------------|---------------------------------|------------|
-| **G.3a ≥25%** (Micro-Poly first light) | Dogfood meshlet scene + soak-gated visibility (not debug ID colors) + `cargo test` micro-poly + golden visibility hash; **no** Nanite marketing label | Stay **~15% scaffold / DEFERRED** |
-| **G.3a acceptance** | AAA Parity §G acceptance checklist for Micro-Poly (1M+ meshlets @60 FPS RTX 3060 class; zero per-mesh CPU submit) | `nanite_*_ready` / marketing **false** |
-| **G.3b–c Radiance** | SW voxel path in Render Graph + Law XV enthusiast-only; HW RT optional with RT score gate; webgl2 **excluded** | `lumen_*_ready` / Radiance GI marketing **false** |
-| **G.3d–e Entropy** | GPU particles + destruction in graph; `chaosParityReady` stays false until Chaos-class soak | Niagara/Chaos parity marketing **false** |
-| **G.8 “competitive with UE5.4”** | Published GF-MESH/RAD/ENT JSON + Law XV hardware profile vs UE5.4 reference scenes — no anonymous “up to 2x” | No public AAA crown claim |
-| **Any Progress % bump** (e.g. 15%→30%) | Cite fixture IDs + commit + failing→passing soak in Changelog; Critic rejects % without evidence | Leave prior % |
+| **Stay ~15%** | Secondary_winit substrates only (64² soft-raster, 4³ probes, 64 entropy chunks, 32→64 FSR, 32px VSM pages) | Claimed depth stays **~15%** |
+| **15→30%** | Product present loop (TICKET-PP-01/03) + persistent frame-graph execute + 3B.2 parity harness exists + dual-stack green; **not** soak-only secondary window | Stay **~15% scaffold** |
+| **G.3a ≥30–50%** (Micro-Poly first light) | Dogfood meshlet scene + soak-gated visibility (not debug ID colors) + soft-raster retired or ≥1080p materials + Hi-Z occlusion win + `cargo test` micro-poly + golden visibility hash; **no** Nanite marketing label | Stay prior % |
+| **G.3a acceptance / →80%** | AAA Parity §G acceptance checklist for Micro-Poly (1M+ meshlets @60 FPS RTX 3060 class; zero per-mesh CPU submit) + G-ACC-02/04/05 partial | `nanite_*_ready` / marketing **false** |
+| **G.3b–c Radiance** | SW voxel path in Render Graph + Law XV enthusiast-only; probe scale ≫4³; HW RT optional with RT score gate; webgl2 **excluded** | `lumen_*_ready` / Radiance GI marketing **false** |
+| **G.3d–e Entropy** | GPU particles + destruction in graph (≥100k class); `chaosParityReady` stays false until Chaos-class soak | Niagara/Chaos parity marketing **false** |
+| **G.8 “competitive with UE5.4” / →100%** | Published GF-MESH/RAD/ENT JSON + Law XV hardware profile vs UE5.4 reference scenes — no anonymous “up to 2x” | No public AAA crown claim |
+| **Any Progress % bump** (e.g. 15%→30%) | Cite ladder band + fixture IDs + commit + failing→passing soak in Changelog; Critic rejects % without evidence; update `G3_CODE_DEPTH_PERCENT_LOCKED` only after band | Leave prior % |
 
-**Kernel letter CLOSED ≠ G.% uplift.** Soak probes (ga–hn, etc.) are lab evidence, not nuclear acceptance. Progress Top-1 Matrix + Index scorecard must stay aligned.
+**Kernel letter CLOSED ≠ G.% uplift.** Soak probes (ga–hn, etc.) and `*_substrate_proven` are lab evidence, not nuclear acceptance. Progress Top-1 Matrix + Index scorecard must stay aligned.
 
 ---
 

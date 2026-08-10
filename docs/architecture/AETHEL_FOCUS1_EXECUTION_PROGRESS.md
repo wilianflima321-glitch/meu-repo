@@ -99,6 +99,7 @@
 | 2026-08-10 onda-n-p0-cores | Backend-only — Onda N N1 vault isolation + N2 paper quarantine + N3 trade audit ledger | **PARTIAL** — `lib/server/quant/` fail-closed TS cores; live blocked until walk-forward PASS; honesty probe reports ondaNCores **3/3**; tests **14/14** targeted; investment-grade **false**; Hub checkout **false** |
 | 2026-08-10 engine-hiz-pyramid | Engine/Rust only — Hi-Z depth pyramid + next-frame cull sample on secondary_winit | **PARTIAL** — `hiz_substrate_proven` evidence; `hiz_ready`/Nanite/Micro-Poly false; G.3 stays ~15% |
 | 2026-08-10 top1-market-gap | Docs+honesty — Top-1 Market Gap Matrix (Engine/IDE/Hub/Quant/AI); reject Unreal 100%; G.% evidence gates; Map/Index scorecard sync | Docs only; no UI; Hub checkout HELD; `investmentGrade` false; Onda G deferred |
+| 2026-08-10 g3-evidence-ladder | Docs+honesty — harsh engine substrate critique; **G.% Evidence Ladder** 15→30→50→80→100; CapScore `g3CodeDepthPercent=15` lock; top-10 product moves | Docs + SRG honesty; **claim >15% = NO**; Hub checkout HELD; Onda G deferred |
 
 ---
 
@@ -1175,17 +1176,75 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Area | Competitor bar | DONE-core (honest) | HELD / PARTIAL (blocks Top-1) | Overclaim risk (forbidden marketing) | Verdict vs Top-1 |
 |------|----------------|--------------------|------------------------------|--------------------------------------|------------------|
-| **Engine** | UE5 Nanite/Lumen/Chaos/RHI/Sequencer | Web Instant Play + Law XV bake; R3F authoring; Timeline scrub/material; CW3 present-root fail-closed; kernel soaks (letter probes) | G.3 ~**15%** scaffold; Nanite/Lumen/Entropy AAA flags false; UE single RHI / desktop live present residual; OpenUSD stage; Spec hero panels MISSING; CW2 load-scale PARTIAL | “UE parity / exceeded”, “Nanite/Lumen shipped”, “G.3 CLOSED”, Onda G “7/7” as nuclear acceptance | **Far behind** — deferred long pole |
+| **Engine** | UE5 Nanite/Lumen/Chaos/RHI/Sequencer | Web Instant Play + Law XV bake; R3F authoring; Timeline scrub/material; CW3 present-root fail-closed; kernel soaks (letter probes); secondary_winit SRG substrates (meshlet/Hi-Z/VSM/FSR/Entropy/radiance) | G.3 ~**15%** scaffold (**ladder forbids uplift** — §G.% Evidence Ladder); Nanite/Lumen/Entropy AAA false; toy ceilings 64² / 4³ / 64 chunks; UE single RHI / product present residual; OpenUSD; Spec heroes MISSING; CW2 load-scale PARTIAL | “UE parity / exceeded”, “Nanite/Lumen shipped”, “G.3 CLOSED”, Onda G “7/7” as nuclear acceptance, **any % >15 without band gates** | **Far behind** — deferred long pole |
 | **IDE (Forge L)** | Cursor Composer + LSP; v0 HMR loop | L.1/L.2/L.5/L.10/L.12 DONE-core; L.7 MagicWand→FusionTx; CW6 multi-file AST/L.5 apply (`COMPOSER_SURPASS_CLAIM=false`) | L.8 live E2B HMR soak; L.9 live create-next-app p95; L.4 remote PTY; L.13 desktop LSP+Python; Firecracker HELD | “Universal IDE”, “surpass Cursor Composer”, “v0-class” | **Cores real; market claim false** |
 | **Hub (RTv1)** | Steam/Epic/Roblox discovery+checkout | I.5/I.6 Showcase; Instant Play+I.2; F.2 playtime; discovery/reviews/social cores; H.0 revenue-lane code | `hubCheckoutAudited` **false**; Hub Coins mint; Agones; G.2 cross-play marketing | “Checkout live”, “Coins economy shipped”, “cross-play” | **Ops partial; monetize HELD** |
 | **Quant (Onda N)** | Jane Street / coloc HFT / licensed L2 | N1–N9 + §23 + Dual-Mode **fail-closed PARTIAL**; SF1–SF7 PARTIAL (SF7=framing spike); honesty APIs | Live FIX session, SBE, live broker, licensed L2, ORT RPA, HSM Blind Brain, GPU mux hot-swap, Cap'n Proto evidence | “Investment-grade”, “retail HFT”, “50ms GPU swap”, “untouchable”, ToS-safe RPA bots | **Spec+guards + framing spike; 0% institutional execution** |
 | **AI (Onda J)** | Cursor/Devin + Creative Fusion | Law XVI Bridge+CostGuard+FusionTx; MoA/Heal; J.5–J.10 cores; J.9 previz DONE-core | J.11/J.12 **STOPPED**; J.7 OpenUSD HELD; J.4 native sqlite-vec PARTIAL; CDP/WebRTC HELD; undo without shared Y.Doc PARTIAL | “AI-native IDE”, “video→GTA”, “Devin-class autonomy” | **Governed creative OK; autonomy blocked** |
 
-**Unreal 100% today = FALSE CLAIM.** Evidence required before any **G.% uplift** in Progress/Index/scorecards (see AAA Parity §G.% evidence gates). Kernel letter CLOSED ≠ G.3 acceptance.
+**Unreal 100% today = FALSE CLAIM.** Evidence required before any **G.% uplift** in Progress/Index/scorecards (see §G.% Evidence Ladder below + AAA Parity §G.% evidence gates). Kernel letter CLOSED ≠ G.3 acceptance.
 
-**Cross-links:** Master Map §0c competitor table · Index scorecard · AAA Parity G acceptance · Quant Spec honesty banner · §Onda N below.
+**Cross-links (Top-1):** Master Map §0c competitor table · Index scorecard · AAA Parity G acceptance · Quant Spec honesty banner · §Onda N below · §G.% Evidence Ladder.
+
+### G.% Evidence Ladder (2026-08-10 — binding; Critic fail-closed)
+
+**Verdict today: can we claim >15%? NO.** Secondary_winit substrates (`4199ffcf4` / `09f6f96a2` / `73541d529` / `7ed1c77cd` / `ceca52878` / `15c388940` / `ece80e879` / `078e360c0` / `9b925baa1`) are **real WGSL/wgpu lab soaks**, not product superiority. CapScore SRG locks `g3CodeDepthPercent=15` (`G3_CODE_DEPTH_PERCENT_LOCKED`) until a band below passes. **Forbidden:** bumping Progress/Index/scorecard % without citing **every** gate in that band + commit + fixture IDs in Changelog.
+
+#### Harsh critique — substrate vs toy (recent engine work)
+
+| Module / commit | What is real | Toy / theater resolution | Blocks product superiority |
+|-----------------|--------------|--------------------------|----------------------------|
+| **Frame graph** `4199ffcf4` | Ordered Instant pass bag on secondary_winit; fail-closed if pass drops; IPC timings (no fake FPS) | Pass bag ≠ UE RHI / Render Dependency Graph; not the Studio WebView viewport | Product still Chromium-composited; `frame_graph_aaa_ready` / `scalable_render_graph_product_ready` false; 3B.2 HELD |
+| **Product present** | HWND inventory + refuse WebView exclusive + engine-owned soak | Secondary window ≠ Studio viewport; TICKET-PP-01..04 open | `product_present_ready=false`; no exclusive wgpu in product chrome |
+| **Meshlet cook/cull** `ece80e879`/`078e360c0` | Face-adjacency BFS ≤64v/≤128tri; GPU frustum/Hi-Z/cone → `draw_indirect` | Fixture-scale clusters; not Nanite DAG/page streaming; MDI feature reported only | Zero GF-MESH-001; no 1M meshlets @60; `nanite_ready` false |
+| **Hi-Z** `9b925baa1` | Depth→R32Float max-mip + next-frame sample | Tiny present surface; not production occlusion for city-scale | `hiz_ready` false; does not retire CPU cull at scale |
+| **Micro-poly** `ceca52878` | Soft-raster consumes cooked meshlets | **64²** soft-raster — debug toy, not visibility-buffer materials | `micro_poly_aaa_ready` false; G-ACC-01 unchecked |
+| **Radiance probes** `15c388940` | GPU fill/sample irradiance volume | **4³ = 64 probes** — lab volume, not Lumen clipmap/denoiser | `lumen_ready` false; black-probe / 4ms gates unchecked |
+| **VSM** `7ed1c77cd` | Page table + physical depth atlas | **8×8 virtual / 16 physical / 32px pages / 2 cascades** | `vsm_aaa_ready` false; no cascade shadow product path |
+| **FSR temporal** `73541d529` | LR→HR history + reactive mask stub | **32→64** upsample — not AMD FSR3 / Frame Gen | `fsr_aaa_ready` false; web CapScore FSR is spatial-only (letter ci) |
+| **Entropy** `09f6f96a2` | Fracture chunk SoA + debris integrate | **64 chunks** — not Niagara 100k / Chaos compound sync | `entropy_aaa_ready` / `chaos_aaa_ready` false |
+| **Web CapScore/SRG** | Law XV score + FSR spatial executor | `frameGraphLive: false`; GBuffer/RT/SSR/Probes nodes HELD | Web cannot claim desktop nuclear; Instant Play ≠ Nanite |
+
+**Pattern:** each commit adds another `*_substrate_proven` flag while correctly keeping `*_aaa_ready=false` — then Progress correctly stays ~15%. That is honesty, **not** progress toward UE/Cursor/launch parity. Stacking orphan substrates without product present + GF fixtures = **infinite 15% treadmill**. Letter-kernel CLOSED flood (ga–hn) already proved the same trap.
+
+#### Ladder bands — raise % only when **all** gates in the target band pass
+
+| Band | Claimed depth | Gates (ALL required; Critic rejects partial) | Still forbidden after band |
+|------|---------------|----------------------------------------------|----------------------------|
+| **Stay ~15%** (current) | Scaffold / secondary_winit lab | Any incomplete band below; substrate_proven alone; letter probes; untracked `rendering/` | Nanite/Lumen/Entropy marketing; “UE parity”; “G.3 CLOSED”; CapScore inventing uplift |
+| **15→30%** — Product frame first light | Product-presentable SRG skeleton | (1) TICKET-PP-01 or PP-03: **persistent** engine-owned (or native child) present loop owned by product session, not soak-only secondary window. (2) `product_present_ready` evidence path **or** documented Studio dual-surface with exclusive wgpu region (PP-02 carve-out). (3) Frame graph executes **every** editor frame with Instant bag + IPC timings soak ≥60s no pass-drop. (4) 3B.2 screenshot parity **harness exists** (web preview hash vs desktop present; may be fail-open measured). (5) `cargo check` + `clippy -D warnings` + targeted GPU soak tests green. (6) Changelog cites commits + fixture IDs; Index scorecard sync. (7) SRG honesty `g3CodeDepthPercent` constant updated **only** after Critic cites this band. | Nanite/Lumen labels; `*_aaa_ready`; 1M meshlets claim; FSR3 Frame Gen; WebView exclusive lie |
+| **30→50%** — Micro-Poly / cull product path (G.3a first light) | Dogfood geometry in product present | (1) GF-MESH-001 on disk + golden visibility hash (not meshlet ID debug colors). (2) Meshlet cook→cull→indirect draw in **product** present (not secondary-only). (3) Soft-raster **retired** or ≥1080p visibility resolve with materials. (4) Hi-Z drives next-frame cull with measured occlusion win vs frustum-only (≥20% draw reduction on dogfood). (5) Micro-poly `cargo test` + soak; `micro_poly_substrate` scaled past 64² for dogfood. (6) Zero per-mesh CPU submit on dogfood path (indirect only). (7) Web CapScore: Micro-Poly node stays **HELD** on webgl2 (Law XV). | “Nanite shipped”; G-ACC-01 1M@60; MDI AAA without feature soak |
+| **50→80%** — Nuclear modules competitive (G.3a–e partial acceptance) | Launch-parity desktop graphics spine | (1) **G-ACC-01** Micro-Poly: 1M+ meshlets @60 FPS RTX 3060-class 1080p enthusiast blueprint. (2) **G-ACC-02** Radiance SW: probe volume ≫4³; ≤4ms GPU; no black probes on GF-RAD-001. (3) **G-ACC-04/05** Entropy: ≥100k particles @60 + destruction no main-thread stall on GF-ENT-001; Rapier compound sync path. (4) VSM/cascade shadows in product graph (not 32px atlas toy). (5) Temporal upscale Law XV path ≥720→1080 with history (not 32→64); FSR3 Frame Gen still optional HELD. (6) `frameGraphLive` dual-path honesty only if web+desktop product graphs proven — else desktop-only claim explicit. (7) Published soak JSON + hardware profile. | “Better than UE in every dimension”; G.8 crown; HW RT without RT score gate |
+| **80→100%** — G.8 competitive + marketing unlock | Parity matrix vs UE5.4 reference | (1) GF-MESH/RAD/ENT published JSON vs UE5.4 same scenes + Law XV profile. (2) G-ACC-03 HW RT hybrid optional green or explicit exclude. (3) Chaos/Niagara **marketing** only if `chaosParityReady` soak class met (else keep Entropy brand). (4) OpenUSD stage or honest HELD badge on import path. (5) Web Instant Play remains Law XV bake+SSGI — **never** claim desktop nuclear on webgl2. (6) Index + Roadmap G.3 checkboxes; Critic dual-stack green. | Anonymous “up to 2×”; Unreal 100% without matrix |
+
+**Anti-theater rules (binding):**
+- `*_substrate_proven` ≠ band pass.
+- Secondary_winit ≠ product present.
+- 64² / 4³ / 64 chunks / 32→64 FSR / 32px VSM pages = **band 15% ceiling** until scaled.
+- Orphan `evidence.ts` / new letter kernels **do not** move the ladder.
+- Critic **must reject** any Progress % edit lacking band gate checklist + commit SHAs.
+
+#### Next 10 engineering moves (Desktop engine + Web CapScore/SRG — close competitor gaps)
+
+Ranked for **product superiority**, not more substrate files:
+
+1. **TICKET-PP-01/03 — Product present loop** — persistent engine-owned (or native child HWND) present wired to Studio session; flip honesty only with evidence; kill secondary-window-as-product illusion.
+2. **3B.2 parity harness** — screenshot/hash gate web preview vs desktop present; unblocks `frameGraphLive` honesty path.
+3. **Wire frame graph → product present only** — stop adding passes to secondary_winit until #1 lands; cull Instant bag to cull→depth→Hi-Z→draw→present first.
+4. **GF-MESH-001 fixture + golden visibility** — dogfood meshlet scene on disk; first real G.3a gate.
+5. **Scale Micro-Poly off 64²** — visibility buffer / material resolve at dogfood resolution; retire soft-raster as acceptance path.
+6. **Hi-Z occlusion win metric** — measure draw reduction; fail soak if Hi-Z is identity vs frustum.
+7. **Web CapScore SRG deepen (honest)** — keep `frameGraphLive=false`; ship CapScore-driven Present budgets + bake gate soak; do **not** mirror desktop nuclear nodes as live on webgl2.
+8. **Radiance volume scale (post 30%)** — replace 4³ with clipmap/cascade sized for GF-RAD-001; denoise stub with no-black-probe soak.
+9. **Entropy × Rapier compound** — grow past 64 chunks toward G-ACC-04/05; destruction events into product graph.
+10. **Compile or delete orphan `rendering/`** — either `pub mod` + product path or quarantine; stop dual stacks (untracked AAA trees vs secondary_winit substrates).
+
+**Explicit non-moves:** new letter kernels; orphan honesty `.ts` without product wire; Nanite/Lumen marketing strings; Hub/Quant parallel as G.% substitute; UI panels.
+
+**Cross-links:** AAA Parity §G acceptance + §G.% gates · Master Map 3B.2–3B.3 · Top-1 Matrix Engine row · SRG `G3_CODE_DEPTH_PERCENT_LOCKED`.
 
 ### Competitor gap (honest — 2026-08-08; refreshed 2026-08-10 Quant)
+
 
 | Competitor | Aethel leads / ties (real) | Aethel loses (block supremacy claim) |
 |---|---|---|
