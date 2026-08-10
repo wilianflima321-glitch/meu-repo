@@ -12,13 +12,15 @@
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
 //!   **engine frame skeleton** (offline meshlet cook → cluster `encode_cull`
 //!   [+ next-frame Hi-Z sample] → pack `DrawIndirectArgs` → clear + depth +
-//!   proxy `draw_indirect` → software micro-poly soft-raster → build depth
-//!   pyramid → radiance probe fill/sample → `queue.submit` →
-//!   `SurfaceTexture::present`) with **no CPU readback** on the hot path.
-//!   Final meshlet/probe/micro-poly stats may be read **after** the loop.
+//!   proxy `draw_indirect` → software micro-poly soft-raster → VSM page
+//!   table + depth atlas → build depth pyramid → radiance probe fill/sample
+//!   → `queue.submit` → `SurfaceTexture::present`) with **no CPU readback**
+//!   on the hot path. Final meshlet/probe/micro-poly/VSM stats may be read
+//!   **after** the loop.
 //! - `hiz_ready` / `nanite_ready` / `micro_poly_aaa_ready` /
-//!   `multi_draw_indirect_aaa_ready` / `lumen_ready` stay **false** —
-//!   substrate ≠ AAA Parity. WebView exclusive present remains HELD.
+//!   `multi_draw_indirect_aaa_ready` / `lumen_ready` / `vsm_aaa_ready`
+//!   stay **false** — substrate ≠ AAA Parity. WebView exclusive present
+//!   remains HELD.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -35,6 +37,7 @@ use crate::gpu_meshlet_cook::{cook_soak_meshlets, soak_cook_input_mesh};
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
 use crate::gpu_micropoly_raster::MicropolyRasterScaffold;
 use crate::gpu_radiance_probes::{soak_probe_volume_params, RadianceProbeVolume};
+use crate::gpu_vsm::VsmShadowAtlas;
 use crate::gpu_culling::GpuCullingPipeline;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
@@ -157,6 +160,22 @@ pub struct RendererPresentProbeReport {
     pub micro_poly_fragments_written: u32,
     /// True when soft-raster consumed cull visibility and wrote fragments.
     pub micro_poly_substrate_proven: bool,
+    /// Virtual page count in the VSM substrate page table.
+    pub vsm_virtual_pages: u32,
+    /// Physical depth-atlas page pool capacity.
+    pub vsm_physical_pool: u32,
+    /// Cascade count tagged in this substrate (not UE clipmap product).
+    pub vsm_cascade_count: u32,
+    /// Instant ms spent in VSM clear+alloc+depth write (sum over frames).
+    pub vsm_ms_total: f64,
+    /// Post-loop pages that received at least one depth write.
+    pub vsm_pages_allocated: u32,
+    pub vsm_pages_depth_written: u32,
+    pub vsm_texels_written: u32,
+    /// True when allocated pages actually wrote depth into the atlas.
+    pub vsm_substrate_proven: bool,
+    /// Always false — UE5 VSM / 16k virtual maps not claimed.
+    pub vsm_aaa_ready: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -255,10 +274,10 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit cook→cull→draw_indirect→micro-poly soft-raster→Hi-Z→radiance probes only".into(),
+        "Probe proves secondary winit cook→cull→draw_indirect→micro-poly→VSM atlas→Hi-Z→radiance only".into(),
         "MULTI_DRAW_INDIRECT feature may be available but multi_draw_indirect_aaa_ready stays false".into(),
-        "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready stay false — substrate ≠ AAA Parity".into(),
-        "True Lumen / Nanite / Micro-Poly AAA / MULTI_DRAW batch still HELD".into(),
+        "hiz_ready / nanite_ready / micro_poly_aaa_ready / lumen_ready / vsm_aaa_ready stay false — substrate ≠ AAA Parity".into(),
+        "True Lumen / Nanite / Micro-Poly AAA / VSM AAA / MULTI_DRAW batch still HELD".into(),
     ]
 }
 
@@ -317,6 +336,15 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         micro_poly_triangles_visible: 0,
         micro_poly_fragments_written: 0,
         micro_poly_substrate_proven: false,
+        vsm_virtual_pages: 0,
+        vsm_physical_pool: 0,
+        vsm_cascade_count: 0,
+        vsm_ms_total: 0.0,
+        vsm_pages_allocated: 0,
+        vsm_pages_depth_written: 0,
+        vsm_texels_written: 0,
+        vsm_substrate_proven: false,
+        vsm_aaa_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -334,9 +362,10 @@ struct EngineFrameOutcome {
     meshlet_cull_ms: f64,
     radiance_probe_ms: f64,
     micro_poly_ms: f64,
+    vsm_ms: f64,
 }
 
-/// Meshlet cull → pack → draw_indirect → micro-poly soft-raster → Hi-Z → radiance → present.
+/// Meshlet cull → pack → draw_indirect → micro-poly → VSM → Hi-Z → radiance → present.
 #[allow(clippy::too_many_arguments)] // secondary frame skeleton stages; keep flat for soak evidence
 fn present_one_engine_frame(
     device: &wgpu::Device,
@@ -344,6 +373,7 @@ fn present_one_engine_frame(
     surface: &wgpu::Surface<'_>,
     meshlets: &MeshletCullScaffold,
     micropoly: &MicropolyRasterScaffold,
+    vsm: &mut VsmShadowAtlas,
     hiz: &DepthPyramidHiz,
     radiance: &RadianceProbeVolume,
     occlusion_enabled: bool,
@@ -393,6 +423,9 @@ fn present_one_engine_frame(
     let t_mp = std::time::Instant::now();
     micropoly.encode_raster(queue, &mut encoder);
     let micro_poly_ms = t_mp.elapsed().as_secs_f64() * 1000.0;
+    let t_vsm = std::time::Instant::now();
+    vsm.encode_update(queue, &mut encoder);
+    let vsm_ms = t_vsm.elapsed().as_secs_f64() * 1000.0;
     let t_hiz = std::time::Instant::now();
     let hiz_downs = hiz.encode_build(&mut encoder);
     let hiz_build_ms = t_hiz.elapsed().as_secs_f64() * 1000.0;
@@ -407,6 +440,7 @@ fn present_one_engine_frame(
         meshlet_cull_ms,
         radiance_probe_ms,
         micro_poly_ms,
+        vsm_ms,
     })
 }
 
@@ -679,6 +713,27 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
+    let mut vsm = match VsmShadowAtlas::new(&device) {
+        Ok(v) => v,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("VsmShadowAtlas init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            r.multi_draw_indirect_feature_available = multi_draw_indirect_feature_available;
+            r.meshlet_cook_ms = meshlet_cook_ms;
+            r.meshlet_cook_input_triangles = meshlet_cook_input_triangles;
+            r.meshlet_cook_cooked_triangles = meshlet_cook_cooked_triangles;
+            return r;
+        }
+    };
+
     let radiance = match RadianceProbeVolume::new(&device, soak_probe_volume_params()) {
         Ok(v) => v,
         Err(e) => {
@@ -709,6 +764,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut meshlet_cull_ms_total = 0.0_f64;
     let mut radiance_probe_ms_total = 0.0_f64;
     let mut micro_poly_ms_total = 0.0_f64;
+    let mut vsm_ms_total = 0.0_f64;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
@@ -722,6 +778,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             &surface,
             &meshlets,
             &micropoly,
+            &mut vsm,
             &hiz,
             &radiance,
             occlusion_enabled,
@@ -737,6 +794,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
                 meshlet_cull_ms_total += outcome.meshlet_cull_ms;
                 radiance_probe_ms_total += outcome.radiance_probe_ms;
                 micro_poly_ms_total += outcome.micro_poly_ms;
+                vsm_ms_total += outcome.vsm_ms;
                 if occlusion_enabled {
                     hiz_cull_sampled_frames = hiz_cull_sampled_frames.saturating_add(1);
                 }
@@ -763,6 +821,16 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             triangles_visible: 0,
             fragments_written: 0,
             depth_tests_passed: 0,
+        }
+    };
+    let vsm_stats = if frames_presented > 0 {
+        vsm.readback_stats(&device, &queue)
+    } else {
+        crate::gpu_vsm::VsmStats {
+            pages_allocated: 0,
+            pages_depth_written: 0,
+            texels_written: 0,
+            cascades_tagged: 0,
         }
     };
     let radiance_samples = if frames_presented > 0 {
@@ -807,6 +875,13 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         && micro_stats.triangles_visible > 0
         && micro_stats.fragments_written > 0
         && cull_visible_final > 0;
+    let vsm_substrate_proven = frames_presented > 0
+        && vsm.virtual_pages > 0
+        && vsm.physical_pool > 0
+        && vsm.cascade_count >= 2
+        && vsm_stats.pages_allocated > 0
+        && vsm_stats.pages_depth_written > 0
+        && vsm_stats.texels_written > 0;
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -829,7 +904,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→cull→draw_indirect→micropoly→hiz→radiance→present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cook→cull→draw_indirect→micropoly→vsm→hiz→radiance→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
             "Offline cook ms={meshlet_cook_ms:.3}; input_tris={meshlet_cook_input_triangles} cooked_tris={meshlet_cook_cooked_triangles}; topology_complete={}; meshlet_cook_proven={meshlet_cook_proven}",
@@ -846,6 +921,15 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             micro_stats.triangles_considered,
             micro_stats.triangles_visible,
             micro_stats.fragments_written
+        ));
+        reasons.push(format!(
+            "VSM virtual_pages={} physical_pool={} cascades={} pages_alloc={} pages_depth={} texels={} ms_total={vsm_ms_total:.3}; vsm_substrate_proven={vsm_substrate_proven}; vsm_aaa_ready=false",
+            vsm.virtual_pages,
+            vsm.physical_pool,
+            vsm.cascade_count,
+            vsm_stats.pages_allocated,
+            vsm_stats.pages_depth_written,
+            vsm_stats.texels_written
         ));
         reasons.push(format!(
             "MULTI_DRAW_INDIRECT adapter feature available={multi_draw_indirect_feature_available}; multi_draw_indirect_aaa_ready=false (not requested; fail-closed without AAA Parity fixtures)"
@@ -865,7 +949,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
         );
         reasons.push(
-            "hiz_ready / lumen_ready / micro_poly_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
+            "hiz_ready / lumen_ready / micro_poly_aaa_ready / vsm_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
                 .into(),
         );
     } else {
@@ -929,6 +1013,15 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         micro_poly_triangles_visible: micro_stats.triangles_visible,
         micro_poly_fragments_written: micro_stats.fragments_written,
         micro_poly_substrate_proven,
+        vsm_virtual_pages: vsm.virtual_pages,
+        vsm_physical_pool: vsm.physical_pool,
+        vsm_cascade_count: vsm.cascade_count,
+        vsm_ms_total,
+        vsm_pages_allocated: vsm_stats.pages_allocated,
+        vsm_pages_depth_written: vsm_stats.pages_depth_written,
+        vsm_texels_written: vsm_stats.texels_written,
+        vsm_substrate_proven,
+        vsm_aaa_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -937,7 +1030,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: cook→cull→draw_indirect→micro-poly soft-raster→Hi-Z→radiance substrate proven as evidence — lumen/nanite/micro_poly_aaa/MDI AAA/UE RHI/WebView exclusive still HELD".into()
+            "Desktop soak: cook→cull→draw_indirect→micro-poly→VSM atlas→Hi-Z→radiance substrate proven as evidence — lumen/nanite/micro_poly_aaa/vsm_aaa/MDI AAA/UE RHI/WebView exclusive still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
@@ -1029,6 +1122,8 @@ mod tests {
         assert!(!r.meshlet_cook_proven);
         assert!(!r.radiance_probe_substrate_proven);
         assert!(!r.micro_poly_substrate_proven);
+        assert!(!r.vsm_substrate_proven);
+        assert!(!r.vsm_aaa_ready);
         assert!(!r.multi_draw_indirect_feature_available);
         assert!(!r.engine_frame_loop_with_cull);
         assert!(!r.indirect_draw_wired);
@@ -1088,6 +1183,14 @@ mod tests {
                 assert!(r.micro_poly_triangle_count > 0);
                 assert!(r.micro_poly_fragments_written > 0);
                 assert!(r.micro_poly_triangles_visible > 0);
+            }
+            assert!(!r.vsm_aaa_ready);
+            if r.vsm_substrate_proven {
+                assert!(r.vsm_virtual_pages > 0);
+                assert!(r.vsm_pages_allocated > 0);
+                assert!(r.vsm_pages_depth_written > 0);
+                assert!(r.vsm_texels_written > 0);
+                assert!(r.vsm_cascade_count >= 2);
             }
             assert!(r.hiz_pyramid_mips >= 2);
             assert!(r.hiz_downsample_passes > 0);

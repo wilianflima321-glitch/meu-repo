@@ -22,6 +22,7 @@ mod gpu_meshlet_cull;
 mod gpu_meshlet_cook;
 mod gpu_micropoly_raster;
 mod gpu_radiance_probes;
+mod gpu_vsm;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;
