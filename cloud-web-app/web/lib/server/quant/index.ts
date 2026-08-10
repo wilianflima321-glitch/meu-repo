@@ -1,13 +1,19 @@
-/** Onda N — Quant finance backend cores (N1–N5 + §23 + Dual-Mode). No UI. Fail-closed. */
+/** Onda N — Quant finance backend cores (N1–N7 + §23 + Dual-Mode + SF4/SF5). No UI. Fail-closed. */
 
 export * from '@/lib/server/quant/acceptance-attestation-store'
 export * from '@/lib/server/quant/dual-mode-execution'
 export * from '@/lib/server/quant/eula-risk-acceptance'
 export * from '@/lib/server/quant/finance-domain-vault'
 export * from '@/lib/server/quant/gpu-priority-mux'
+export * from '@/lib/server/quant/headless-quant-runtime'
+export * from '@/lib/server/quant/maestro-finance-pulse'
 export * from '@/lib/server/quant/market-data-ingest'
+export * from '@/lib/server/quant/market-pattern-domain'
+export * from '@/lib/server/quant/mathematical-evidence'
 export * from '@/lib/server/quant/non-custodial-invariants'
 export * from '@/lib/server/quant/paper-trading-kernel'
+export * from '@/lib/server/quant/quant-l14-vault-pack'
 export * from '@/lib/server/quant/risk-envelope'
 export * from '@/lib/server/quant/shadow-audit-telemetry'
+export * from '@/lib/server/quant/tick-spsc-ring'
 export * from '@/lib/server/quant/trade-audit-ledger'

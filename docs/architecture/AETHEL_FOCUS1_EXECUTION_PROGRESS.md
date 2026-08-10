@@ -1229,16 +1229,16 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 |-----------------------------------|-------------|-------|
 | Deterministic sim / multi-timeframe tensors | **PARTIAL** | Game `simulation-tick` 60Hz + netcode fixed-point — not portfolio/backtest |
 | Market-data feed + SAB multiplex | **PARTIAL** | N4 ingest stub — no licensed L2 WebSocket/FIX feed |
-| Rust headless order kernel (<5ms claim) | **MISSING** | No order router in `aethel-kernel-rust` or studio-local |
+| Rust headless order kernel (<5ms claim) | **PARTIAL** | SF5 headless tick probe; no FIX/order router / &lt;5ms claim |
 | FIX / SBE binary gateway | **MISSING** | Zero FIX session code |
 | Risk limits / kill-switch / max drawdown | **PARTIAL** | N5 web+Rust envelope; live disabled |
 | Paper-trading quarantine (§22.A) | **PARTIAL** | walk-forward gate blocks live |
-| VectorIndex 20yr pattern backtest | **PARTIAL** | J.4 index = code/scene embeddings, not OHLCV |
-| Mini-IA ONNX + GPU tick ring | **HELD** | ORT fixture (letter da) HELD; no finance model |
+| VectorIndex 20yr pattern backtest | **PARTIAL** | N6 `market-pattern` OHLCV domain + local-hash — not 20yr/&lt;1ms |
+| Mini-IA ONNX + GPU tick ring | **HELD** | ORT fixture (letter da) HELD; N6 CPU SPSC only |
 | GPU Priority Mux §23.A (~50ms) | **HELD** | Honesty interface only |
-| Maestro pulse + veto (VPIN/regime) | **PARTIAL** | Creative Maestro exists; Dual-Mode finance guard wired; no finance scheduler/veto |
+| Maestro pulse + veto (VPIN/regime) | **PARTIAL** | N7 finance pulse + Dual-Mode submit guard; Cap'n Proto HELD |
 | Dual-Mode Execution (API vs RPA) | **PARTIAL** | Policy + Maestro guard; no live adapters |
-| Mathematical Evidence Report (Cap'n Proto) | **MISSING** | No zero-copy quant evidence bus |
+| Mathematical Evidence Report (Cap'n Proto) | **PARTIAL** | JSON schema + fingerprint; Cap'n Proto / FlatBuffers **HELD** |
 | Blind Brain key vault (Rust AES) | **MISSING** | Non-custodial reject of platform secrets; vault HELD |
 | P2P market-data mesh | **MISSING** | Spec §17 red-team rejects; no libp2p market module |
 | Regulatory audit trail | **PARTIAL** | N3 + §23 attestation/consent stubs |
@@ -1281,8 +1281,8 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **P1** | N4 | Market-data ingest adapter (read-only REST/WS sandbox) | **PARTIAL** 2026-08-10 — fail-closed + Z-score; no licensed feed |
 | **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | **PARTIAL** 2026-08-10 — core `76e194ed0`; paper kernel wired (integrate deepen); live hard-disabled |
 | **P1** | SF2 | Signed WORM evidence store | **PARTIAL** 2026-08-10 — core `3d459cef6`; N3 sink + cloud consent gate; Hub Coins isolated |
-| **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | Wire fe pattern to finance tick path; J.4 domain tag `market-pattern` |
-| **P2** | N7 | Maestro finance pulse scheduler + Mathematical Evidence schema | Cap'n Proto or FlatBuffers; Maestro veto only — Mini-IA no submit |
+| **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | **PARTIAL** 2026-08-10 — `tick-spsc-ring.ts` + `market-pattern-domain.ts`; licensed L2 SAB / 20yr claim HELD |
+| **P2** | N7 | Maestro finance pulse scheduler + Mathematical Evidence schema | **PARTIAL** 2026-08-10 — pulse veto + JSON evidence; Cap'n Proto HELD; Mini-IA submit forbidden |
 | **P2** | N8 | ONNX finance fixture honesty (extend letter da) | Separate `financeOnnxReady` — do not flip text-to-3d gate |
 | **P2** | N9 | FIX/SBE gateway spike (colocation mode only) | Behind feature flag; retail mode hard-blocks microsecond ops |
 | **P2** | N23b | Real ORT/wgpu GPU Priority Mux + measured eviction soak | Flip `hotSwapReady` only with evidence — never invent 50ms |
@@ -1318,6 +1318,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 | Date | Change |
 |------|--------|
+| 2026-08-10 n6-n7-sf4-sf5 | **Backend-only N6/N7/SF4/SF5 PARTIAL (no UI; Dual-Mode files untouched).** N6: `tick-spsc-ring.ts` + `market-pattern-domain.ts`. N7: `maestro-finance-pulse.ts` + `mathematical-evidence.ts` (Cap'n Proto HELD; Mini-IA submit forbidden). SF4: `quant-l14-vault-pack.ts`. SF5: `headless-quant-runtime.ts` (FIX HELD). Honesty + shared-substrate SF4/SF5; `investmentGrade` **false**. Tests **14/14**. Hub checkout **HELD**. |
 | 2026-08-10 engine-present-cull-loop | **Engine/Rust only (no UI).** Critique: Unreal 100% needs unified RHI present into product viewport + Micro-Poly/Radiance/Entropy G acceptance — **not** this pass. **Deepen landed:** `GpuCullingPersistentPass` (persistent buffers + hot-path `encode_cull` without readback); multi-frame cull soak with **Instant** min/mean/max/total ms + post-loop visible count; secondary_winit `renderer_present_probe` now runs **cull+clear+submit+present** per frame (`engine_frame_loop_with_cull`); AAA flags `nanite_ready`/`lumen_ready`/`micro_poly_aaa_ready`/`unreal_rhi_parity_ready` stay **false**. Master Map **3B.3 → PARTIAL** (secondary skeleton only). **G.3 stays ~15%** (no Nuclear acceptance). **Gates:** `CARGO_TARGET_DIR=E:\aethel-target-gnu` — `cargo check` + `cargo clippy -- -D warnings` **green**; `cargo test --lib` → **STATUS_ENTRYPOINT_NOT_FOUND** (0xc0000139) harness **unchanged**. HELD: WebView exclusive present, `rendering/*` product wire, MultiDrawIndirect, Nanite/Lumen/Entropy. |
 | 2026-08-10 top1-market-gap | **Docs+honesty only (no UI; no new MD).** Progress §**Top-1 Market Gap Matrix** (Engine / IDE / Hub / Quant / AI) — DONE-core vs HELD vs overclaim; **Unreal 100% today = FALSE**; G.% uplift gates → AAA Parity §G.% evidence gates. Master Map §0c competitor table + Ledger; Index scorecard Quant **~5–15% fail-closed** (was overstated 0% / understated investment risk). Hub checkout HELD; `investmentGrade=false`; Onda G deferred. |
 | 2026-08-10 maestro-sf3-deepen | Commits: `b57afa834` / `b5b7d2c08`. **Backend-only Maestro-on-submit + SF3 PARTIAL (no UI).** Wire: every `submitPaperOrder` / `submitLiveIntent` calls `evaluateMaestroExecutionGuard` with mode+timeframe before N5; live-intent always fail-closed (`liveBrokerReady=false`, no ORT/CV RPA). SF3: `lib/production/monotonic-timebase.ts` — sim-tick vs wall isolation + optional exchange timestamp hook (fail-closed regression); `ptpReady`/`exchangeIngestReady` false. Honesty: quant `substrateSf3` + shared-substrate `sf3MonotonicTimebaseReady`. Tests: monotonic + paper + dual-mode + honesty + substrate **24/24**. `investmentGrade` **false**. Hub checkout **HELD**. |

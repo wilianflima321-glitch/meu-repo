@@ -15,6 +15,8 @@ import {
 } from '@/lib/production/task-evidence-ledger'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
+import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-vault-pack'
+import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
 
 export const VANGUARD_QUANT_FINANCE_READY = false as const
 export const FIX_PROTOCOL_READY = false as const
@@ -32,6 +34,12 @@ export interface SharedSubstrateHonestyReport {
   /** SF3 — sim-tick vs wall isolation + optional exchange timestamp hook. */
   sf3MonotonicTimebaseReady: boolean
   sf3Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF4 — quant L.14 vault pack (finance vs game surfaces). */
+  sf4QuantVaultPackReady: boolean
+  sf4Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF5 — headless tick runtime without UI (no FIX). */
+  sf5HeadlessRuntimeReady: boolean
+  sf5Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
@@ -142,6 +150,24 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     )
   }
 
+  const sf4 = probeQuantL14VaultPackReadiness()
+  const sf4QuantVaultPackReady = sf4.ready
+  const sf4Status: SharedSubstrateHonestyReport['sf4Status'] = sf4.status
+  if (!sf4QuantVaultPackReady) {
+    notes.push('sf4QuantVaultPackReady HELD — quant L.14 vault pack probe failed')
+  } else {
+    notes.push(`sf4QuantVaultPackReady PARTIAL — ${sf4.note}`)
+  }
+
+  const sf5 = probeHeadlessQuantRuntimeReadiness()
+  const sf5HeadlessRuntimeReady = sf5.ready
+  const sf5Status: SharedSubstrateHonestyReport['sf5Status'] = sf5.status
+  if (!sf5HeadlessRuntimeReady) {
+    notes.push('sf5HeadlessRuntimeReady HELD — headless runtime probe failed')
+  } else {
+    notes.push(`sf5HeadlessRuntimeReady PARTIAL — ${sf5.note}`)
+  }
+
   const sampleLedger = appendChainedTaskEvidence(
     createTaskEvidenceLedger({
       taskId: 'substrate-fingerprint',
@@ -177,6 +203,10 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sf2Status,
     sf3MonotonicTimebaseReady,
     sf3Status,
+    sf4QuantVaultPackReady,
+    sf4Status,
+    sf5HeadlessRuntimeReady,
+    sf5Status,
     deterministicWebReplayReady,
     competitiveRollbackSoakReady: competitive.competitiveRollbackSoakReady,
     evidenceAuditChainReady,
