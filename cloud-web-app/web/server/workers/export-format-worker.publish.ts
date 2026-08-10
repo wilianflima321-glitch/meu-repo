@@ -15,10 +15,16 @@ import {
   evaluateBakedLightingPublishGate,
   evaluatePublishAssetCookStage,
   refusePackWithoutBakeEvidence,
+  refusePackWithoutMaterialXEvidence,
+  refusePackWithoutOpenVdbEvidence,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator';
 import { assertRuntimeExportClean } from '@/lib/runtime/editor-runtime-boundary';
-import { transpileProjectScripts, type TranspileSourceAsset } from '@/lib/production/visual-script-transpile-stage';
+import {
+  refusePackWithoutVsWasmBytecodeEvidence,
+  transpileProjectScripts,
+  type TranspileSourceAsset,
+} from '@/lib/production/visual-script-transpile-stage';
 import { writeAethelPack } from '@/lib/immunity/aethel-pack-writer';
 import { ensureZstdEncoder } from '@/lib/immunity/aethel-pack-compress';
 import { buildMeasuredExportBundleEvidence } from '@/lib/hub/export-bundle-measurement';
@@ -48,6 +54,16 @@ export interface PublishArtifact {
 export interface PublishPackagingStageOptions {
   bakeReceiptRef?: string | null;
   lightmapBytes?: number | null;
+  /** Optional `.mtlx` ASCII payloads — parsed for standard_surface; product MaterialX stays HELD. */
+  materialXPayloads?: string[];
+  /** Product MaterialX claim — always refused when true. */
+  claimMaterialXProductReady?: boolean;
+  /** Optional header-only `.vdb` fixtures (≤16 bytes) — sparse leaf ingest HELD. */
+  volumeVdbPayloads?: Uint8Array[];
+  /** Product OpenVDB claim — always refused when true. */
+  claimOpenVdbProductReady?: boolean;
+  /** VS→WASM bytecode ship claim — always refused when true. */
+  claimWasmBytecodeShipReady?: boolean;
 }
 
 /**
@@ -115,6 +131,25 @@ interface GeneratedGameManifestJson {
     bakeReceiptRef: string | null;
     lightmapBytes: number | null;
     evidenceFingerprint: string | null;
+  };
+  /** S1/R17 — MaterialX standard_surface substrate (product HELD). */
+  materialX: {
+    materialXProductReady: false;
+    receiptCount: number;
+    fingerprints: string[];
+  };
+  /** S7/R17 — OpenVDB header substrate (product HELD). */
+  openVdb: {
+    openVdbProductReady: false;
+    receiptCount: number;
+    fingerprints: string[];
+  };
+  /** Law VII — VS→TS transpile may be PARTIAL; WASM bytecode ship HELD. */
+  visualScriptBytecode: {
+    vsToTsTranspileReady: boolean;
+    generatedFileCount: number;
+    contentFingerprint: string;
+    wasmBytecodeShipReady: false;
   };
 }
 
@@ -249,9 +284,51 @@ export async function runPublishPackagingStage(
     throw new Error(`HELD pack refused: ${packBake.message}`);
   }
 
+  const materialXGate = refusePackWithoutMaterialXEvidence({
+    claimMaterialXProductReady: stageOptions.claimMaterialXProductReady,
+    materialXPayloads: stageOptions.materialXPayloads,
+  });
+  if (!materialXGate.ok) {
+    log.error('publish.pack_refused_materialx', {
+      jobId,
+      projectId,
+      code: materialXGate.code,
+      message: materialXGate.message,
+    });
+    throw new Error(`HELD MaterialX pack refused: ${materialXGate.message}`);
+  }
+
+  const openVdbGate = refusePackWithoutOpenVdbEvidence({
+    claimOpenVdbProductReady: stageOptions.claimOpenVdbProductReady,
+    volumeVdbPayloads: stageOptions.volumeVdbPayloads,
+  });
+  if (!openVdbGate.ok) {
+    log.error('publish.pack_refused_openvdb', {
+      jobId,
+      projectId,
+      code: openVdbGate.code,
+      message: openVdbGate.message,
+    });
+    throw new Error(`HELD OpenVDB pack refused: ${openVdbGate.message}`);
+  }
+
   await reportProgress(jobId, 45, 'Transpiling Visual Scripting graphs');
   const sources = await buildProjectScriptSources(projectId);
   const transpileResult = transpileProjectScripts(sources);
+
+  const vsWasmGate = refusePackWithoutVsWasmBytecodeEvidence({
+    claimWasmBytecodeShipReady: stageOptions.claimWasmBytecodeShipReady,
+    transpile: transpileResult,
+  });
+  if (!vsWasmGate.ok) {
+    log.error('publish.pack_refused_vs_wasm', {
+      jobId,
+      projectId,
+      code: vsWasmGate.code,
+      message: vsWasmGate.message,
+    });
+    throw new Error(`HELD VS→WASM pack refused: ${vsWasmGate.message}`);
+  }
 
   await reportProgress(jobId, 60, 'Verifying runtime isolation (Tree Shaking)');
   const generatedSources = transpileResult.files.map(f => f.content);
@@ -326,6 +403,22 @@ export async function runPublishPackagingStage(
           : null,
       evidenceFingerprint: bakeGate.evidenceFingerprint,
     },
+    materialX: {
+      materialXProductReady: false,
+      receiptCount: materialXGate.receipts.length,
+      fingerprints: materialXGate.receipts.map((r) => r.fingerprint),
+    },
+    openVdb: {
+      openVdbProductReady: false,
+      receiptCount: openVdbGate.receipts.length,
+      fingerprints: openVdbGate.receipts.map((r) => r.fingerprint),
+    },
+    visualScriptBytecode: {
+      vsToTsTranspileReady: vsWasmGate.receipt.vsToTsTranspileReady,
+      generatedFileCount: vsWasmGate.receipt.generatedFileCount,
+      contentFingerprint: vsWasmGate.receipt.contentFingerprint,
+      wasmBytecodeShipReady: false,
+    },
   };
 
   await reportProgress(jobId, 90, 'Packaging target artifact');
@@ -346,6 +439,12 @@ export async function runPublishPackagingStage(
           compression: written.manifest.compression,
           textures: written.manifest.textures.length,
           meshes: written.manifest.meshes.length,
+          materialXProductReady: false,
+          materialXReceiptCount: materialXGate.receipts.length,
+          openVdbProductReady: false,
+          openVdbReceiptCount: openVdbGate.receipts.length,
+          wasmBytecodeShipReady: false,
+          vsToTsTranspileReady: vsWasmGate.receipt.vsToTsTranspileReady,
         },
         null,
         2,

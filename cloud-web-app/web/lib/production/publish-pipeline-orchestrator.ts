@@ -259,6 +259,38 @@ export type {
   PublishBakeTarget,
 } from '@/lib/production/baked-lighting-publish-gate'
 
+export {
+  refusePackWithoutMaterialXEvidence,
+  sealMaterialXSubstrateReceipt,
+  parseMaterialXStandardSurface,
+  MATERIALX_PRODUCT_READY,
+  MATERIALX_LOOKDEV_AAA_READY,
+  MATERIALX_MARKETING_ALLOWED,
+} from '@/lib/production/materialx-standard-surface-substrate'
+export type {
+  MaterialXSubstrateReceipt,
+  StandardSurfacePbr,
+} from '@/lib/production/materialx-standard-surface-substrate'
+
+export {
+  refusePackWithoutOpenVdbEvidence,
+  sealOpenVdbHeaderReceipt,
+  parseOpenVdbHeader,
+  buildOpenVdbHeaderFixture,
+  OPENVDB_PRODUCT_READY,
+  LUMEN_VDB_VOLUMETRIC_AAA_READY,
+  OPENVDB_MARKETING_ALLOWED,
+} from '@/lib/production/openvdb-header-substrate'
+export type { OpenVdbHeaderReceipt } from '@/lib/production/openvdb-header-substrate'
+
+export {
+  sealVisualScriptBytecodeShipReceipt,
+  refusePackWithoutVsWasmBytecodeEvidence,
+  VS_WASM_BYTECODE_SHIP_READY,
+  VS_TO_WASM_MARKETING_ALLOWED,
+} from '@/lib/production/visual-script-transpile-stage'
+export type { VisualScriptBytecodeShipReceipt } from '@/lib/production/visual-script-transpile-stage'
+
 export interface RuntimeIsolationViolation {
   forbiddenPackage: string
   sourceIndex: number

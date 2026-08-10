@@ -10,11 +10,19 @@
  * written into the exported game, and `verifyRuntimeBundleIsolation` from
  * `publish-pipeline-orchestrator.ts` scans exactly that output before
  * packaging is allowed to run.
+ *
+ * Law VII honesty: VS→TS string transpile is real; VS→WASM bytecode ship stays HELD.
  */
+
+import { createHash } from 'node:crypto'
 
 import { VisualScriptCompiler } from '@aethel/visual-scripting/VisualScriptRuntime'
 import type { VisualScript } from '@aethel/visual-scripting/VisualScriptEditor'
 import { AbilityGraphCompiler, type AbilityGraph, type CompiledAbility } from '@aethel/gameplay/ability-graph-compiler'
+
+/** VS→WASM bytecode / Worker gameplay shield product — HELD until M.3 + Law VII cook. */
+export const VS_WASM_BYTECODE_SHIP_READY = false as const
+export const VS_TO_WASM_MARKETING_ALLOWED = false as const
 
 export type TranspileSourceKind = 'visual-script' | 'ability-graph'
 
@@ -47,6 +55,16 @@ export interface TranspileStageResult {
   warnings: TranspileWarning[]
   /** True when every source asset produced at least one file — a Publish job with unrecognized graph shapes should hold for review, not silently ship an empty script. */
   allSourcesCompiled: boolean
+}
+
+export type VisualScriptBytecodeShipReceipt = {
+  version: 1
+  vsToTsTranspileReady: boolean
+  generatedFileCount: number
+  contentFingerprint: string
+  wasmBytecodeShipReady: false
+  vsToWasmMarketingAllowed: false
+  shipStatus: 'PARTIAL' | 'HELD'
 }
 
 function extractClassName(code: string): string {
@@ -140,4 +158,59 @@ export function transpileProjectScripts(sources: TranspileSourceAsset[]): Transp
   }
 
   return { files, warnings, allSourcesCompiled }
+}
+
+/**
+ * Fail-closed VS→WASM ship receipt — TS string transpile may be ready; bytecode/WASM ship never auto-flips.
+ */
+export function sealVisualScriptBytecodeShipReceipt(
+  result: TranspileStageResult,
+): VisualScriptBytecodeShipReceipt {
+  const hash = createHash('sha256')
+  for (const file of result.files) {
+    hash.update(file.path)
+    hash.update('\0')
+    hash.update(file.content)
+    hash.update('\0')
+  }
+  const contentFingerprint = hash.digest('hex').slice(0, 16)
+  const vsToTsTranspileReady = result.allSourcesCompiled && result.files.length > 0
+
+  if (VS_WASM_BYTECODE_SHIP_READY || VS_TO_WASM_MARKETING_ALLOWED) {
+    throw new Error('VS→WASM product/marketing flags must remain false')
+  }
+
+  return {
+    version: 1,
+    vsToTsTranspileReady,
+    generatedFileCount: result.files.length,
+    contentFingerprint,
+    wasmBytecodeShipReady: false,
+    vsToWasmMarketingAllowed: false,
+    shipStatus: vsToTsTranspileReady ? 'PARTIAL' : 'HELD',
+  }
+}
+
+/**
+ * Publish refuse — claiming VS→WASM bytecode ship without Law VII cook.
+ */
+export function refusePackWithoutVsWasmBytecodeEvidence(input: {
+  claimWasmBytecodeShipReady?: boolean
+  transpile?: TranspileStageResult
+}):
+  | { ok: true; receipt: VisualScriptBytecodeShipReceipt; wasmBytecodeShipReady: false }
+  | { ok: false; code: 'product_claim_held'; message: string } {
+  if (input.claimWasmBytecodeShipReady === true) {
+    return {
+      ok: false,
+      code: 'product_claim_held',
+      message: 'VS→WASM bytecode ship claim refused — Law VII Worker bytecode HELD',
+    }
+  }
+  const transpile = input.transpile ?? { files: [], warnings: [], allSourcesCompiled: true }
+  return {
+    ok: true,
+    receipt: sealVisualScriptBytecodeShipReceipt(transpile),
+    wasmBytecodeShipReady: false,
+  }
 }
