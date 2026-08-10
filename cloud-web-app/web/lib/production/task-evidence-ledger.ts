@@ -18,6 +18,8 @@ export type TaskEvidenceKind =
   | 'idempotency'
   | 'runtime-budget'
   | 'artifact'
+  | 'deterministic-replay'
+  | 'audit-chain'
 
 export interface TaskEvidenceEvent {
   id: string
@@ -50,6 +52,7 @@ export interface TaskEvidenceReadiness {
 const KIND_BY_REQUIREMENT: Array<[RegExp, TaskEvidenceKind]> = [
   [/read receipt/i, 'read-receipt'],
   [/source|citation|research/i, 'source'],
+  [/deterministic replay/i, 'deterministic-replay'],
   [/replay/i, 'browser-replay'],
   [/screenshot/i, 'screenshot'],
   [/DOM snapshot/i, 'dom-snapshot'],
@@ -171,4 +174,74 @@ export function summarizeTaskEvidenceLedger(ledger: TaskEvidenceLedger): string 
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([kind, count]) => `${kind}:${count}`)
     .join(', ')
+}
+
+function digestPart(value: string): string {
+  let h = 2166136261
+  for (let i = 0; i < value.length; i++) {
+    h ^= value.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return (h >>> 0).toString(16).padStart(8, '0')
+}
+
+/** Stable fingerprint for append-only audit posture (games + finance evidence). */
+export function fingerprintEvidenceLedger(ledger: TaskEvidenceLedger): string {
+  const ordered = [...ledger.events].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  let chain = digestPart(`${ledger.taskId}|${ledger.projectId}|v${ledger.version}`)
+  for (const event of ordered) {
+    chain = digestPart(`${chain}|${event.id}|${event.kind}|${event.summary}|${event.createdAt}`)
+  }
+  return chain
+}
+
+export function verifyEvidenceAuditChain(ledger: TaskEvidenceLedger): {
+  valid: boolean
+  reason?: string
+  fingerprint: string
+} {
+  const fingerprint = fingerprintEvidenceLedger(ledger)
+  const ordered = [...ledger.events].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  if (ordered.length === 0) {
+    return { valid: false, reason: 'empty ledger', fingerprint }
+  }
+  if (ordered[0]?.kind !== 'mission') {
+    return { valid: false, reason: 'mission event must anchor chain', fingerprint }
+  }
+
+  let prevDigest = digestPart('genesis')
+  for (const event of ordered) {
+    if (event.kind === 'mission') {
+      if (event.refs.some((ref) => ref.startsWith('chain:prev='))) {
+        return { valid: false, reason: 'mission must not carry chain prev ref', fingerprint }
+      }
+      prevDigest = digestPart(`${event.id}|${event.createdAt}`)
+      continue
+    }
+    const prevRef = event.refs.find((ref) => ref.startsWith('chain:prev='))
+    if (!prevRef) {
+      return { valid: false, reason: `missing chain prev ref on ${event.id}`, fingerprint }
+    }
+    const prev = prevRef.slice('chain:prev='.length)
+    if (prev !== prevDigest) {
+      return { valid: false, reason: `broken chain at ${event.id}`, fingerprint }
+    }
+    prevDigest = digestPart(`${event.id}|${event.createdAt}`)
+  }
+
+  return { valid: true, fingerprint }
+}
+
+export function appendChainedTaskEvidence(
+  ledger: TaskEvidenceLedger,
+  event: Omit<TaskEvidenceEvent, 'id' | 'createdAt'> & { id?: string; createdAt?: string }
+): TaskEvidenceLedger {
+  const ordered = [...ledger.events].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  const tail = ordered[ordered.length - 1]
+  const prev =
+    tail === undefined
+      ? digestPart('genesis')
+      : digestPart(`${tail.id}|${tail.createdAt}`)
+  const refs = unique([...(event.refs ?? []), `chain:prev=${prev}`])
+  return appendTaskEvidence(ledger, { ...event, refs })
 }
