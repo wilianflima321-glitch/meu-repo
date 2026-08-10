@@ -115,6 +115,7 @@
 | 2026-08-10 gas-entropy-rapier | Commit: `784d13b46`. Kernel/Desktop — GAS binary tick Instant metrics + Entropy×Rapier ≥256 bodies | **PARTIAL** — `GAS_60HZ_BINARY_IPC_READY`/`chaos_destruction_aaa_ready` **false**; G.3 stays ~15% |
 | 2026-08-10 collapse-dual-bridge | Commit: `d36a9b3fb`. Backend-only — Honesty Matrix #2 collapse dual Bridge (`lib/ai` → production re-export + fail-closed legacy class) | **DONE-core** — single CostGuard choke; expensive generate routes still HTTP Bridge; J.12 **STOPPED**; `nativeOnnxReady` untouched; vitest collapse+Law XVI+HTTP **27/27**; Hub checkout **false**; `investmentGrade` untouched |
 | 2026-08-10 honesty-7-8-j7-fusion | Commit: `b608fb8b6`. Backend-only — Honesty Matrix #7 J.7 refined GLB/USDZ cook + #8 Fusion atomic revert + CW6 creative apply receipt | **PARTIAL** deepen — cook receipt fail-closed capsule/empty/OpenUSD; shared-Y.Doc undo evidence; fileValidation blocks write theater; OpenUSD/USDC mesh/Meshy surpass **HELD**; vitest **23/23** targeted; Hub/investmentGrade/G.3/`nativeOnnxReady` untouched |
+| 2026-08-10 creative-top8-queue-stamp | Docs+backend — Creative top-8 queue status stamp + viewport drop→cook/Fusion fail-closed wire (no UI) | **PARTIAL** — queue: #2 DONE-core; #1+#3–#8 PARTIAL; Founder weights/J.12/OpenUSD/UI **HELD**; drop-cook vitest green; Hub/investmentGrade/G.3/`nativeOnnxReady` untouched |
 | 2026-08-10 wasm-shield-gas-ipc | Commit: `3a8e21f80` (+ GAS IPC cmds in `a975a8cfc` handler wire). Desktop — WASM Shield wasmtime ABI + GAS soak IPC | **PARTIAL** — `GAS_60HZ_BINARY_IPC_READY`/marketplace/V8 **false**; G.3 stays ~15% |
 
 ---
@@ -1260,10 +1261,27 @@ Ranked for **product generative superiority**, not new MD or UI chrome. **Forbid
 4. **Clay→refine evidence ledger** — **PARTIAL** (`clay-refine-evidence.ts` + bw conveyor seal): fingerprint receipts (provider, triangles, critic, CapScore); fail-closed empty/theater/critic REJECT. Still open: live bx poll→ledger soak.
 5. **World Forge Maestro barrier** — **PARTIAL** (`world-forge-maestro-barrier.ts` + conveyor gate + pulse `worldForgeEvidence`): refuse success without heightfield+PCG; Fusion abort / LoRA empty / bake refuse / theater fail-closed. Still open: multi-stage CostGuard spend across conveyor.
 6. **CapScore-aware quality ladder for gen** — **PARTIAL first-light:** `creative-quality-tier-binding.ts` (draft|standard|high|cloud_max; competitor claims **false**). Still needed: bind budgets into native-gen + world-forge conveyor hot paths (not pulse-only).
-7. **J.7 Meshy→USD cook runtime (not OpenUSD theater)** — **PARTIAL (2026-08-10 `b608fb8b6`):** `usd-refined-mesh-cook.ts` seals refined GLB cook receipt + optional USDZ preview ZIP; fail-closed capsule/empty/OpenUSD/USDC mesh; `OPEN_USD_COOK_STAGE_READY`/`MESH_CLAY_SURPASS_CLAIM` **false**. Viewport drop wire still OPEN; OpenUSD C++ HELD.
+7. **J.7 Meshy→USD cook runtime (not OpenUSD theater)** — **PARTIAL (2026-08-10 `b608fb8b6`):** `usd-refined-mesh-cook.ts` seals refined GLB cook receipt + optional USDZ preview ZIP; fail-closed capsule/empty/OpenUSD/USDC mesh; `OPEN_USD_COOK_STAGE_READY`/`MESH_CLAY_SURPASS_CLAIM` **false**. Viewport drop→cook/Fusion fail-closed wire (`viewport-asset-drop-cook-wire.ts`) PARTIAL; OpenUSD C++ HELD.
 8. **Shared-Y.Doc Fusion undo + apply swarm receipts** — **PARTIAL (2026-08-10 `b608fb8b6`):** `fusion-atomic-revert-evidence.ts` seals before/after hashes on shared-Y.Doc abort/revert; `creative-apply-fusion-receipt.ts` refuses write success on CW6 `fileValidation` deny / missing FusionTx / empty receipts. Cross-isolate production soak still OPEN.
 
 **Explicit non-moves:** resume J.11/J.12 without Founder; Meshy/Tripo marketing as “surpassed”; new exotic kernel letters as gen proof; UI redesign; Quant Mini-IA conflation with creative Mini-IA.
+
+
+#### Creative Generation top-8 backend queue status (2026-08-10 — stamp after #7+#8)
+
+| # | Move | Status | Evidence / commit | Remaining blockers (not ship) |
+|---|------|--------|-------------------|-------------------------------|
+| 1 | Maestro creative dispatch unify | **PARTIAL** | `maestro-creative-pulse.ts` (`0569829c2`) | Wire pulse → cb/cd/bw Bridge nucleus; J.12 **STOPPED** (Founder) |
+| 2 | Collapse dual Bridge | **DONE-core** | `d36a9b3fb` — `lib/ai` re-export + fail-closed class | None (keep single choke) |
+| 3 | Native ORT text-to-3d | **PARTIAL** | `creative-onnx-session.ts` (`2e2a2a302`); `ortFixtureLoaded` only | **Founder weights** + ORT soak before `nativeOnnxReady` |
+| 4 | Clay→refine evidence | **PARTIAL** | `clay-refine-evidence.ts` (`99dc84fe5`) | Live bx poll→ledger soak |
+| 5 | World Forge Maestro barrier | **PARTIAL** | `world-forge-maestro-barrier.ts` (`99dc84fe5`) | Multi-stage CostGuard spend |
+| 6 | CapScore quality ladder | **PARTIAL** | `creative-quality-tier-binding.ts` (`0569829c2`) | Bind budgets into native-gen + WF conveyors |
+| 7 | J.7 refined GLB/USDZ cook | **PARTIAL** | `usd-refined-mesh-cook.ts` + `viewport-asset-drop-cook-wire.ts` (`b608fb8b6`+) | **OpenUSD C++** / USDC mesh / Meshy surpass **HELD**; UI chrome out of scope |
+| 8 | Shared-Y.Doc Fusion undo + CW6 | **PARTIAL** | `fusion-atomic-revert-evidence.ts` + `creative-apply-fusion-receipt.ts` (`b608fb8b6`) | Cross-isolate production soak; UI undo chrome out of scope |
+
+**Backend queue verdict:** creative top-8 **not drained** — **1 DONE-core** (#2); **#1+#3–#8 PARTIAL**. Actionable backend without Founder/UI/OpenUSD: deepen #1 pulse→conveyor nucleus, #4 bx soak, #5 CostGuard multi-stage, #6 conveyor budget bind. **HELD until Founder:** weights/`nativeOnnxReady`, J.12, OpenUSD C++, Hub/`investmentGrade`. **No UI** in this queue stamp.
+
 
 **Cross-links:** Top-1 AI row · AI Fusion Travas · Apex Swarm §0a Anti-Hype · letters bw/bx/bz/ca/cb/cc/cd/cu/da · `maestro-creative-pulse` / `creative-quality-tier-binding` · STOPPED J.11/J.12 · Law XV CapScore.
 
