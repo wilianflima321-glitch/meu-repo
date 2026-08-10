@@ -11,10 +11,9 @@
  * - Binary USDC crate magic → fail-closed (no invent)
  */
 
-export const USDA_HIERARCHY_PREVIEW_KIND = 'hierarchy_wireframe_only' as const
+import { isUsdcCrateBytes } from '@/lib/production/usd-stage-intake'
 
-/** Pixar USDC crate magic (binary) — reject for ASCII hierarchy path. */
-const USDC_CRATE_MAGIC = [0x50, 0x58, 0x52, 0x2d, 0x55, 0x53, 0x44, 0x43] // PXR-USDC
+export const USDA_HIERARCHY_PREVIEW_KIND = 'hierarchy_wireframe_only' as const
 
 export type UsdaHierarchyPrimKind = 'Xform' | 'Mesh' | 'Other'
 
@@ -41,11 +40,6 @@ export type UsdaHierarchyPreview = {
 const DEF_RE = /def\s+(\w+)\s+"([^"]+)"/g
 const EXTENT_RE =
   /float3\[\]\s+extent\s*=\s*\[\s*\(\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*\)\s*,\s*\(\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*,\s*([-\d.eE+]+)\s*\)\s*\]/g
-
-function isUsdcCrate(bytes: Uint8Array): boolean {
-  if (bytes.length < USDC_CRATE_MAGIC.length) return false
-  return USDC_CRATE_MAGIC.every((b, i) => bytes[i] === b)
-}
 
 function looksMostlyAscii(text: string): boolean {
   if (!text.trim()) return false
@@ -121,7 +115,7 @@ export function parseUsdaHierarchyPreview(
   } else {
     const bytes = source instanceof Uint8Array ? source : new Uint8Array(source)
     if (bytes.byteLength === 0) return held('empty')
-    if (isUsdcCrate(bytes)) return held('crate_binary')
+    if (isUsdcCrateBytes(bytes)) return held('crate_binary')
     text = new TextDecoder('utf-8', { fatal: false }).decode(bytes)
   }
 

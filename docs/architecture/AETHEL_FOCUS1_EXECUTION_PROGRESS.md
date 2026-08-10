@@ -64,6 +64,7 @@
 | 2026-08-08 r12-cw5-storybook | R12 CW5 Storybook token sync + Figma honesty HELD | **PARTIAL** deepen; `qa:storybook-token-sync` + vitest **4/4**; Figma HELD; Hub checkout HELD |
 | 2026-08-10 backend-debt-close | Backend-only pass — L.8 L-ACC-08 soak harness + J.4 semantic recall soak + H.1+ cert template + chargeback edge cases | **PARTIAL** deepen; tests **32/32** targeted (+1 skipped live E2B); `hubCheckoutAudited` still **false**; UI track untouched |
 | 2026-08-10 j4-l4-backend | Backend-only — J.4 BYOK reindex→recall cert harness + L.4 E2B remote PTY probe/wire | **PARTIAL** deepen; J.4 mock BYOK cert **5/5** + recall/BYOK suites **18/18**; L.4 E2B PTY probe + wire **7/7** + L.4 bridge **12/12**; live OpenAI BYOK + live E2B PTY soak still open; `hubCheckoutAudited` **false** |
+| 2026-08-10 e2b-dep-j7-intake | Backend-only — `e2b` workspace install + J.7 `usd-stage-intake` fail-closed (OpenUSD HELD) | **PARTIAL** deepen; `e2b@^2.0.1` resolved in node_modules (`probeE2BRemotePtySdk` loadable); `usd-stage-intake.ts` byte classify + HELD reasons + `.usdc` intake; tests **38/38** targeted (e2b **7/7** + j7 intake **8/8** + regression); live E2B PTY soak + OpenUSD C++ stage **HELD**; Hub checkout **false** |
 
 ---
 
@@ -80,7 +81,7 @@
 | Video scaffold Trava III | `video-to-scaffold-extractor.ts` | |
 | GraphOperator J.5 | `graph-operator.ts` | Bridge+FusionTx+Critic |
 | VideoToMechanic J.6 | `video-to-mechanic-operator.ts` + `POST /api/ai/video/scaffold` | scaffold only |
-| UsdIntegrator J.7 | `usd-integrator.ts` | no capsule; USDZ preview **PARTIAL** (Three USDZLoader); USDA/USD/USDC **HELD** |
+| UsdIntegrator J.7 | `usd-integrator.ts` + `usd-stage-intake.ts` | no capsule; USDZ preview **PARTIAL** (Three USDZLoader); USDA/USD/USDC **HELD**; `evaluateUsdStageIntake` fail-closed + OpenUSD HELD reasons |
 | BrowserOperator J.8 | `browser-operator.ts` + `POST /api/agents/browser-operator/research` | governed fetch; CDP farm HELD |
 | LiveVoice J.10 | `live-voice-operator.ts` + `POST /api/agents/live-voice/direction` | PTT/generate?play; duplex WebRTC HELD |
 | LazyInspector #66 | `lazy-inspector.ts` + apply `preflight.ts` | `LAZY_INSPECTOR_REJECT` |

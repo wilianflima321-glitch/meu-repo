@@ -1,14 +1,17 @@
 import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 import type { ViewportSceneObject } from '@/components/viewport/AethelViewport3D'
 import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
-import { resolveUsdBrowserFormatSupport } from '@/lib/production/usd-integrator'
+import {
+  evaluateUsdStageIntake,
+  resolveUsdBrowserFormatSupport,
+} from '@/lib/production/usd-integrator'
 import type { UsdaHierarchyPreviewMeta } from '@/lib/viewport/usda-preview-hierarchy'
 import {
   parseUsdaHierarchyPreview,
   toUsdaHierarchyPreviewMeta,
 } from '@/lib/viewport/usda-preview-hierarchy'
 
-export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usda' | 'usdz'
+export type ViewportAssetImportFormat = 'glb' | 'gltf' | 'fbx' | 'obj' | 'usd' | 'usda' | 'usdc' | 'usdz'
 export type ViewportAssetLicenseStatus = 'needs-review' | 'approved' | 'blocked'
 
 export type ViewportAssetImportMetadata = {
@@ -76,6 +79,7 @@ export const VIEWPORT_ASSET_IMPORT_EXTENSIONS: readonly ViewportAssetImportForma
   'obj',
   'usd',
   'usda',
+  'usdc',
   'usdz',
 ]
 
@@ -94,6 +98,7 @@ const FORMAT_GEOMETRY: Record<ViewportAssetImportFormat, NonNullable<ViewportSce
   // Held USD formats must not look like solid character proxies — wireframe box via mesh path.
   usd: 'box',
   usda: 'box',
+  usdc: 'box',
   usdz: 'box',
 }
 
@@ -268,15 +273,24 @@ export async function buildViewportImportedObjectsFromFiles({
     const format = getViewportAssetImportFormat(file.name)
     if (!format) continue
 
-    if (format === 'usd' || format === 'usda') {
+    if (format === 'usd' || format === 'usda' || format === 'usdc') {
       // Fail-closed: no solid meshUrl / OpenUSD stage. ASCII hierarchy wireframe deepen only.
       let usdaHierarchy: UsdaHierarchyPreviewMeta | undefined
       let meshCount: number | undefined
+      let viewerStatus: 'live' | 'held' = 'held'
       try {
-        const text = await readDroppedFileText(file)
-        const preview = parseUsdaHierarchyPreview(text)
-        usdaHierarchy = toUsdaHierarchyPreviewMeta(preview)
-        if (usdaHierarchy) meshCount = usdaHierarchy.meshCount
+        const bytes =
+          typeof file.arrayBuffer === 'function'
+            ? new Uint8Array(await file.arrayBuffer())
+            : new Uint8Array(0)
+        const intake = evaluateUsdStageIntake({ format, bytes })
+        viewerStatus = intake.viewerStatus === 'live' ? 'live' : 'held'
+        if (intake.hierarchyWireframeEligible) {
+          const text = await readDroppedFileText(file)
+          const preview = parseUsdaHierarchyPreview(text)
+          usdaHierarchy = toUsdaHierarchyPreviewMeta(preview)
+          if (usdaHierarchy) meshCount = usdaHierarchy.meshCount
+        }
       } catch {
         usdaHierarchy = undefined
       }
@@ -285,7 +299,7 @@ export async function buildViewportImportedObjectsFromFiles({
         file: {
           fileName: file.name,
           sizeBytes: file.size,
-          viewerStatus: 'held',
+          viewerStatus,
           hierarchyPreserved: Boolean(usdaHierarchy && usdaHierarchy.primCount > 0),
           ...(typeof meshCount === 'number' ? { meshCount } : {}),
           ...(usdaHierarchy ? { usdaHierarchy } : {}),

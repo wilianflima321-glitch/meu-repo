@@ -553,3 +553,18 @@ export async function runUsdIntegrator(input: {
     ledger,
   }
 }
+
+export {
+  OPENUSD_STAGE_HELD_REASONS,
+  classifyUsdPayloadBytes,
+  describeOpenUsdStageHonesty,
+  evaluateUsdStageIntake,
+  isUsdcCrateBytes,
+  isUsdzZipBytes,
+  resolveUsdFormatFromExtension,
+} from '@/lib/production/usd-stage-intake'
+export type {
+  OpenUsdStageHeldReason,
+  UsdPayloadKind,
+  UsdStageIntakeResult,
+} from '@/lib/production/usd-stage-intake'
