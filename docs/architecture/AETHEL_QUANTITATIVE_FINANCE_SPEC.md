@@ -1,10 +1,10 @@
 # Aethel Engine — Quantitative Finance & Predictive AI Spec (Onda N / Vanguard)
 
-**Version:** 2.9 (Chief Architect — Protocolo de Veto e Toxicidade de Fluxo)  
+**Version:** 2.10 (Chief Architect — Dual-Mode Execution honesty)  
 **Status:** **Binding** — Extensão da Aethel Engine para modelagem estocástica e operação autônoma no mercado financeiro.
-**Date:** 2026-08-08
+**Date:** 2026-08-10
 
-> **Implementation honesty (2026-08-10):** N1–N5 + §23 fail-closed TypeScript cores under `lib/server/quant/` (vault, paper quarantine, trade audit, market ingest stub, risk envelope mirror, non-custodial, EULA, consent telemetry, GPU mux **HELD**). **No** FIX bridge, licensed L2 feed, real ORT/wgpu eviction, or live broker adapter. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code**. Live probe: `GET /api/runtime/quant-finance-honesty` · Progress §Onda N · `vanguardQuantReady=false` · **investment-grade HELD**.
+> **Implementation honesty (2026-08-10):** N1–N5 + §23 + **Dual-Mode Execution** fail-closed TypeScript cores under `lib/server/quant/` (vault, paper quarantine, trade audit, market ingest stub, risk envelope mirror, non-custodial, EULA, consent telemetry, GPU mux **HELD**, `dual-mode-execution.ts`). **No** FIX bridge, licensed L2 feed, real ORT/wgpu eviction, live broker adapter, or live ORT/CV RPA. Legacy `packages/aethel-cli-legacy/src/common/trading/` is **dead code**. Live probe: `GET /api/runtime/quant-finance-honesty` · Progress §Onda N · `vanguardQuantReady=false` · **investment-grade HELD**.
 
 ## 1. O Mandato HFT (High-Frequency Trading)
 A Aethel Engine não é apenas um motor de renderização visual. Suas bases matemáticas (álgebra linear SIMD, paralelismo livre de locks `rayon`, processamento na GPU `wgpu`) são estruturalmente idênticas às engines quantitativas usadas em *Wall Street*. 
@@ -388,3 +388,52 @@ On EULA accept: bind account ↔ anti-fraud hash and append to server append-onl
 | Live enable gate | N2 `attemptEnableLive` requires quarantine PASS **and** EULA | PARTIAL; `liveBrokerReady=false` |
 
 **Marketing rule:** Never claim “empresa intocável”, “50ms invisible GPU swap shipped”, or silent audit cloud. `vanguardQuantReady` / `investmentGrade` stay **false**.
+
+## Dual-Mode Execution (binding honesty — 2026-08-10)
+
+User architecture splits execution into two mutually exclusive modes. Code: `lib/server/quant/dual-mode-execution.ts` (`ExecutionMode`, `evaluateMaestroExecutionGuard`). **Neither mode is investment-grade.** Hub checkout **HELD**.
+
+### Modes
+
+| Mode | Path | Honest latency / surface | Keys |
+|------|------|--------------------------|------|
+| **`vanguard_hft_api`** | Rust kernel → broker **API** | Institutional / ms-class only with **colocation**; retail home Wi-Fi must **not** claim ms arbitrage or spoofing-detect as shipped | Local opaque Blind Brain API key ref (non-custodial). Platform DB never stores raw secrets. |
+| **`manus_rpa_browser`** | User logged into broker **UI**; CV + DOM parsing | ~**800ms** click latency OK only for **Swing/Position** on **≥15m** charts | No API keys; session cookies in user browser. |
+
+### Ruthless critique (binding)
+
+| Claim / posture | Verdict | Binding rule |
+|-----------------|---------|--------------|
+| HFT / ms arbitrage on home Wi-Fi | **FALSE as ship claim** | Physically inconsistent with colocation doctrine (§9.C). `claimsMsExecutionWorks=false` always. Marketing ms retail HFT = reject. |
+| Institutional spoofing-detect / microsecond path without FIX + licensed L2 + coloc | **HELD** | Spec intent only. No FIX/SBE gateway in repo. |
+| Manus RPA/CV auto-clicking broker UI | **HIGH legal risk** | Likely violates Broker **ToS**; may create **market-abuse / unauthorized automation** exposure. Live ORT/CV RPA = **HELD**. Policy may allow swing/position intents; product must not market “safe bots.” Risk is **user-borne**. |
+| Maestro + Mini-IA multi-timeline in **same** browser profile | **UNSAFE without isolation** | Shared cookies/DOM races. Guard **blocks** `maestroTimelineCount>1` + `sameBrowserProfile=true`. Safe only with isolated profiles / serialized clicks (still not live RPA). |
+| RPA scalping / HFT / sub-15m charts | **REJECT** | Maestro **MUST** auto-block. `maxFrequency='swing_or_position'`, `minChartTimeframeMinutes=15`. |
+| Vanguard live after key present | **Still false** | Requires N2 quarantine PASS + §23 EULA; even then `liveBrokerReady=false` until FIX + legal sign-off. |
+| `investmentGrade` | **false** | Both modes PARTIAL policy only. |
+
+### Fail-closed policy (shipped cores)
+
+| Gate | Behavior |
+|------|----------|
+| RPA + `frequency: hft\|scalping\|intraday` | Reject (`rpa_hft_blocked` / `rpa_scalping_blocked` / `rpa_intraday_below_floor`) |
+| RPA + chart &lt; 15m | Reject (`rpa_timeframe_too_short`) |
+| HFT without `local:blind-brain:*` key ref | Reject (`hft_missing_local_api_key`) |
+| HFT without N2 quarantine PASS | Reject (`hft_quarantine_not_passed`) |
+| HFT without §23 EULA attestation | Reject (`hft_eula_not_accepted`) |
+| Any `claimsMsExecution: true` | Reject (`hft_ms_claim_forbidden`) |
+| Maestro multi-timeline same profile (RPA) | Reject (`maestro_multi_timeline_unsafe`) |
+
+### Shippable now vs HELD
+
+| Item | Status |
+|------|--------|
+| Dual-mode types + Maestro guard + honesty probe fields | **PARTIAL (shipped)** |
+| N1–N5 + §23 EULA/non-custodial/consent stubs | **PARTIAL** |
+| FIX / live broker API adapter | **HELD** |
+| Live ORT/CV RPA click automation | **HELD** |
+| Ms execution / retail HFT marketing | **FORBIDDEN** |
+| Silent telemetry | **FORBIDDEN** |
+| `investmentGrade` / `vanguardQuantReady` | **false** |
+
+**Marketing rule:** Never claim Dual-Mode makes Aethel investment-ready, ToS-safe for RPA, or ms-capable on home networks.

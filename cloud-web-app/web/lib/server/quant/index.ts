@@ -1,6 +1,7 @@
-/** Onda N — Quant finance backend cores (N1–N5 + §23 legal/hardware). No UI. Fail-closed. */
+/** Onda N — Quant finance backend cores (N1–N5 + §23 + Dual-Mode). No UI. Fail-closed. */
 
 export * from '@/lib/server/quant/acceptance-attestation-store'
+export * from '@/lib/server/quant/dual-mode-execution'
 export * from '@/lib/server/quant/eula-risk-acceptance'
 export * from '@/lib/server/quant/finance-domain-vault'
 export * from '@/lib/server/quant/gpu-priority-mux'

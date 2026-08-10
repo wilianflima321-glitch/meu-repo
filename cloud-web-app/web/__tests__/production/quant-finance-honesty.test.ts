@@ -70,6 +70,18 @@ describe('quant finance honesty probe', () => {
     expect(report.wedgeConflict.some((line) => line.includes('untouchable'))).toBe(true)
   })
 
+  it('reports Dual-Mode Execution PARTIAL without investmentGrade or live adapters', () => {
+    const report = probeQuantFinanceHonesty()
+    expect(report.dualModeExecution.investmentGrade).toBe(false)
+    expect(report.dualModeExecution.vanguardHftApi.liveBrokerReady).toBe(false)
+    expect(report.dualModeExecution.manusRpaBrowser.liveOrtRpaReady).toBe(false)
+    expect(report.dualModeExecution.maestroGuardWired).toBe(true)
+    expect(report.wedgeConflict.some((line) => line.includes('home-WiFi') || line.includes('colocation'))).toBe(
+      true,
+    )
+    expect(report.wedgeConflict.some((line) => line.includes('RPA'))).toBe(true)
+  })
+
   it('flags wedge conflicts and dead legacy trading code', () => {
     const report = probeQuantFinanceHonesty()
     expect(report.wedgeConflict.length).toBeGreaterThanOrEqual(3)
