@@ -95,3 +95,17 @@ export {
   type WasmShieldDenyEvidence,
   type WasmShieldEnforceResult,
 } from './wasm-shield-enforce'
+
+export {
+  DIRECT_STORAGE_READY,
+  DIRECT_STORAGE_MARKETING_ALLOWED,
+  WEB_DIRECT_STORAGE_FORBIDDEN,
+  createZeroCopyAssetStream,
+  fulfillAssetStreamRange,
+  claimDirectStorageReady,
+  claimWebDirectStorageMarketing,
+  probeZeroCopyAssetStreamReadiness,
+  type ZeroCopyAssetStream,
+  type AssetStreamPageView,
+  type AssetStreamPageRequest,
+} from './zero-copy-asset-stream'

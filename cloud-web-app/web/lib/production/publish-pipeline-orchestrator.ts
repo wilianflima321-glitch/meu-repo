@@ -245,43 +245,19 @@ export function evaluatePublishAssetCookStage(input: {
 
 /**
  * Law XV — baked-lighting is mandatory before package for web-static.
- * Returns fail-closed when bake receipt is missing (no mock success).
+ * Hardened implementation lives in baked-lighting-publish-gate.ts (theater receipt refuse).
  */
-export function evaluateBakedLightingPublishGate(input: {
-  target: PublishTarget
-  bakeReceiptRef?: string | null
-  lightmapBytes?: number | null
-}): {
-  allowed: boolean
-  stageId: 'baked-lighting'
-  reason: string
-  shipStatus: 'IMPLEMENTED' | 'PARTIAL' | 'HELD'
-} {
-  if (input.target === 'native-tauri') {
-    return {
-      allowed: true,
-      stageId: 'baked-lighting',
-      reason: 'Native tauri may defer bake to desktop cooker — receipt optional for plan stage.',
-      shipStatus: 'PARTIAL',
-    }
-  }
-  const hasReceipt = Boolean(input.bakeReceiptRef && input.bakeReceiptRef.trim().length > 0)
-  const hasBytes = typeof input.lightmapBytes === 'number' && input.lightmapBytes > 0
-  if (hasReceipt && hasBytes) {
-    return {
-      allowed: true,
-      stageId: 'baked-lighting',
-      reason: 'Bake receipt + lightmap bytes present.',
-      shipStatus: 'IMPLEMENTED',
-    }
-  }
-  return {
-    allowed: false,
-    stageId: 'baked-lighting',
-    reason: 'web-static publish blocked — missing baked-lighting receipt/lightmap (Law XV).',
-    shipStatus: 'HELD',
-  }
-}
+export {
+  evaluateBakedLightingPublishGate,
+  refusePackWithoutBakeEvidence,
+  isTheaterBakeReceipt,
+  probeBakedLightingPublishGateReadiness,
+} from '@/lib/production/baked-lighting-publish-gate'
+export type {
+  BakedLightingPublishGateResult,
+  BakedLightingGateRejectCode,
+  PublishBakeTarget,
+} from '@/lib/production/baked-lighting-publish-gate'
 
 export interface RuntimeIsolationViolation {
   forbiddenPackage: string

@@ -4,6 +4,7 @@
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
+import { isTheaterBakeReceipt } from '@/lib/production/baked-lighting-publish-gate'
 
 const log = createComponentLogger('publish-arcade-honesty')
 
@@ -44,16 +45,22 @@ export function evaluateBakedLightingPublishGate(input: {
   evidencePresent?: boolean
   evidenceRef?: string | null
 } = {}): BakedLightingGateResult {
-  const present = input.evidencePresent === true && Boolean(input.evidenceRef?.trim())
+  const ref = input.evidenceRef?.trim() ?? ''
+  const present =
+    input.evidencePresent === true &&
+    Boolean(ref) &&
+    !isTheaterBakeReceipt(ref) &&
+    ref.length >= 8
   if (present) {
     return {
       stageId: 'baked-lighting',
       required: true,
       status: 'PASS',
       allowSuccessArtifact: true,
-      notes: [`Baked-lighting evidence present: ${input.evidenceRef}`],
+      notes: [`Baked-lighting evidence present: ${ref}`],
     }
   }
+  const theater = Boolean(ref) && isTheaterBakeReceipt(ref)
   return {
     stageId: 'baked-lighting',
     required: true,
@@ -61,7 +68,9 @@ export function evaluateBakedLightingPublishGate(input: {
     allowSuccessArtifact: false,
     notes: [
       'Law XV requires baked-lighting before claiming final publish success',
-      'No bake evidence — refuse fake success artifact',
+      theater
+        ? 'Theater/placeholder bake receipt refused — no fake success artifact'
+        : 'No bake evidence — refuse fake success artifact',
     ],
   }
 }

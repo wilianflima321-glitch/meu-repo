@@ -14,6 +14,7 @@ import type { PublishPipelinePlan, PublishTarget } from '@/lib/production/publis
 import {
   evaluateBakedLightingPublishGate,
   evaluatePublishAssetCookStage,
+  refusePackWithoutBakeEvidence,
   verifyRuntimeBundleIsolation,
 } from '@/lib/production/publish-pipeline-orchestrator';
 import { assertRuntimeExportClean } from '@/lib/runtime/editor-runtime-boundary';
@@ -113,6 +114,7 @@ interface GeneratedGameManifestJson {
     reason: string;
     bakeReceiptRef: string | null;
     lightmapBytes: number | null;
+    evidenceFingerprint: string | null;
   };
 }
 
@@ -176,9 +178,12 @@ export async function runPublishPackagingStage(
       projectId,
       reason: bakeGate.reason,
       shipStatus: bakeGate.shipStatus,
+      rejectCode: bakeGate.rejectCode ?? null,
     });
     throw new Error(
-      `HELD not_implemented: ${bakeGate.reason} (Law XV — refuse success:true without bake receipt/lightmap)`,
+      `HELD not_implemented: ${bakeGate.reason} (Law XV — refuse success:true without bake receipt/lightmap${
+        bakeGate.rejectCode ? `; code=${bakeGate.rejectCode}` : ''
+      })`,
     );
   }
 
@@ -225,6 +230,23 @@ export async function runPublishPackagingStage(
     throw new Error(
       `Asset cook failed — empty or invalid .aethelpack forbidden (Law XVI): ${cookGate.reason}`,
     );
+  }
+
+  // Law XV + XVI — refuse packaging success when bake theater/empty or pack bytes vanish.
+  const packBake = refusePackWithoutBakeEvidence({
+    target: plan.target,
+    bakeReceiptRef: stageOptions.bakeReceiptRef,
+    lightmapBytes: stageOptions.lightmapBytes,
+    packByteLength: cookGate.packByteLength,
+  });
+  if (!packBake.ok) {
+    log.error('publish.pack_refused_without_bake', {
+      jobId,
+      projectId,
+      code: packBake.code,
+      message: packBake.message,
+    });
+    throw new Error(`HELD pack refused: ${packBake.message}`);
   }
 
   await reportProgress(jobId, 45, 'Transpiling Visual Scripting graphs');
@@ -302,6 +324,7 @@ export async function runPublishPackagingStage(
         typeof stageOptions.lightmapBytes === 'number' && stageOptions.lightmapBytes > 0
           ? Math.floor(stageOptions.lightmapBytes)
           : null,
+      evidenceFingerprint: bakeGate.evidenceFingerprint,
     },
   };
 
