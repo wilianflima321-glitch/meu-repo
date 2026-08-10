@@ -514,6 +514,60 @@ fn configure_surface(
 
 /// Blocking present soak on a dedicated thread (owns its own winit EventLoop).
 fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentProbeReport {
+    present_probe_on_secondary_window_ex(
+        frames_requested,
+        SecondaryPresentOptions {
+            visible: false,
+            title: "Aethel Present Probe",
+            width: 128,
+            height: 128,
+        },
+    )
+}
+
+struct SecondaryPresentOptions {
+    visible: bool,
+    title: &'static str,
+    width: u32,
+    height: u32,
+}
+
+/// Engine-owned OS window present (visible) — still not WebView exclusive / product viewport.
+pub fn run_engine_owned_os_window_present_probe(frames: Option<u32>) -> RendererPresentProbeReport {
+    let frames_requested = frames.unwrap_or(DEFAULT_PRESENT_SOAK_FRAMES);
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::Builder::new()
+        .name("aethel-engine-owned-present".into())
+        .spawn(move || {
+            let report = present_probe_on_secondary_window_ex(
+                frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES),
+                SecondaryPresentOptions {
+                    visible: true,
+                    title: "Aethel Engine — Engine-Owned Present (not WebView exclusive)",
+                    width: 320,
+                    height: 240,
+                },
+            );
+            let _ = tx.send(report);
+        })
+        .expect("spawn engine-owned present thread");
+
+    match rx.recv_timeout(PRESENT_PROBE_TIMEOUT) {
+        Ok(report) => report,
+        Err(_) => fail_report(
+            frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES),
+            vec![
+                "Engine-owned present probe timed out".into(),
+                "presented stays false — fail-closed".into(),
+            ],
+        ),
+    }
+}
+
+fn present_probe_on_secondary_window_ex(
+    frames_requested: u32,
+    opts: SecondaryPresentOptions,
+) -> RendererPresentProbeReport {
     let frames_requested = frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES);
 
     let mut event_loop_builder = EventLoopBuilder::new();
@@ -531,9 +585,9 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     };
 
     let window = match WindowBuilder::new()
-        .with_title("Aethel Present Probe")
-        .with_inner_size(PhysicalSize::new(128, 128))
-        .with_visible(false)
+        .with_title(opts.title)
+        .with_inner_size(PhysicalSize::new(opts.width, opts.height))
+        .with_visible(opts.visible)
         .build(&event_loop)
     {
         Ok(w) => w,

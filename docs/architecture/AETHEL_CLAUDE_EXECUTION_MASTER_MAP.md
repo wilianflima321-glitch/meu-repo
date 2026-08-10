@@ -1012,7 +1012,7 @@ Law XVI + Bridge generate choke ? L.5 ? tree-authority ? **`chat-spend-session` 
 |---|------|------------|--------|
 | 3B.1 | Create/wire `scalable-render-graph` + `hardware-profile` (Capability Score) | Law XV; scores 0???100 | **DONE CORE 2026-07-11ab** ??? web probe + blueprint registry; Auto Fidelity + honesty wire; frame graph still HELD |
 | 3B.2 | wgpu frame graph feeds editor viewport (not surface-only) | Screenshot parity gate web preview vs desktop | **HELD** ??? wgpu surface probe only |
-| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit **ScalableRenderGraph-style frame graph** (`gpu_frame_graph.rs` Instant pass bag); product WebView exclusive / `frame_graph_aaa_ready` / `scalable_render_graph_product_ready` / all substrate `*_aaa_ready` **HELD**; G.3 ~15% |
+| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit **ScalableRenderGraph-style frame graph** + **product_present_adapter** (engine-owned OS window soak; `product_present_ready=false`; WebView exclusive HELD / TICKET-PP-01..04); `frame_graph_aaa_ready` / `scalable_render_graph_product_ready` / all substrate `*_aaa_ready` **HELD**; G.3 ~15% |
 | 3B.4 | Live Cook-Torrance BRDF in material shaders | PBR sphere shows specular (ENG-007) | **HELD** |
 
 #### Round 3C ??? Advanced paths (P1 ??? only after 3A/3B)
@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4z | **Engine product present adapter PARTIAL (no UI):** `product_present_adapter.rs` HWND inventory + refuse WebView exclusive attach + engine-owned secondary_winit frame-graph present soak; IPC honesty/soak; **`product_present_ready=false`** / **`webview_exclusive_present_ready=false`**; TICKET-PP-01..04. AAA flags stay false. **3B.3 stays PARTIAL**. G.3 stays ~15%. Gates: check+clippy green. |
 | 2026-08-10 | 1.4y | **Engine secondary ScalableRenderGraph-style frame graph PARTIAL (no UI):** `gpu_frame_graph.rs` ordered Instant pass bag (cull→pack→draw→Hi-Z→radiance→micro-poly→VSM→FSR→entropy→submit→present); fail-closed on pass drop; IPC timings (no FPS); `frame_graph_substrate_proven` evidence; **`frame_graph_aaa_ready`/`scalable_render_graph_product_ready`/all `*_aaa_ready` stay false**. WebView exclusive HELD (Chromium HWND). **3B.3 stays PARTIAL**. G.3 stays ~15%. Gates: check+clippy green. |
 | 2026-08-10 | 1.4x | **Engine Entropy / GPU destruction substrate PARTIAL (no UI):** `gpu_entropy_destruction.rs` fracture chunk SoA + GPU impulse/debris integrate on secondary_winit; Instant metrics; `entropy_substrate_proven` when chunks update; **`entropy_aaa_ready`/`chaos_aaa_ready`/`nanite_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4w | **Engine FSR / temporal upsample substrate PARTIAL (no UI):** `gpu_fsr.rs` LR→HR history buffer + reactive mask stub on secondary_winit; Instant metrics; `fsr_substrate_proven` evidence; **`fsr_aaa_ready`/`nanite_ready`/`micro_poly_aaa_ready`/`lumen_ready`/`vsm_aaa_ready` stay false**. Law XV honesty — not FSR3 AAA. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |

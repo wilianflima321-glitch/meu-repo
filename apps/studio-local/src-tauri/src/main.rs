@@ -20,6 +20,7 @@ mod gpu_hiz;
 mod gpu_indirect_draw;
 mod gpu_meshlet_cull;
 mod gpu_meshlet_cook;
+mod product_present_adapter;
 mod gpu_entropy_destruction;
 mod gpu_frame_graph;
 mod gpu_fsr;
@@ -392,6 +393,9 @@ fn main() {
             wgpu_renderer::present_frame,
             wgpu_renderer::renderer_present_probe_last,
             wgpu_renderer::renderer_frame_graph_timings_last,
+            product_present_adapter::product_present_honesty_probe,
+            product_present_adapter::product_present_try_webview_attach,
+            product_present_adapter::product_present_engine_owned_soak,
             physics_commands::poll_physics_state,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,

@@ -162,6 +162,20 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                 next_action: "Product WebView exclusive present or full SRG/UE RHI when Parity fixtures allow; never flip AAA flags or fabricate FPS.",
             },
             NativeKernelCapability {
+                id: "product-present-adapter-contract",
+                label: "Product present adapter — HWND inventory + engine-owned OS window",
+                state: NativeKernelState::NeedsReview,
+                evidence_refs: vec![
+                    "src-tauri/src/product_present_adapter.rs",
+                    "src-tauri/src/gpu_frame_graph.rs",
+                    "src-tauri/src/wgpu_renderer.rs",
+                ],
+                blocker: Some(
+                    "Engine-owned secondary_winit can present the frame graph; product_present_ready and webview_exclusive_present_ready stay false (Chromium owns Tauri HWND). TICKET-PP-01..04 required for Studio product viewport exclusive present.",
+                ),
+                next_action: "Close TICKET-PP-01..04 before flipping product_present_ready; never claim WebView exclusive from identity mount.",
+            },
+            NativeKernelCapability {
                 id: "wasm-hot-reload-contract",
                 label: "Deterministic WASM gameplay hot-reload contract",
                 state: NativeKernelState::Available,
