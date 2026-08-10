@@ -16,6 +16,7 @@ mod asset_cooker;
 mod desktop_commands;
 mod entropy_gpu_particles;
 mod gpu_culling;
+mod gpu_indirect_draw;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;

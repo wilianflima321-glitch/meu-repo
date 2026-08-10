@@ -6,14 +6,18 @@
 //!
 //! # Present honesty (CW3 Path A)
 //! - Tauri main window hosts a Chromium WebView; exclusive native swapchain present
-//!   on that HWND remains **HELD** (WebView owns the pixels).
+//!   on that HWND remains **HELD** (WebView owns the pixels — Chromium compositor
+//!   owns the HWND; mounting a wgpu surface without exclusive ownership is identity
+//!   only, never product viewport replacement).
 //! - Maximum real path: controlled secondary `winit` window → surface configure →
-//!   **engine frame skeleton** (`GpuCullingPersistentPass::encode_cull` + clear →
-//!   `queue.submit` → `SurfaceTexture::present`) with **no CPU readback** on the
-//!   hot path. Final cull count may be read **after** the loop for evidence only.
+//!   **engine frame skeleton** (`encode_cull` → pack `DrawIndirectArgs` →
+//!   clear + `draw_indirect` → `queue.submit` → `SurfaceTexture::present`) with
+//!   **no CPU readback** on the hot path. Final cull count may be read **after**
+//!   the loop for evidence only.
 //! - `live_present` in web honesty flips only when this probe returns
 //!   `presented: true` **and** `submitted: true` (desktop honesty status stays fallback).
-//! - Never Nanite/Lumen/UE-RHI / Micro-Poly AAA marketing from mount or probe alone.
+//! - Never Nanite/Lumen/UE-RHI / Micro-Poly / MULTI_DRAW_INDIRECT AAA marketing
+//!   from mount or probe alone.
 
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -27,6 +31,7 @@ use winit::window::WindowBuilder;
 use crate::gpu_culling::{
     identity_frustum, soak_fixture_objects, GpuCullingPersistentPass, GpuCullingPipeline,
 };
+use crate::gpu_indirect_draw::IndirectDrawScaffold;
 
 /// Default soak frames for present probe (bounded — not a product game loop).
 const DEFAULT_PRESENT_SOAK_FRAMES: u32 = 3;
@@ -87,6 +92,15 @@ pub struct RendererPresentProbeReport {
     pub frame_ms_total: f64,
     /// True when this soak ran the present+cull engine frame skeleton.
     pub engine_frame_loop_with_cull: bool,
+    /// True when secondary soak issued GPU `draw_indirect` (scaffold proven).
+    /// Product WebView path + true MULTI_DRAW_INDIRECT AAA remain HELD.
+    pub indirect_draw_wired: bool,
+    /// Always false — `Features::MULTI_DRAW_INDIRECT` batch / Nanite MDI not claimed.
+    pub multi_draw_indirect_aaa_ready: bool,
+    /// True when VS indexed objects via storage buffers (bindless-*layout* scaffold).
+    pub bindless_layout_scaffold: bool,
+    /// Always false — full bindless descriptor heap / UE RHI bindless AAA HELD.
+    pub bindless_aaa_ready: bool,
     /// Reasons (fail-closed or remaining HELD vs UE RHI).
     pub reasons: Vec<String>,
     pub held_vs_ue_rhi: Vec<String>,
@@ -185,8 +199,8 @@ fn held_vs_ue_baseline() -> Vec<String> {
     vec![
         "UE ships a unified RHI present pipeline into the game viewport".into(),
         "Aethel Studio Local UI is WebView-composited — exclusive HWND present HELD".into(),
-        "Probe proves secondary winit swapchain present only — not IDE viewport replacement".into(),
-        "No Nanite/Lumen/virtualized geometry from this path".into(),
+        "Probe proves secondary winit swapchain present + single draw_indirect only — not IDE viewport replacement".into(),
+        "True MULTI_DRAW_INDIRECT batch / Nanite/Lumen/virtualized geometry still HELD".into(),
         "CPU texture readback / staging copies for capture remain HELD if needed later".into(),
     ]
 }
@@ -215,6 +229,10 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         frame_ms_mean: 0.0,
         frame_ms_total: 0.0,
         engine_frame_loop_with_cull: false,
+        indirect_draw_wired: false,
+        multi_draw_indirect_aaa_ready: false,
+        bindless_layout_scaffold: false,
+        bindless_aaa_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -226,12 +244,13 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
     }
 }
 
-/// Cull encode (optional) + clear + submit + present one frame. No map/readback.
+/// Cull → pack indirect → clear + draw_indirect → submit + present. No map/readback.
 fn present_one_engine_frame(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
     surface: &wgpu::Surface<'_>,
     cull: Option<&GpuCullingPersistentPass>,
+    indirect: Option<&IndirectDrawScaffold>,
 ) -> Result<(), String> {
     let frame = surface
         .get_current_texture()
@@ -245,9 +264,12 @@ fn present_one_engine_frame(
     if let Some(pass) = cull {
         pass.encode_cull(queue, &mut encoder);
     }
+    if let Some(ind) = indirect {
+        ind.encode_pack(&mut encoder);
+    }
     {
-        let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("aethel-present-probe-clear"),
+        let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("aethel-present-probe-clear-draw"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
                 resolve_target: None,
@@ -265,6 +287,9 @@ fn present_one_engine_frame(
             occlusion_query_set: None,
             timestamp_writes: None,
         });
+        if let Some(ind) = indirect {
+            ind.encode_draw_indirect(&mut rpass);
+        }
     }
     queue.submit(std::iter::once(encoder.finish()));
     frame.present();
@@ -406,15 +431,19 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
-    if let Err(e) = configure_surface(&device, &adapter, &surface, size.width, size.height) {
-        let mut r = fail_report(frames_requested, vec![e]);
-        r.adapter_acquired = true;
-        r.device_created = true;
-        r.adapter_name = adapter_name;
-        r.backend = backend;
-        r.surface_kind = "secondary_winit".into();
-        return r;
-    }
+    let surface_format = match configure_surface(&device, &adapter, &surface, size.width, size.height)
+    {
+        Ok(f) => f,
+        Err(e) => {
+            let mut r = fail_report(frames_requested, vec![e]);
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            return r;
+        }
+    };
 
     let (objects, expected_visible) = soak_fixture_objects();
     let frustum = identity_frustum(objects.len() as u32);
@@ -435,18 +464,43 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         }
     };
 
+    let indirect = match IndirectDrawScaffold::new(&device, surface_format, &cull_pass, &objects) {
+        Ok(s) => s,
+        Err(e) => {
+            let mut r = fail_report(
+                frames_requested,
+                vec![format!("IndirectDrawScaffold init failed: {e}")],
+            );
+            r.adapter_acquired = true;
+            r.device_created = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            r.surface_kind = "secondary_winit".into();
+            r.surface_configured = true;
+            return r;
+        }
+    };
+
     let mut frames_presented = 0u32;
     let mut cull_dispatches = 0u32;
+    let mut indirect_draws = 0u32;
     let mut submitted = false;
     let mut last_err: Option<String> = None;
     let mut frame_ms: Vec<f64> = Vec::with_capacity(frames_requested as usize);
     for _ in 0..frames_requested {
         let t0 = std::time::Instant::now();
-        match present_one_engine_frame(&device, &queue, &surface, Some(&cull_pass)) {
+        match present_one_engine_frame(
+            &device,
+            &queue,
+            &surface,
+            Some(&cull_pass),
+            Some(&indirect),
+        ) {
             Ok(()) => {
                 submitted = true;
                 frames_presented = frames_presented.saturating_add(1);
                 cull_dispatches = cull_dispatches.saturating_add(1);
+                indirect_draws = indirect_draws.saturating_add(1);
                 frame_ms.push(t0.elapsed().as_secs_f64() * 1000.0);
             }
             Err(e) => {
@@ -463,6 +517,7 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         0
     };
     let cull_frustum_ok = cull_visible_final == expected_visible && cull_dispatches > 0;
+    let indirect_draw_wired = presented_ok(frames_presented, indirect_draws) && cull_frustum_ok;
 
     let frame_ms_total: f64 = frame_ms.iter().sum();
     let frame_ms_min = frame_ms
@@ -485,16 +540,20 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
     let mut reasons = Vec::new();
     if presented {
         reasons.push(format!(
-            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via wgpu cull+clear+submit+present (no CPU readback on hot path)"
+            "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via cull→pack→draw_indirect→submit→present (no CPU readback on hot path)"
         ));
         reasons.push(format!(
-            "Cull dispatches={cull_dispatches}; post-loop visible={cull_visible_final} (expected {expected_visible}); frustum_ok={cull_frustum_ok}"
+            "Cull dispatches={cull_dispatches}; indirect draws={indirect_draws}; post-loop visible={cull_visible_final} (expected {expected_visible}); frustum_ok={cull_frustum_ok}"
         ));
         reasons.push(format!(
             "Measured Instant frame ms: min={frame_ms_min:.3} mean={frame_ms_mean:.3} max={frame_ms_max:.3} total={frame_ms_total:.3}"
         ));
         reasons.push(
             "WebView exclusive present still HELD — operator Studio UI remains WebView/WebGL2".into(),
+        );
+        reasons.push(
+            "True MULTI_DRAW_INDIRECT / Nanite / Micro-Poly AAA / bindless descriptor heap still HELD"
+                .into(),
         );
     } else {
         reasons.push(
@@ -526,6 +585,10 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         frame_ms_mean,
         frame_ms_total,
         engine_frame_loop_with_cull: presented && cull_dispatches > 0,
+        indirect_draw_wired,
+        multi_draw_indirect_aaa_ready: false,
+        bindless_layout_scaffold: indirect_draw_wired,
+        bindless_aaa_ready: false,
         reasons,
         held_vs_ue_rhi: held_vs_ue_baseline(),
         nanite_ready: false,
@@ -534,11 +597,15 @@ fn present_probe_on_secondary_window(frames_requested: u32) -> RendererPresentPr
         unreal_rhi_parity_ready: false,
         letter: "cw3-present".into(),
         note: if presented {
-            "Desktop soak: secondary winit engine frame skeleton (cull+present) proven — live_present eligible for honesty role; UE RHI / WebView exclusive / Nanite/Lumen/Micro-Poly AAA still HELD".into()
+            "Desktop soak: secondary winit cull→draw_indirect frame skeleton proven — live_present eligible; UE RHI / WebView exclusive / MULTI_DRAW_INDIRECT AAA / Nanite/Lumen/Micro-Poly still HELD".into()
         } else {
             "Present/submit probe did not present — honesty stays experimental_mount".into()
         },
     }
+}
+
+fn presented_ok(frames_presented: u32, indirect_draws: u32) -> bool {
+    frames_presented > 0 && indirect_draws == frames_presented
 }
 
 /// Run present/submit soak (secondary controlled window). Thread-isolated EventLoop.
@@ -617,6 +684,10 @@ mod tests {
         assert!(!r.micro_poly_aaa_ready);
         assert!(!r.unreal_rhi_parity_ready);
         assert!(!r.engine_frame_loop_with_cull);
+        assert!(!r.indirect_draw_wired);
+        assert!(!r.multi_draw_indirect_aaa_ready);
+        assert!(!r.bindless_layout_scaffold);
+        assert!(!r.bindless_aaa_ready);
         assert_eq!(r.cull_dispatches, 0);
         assert!(r.webview_exclusive_present_held);
         assert!(!r.cpu_readback_on_hot_path);
@@ -632,6 +703,8 @@ mod tests {
         assert!(!r.lumen_ready);
         assert!(!r.micro_poly_aaa_ready);
         assert!(!r.unreal_rhi_parity_ready);
+        assert!(!r.multi_draw_indirect_aaa_ready);
+        assert!(!r.bindless_aaa_ready);
         assert!(r.webview_exclusive_present_held);
         assert!(!r.cpu_readback_on_hot_path);
         assert!(r.frames_requested <= MAX_PRESENT_SOAK_FRAMES);
@@ -646,10 +719,16 @@ mod tests {
             assert!(r.engine_frame_loop_with_cull);
             assert_eq!(r.cull_dispatches, r.frames_presented);
             assert!(r.frame_ms_total >= 0.0);
+            // indirect_draw_wired only when frustum evidence also matched
+            if r.cull_frustum_ok {
+                assert!(r.indirect_draw_wired);
+                assert!(r.bindless_layout_scaffold);
+            }
             assert!(!r.backend.is_empty());
             assert!(!r.adapter_name.is_empty());
         } else {
             assert_eq!(r.frames_presented, 0);
+            assert!(!r.indirect_draw_wired);
             assert!(!r.reasons.is_empty());
         }
         assert!(!r.held_vs_ue_rhi.is_empty());
@@ -661,5 +740,6 @@ mod tests {
         assert_eq!(r.frames_requested, 1);
         assert!(!r.unreal_rhi_parity_ready);
         assert!(!r.micro_poly_aaa_ready);
+        assert!(!r.multi_draw_indirect_aaa_ready);
     }
 }

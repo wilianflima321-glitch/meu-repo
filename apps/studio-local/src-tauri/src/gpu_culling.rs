@@ -98,9 +98,9 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 "#;
 
 // `dispatch` / `GpuCullingPersistentPass` are exercised by IPC soaks and by the
-// secondary-window engine frame skeleton in `wgpu_renderer.rs` (clear+submit+present
-// with one cull encode per frame). Product WebView exclusive present + Hi-Z +
-// MultiDrawIndirect remain HELD — see present honesty docs. Never claim Nanite.
+// secondary-window engine frame skeleton in `wgpu_renderer.rs` (cull → pack
+// DrawIndirectArgs → draw_indirect → clear/submit/present). Product WebView
+// exclusive present + Hi-Z + true MULTI_DRAW_INDIRECT AAA remain HELD.
 pub struct GpuCullingPipeline {
     pub pipeline: wgpu::ComputePipeline,
     pub bind_group_layout: wgpu::BindGroupLayout,
@@ -116,7 +116,6 @@ pub struct GpuCullingPersistentPass {
     object_buffer: wgpu::Buffer,
     #[allow(dead_code)]
     frustum_buffer: wgpu::Buffer,
-    #[allow(dead_code)]
     visible_indices_buffer: wgpu::Buffer,
     visible_count_buffer: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
@@ -216,6 +215,16 @@ impl GpuCullingPersistentPass {
         pass.set_bind_group(0, &self.bind_group, &[]);
         let workgroups = self.object_count.div_ceil(64);
         pass.dispatch_workgroups(workgroups, 1, 1);
+    }
+
+    /// Binding for indirect-pack compute (visible instance count).
+    pub fn visible_count_binding(&self) -> wgpu::BindingResource<'_> {
+        self.visible_count_buffer.as_entire_binding()
+    }
+
+    /// Binding for VS bindless-layout lookup (compacted visible object indices).
+    pub fn visible_indices_binding(&self) -> wgpu::BindingResource<'_> {
+        self.visible_indices_buffer.as_entire_binding()
     }
 
     /// Post-loop evidence only — maps the GPU atomic count (not present hot path).
@@ -461,7 +470,8 @@ pub struct GpuCullingSoakReport {
     pub frame_ms_max: f64,
     pub frame_ms_mean: f64,
     pub frame_ms_total: f64,
-    /// Always false — Hi-Z / indirect draw not wired to product render pass.
+    /// Always false until secondary present soak proves `draw_indirect` (see wgpu_renderer).
+    /// Headless multi-frame cull soak does not flip this — no present/draw path here.
     pub indirect_draw_wired: bool,
     pub nanite_ready: bool,
     pub micro_poly_aaa_ready: bool,
