@@ -198,6 +198,7 @@ pub mod autonomous_entropy_corrector;
 pub mod sonic_impedance_protocol;
 pub mod quantum_snapshot_dna;
 pub mod kernel_honesty;
+pub mod substrate_deterministic_replay;
 pub mod desktop_soak;
 pub mod raymarching_volumetric_renderer;
 pub mod self_healing_runtime_daemon;
@@ -299,6 +300,9 @@ pub mod async_bvh_ray_tracer;
 pub mod heterogeneous_hardware_fallback_matrix;
 
 
-
-
-
+pub mod physics_kernel;
+pub mod ipc_zero_copy_ws;
+#[cfg(feature = "wgpu-bridge")]
+pub mod nanite_wgpu_bridge;
+#[cfg(feature = "wgpu-bridge")]
+pub mod radiance_cascades_wgpu_bridge;

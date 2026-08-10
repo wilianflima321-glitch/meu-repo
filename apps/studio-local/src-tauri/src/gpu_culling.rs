@@ -19,6 +19,7 @@
 //! standalone module doesn't own. Nanite-style virtualized geometry/cluster
 //! LOD selection is a much larger, separate system on top of this.
 use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /// One entry per object in the world; matches the WGSL `ObjectBounds`
@@ -96,11 +97,9 @@ fn cull_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 "#;
 
-// `dispatch` (below) is the only reader of these fields; it isn't called yet because
-// GPU-driven culling isn't wired into a live per-frame render loop (present/submit is
-// still CW3 Path A secondary-window only — see `wgpu_renderer.rs` present honesty docs).
-// Transitive dead-code analysis flags both the unused method and the fields it reads.
-#[allow(dead_code)]
+// `dispatch` is exercised by the IPC soak probe below; it is not yet wired into
+// a live per-frame render loop (present/submit is still CW3 Path A secondary-window
+// only — see `wgpu_renderer.rs` present honesty docs).
 pub struct GpuCullingPipeline {
     pub pipeline: wgpu::ComputePipeline,
     pub bind_group_layout: wgpu::BindGroupLayout,
@@ -182,7 +181,6 @@ impl GpuCullingPipeline {
     /// the surviving instance count back to the CPU (useful for debug HUDs
     /// and tests; the render pass itself should prefer `draw_indirect`
     /// straight off the GPU-written counter buffer to avoid this readback).
-    #[allow(dead_code)]
     pub fn dispatch(
         &self,
         device: &Arc<wgpu::Device>,
@@ -286,6 +284,165 @@ impl GpuCullingPipeline {
         readback_indices.unmap();
         result
     }
+}
+
+/// Structured evidence for GPU frustum culling soak (IPC + agent tooling).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct GpuCullingSoakReport {
+    pub gpu_culling_frustum_ready: bool,
+    pub adapter_acquired: bool,
+    pub device_created: bool,
+    pub frustum_test_passed: bool,
+    pub visible_count: u32,
+    pub expected_visible: u32,
+    pub total_objects: u32,
+    pub adapter_name: String,
+    pub backend: String,
+    /// Always false — Hi-Z / indirect draw not wired to render pass.
+    pub indirect_draw_wired: bool,
+    pub nanite_ready: bool,
+    pub micro_poly_aaa_ready: bool,
+    pub letter: String,
+    pub note: String,
+    pub reasons: Vec<String>,
+}
+
+fn identity_frustum(count: u32) -> CullingFrustum {
+    CullingFrustum {
+        planes: [
+            [1.0, 0.0, 0.0, 10.0],
+            [-1.0, 0.0, 0.0, 10.0],
+            [0.0, 1.0, 0.0, 10.0],
+            [0.0, -1.0, 0.0, 10.0],
+            [0.0, 0.0, 1.0, 10.0],
+            [0.0, 0.0, -1.0, 10.0],
+        ],
+        object_count: count,
+        occlusion_enabled: 0,
+        _padding: [0, 0],
+    }
+}
+
+fn fail_gpu_culling_report(reasons: Vec<String>) -> GpuCullingSoakReport {
+    GpuCullingSoakReport {
+        gpu_culling_frustum_ready: false,
+        adapter_acquired: false,
+        device_created: false,
+        frustum_test_passed: false,
+        visible_count: 0,
+        expected_visible: 4,
+        total_objects: 8,
+        adapter_name: String::new(),
+        backend: String::new(),
+        indirect_draw_wired: false,
+        nanite_ready: false,
+        micro_poly_aaa_ready: false,
+        letter: "cull-soak".into(),
+        note: "GPU frustum culling soak failed — gpuCullingFrustumReady stays false".into(),
+        reasons,
+    }
+}
+
+/// Runs one real wgpu compute dispatch and verifies in-frustum vs out-frustum counts.
+pub fn run_gpu_culling_frustum_soak() -> GpuCullingSoakReport {
+    let objects = [
+        ObjectBounds { center: [0.0, 0.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [5.0, 0.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [0.0, 5.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [0.0, 0.0, 5.0], radius: 1.0 },
+        ObjectBounds { center: [50.0, 0.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [-50.0, 0.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [0.0, 50.0, 0.0], radius: 1.0 },
+        ObjectBounds { center: [0.0, 0.0, 50.0], radius: 1.0 },
+    ];
+    let expected_visible = 4u32;
+    let total_objects = objects.len() as u32;
+
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::all(),
+        ..Default::default()
+    });
+
+    let adapter = match pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+        power_preference: wgpu::PowerPreference::HighPerformance,
+        compatible_surface: None,
+        force_fallback_adapter: false,
+    })) {
+        Some(a) => a,
+        None => {
+            return fail_gpu_culling_report(vec![
+                "No wgpu adapter available for GPU culling soak".into(),
+            ]);
+        }
+    };
+
+    let info = adapter.get_info();
+    let adapter_name = info.name.clone();
+    let backend = format!("{:?}", info.backend);
+
+    let (device, queue) = match pollster::block_on(adapter.request_device(
+        &wgpu::DeviceDescriptor {
+            label: Some("Aethel GPU Culling Soak Device"),
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+        },
+        None,
+    )) {
+        Ok(dq) => dq,
+        Err(e) => {
+            let mut r = fail_gpu_culling_report(vec![format!("request_device failed: {e}")]);
+            r.adapter_acquired = true;
+            r.adapter_name = adapter_name;
+            r.backend = backend;
+            return r;
+        }
+    };
+
+    let device = Arc::new(device);
+    let queue = Arc::new(queue);
+    let pipeline = GpuCullingPipeline::new(&device);
+    let frustum = identity_frustum(total_objects);
+    let visible = pipeline.dispatch(&device, &queue, &objects, frustum);
+    let visible_count = visible.len() as u32;
+    let frustum_test_passed = visible_count == expected_visible;
+
+    let mut reasons = Vec::new();
+    if !frustum_test_passed {
+        reasons.push(format!(
+            "expected {expected_visible} visible objects, got {visible_count}"
+        ));
+    }
+
+    let gpu_culling_frustum_ready = frustum_test_passed;
+    GpuCullingSoakReport {
+        gpu_culling_frustum_ready,
+        adapter_acquired: true,
+        device_created: true,
+        frustum_test_passed,
+        visible_count,
+        expected_visible,
+        total_objects,
+        adapter_name,
+        backend,
+        indirect_draw_wired: false,
+        nanite_ready: false,
+        micro_poly_aaa_ready: false,
+        letter: "cull-soak".into(),
+        note: if gpu_culling_frustum_ready {
+            "GPU frustum compute culling soak passed — gpuCullingFrustumReady true; Hi-Z/indirect-draw/Nanite AAA HELD"
+                .into()
+        } else {
+            "GPU frustum culling soak failed — see reasons".into()
+        },
+        reasons,
+    }
+}
+
+/// Tauri IPC — GPU frustum culling soak (functional backend probe).
+#[tauri::command]
+pub fn probe_gpu_culling_frustum_soak_cmd() -> GpuCullingSoakReport {
+    run_gpu_culling_frustum_soak()
 }
 
 #[cfg(test)]

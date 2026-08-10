@@ -143,10 +143,12 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
             NativeKernelCapability {
                 id: "gpu-driven-culling-contract",
                 label: "GPU-driven frustum compute culling contract",
-                state: NativeKernelState::Available,
+                state: NativeKernelState::NeedsReview,
                 evidence_refs: vec!["src-tauri/src/gpu_culling.rs"],
-                blocker: None,
-                next_action: "Wire GpuCullingPipeline output into indirect draw calls.",
+                blocker: Some(
+                    "Frustum compute dispatch proven via IPC soak; not wired into live per-frame render loop or indirect draw.",
+                ),
+                next_action: "Wire culling output into indirect draw after unified present loop (CW3 Path A product viewport).",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",

@@ -4,6 +4,8 @@ pub mod contracts;
 pub mod daemon;
 /// Unified SoA from `aethel-kernel-rust` (letter dc).
 pub mod ecs_core;
+/// Kernel foundation honesty IPC (letter dc — agents/tools probe).
+pub mod kernel_foundation_honesty_wire;
 pub mod ecs_parallel;
 pub mod gameplay_ability_system;
 pub mod geometry_clusterizer;

@@ -67,6 +67,8 @@
 | 2026-08-10 e2b-dep-j7-intake | Backend-only — `e2b` workspace install + J.7 `usd-stage-intake` fail-closed (OpenUSD HELD) | **PARTIAL** deepen; `e2b@^2.0.1` resolved in node_modules (`probeE2BRemotePtySdk` loadable); `usd-stage-intake.ts` byte classify + HELD reasons + `.usdc` intake; tests **38/38** targeted (e2b **7/7** + j7 intake **8/8** + regression); live E2B PTY soak + OpenUSD C++ stage **HELD**; Hub checkout **false** |
 | 2026-08-10 fc-cw2-cw7-backend | Backend-only — Firecracker honesty probe + CW2/CW7 truth matrix rows + swarm scale gate | **PARTIAL** deepen; `forge-sandbox-honesty.ts` + `/api/runtime/forge-sandbox-honesty` (firecracker **HELD** always); `kernel-load-scale-honesty.ts` + `disk-austerity-honesty.ts`; truth matrix rows `forge.sandbox.providers` / `kernel.load-scale.cw2` / `disk.austerity.cw7`; `SWARM_MAX_PARALLEL_CELLS=5` fail-closed; preview-runtime-readiness blocks `AETHEL_PREVIEW_PROVIDER=firecracker`; tests **22/22** new+matrix+swarm cap (+ L1 **11/11**); Hub checkout **false** |
 | 2026-08-10 onda-n-quant-honesty | Backend-only — Onda N Quant Finance honesty audit + fail-closed probe (letter **nf**) | **HELD** — spec v2.9 binding intent only; **zero** production trading/HFT modules; legacy cli PaperExchange dead code; `quant-finance-honesty.ts` + `/api/runtime/quant-finance-honesty` + CW1 row `quant.finance.onda-n`; tests **4/4**; investment-grade **false**; Hub checkout **false** |
+| 2026-08-10 onda-n-p0-cores | Backend-only — Onda N N1 vault isolation + N2 paper quarantine + N3 trade audit ledger | **PARTIAL** — `lib/server/quant/` fail-closed TS cores; live blocked until walk-forward PASS; honesty probe reports ondaNCores **3/3**; tests **16/16** targeted; investment-grade **false**; Hub checkout **false** |
+| 2026-08-10 rust-backend-ipc-soak | Rust/backend IPC + compile hygiene (no UI) | **PARTIAL** deepen — functional agent/runtime probes re-registered; GPU culling dispatch IPC soak; kernel wgpu optional `wgpu-bridge`; gates green; studio-local test harness STATUS_ENTRYPOINT_NOT_FOUND unchanged; Onda G deferred |
 
 ---
 
@@ -704,7 +706,7 @@ Two independent audits recorded here (documentation alignment only this round �
 | Area | Evidence | Honest status |
 |------|----------|---------------|
 | **Desktop PBR render stack** | Staged `apps/studio-local/src-tauri/src/rendering/*` (PBR forward, shadow, skybox, gltf_loader, nanite/bindless compute scaffolds) + `wgpu_renderer.rs` refactor | **PARTIAL** — still uncommitted Onda G scaffold; **do not** treat Law XI gate restore as AAA ship |
-| **Kernel wire hygiene / Law XI Rust gates** | WIP `distinct_from_peers_note` corruption across ~90 `kernel_*_wire.rs` (bad `r.field` + orphaned post-call inserts + struct-def initializer syntax) blocked `cargo check` | **RESTORED 2026-08-08 (P2c)** — wires use wire-local `"distinct".into()`; `gpu_culling_compute` exported CPU-soak-only (no wgpu dep); `ipc_zero_copy_ws` spawn HELD in `main.rs`. Gates: `cargo check` + `cargo clippy -- -D warnings` **green**; `cargo test --lib` → known `STATUS_ENTRYPOINT_NOT_FOUND` (0xc0000139) harness non-regression |
+| **Kernel wire hygiene / Law XI Rust gates** | WIP `distinct_from_peers_note` corruption across ~90 `kernel_*_wire.rs` (bad `r.field` + orphaned post-call inserts + struct-def initializer syntax) blocked `cargo check` | **RESTORED 2026-08-08 (P2c)** — wires use wire-local `"distinct".into()`; `gpu_culling_compute` exported CPU-soak-only (no wgpu dep); `ipc_zero_copy_ws` spawn HELD in `main.rs`. **2026-08-10 deepen:** kernel `wgpu` → optional `wgpu-bridge` feature (default off) so studio-local wgpu 0.20 compiles; functional IPC probes re-registered (~25→~37 commands, not full ~91 surface). Gates: `cargo check` + `cargo clippy -- -D warnings` **green**; kernel `cargo test --lib` **895/895**; studio-local `cargo test --lib` → known `STATUS_ENTRYPOINT_NOT_FOUND` (0xc0000139) harness non-regression |
 | **XPBD native compute** | `physics/xpbd_compute.wgsl`, `xpbd_native_compute.rs` (untracked) | **SCAFFOLD** — not wired to playtest honesty |
 | **J.11 ACP / J.12 OrchestratorProd** | Untracked `agent-control-protocol.ts`, `orchestrator-prod.ts` (~150 LoC JSON-RPC scaffold) | **WORKING TREE ONLY** — **Founder STOP (Pacto 2026-07-11ak) remains binding**; no Vitest, no CostGuard wire, no production dispatch — do **not** lift STOP without Founder sign-off + full J.12 acceptance |
 | **L.2 DevContainerManifest** | on-disk `.aethel/devcontainer.json` persist + L.9/commit-gate | **DONE (core)** — this round |
@@ -1150,14 +1152,17 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 
 ## Onda N — Quantitative Finance honesty (2026-08-10)
 
-**Verdict:** **NOT investment-ready.** The Quant Finance Spec v2.9 is **binding architecture intent** with **~0% production implementation** in the live product tree. Do **not** market Vanguard Quant, HFT, Wall Street parity, or autonomous trading.
+**Verdict:** **NOT investment-ready.** N1–N3 P0 TypeScript cores shipped (**PARTIAL**); full investment-grade still requires N5 Rust risk kernel, licensed L2 feed, paper soak, and legal sign-off. Do **not** market Vanguard Quant, HFT, Wall Street parity, or autonomous trading.
 
 | Gate | Status | Evidence |
 |------|--------|----------|
 | `vanguardQuantReady` | **false** | `lib/production/quant-finance-honesty.ts` letter **nf** |
-| `investmentGrade` | **false** | No paper quarantine, audit trail, licensed L2 feed, or exchange adapter |
-| Marketing Vanguard / HFT | **blocked** | CW1 row `quant.finance.onda-n` → NOT_IMPLEMENTED |
+| `investmentGrade` | **false** | N2 quarantine + N3 audit exist; no broker adapter, L2 feed, or N5 soak |
+| Marketing Vanguard / HFT | **blocked** | CW1 row `quant.finance.onda-n` → **PARTIAL** (N1–N3 only) |
 | Live probe | **wired** | `GET /api/runtime/quant-finance-honesty` (auth required) |
+| N1 vault isolation | **PARTIAL** | `lib/server/quant/finance-domain-vault.ts` |
+| N2 paper quarantine | **PARTIAL** | `lib/server/quant/paper-trading-kernel.ts` — `live=false` default |
+| N3 trade audit ledger | **PARTIAL** | `lib/server/quant/trade-audit-ledger.ts` |
 
 ### Spec mandate → code reality (gap matrix)
 
@@ -1168,15 +1173,15 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | Rust headless order kernel (<5ms claim) | **MISSING** | No order router in `aethel-kernel-rust` or studio-local |
 | FIX / SBE binary gateway | **MISSING** | Zero FIX session code |
 | Risk limits / kill-switch / max drawdown | **MISSING** | `high-risk-action-firewall.ts` blocks agent trade *text* only |
-| Paper-trading quarantine (§22.A) | **MISSING** | Legacy `aethel-cli-legacy` PaperExchange — dead code |
+| Paper-trading quarantine (§22.A) | **PARTIAL** | `lib/server/quant/paper-trading-kernel.ts` — walk-forward gate blocks live |
 | VectorIndex 20yr pattern backtest | **PARTIAL** | J.4 index = code/scene embeddings, not OHLCV |
 | Mini-IA ONNX + GPU tick ring | **HELD** | ORT fixture (letter da) HELD for text-to-3d; no finance model |
 | Maestro pulse + veto (VPIN/regime) | **PARTIAL** | Creative Maestro exists; no finance scheduler/veto |
 | Mathematical Evidence Report (Cap'n Proto) | **MISSING** | No zero-copy quant evidence bus |
 | Blind Brain key vault (Rust AES) | **MISSING** | BYOK = LLM keys; no exchange secret vault |
 | P2P market-data mesh | **MISSING** | Spec §17 red-team rejects; no libp2p market module |
-| Regulatory audit trail | **MISSING** | AI task ledger ≠ trade lifecycle audit |
-| Domain isolation finance vs games | **PARTIAL** | L.14 multi-surface context — no finance project vault type |
+| Regulatory audit trail | **PARTIAL** | `lib/server/quant/trade-audit-ledger.ts` — append-only hash chain + clockDriftMs |
+| Domain isolation finance vs games | **PARTIAL** | `lib/server/quant/finance-domain-vault.ts` — sealed scope + capital pool gates |
 | Law XVI CostGuard vs trading PnL | **CONFLICT** | CostGuard settles AI credits — not broker margin/PnL |
 | Hub Coins vs exchange capital | **CONFLICT** | H.0 Coins **HELD** — must not conflate with strategy capital |
 
@@ -1192,9 +1197,9 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | Pri | ID | Work | Acceptance |
 |-----|-----|------|------------|
 | **P0** | N0 | **Honesty probe + CW1 row** (letter nf) | **DONE-core** 2026-08-10 — probe + API + tests + truth matrix |
-| **P0** | N1 | Finance project domain type + L.14 vault isolation | Finance context never merges with game Yjs scopes; fail-closed type gate |
-| **P0** | N2 | Paper-trading kernel + walk-forward quarantine gate | No live capital until paper soak passes; migrate off cli-legacy types into `@/lib/production/` |
-| **P0** | N3 | Trade audit ledger (order intent → risk check → paper/live) | Append-only, clock-drift field, distinct from AI task-evidence-ledger |
+| **P0** | N1 | Finance project domain type + L.14 vault isolation | **DONE-core** 2026-08-10 — `finance-domain-vault.ts` + tests |
+| **P0** | N2 | Paper-trading kernel + walk-forward quarantine gate | **DONE-core** 2026-08-10 — `paper-trading-kernel.ts`; live blocked until PASS |
+| **P0** | N3 | Trade audit ledger (order intent → risk check → paper/live) | **DONE-core** 2026-08-10 — `trade-audit-ledger.ts` hash chain + tests |
 | **P1** | N4 | Market-data ingest adapter (read-only REST/WS sandbox) | Normalized tick schema + Z-score outlier filter (§12.C); no execution |
 | **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | Kernel rejects before network; pairs with N3 audit |
 | **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | Wire fe pattern to finance tick path; J.4 domain tag `market-pattern` |
@@ -1235,6 +1240,7 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 |------|--------|
 | 2026-08-08 r12-cw5-storybook | Commit: `060e3a69f`. **R12 / CW5 Storybook token government deepen (PARTIAL; Figma HELD).** `qa:storybook-token-sync` fail-closed over **48** stories (`web/components` + `packages/ide-ui`) — rejects hex/rgb + Tailwind default-palette theater. Storybook `main.ts` globs ide-ui; coverage ratchet includes ide-ui (≥2). Tokenized AgentsWindow / ViewportWorkbenchShell / RemoteCursorLayer story chrome to `var(--aethel-*)`. Honesty: `cw5-figma-honesty.ts` — `CW5_STORYBOOK_TOKEN_SYNC_READY=true`, `CW5_FIGMA_TOKEN_GOVERNMENT_READY=false` (no live Figma Variables/MCP empire claim). Tests: storybook-token-sync **4/4**; gates green. Remaining CW5 OPEN: broader critical-surface story matrix + real Figma sync. Hub checkout HELD. No Onda G. |
 | 2026-08-08 r21-r22-monaco-acl | Commit: `09d988b71`. **R21 Monaco shell mount + R22 terminal_* agent ACL DONE-core (desktop).** Monaco: `MonacoCodeEditorPanel` + `lspFarmMonacoBridge` mounted in StudioLocalApp Scene & Tools; hover/definition/didChange ↔ L.13 `lsp_farm` IPC; fail-closed when farm HELD (no fake tips). R22: `agent_shell_acl.rs` + `terminal_*`/`terminal_acl_probe` registered; agent/`agentTool`/`agentId` → `AGENT_HOST_PTY_DENIED` Law #48 evidence; human UI `callerKind=user`. Deps: `monaco-editor` + `@monaco-editor/react`. **Gates:** CARGO_TARGET_DIR=E:\aethel-target-gnu — `cargo check` + `cargo clippy -- -D warnings` **green**; `cargo test` link harness `-lshlwapi` known non-regression. Hub checkout HELD. No Onda G. Remaining desktop OPEN: R21 wgpu present-in-WebView + dock/outliner/undock; R6 live LSP acceptance. |
+| 2026-08-10 rust-backend-ipc-soak | **Rust/backend IPC + compile hygiene (no UI).** Re-registered functional agent/runtime probes (`local_runtime_*`, `native_kernel_manifest`, `jobs_*`, `probe_kernel_foundation_cmd`, PBD/micro-poly cull, `probe_gpu_culling_frustum_soak_cmd`); `GpuCullingPipeline::dispatch` exercised via IPC soak (not render loop). Kernel: `wgpu` optional feature `wgpu-bridge` (default off) fixes studio-local wgpu 0.20 vs kernel wgpu 30 clash; `kernel_honesty` Serialize; clippy `quantum_rollback_netcode`. **Gates:** `CARGO_TARGET_DIR=E:\aethel-target-gnu` — kernel + studio-local `cargo check` + `cargo clippy -- -D warnings` **green**; kernel `cargo test --lib` **895/895**; studio-local `cargo test --lib` → **STATUS_ENTRYPOINT_NOT_FOUND** (0xc0000139) harness **unchanged**. Onda G deferred: unified frame loop, `rendering/*` unwired, ~85 kernel wires still off handler. |
 | 2026-08-08 j-l-debt-close | Commit: `84ea735a6`. **J/L product debt deepen (3 closures).** (1) **Timeline→GAS:** `timeline-gas-cue-bridge.ts` arms in-process `GameplayCueDispatcher` from event cue bus; `eventName` authoring; CanvasViewportSurface enables for non-demo; desktop GAS IPC stays **HELD**. (2) **J.7 USDA:** `usda-preview-hierarchy.ts` ASCII prim/extent → hierarchy wireframe boxes; drop intake attaches `usdaHierarchy` without meshUrl; shipStatus USDA/USDC remains **HELD** (not OpenUSD theater). (3) **L.9 L-ACC-04:** `l9-scaffold-soak.ts` fail-closed measured p50/p95 (`evidenceStatus:held` with zero samples); instrumented `scaffoldAndPreviewProject`; `proveL9ScaffoldSoakReady` requires ≥20 under-budget successes. Tests: gas-bridge **4/4** + usda **5/5** + soak **5/5** (+1 skipped) + j7/event/scene-apply regression **37/37** targeted (1 skipped). Hub checkout HELD. No J.11/J.12. No Onda G. |
 | 2026-08-08 desktop-ux-honesty | **Desktop Studio Local UX honesty PARTIAL (theater purge).** Audited StudioLocalApp + panels vs UE Editor / native IDE bar. **P0 theater killed:** Cinema Compositor (ProRes/fake FPS/alert export), Telepathic Drone (fake CoVe/PT-BR), Sentinel (hardcoded WASM RUNNING / happiness %), Aesthetic "NPR KERNEL ACTIVE", HardwareProfiler fabricated RTX 3060 Tier-2 VRAM, FpsOverlayBadge default 60 FPS. **Fixes:** fail-closed honesty panels (EN + var(--aethel-*)); Sentinel to live hardware_profiler; new LspFarmStatusPanel (lsp_farm_honesty/probe); default tab to Scene and Tools; Terminal human-only Law #48 badge; egui overlay copy = debug scaffold not telemetry; pty_commands human-lane doc. **Gates:** CARGO_TARGET_DIR=E:\aethel-target-gnu — cargo check + cargo clippy -- -D warnings **green**. **No Onda G** wiring / no pub mod rendering / Hub checkout HELD. Remaining desktop OPEN: R21 present-in-product + Monaco shell mount; R6 live LSP acceptance; R22 agent ACL on terminal_*. |
 | 2026-08-08 docs-honesty-gap | **Docs-only honesty alignment (no new MD; no product code).** Ruthless critique: (overclaim) Master Map CW6 still implied Composer-surpass posture while code `COMPOSER_SURPASS_CLAIM=false`; Master UX §0 Timeline still said scrub OPEN after scrub/material UNHELD; “Universal IDE / AI-native / ready to sell” must stay marketing-forbidden. (underclaim) Instant Play+I.2+Law XV+R18, L.10 green, L.12 100%, H.1+ tech modules, Timeline material/event bus, L.8 remote detect — already shipped as DONE-core/PARTIAL correctly in Progress but under-signaled in Index scorecard narrative. Synced Progress Remaining OPEN + Top-15 + competitor gap; Master Map §0c gap table + 1.4n; Index scorecard; Master UX §0 Timeline/Terminal + competitor table. Hub checkout HELD. Onda G deferred. J.11/J.12 STOPPED. |

@@ -35,24 +35,15 @@ use aethel_studio_local::physics_kernel::PhysicsKernel;
 // were dropped. Re-wiring soak/probe kernel wires into `generate_handler!` remains a
 // deliberate follow-up (Onda G deferred — see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g).
 //
-// L.13 exception (2026-08-08): minimal `lsp_farm::*` commands are registered below
-// (honesty/probe/spawn/list/stop/ipc_probe) without re-expanding the cut kernel-wire
-// handler surface. Monaco desktop hover/definition acceptance stays OPEN.
+// L.13 exception (2026-08-08): minimal `lsp_farm::*` commands are registered below.
+// Functional agent/runtime + kernel honesty probes re-registered 2026-08-10 (not full ~91 wire surface).
 use aethel_studio_local::kernel_svo_terrain_world_partition_wire::*;
 use tauri::Manager;
 
-// NOTE (chore/preserve WIP, 2026-08-08): the runtime-probe / job-routing command
-// surface below (LOCAL_DEVICE_ID through jobs_cancel) is real, tested logic that
-// used to be registered in `generate_handler!` before the handler was trimmed.
-// It is intentionally left disconnected (not re-wired) in this preservation pass —
-// see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g. #[allow(dead_code)] silences the
-// resulting warnings honestly instead of inventing new call sites.
-#[allow(dead_code)]
 const LOCAL_DEVICE_ID: &str = "local-device";
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
 struct RuntimeProbeSummary {
     lane: String,
     available: bool,
@@ -62,7 +53,6 @@ struct RuntimeProbeSummary {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
 struct RuntimeRouteResponse {
     lane: String,
     reason: String,
@@ -71,7 +61,6 @@ struct RuntimeRouteResponse {
     requires_human_approval: bool,
 }
 
-#[allow(dead_code)]
 fn target_lane(target: RuntimeExecutionTarget) -> &'static str {
     match target {
         RuntimeExecutionTarget::LocalNative => "local-native",
@@ -83,7 +72,6 @@ fn target_lane(target: RuntimeExecutionTarget) -> &'static str {
     }
 }
 
-#[allow(dead_code)]
 fn job_state_label(state: RuntimeJobState) -> &'static str {
     match state {
         RuntimeJobState::Queued => "queued",
@@ -96,7 +84,6 @@ fn job_state_label(state: RuntimeJobState) -> &'static str {
     }
 }
 
-#[allow(dead_code)]
 fn parse_job_lane(kind: &str) -> Option<RuntimeJobLane> {
     let normalized = kind.trim().replace('_', "-").to_ascii_lowercase();
     match normalized.as_str() {
@@ -143,13 +130,11 @@ fn open_panel_window(app: tauri::AppHandle, label: String, title: String, panel:
     Ok(())
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_health() -> String {
     aethel_studio_local::daemon::health_body()
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_probe() -> RuntimeProbeSummary {
     let probe = collect_local_probe(LOCAL_DEVICE_ID);
@@ -167,26 +152,22 @@ fn local_runtime_probe() -> RuntimeProbeSummary {
     }
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_probe_report() -> LocalRuntimeProbeReport {
     collect_local_probe(LOCAL_DEVICE_ID)
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn local_runtime_sidecars() -> Vec<RuntimeSidecarCapability> {
     let probe = collect_local_probe(LOCAL_DEVICE_ID);
     build_sidecar_capability_manifest(&probe)
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn native_kernel_manifest() -> NativeKernelManifest {
     build_native_kernel_manifest()
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn jobs_route(
     kind: String,
@@ -215,7 +196,6 @@ fn jobs_route(
     })
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn jobs_list(store: State<'_, Mutex<RuntimeJobStore>>) -> Result<Vec<RuntimeJobStatus>, String> {
     let store = store
@@ -224,7 +204,6 @@ fn jobs_list(store: State<'_, Mutex<RuntimeJobStore>>) -> Result<Vec<RuntimeJobS
     Ok(store.list())
 }
 
-#[allow(dead_code)]
 #[tauri::command]
 fn jobs_cancel(
     job_id: String,
@@ -410,6 +389,7 @@ fn main() {
             scene_graph::scene_update_transform,
             scene_graph::scene_add_node,
             scene_graph::scene_remove_node,
+            scene_graph::scene_reparent,
             mmap_commands::mmap_open,
             mmap_commands::mmap_read_range,
             mmap_commands::mmap_close,
@@ -443,7 +423,21 @@ fn main() {
             aethel_studio_local::plugin_sandbox::execute_sandbox_plugin,
             aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
             aethel_studio_local::plugin_sandbox::export_vibe_embedding,
-            aethel_studio_local::plugin_sandbox::register_user_aesthetic_override
+            aethel_studio_local::plugin_sandbox::register_user_aesthetic_override,
+            // Agent/runtime probes (functional backend — not full kernel-wire surface)
+            local_runtime_health,
+            local_runtime_probe,
+            local_runtime_probe_report,
+            local_runtime_sidecars,
+            native_kernel_manifest,
+            jobs_route,
+            jobs_list,
+            jobs_cancel,
+            aethel_studio_local::kernel_foundation_honesty_wire::probe_kernel_foundation_cmd,
+            aethel_studio_local::kernel_micro_poly_cull_wire::probe_micro_poly_cull_cmd,
+            aethel_studio_local::kernel_position_based_dynamics_wire::probe_position_based_dynamics_cmd,
+            aethel_studio_local::kernel_position_based_dynamics_wire::run_kernel_position_based_dynamics_soak_cmd,
+            gpu_culling::probe_gpu_culling_frustum_soak_cmd,
         ])
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");

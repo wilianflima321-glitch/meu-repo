@@ -8,8 +8,10 @@ use crate::quantum_snapshot_dna::{MutEvent, MutOp, QuantumSnapshotDna};
 use crate::recursive_state_branching::RecursiveStateBranching;
 use crate::sonic_impedance_protocol::SonicImpedanceProtocol;
 use crate::spectral_participating_media::SpectralParticipatingMedia;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct KernelHonestyReport {
     pub world_soa_ready: bool,
     pub frame_arena_ready: bool,
