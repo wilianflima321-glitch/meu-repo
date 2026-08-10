@@ -28,6 +28,8 @@ describe('shared substrate honesty', () => {
     expect(report.sf5Status).toBe('PARTIAL')
     expect(report.sf6BlindBrainVaultReady).toBe(true)
     expect(report.sf6Status).toBe('PARTIAL')
+    expect(report.sf7FixFramingSpikeReady).toBe(true)
+    expect(report.sf7Status).toBe('PARTIAL')
     expect(report.monotonicTimebaseReady).toBe(true)
     expect(report.sharedSubstrateReady).toBe(true)
     expect(report.vanguardQuantFinanceReady).toBe(false)

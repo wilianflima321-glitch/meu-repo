@@ -18,6 +18,7 @@ import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-
 import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-vault-pack'
 import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
 import { probeBlindBrainVaultReadiness } from '@/lib/server/quant/blind-brain-vault'
+import { probeFixGatewaySpikeReadiness } from '@/lib/server/quant/fix-gateway-spike'
 
 export const VANGUARD_QUANT_FINANCE_READY = false as const
 export const FIX_PROTOCOL_READY = false as const
@@ -44,12 +45,16 @@ export interface SharedSubstrateHonestyReport {
   /** SF6 — Blind Brain AES vault (HSM still false). */
   sf6BlindBrainVaultReady: boolean
   sf6Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF7 — FIX framing spike only (licensed L2 / C2T / SBE still false). */
+  sf7FixFramingSpikeReady: boolean
+  sf7Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
   monotonicTimebaseReady: boolean
   /** Always false — Onda N / Vanguard Quant not implemented in kernel. */
   vanguardQuantFinanceReady: typeof VANGUARD_QUANT_FINANCE_READY
+  /** Always false — N9 frames FIX locally; no venue socket / session ready. */
   fixProtocolReady: typeof FIX_PROTOCOL_READY
   hftMarketingAllowed: typeof HFT_MARKETING_ALLOWED
   webReplayBaselineHash: string
@@ -96,7 +101,8 @@ function proveEvidenceAuditChainSample(): boolean {
 export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
   const notes: string[] = [
     'Shared substrate = determinism + replay + append-only evidence — not Vanguard Quant trading',
-    'vanguardQuantFinanceReady=false — no FIX/order book/HFT; Blind Brain AES PARTIAL (HSM HELD)',
+    'vanguardQuantFinanceReady=false — no live FIX session/order book/HFT; Blind Brain AES PARTIAL (HSM HELD); SF7 framing spike only',
+    'fixProtocolReady=false — N9 Logon/Heartbeat codec only; socket transmit + NewOrderSingle forbidden',
     '§23 silent shadow telemetry FORBIDDEN — consent-gated only; GPU Priority Mux HELD',
   ]
 
@@ -181,6 +187,17 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     notes.push(`sf6BlindBrainVaultReady PARTIAL — ${sf6.note}`)
   }
 
+  const sf7 = probeFixGatewaySpikeReadiness()
+  const sf7FixFramingSpikeReady = sf7.ready
+  const sf7Status: SharedSubstrateHonestyReport['sf7Status'] = sf7.status
+  if (!sf7FixFramingSpikeReady) {
+    notes.push('sf7FixFramingSpikeReady HELD — FIX framing spike probe failed')
+  } else {
+    notes.push(
+      `sf7FixFramingSpikeReady PARTIAL — ${sf7.note}; fixProtocolReady=false; licensed L2/C2T/SBE HELD`,
+    )
+  }
+
   const sampleLedger = appendChainedTaskEvidence(
     createTaskEvidenceLedger({
       taskId: 'substrate-fingerprint',
@@ -222,6 +239,8 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sf5Status,
     sf6BlindBrainVaultReady,
     sf6Status,
+    sf7FixFramingSpikeReady,
+    sf7Status,
     deterministicWebReplayReady,
     competitiveRollbackSoakReady: competitive.competitiveRollbackSoakReady,
     evidenceAuditChainReady,

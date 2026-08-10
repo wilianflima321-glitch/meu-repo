@@ -27,9 +27,9 @@ describe('quant finance honesty probe', () => {
     expect(report.heldReason).toBe('onda_n_p0_cores_partial_no_investment_grade')
   })
 
-  it('reports N1–N8 cores as PARTIAL after backend ship', () => {
+  it('reports N1–N9 cores as PARTIAL after backend ship', () => {
     const report = probeQuantFinanceHonesty()
-    expect(report.ondaNCores).toHaveLength(8)
+    expect(report.ondaNCores).toHaveLength(9)
     for (const core of report.ondaNCores) {
       expect(core.status).toBe('PARTIAL')
       expect(core.ready).toBe(true)
@@ -46,6 +46,8 @@ describe('quant finance honesty probe', () => {
     expect(report.substrateSf5.ready).toBe(true)
     expect(report.substrateSf6.status).toBe('PARTIAL')
     expect(report.substrateSf6.ready).toBe(true)
+    expect(report.substrateSf7.status).toBe('PARTIAL')
+    expect(report.substrateSf7.ready).toBe(true)
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
     expect(byId['domain-isolation-l14']?.status).toBe('PARTIAL')
     expect(byId['paper-trading-quarantine']?.status).toBe('PARTIAL')
@@ -57,6 +59,8 @@ describe('quant finance honesty probe', () => {
     expect(byId['mathematical-evidence-report']?.status).toBe('PARTIAL')
     expect(byId['mini-ia-onnx-finance']?.status).toBe('PARTIAL')
     expect(byId['blind-brain-key-vault']?.status).toBe('PARTIAL')
+    expect(byId['fix-protocol-bridge']?.status).toBe('PARTIAL')
+    expect(byId['fix-protocol-bridge']?.note).toMatch(/fixGatewayReady=false/)
   })
 
   it('marks non-ship execution paths NOT_IMPLEMENTED or HELD', () => {
@@ -64,7 +68,7 @@ describe('quant finance honesty probe', () => {
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
 
     expect(byId['order-execution-kernel']?.status).toBe('NOT_IMPLEMENTED')
-    expect(byId['fix-protocol-bridge']?.status).toBe('NOT_IMPLEMENTED')
+    expect(byId['fix-protocol-bridge']?.status).toBe('PARTIAL')
     expect(byId['gpu-priority-mux']?.status).toBe('HELD')
     expect(byId['non-custodial-invariants']?.status).toBe('PARTIAL')
     expect(byId['eula-risk-acceptance']?.status).toBe('PARTIAL')

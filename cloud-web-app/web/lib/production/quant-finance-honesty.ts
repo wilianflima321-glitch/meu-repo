@@ -39,6 +39,7 @@ import { probeQuantL14VaultPackReadiness } from '@/lib/server/quant/quant-l14-va
 import { probeHeadlessQuantRuntimeReadiness } from '@/lib/server/quant/headless-quant-runtime'
 import { probeBlindBrainVaultReadiness } from '@/lib/server/quant/blind-brain-vault'
 import { probeFinanceOnnxReadiness } from '@/lib/server/quant/finance-onnx-session'
+import { probeFixGatewaySpikeReadiness } from '@/lib/server/quant/fix-gateway-spike'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
 import { probeMonotonicTimebaseReadiness } from '@/lib/production/monotonic-timebase'
@@ -68,7 +69,7 @@ export type QuantFinanceCapabilityRow = {
 }
 
 export type OndaNCoreReadiness = {
-  id: 'N1' | 'N2' | 'N3' | 'N4' | 'N5' | 'N6' | 'N7' | 'N8'
+  id: 'N1' | 'N2' | 'N3' | 'N4' | 'N5' | 'N6' | 'N7' | 'N8' | 'N9'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -77,7 +78,7 @@ export type OndaNCoreReadiness = {
 }
 
 export type SubstrateSfReadiness = {
-  id: 'SF1' | 'SF2' | 'SF3' | 'SF4' | 'SF5' | 'SF6'
+  id: 'SF1' | 'SF2' | 'SF3' | 'SF4' | 'SF5' | 'SF6' | 'SF7'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -99,6 +100,7 @@ export type QuantFinanceHonestyReport = {
   substrateSf4: SubstrateSfReadiness
   substrateSf5: SubstrateSfReadiness
   substrateSf6: SubstrateSfReadiness
+  substrateSf7: SubstrateSfReadiness
   section23: {
     nonCustodial: ReturnType<typeof probeNonCustodialReadiness>
     eulaAcceptance: ReturnType<typeof probeEulaRiskAcceptanceReadiness>
@@ -261,6 +263,17 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
         note: n8.note,
       }
     })(),
+    (() => {
+      const n9 = probeFixGatewaySpikeReadiness()
+      return {
+        id: 'N9' as const,
+        label: 'FIX gateway spike (Logon/Heartbeat framing; no live orders)',
+        status: n9.status,
+        path: n9.path,
+        ready: n9.ready,
+        note: n9.note,
+      }
+    })(),
   ]
 }
 
@@ -339,6 +352,18 @@ function probeSubstrateSf6(): SubstrateSfReadiness {
   }
 }
 
+function probeSubstrateSf7(): SubstrateSfReadiness {
+  const sf7 = probeFixGatewaySpikeReadiness()
+  return {
+    id: 'SF7',
+    label: 'Institutional FIX framing spike (no licensed L2 / C2T)',
+    status: sf7.status,
+    path: sf7.path,
+    ready: sf7.ready,
+    note: sf7.note,
+  }
+}
+
 /** Static capability matrix — paths verified absent from production tree (2026-08-10). */
 function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantFinanceCapabilityRow[] {
   const n1 = ondaNCores.find((c) => c.id === 'N1')
@@ -349,6 +374,7 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
   const n6 = ondaNCores.find((c) => c.id === 'N6')
   const n7 = ondaNCores.find((c) => c.id === 'N7')
   const n8 = ondaNCores.find((c) => c.id === 'N8')
+  const n9 = ondaNCores.find((c) => c.id === 'N9')
 
   return [
     {
@@ -379,9 +405,11 @@ function buildQuantFinanceCapabilities(ondaNCores: OndaNCoreReadiness[]): QuantF
       id: 'fix-protocol-bridge',
       specSection: '§7 / §9.D',
       label: 'Binary FIX / SBE exchange gateway',
-      status: 'NOT_IMPLEMENTED',
-      path: null,
-      note: 'Spec claims FIX; zero FIX parser or session manager in repo.',
+      status: n9?.ready ? 'PARTIAL' : 'NOT_IMPLEMENTED',
+      path: n9?.path ?? 'lib/server/quant/fix-gateway-spike.ts',
+      note: n9?.ready
+        ? 'N9/SF7 FIX 4.4 Logon/Heartbeat framing + checksum; fixGatewayReady=false; SBE/licensed L2/live orders HELD.'
+        : 'Spec claims FIX; FIX gateway spike probe not ready.',
     },
     {
       id: 'risk-limits-kernel',
@@ -558,6 +586,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
   const substrateSf4 = probeSubstrateSf4()
   const substrateSf5 = probeSubstrateSf5()
   const substrateSf6 = probeSubstrateSf6()
+  const substrateSf7 = probeSubstrateSf7()
   const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
   const section23 = {
@@ -586,13 +615,14 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
 
   const notes = [
     `capabilities: ${capabilities.length} tracked; NOT_IMPLEMENTED=${notImplemented}.`,
-    `onda N cores ready=${p0Ready}/8 (N1–N7 + N8 finance ONNX probe).`,
+    `onda N cores ready=${p0Ready}/9 (N1–N8 + N9 FIX framing spike).`,
     `SF1 session tape: ${substrateSf1.status} — ${substrateSf1.note}`,
     `SF2 signed WORM: ${substrateSf2.status} — ${substrateSf2.note}`,
     `SF3 monotonic timebase: ${substrateSf3.status} — ${substrateSf3.note}`,
     `SF4 quant L.14 vault pack: ${substrateSf4.status} — ${substrateSf4.note}`,
     `SF5 headless runtime: ${substrateSf5.status} — ${substrateSf5.note}`,
     `SF6 Blind Brain AES vault: ${substrateSf6.status} — ${substrateSf6.note}`,
+    `SF7 FIX framing spike: ${substrateSf7.status} — ${substrateSf7.note}`,
     `§23 non-custodial: ${section23.nonCustodial.note}`,
     `§23 EULA: ${section23.eulaAcceptance.note}`,
     `§23 GPU mux: ${section23.gpuPriorityMux.note}`,
@@ -600,12 +630,14 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     `§23 attestation store: ${section23.acceptanceAttestation.note}`,
     `Dual-Mode Vanguard HFT: ${dualModeExecution.vanguardHftApi.note}`,
     `Dual-Mode Manus RPA: ${dualModeExecution.manusRpaBrowser.note}`,
-    'N1–N8 fail-closed cores — no FIX broker, licensed L2 feed, or live adapter; investmentGrade=false.',
+    'N1–N9 fail-closed cores — fixGatewayReady=false; no live broker, licensed L2, or SBE; investmentGrade=false.',
     'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd; paper/live-intent call Maestro then evaluateRisk.',
     'N6 SPSC tick ring + market-pattern VectorIndex domain — not 20yr/<1ms claim.',
     'N7 Maestro finance pulse veto-only — Mini-IA cannot submit; Cap\'n Proto math evidence HELD.',
     'N8 finance ONNX refuses inference without model bytes; financeOnnxReady=false; does not flip text-to-3d gate.',
+    'N9 FIX Logon/Heartbeat framing only — socket send + NewOrderSingle hard-blocked; home Wi-Fi ≠ colocation.',
     'SF6 Blind Brain AES-256-GCM local wrap — HSM/production custody HELD.',
+    'SF7 PARTIAL = N9 spike only — licensed L2 book / C2T / SBE / venue session HELD.',
     'N3 optional SF2 WORM sink — local durable OK; cloudMirror requires explicit consent (no silent telemetry).',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — text-to-3d da distinct from N8 financeOnnxReady.`,
@@ -633,6 +665,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     substrateSf4,
     substrateSf5,
     substrateSf6,
+    substrateSf7,
     section23,
     dualModeExecution,
     wedgeConflict,
