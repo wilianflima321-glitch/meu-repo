@@ -18,6 +18,8 @@ describe('shared substrate honesty', () => {
     expect(report.evidenceAuditChainReady).toBe(true)
     expect(report.sf1SessionTapeReady).toBe(true)
     expect(report.sf1Status).toBe('PARTIAL')
+    expect(report.sf2SignedWormReady).toBe(true)
+    expect(report.sf2Status).toBe('PARTIAL')
     expect(report.sharedSubstrateReady).toBe(true)
     expect(report.vanguardQuantFinanceReady).toBe(false)
     expect(report.fixProtocolReady).toBe(false)
@@ -26,6 +28,8 @@ describe('shared substrate honesty', () => {
     expect(report.evidenceLedgerFingerprint.length).toBeGreaterThan(0)
     expect(report.sessionTapeFingerprint.length).toBeGreaterThan(0)
     expect(report.sessionTapeEntryCount).toBeGreaterThanOrEqual(2)
+    expect(report.wormFingerprint.length).toBeGreaterThan(0)
+    expect(report.wormEntryCount).toBeGreaterThanOrEqual(2)
   })
 
   it('detects broken audit chain links', () => {

@@ -1233,7 +1233,8 @@ Zero-MVP, Anti-Hype ?0a, import shipped libs. One row until green.
 | **P0** | N3 | Trade audit ledger (order intent → risk check → paper/live) | **DONE-core** 2026-08-10 — `trade-audit-ledger.ts` hash chain + tests |
 | **P0** | N23 | §23 non-custodial + EULA + consent telemetry + mux honesty | **PARTIAL** 2026-08-10 — cores + APIs; mux/live broker/durable cloud WORM **HELD** |
 | **P1** | N4 | Market-data ingest adapter (read-only REST/WS sandbox) | **PARTIAL** 2026-08-10 — fail-closed + Z-score; no licensed feed |
-| **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | **PARTIAL** — kernel + web mirror; live hard-disabled |
+| **P1** | N5 | Rust risk envelope (max drawdown, leverage, kill-switch) | **PARTIAL** 2026-08-10 — `risk_envelope.rs` + IPC + web mirror; live hard-disabled; investmentGrade false |
+| **P1** | SF2 | Signed WORM evidence store | **PARTIAL** 2026-08-10 — HMAC-SHA256 + optional durable JSONL; Hub Coins isolated |
 | **P1** | N6 | Reuse lockfree ring buffer for tick SPSC + VectorIndex OHLCV slice | Wire fe pattern to finance tick path; J.4 domain tag `market-pattern` |
 | **P2** | N7 | Maestro finance pulse scheduler + Mathematical Evidence schema | Cap'n Proto or FlatBuffers; Maestro veto only — Mini-IA no submit |
 | **P2** | N8 | ONNX finance fixture honesty (extend letter da) | Separate `financeOnnxReady` — do not flip text-to-3d gate |
