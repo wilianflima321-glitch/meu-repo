@@ -33,6 +33,13 @@ import {
   buildMasterUxHeroPanelBench,
   formatMasterUxHeroBenchEvidence,
 } from '@/lib/production/master-ux-hero-panel-bench'
+import { describeForgeSandboxHonestySync } from '@/lib/production/forge-sandbox-honesty'
+import { probeDiskAusterityHonesty } from '@/lib/production/disk-austerity-honesty'
+import { probeKernelLoadScaleHonesty } from '@/lib/production/kernel-load-scale-honesty'
+import {
+  SWARM_MAX_HEAL_ROUNDS,
+  SWARM_MAX_PARALLEL_CELLS,
+} from '@/lib/production/multi-file-apply-swarm'
 
 const log = createComponentLogger('consolidation-truth-matrix')
 
@@ -170,6 +177,9 @@ export function buildConsolidationTruthMatrix(
     cw4CriticalBlockers.length > 0 || CW4_OVERALL_STATUS !== 'DONE'
       ? 'PARTIAL'
       : 'IMPLEMENTED'
+  const forgeSandbox = describeForgeSandboxHonestySync()
+  const cw7 = probeDiskAusterityHonesty()
+  const cw2 = probeKernelLoadScaleHonesty()
 
   const rows: ConsolidationTruthRow[] = [
     {
@@ -268,9 +278,43 @@ export function buildConsolidationTruthMatrix(
       status: 'PARTIAL',
       marketingAllowed: emptyNexus.marketingAllowed,
       heldReason: 'j11_j12_founder_stop',
-      note: 'AI-native IDE marketing blocked until J.1+J.2+J.12 or Founder lifts STOP',
-      lastEvidence: `emptyFailClosed=${!emptyNexus.complete};j11j12=STOPPED;composerSurpass=HELD;marketing=false`,
+      note: `AI-native IDE marketing blocked until J.1+J.2+J.12 or Founder lifts STOP; swarm cap=${SWARM_MAX_PARALLEL_CELLS} cells, heal≤${SWARM_MAX_HEAL_ROUNDS}`,
+      lastEvidence: `emptyFailClosed=${!emptyNexus.complete};j11j12=STOPPED;composerSurpass=HELD;swarmMax=${SWARM_MAX_PARALLEL_CELLS};healMax=${SWARM_MAX_HEAL_ROUNDS};marketing=false`,
       gatedNames: ['J.11 ACP', 'J.12 OrchestratorProd', 'Cursor Composer surpass', 'AI-native IDE'],
+    },
+    {
+      id: 'forge.sandbox.providers',
+      claim:
+        'Forge sandbox providers — local-isolated DONE; e2b env-gated; Firecracker microVM HELD',
+      path: 'lib/production/forge-sandbox-honesty.ts',
+      status: forgeSandbox.localIsolatedReady ? 'PARTIAL' : 'HELD',
+      marketingAllowed: false,
+      heldReason: 'firecracker_not_implemented',
+      note: 'No Firecracker/KVM host binary in repo; runtime-provision uses e2b/custom-endpoint only.',
+      lastEvidence: `localIsolated=${forgeSandbox.localIsolatedReady};firecracker=${forgeSandbox.firecrackerMicroVmReady};runtimeProvisionFc=${forgeSandbox.runtimeProvisionFirecrackerSupported}`,
+      gatedNames: ['Firecracker', 'KVM microVM', 'AI-native IDE'],
+    },
+    {
+      id: 'kernel.load-scale.cw2',
+      claim: `CW2 kernel load-scale micro-soaks N≥${cw2.minPeerN} — Chaos/Unreal AAA HELD`,
+      path: 'lib/production/kernel-load-scale-honesty.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      heldReason: cw2.heldReason,
+      note: `Peers: ${cw2.peers.map((p) => `${p.id}@${p.soakN}`).join(', ')}; GPU memory matrix OPEN.`,
+      lastEvidence: `minN=${cw2.minPeerN};wallSec=${cw2.wallBudgetSec};chaosAaa=${cw2.chaosDestructionAaaReady};gpuMatrix=${cw2.gpuMemoryMatrixReady}`,
+      gatedNames: ['Chaos', 'DualSPHysics', 'Unreal Mass', 'Nanite'],
+    },
+    {
+      id: 'disk.austerity.cw7',
+      claim: 'CW7 disk austerity — docs + example cargo target; prune/CAS/CI HELD',
+      path: 'lib/production/disk-austerity-honesty.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      heldReason: cw7.heldReason,
+      note: cw7.notes[2],
+      lastEvidence: `status=${cw7.overallStatus};cargoTargetDir=${cw7.cargoTargetDirEnv ?? 'unset'};example=${cw7.artifacts.some((a) => a.id === 'studio-local-cargo-example' && a.exists)};orphanPrune=${cw7.orphanPruneEnforced}`,
+      gatedNames: ['CAS cook', 'orphan prune'],
     },
     {
       id: 'ui.persistence.spine',

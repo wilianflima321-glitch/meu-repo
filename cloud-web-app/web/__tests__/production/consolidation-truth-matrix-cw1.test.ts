@@ -22,7 +22,7 @@ describe('CW1 consolidation truth matrix', () => {
 
     expect(matrix.wave).toBe('CW1')
     expect(matrix.marketingAaaAllowed).toBe(false)
-    expect(matrix.rows.length).toBeGreaterThanOrEqual(7)
+    expect(matrix.rows.length).toBeGreaterThanOrEqual(11)
 
     const renderer = matrix.rows.find((r) => r.id === 'renderer.web.present')
     const path = matrix.rows.find((r) => r.id === 'render.path.live')
@@ -30,6 +30,9 @@ describe('CW1 consolidation truth matrix', () => {
     const hub = matrix.rows.find((r) => r.id === 'hub.rtv1')
     const kernel = matrix.rows.find((r) => r.id === 'kernel.rust.foundation')
     const agents = matrix.rows.find((r) => r.id === 'agents.receipt.completeness')
+    const forge = matrix.rows.find((r) => r.id === 'forge.sandbox.providers')
+    const cw2 = matrix.rows.find((r) => r.id === 'kernel.load-scale.cw2')
+    const cw7 = matrix.rows.find((r) => r.id === 'disk.austerity.cw7')
 
     expect(renderer?.path).toContain('renderer-honesty-capability')
     expect(path?.path).toContain('render-path-honesty')
@@ -37,12 +40,19 @@ describe('CW1 consolidation truth matrix', () => {
     expect(hub?.path).toContain('hub-honesty')
     expect(kernel?.path).toContain('kernel-rust-foundation-honesty')
     expect(agents?.path).toContain('agents-receipt-completeness')
+    expect(forge?.path).toContain('forge-sandbox-honesty')
+    expect(cw2?.path).toContain('kernel-load-scale-honesty')
+    expect(cw7?.path).toContain('disk-austerity-honesty')
 
     expect(renderer?.lastEvidence).toMatch(/r3f-webgl2|held/)
     expect(path?.lastEvidence).toMatch(/web-r3f-webgl2|held/)
     expect(presentRoot?.lastEvidence).toMatch(/cw3-present-root-v1|web-r3f-webgl2/)
     expect(presentRoot?.status).toBe('PARTIAL')
     expect(presentRoot?.marketingAllowed).toBe(false)
+    expect(forge?.marketingAllowed).toBe(false)
+    expect(forge?.lastEvidence).toMatch(/firecracker=false/)
+    expect(cw2?.status).toBe('PARTIAL')
+    expect(cw7?.status).toBe('PARTIAL')
   })
 
   it('keeps marketingAllowed false for HELD AAA names', () => {

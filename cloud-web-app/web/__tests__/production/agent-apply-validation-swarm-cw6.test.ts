@@ -11,7 +11,7 @@ import {
   runGovernedApplyValidationGate,
   validateFileAstSyntax,
 } from '@/lib/production/agent-apply-validation-gate'
-import { runMultiFileApplySwarm } from '@/lib/production/multi-file-apply-swarm'
+import { runMultiFileApplySwarm, SWARM_MAX_PARALLEL_CELLS } from '@/lib/production/multi-file-apply-swarm'
 import {
   extractFileValidationFromApplyResult,
   toGovernedApplyReceipt,
@@ -231,6 +231,20 @@ describe('CW6 multi-file apply swarm', () => {
     expect(result.files).toHaveLength(2)
     expect(result.parallelCells).toBe(2)
     expect(result.composerSurpassClaim).toBe(false)
+  })
+
+  it('fail-closes when parallel cell count exceeds CW6 forge scale cap', async () => {
+    const cells = Array.from({ length: SWARM_MAX_PARALLEL_CELLS + 1 }, (_, i) => ({
+      taskId: `t${i}`,
+      role: (i === 0 ? 'critical' : 'peripheral') as const,
+      path: `src/f${i}.ts`,
+      content: `export const v${i} = ${i}\n`,
+    }))
+    const result = await runMultiFileApplySwarm({ cells, enableAutoHeal: false })
+    expect(result.ok).toBe(false)
+    expect(result.code).toBe('SWARM_SCALE_LIMIT_EXCEEDED')
+    expect(result.composerSurpassClaim).toBe(false)
+    expect(result.parallelCells).toBe(SWARM_MAX_PARALLEL_CELLS + 1)
   })
 })
 

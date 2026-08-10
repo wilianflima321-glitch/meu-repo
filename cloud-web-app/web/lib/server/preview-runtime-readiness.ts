@@ -3,6 +3,7 @@ import {
   getManagedPreviewProviderConfig,
   parseConfiguredProvisionEndpoints,
 } from '@/lib/server/preview-provider-config'
+import { describeForgeSandboxHonestySync } from '@/lib/production/forge-sandbox-honesty'
 
 export type PreviewRuntimeReadiness = {
   status: 'ready' | 'partial'
@@ -19,6 +20,7 @@ export type PreviewRuntimeReadiness = {
   blockers: string[]
   instructions: string[]
   recommendedCommands: string[]
+  forgeSandbox: ReturnType<typeof describeForgeSandboxHonestySync>
   metadata: {
     configuredEndpoints: string[]
     localDiscovery: {
@@ -70,6 +72,16 @@ export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadin
 
   const blockers: string[] = []
   let strategy: PreviewRuntimeReadiness['strategy'] = 'inline'
+  const forgeSandbox = describeForgeSandboxHonestySync()
+  const rawProvider = String(process.env.AETHEL_PREVIEW_PROVIDER || '').trim().toLowerCase()
+
+  if (rawProvider === 'firecracker') {
+    blockers.push('FIRECRACKER_RUNTIME_NOT_IMPLEMENTED')
+    instructions.push(
+      'Firecracker/KVM microVM runtime provisioning is HELD — no host binary/API in this repo.',
+    )
+    instructions.push('Use E2B (E2B_API_KEY) or local dev runtime discovery instead.')
+  }
 
   if (managedConfigured) {
     strategy = 'managed'
@@ -151,6 +163,7 @@ export async function getPreviewRuntimeReadiness(): Promise<PreviewRuntimeReadin
     blockers,
     instructions,
     recommendedCommands: Array.from(new Set(recommendedCommands)),
+    forgeSandbox,
     metadata: {
       configuredEndpoints,
       localDiscovery: {

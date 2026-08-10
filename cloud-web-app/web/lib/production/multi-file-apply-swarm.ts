@@ -18,6 +18,11 @@ import type { L5VirtualFile } from '@/lib/production/project-l5-typecheck'
 
 const log = createComponentLogger('multi-file-apply-swarm')
 
+/** Maestro plan: 1 critical + up to 4 peripheral cells — not unbounded Composer fan-out. */
+export const SWARM_MAX_PARALLEL_CELLS = 5 as const
+export const SWARM_MAX_PERIPHERAL_CELLS = 4 as const
+export const SWARM_MAX_HEAL_ROUNDS = 3 as const
+
 export type SwarmPatchCell = {
   taskId: string
   path: string
@@ -35,7 +40,7 @@ export type SwarmHealFn = (input: {
 
 export type MultiFileApplySwarmResult = {
   ok: boolean
-  code?: ApplyValidationGateResult['code']
+  code?: ApplyValidationGateResult['code'] | 'SWARM_SCALE_LIMIT_EXCEEDED'
   /** Healed/validated contents ready for governed write (only when ok). */
   files: Array<{ taskId: string; path: string; content: string }>
   fileValidation: FileValidationStatusEntry[]
@@ -85,9 +90,35 @@ export async function runMultiFileApplySwarm(input: {
   enableAutoHeal?: boolean
   maxHealRounds?: 1 | 2 | 3
   heal?: SwarmHealFn
+  sandboxSessionId?: string
+  projectRootPath?: string
 }): Promise<MultiFileApplySwarmResult> {
   const cells = input.cells
-  const maxHealRounds = input.maxHealRounds ?? 3
+  const maxHealRounds = input.maxHealRounds ?? SWARM_MAX_HEAL_ROUNDS
+
+  if (cells.length > SWARM_MAX_PARALLEL_CELLS) {
+    log.warn('swarm_scale_limit_exceeded', {
+      cells: cells.length,
+      max: SWARM_MAX_PARALLEL_CELLS,
+    })
+    return {
+      ok: false,
+      code: 'SWARM_SCALE_LIMIT_EXCEEDED',
+      files: [],
+      fileValidation: cells.map((c) => ({
+        path: c.path.replace(/\\/g, '/'),
+        status: 'denied_disjoint' as const,
+        code: 'SWARM_SCALE_LIMIT_EXCEEDED',
+        detail: `Max ${SWARM_MAX_PARALLEL_CELLS} parallel cells (1 critical + ${SWARM_MAX_PERIPHERAL_CELLS} peripheral)`,
+        taskId: c.taskId,
+      })),
+      compilerLog: `Swarm scale limit: ${cells.length} cells > ${SWARM_MAX_PARALLEL_CELLS}`,
+      healRoundsUsed: 0,
+      parallelCells: cells.length,
+      composerSurpassClaim: false,
+      marketingAllowed: false,
+    }
+  }
 
   if (cells.length === 0) {
     return {
@@ -104,7 +135,9 @@ export async function runMultiFileApplySwarm(input: {
 
   // Maestro-style disjoint path plan (nucleus + peripherals) — no J.11/J.12.
   const critical = cells.find((c) => c.role === 'critical') ?? cells[0]!
-  const peripherals = cells.filter((c) => c.taskId !== critical.taskId).slice(0, 4)
+  const peripherals = cells
+    .filter((c) => c.taskId !== critical.taskId)
+    .slice(0, SWARM_MAX_PERIPHERAL_CELLS)
   const plan = buildMaestroDelegationPlan({
     missionId: `swarm_${Date.now().toString(36)}`,
     maestroModelId: 'governed-apply-swarm',
@@ -188,6 +221,8 @@ export async function runMultiFileApplySwarm(input: {
         taskId: c.taskId,
       })),
       ambientFiles: input.ambientFiles,
+      sandboxSessionId: input.sandboxSessionId,
+      projectRootPath: input.projectRootPath,
     })
 
     if (gate.ok) {
