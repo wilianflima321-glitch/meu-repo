@@ -113,6 +113,7 @@
 | 2026-08-10 gas-entropy-rapier | Commit: `784d13b46`. Kernel/Desktop — GAS binary tick Instant metrics + Entropy×Rapier ≥256 bodies | **PARTIAL** — `GAS_60HZ_BINARY_IPC_READY`/`chaos_destruction_aaa_ready` **false**; G.3 stays ~15% |
 | 2026-08-10 collapse-dual-bridge | Commit: `d36a9b3fb`. Backend-only — Honesty Matrix #2 collapse dual Bridge (`lib/ai` → production re-export + fail-closed legacy class) | **DONE-core** — single CostGuard choke; expensive generate routes still HTTP Bridge; J.12 **STOPPED**; `nativeOnnxReady` untouched; vitest collapse+Law XVI+HTTP **27/27**; Hub checkout **false**; `investmentGrade` untouched |
 | 2026-08-10 honesty-7-8-j7-fusion | Commit: `b608fb8b6`. Backend-only — Honesty Matrix #7 J.7 refined GLB/USDZ cook + #8 Fusion atomic revert + CW6 creative apply receipt | **PARTIAL** deepen — cook receipt fail-closed capsule/empty/OpenUSD; shared-Y.Doc undo evidence; fileValidation blocks write theater; OpenUSD/USDC mesh/Meshy surpass **HELD**; vitest **23/23** targeted; Hub/investmentGrade/G.3/`nativeOnnxReady` untouched |
+| 2026-08-10 wasm-shield-gas-ipc | Commit: `3a8e21f80` (+ GAS IPC cmds in `a975a8cfc` handler wire). Desktop — WASM Shield wasmtime ABI + GAS soak IPC | **PARTIAL** — `GAS_60HZ_BINARY_IPC_READY`/marketplace/V8 **false**; G.3 stays ~15% |
 
 ---
 
