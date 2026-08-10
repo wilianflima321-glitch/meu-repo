@@ -105,7 +105,7 @@
 | 2026-08-10 gf-mesh-001 | Commit: *(pending)*. Web GF-MESH-001 dogfood + golden visibility (30→50 prep) | **PARTIAL** — on-disk fixture + meshlet cook + sealed visibility hash; capsule/OpenUSD/Nanite **false**; G.3 stays **15%**; band **30→50 HELD**; vitest targeted; Hub checkout **false** |
 | 2026-08-10 physics-fiber-kernel | Commit: `d8b7149c3`. Kernel/Rust only — Rapier fixed-dt determinism soak + fiber rayon SoA job system | **PARTIAL** — Instant soaks; `chaos_physics_aaa_ready`/`rayon_dots_aaa_ready` **false**; no Unreal claim; G.3 stays ~15% |
 | 2026-08-10 creative-gen-honesty | Docs+honesty — Creative Generation Honesty Matrix (Mini-IA / Maestro / Nexus / Bridge vs Meshy·Tripo·UEFN); top-8 deepen moves | Docs only; no UI; J.11/J.12 STOPPED; Hub checkout HELD; `nativeOnnxReady` false |
-| 2026-08-10 maestro-creative-quality | Backend-only — Maestro creative pulse + CapScore quality-tier binding (Mini-IA allowlist) | **PARTIAL** — Intent→CostGuard→Nexus→Fusion scopes; J.12 OrchestratorProd **STOPPED**; no UE/Meshy-Tripo clay claim; vitest **10/10**; Hub checkout **false**; `investmentGrade` untouched |
+| 2026-08-10 maestro-creative-quality | Commit: `0569829c2`. Backend-only — Maestro creative pulse + CapScore quality-tier binding (Mini-IA allowlist) | **PARTIAL** — Intent→CostGuard→Nexus→Fusion scopes; J.12 OrchestratorProd **STOPPED**; no UE/Meshy-Tripo clay claim; vitest **10/10**; Hub checkout **false**; `investmentGrade` untouched |
 
 ---
 

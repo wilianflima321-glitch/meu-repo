@@ -247,6 +247,16 @@ export function buildConsolidationTruthMatrix(
       gatedNames: ['Nanite', 'Lumen', 'frameGraphLive', 'WebGPU present', 'G.3% uplift'],
     },
     {
+      id: 'render.gf-mesh-001',
+      claim:
+        'GF-MESH-001 dogfood mesh on disk + golden visibility hash — Nanite/OpenUSD false; band 30→50 HELD; G.3% locked 15',
+      path: 'lib/production/gf-mesh-001-visibility-fixture.ts',
+      status: 'PARTIAL',
+      marketingAllowed: false,
+      lastEvidence: 'fixture=GF-MESH-001|onDisk=true|naniteReady=false|g3Band30To50Passed=false',
+      gatedNames: ['Nanite', 'Lumen', 'OpenUSD', 'G.3% uplift', 'capsule character'],
+    },
+    {
       id: 'hub.rtv1',
       claim: hub.claim,
       path: 'lib/hub/hub-honesty-capability.ts',

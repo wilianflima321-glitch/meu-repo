@@ -9,6 +9,7 @@ import {
 import { buildScalableRenderGraphReport } from '@aethel/engine/render/scalable-render-graph'
 import { proveGpuDeviceSoakReadiness } from '@aethel/engine/render/gpu-device-soak'
 import { evaluateFrameParityHarnessReadiness } from '@/lib/production/frame-parity-harness-3b2'
+import { evaluateGfMesh001Readiness } from '@/lib/production/gf-mesh-001-visibility-fixture'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('api/runtime/renderer-honesty/route')
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
     },
   })
   const frameParity = evaluateFrameParityHarnessReadiness()
+  const gfMesh001 = evaluateGfMesh001Readiness()
 
   // Desktop present evidence — only from explicit probe params (never invent).
   // Fail-closed: presented without submitted must not flip live_present.
@@ -106,11 +108,12 @@ export async function GET(req: NextRequest) {
     gpuSoakReady: gpuSoak.ready,
     frameParityHarnessExists: frameParity.harnessExists,
     g3Band15To30Passed: frameParity.g3Band15To30Passed,
+    gfMesh001Ready: gfMesh001.ready,
   })
 
   return NextResponse.json({
     mock: false,
-    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity',
+    focus: '2A+3B.1+ci+cw3+xv-capscore+3b2-parity+gf-mesh-001',
     report,
     /** CW3 — operator present root mirrored at top level for Studio/IDE chrome. */
     presentRoot: report.presentRoot ?? null,
@@ -140,6 +143,23 @@ export async function GET(req: NextRequest) {
       lumenMarketingAllowed: false,
       webgpuProductPresentReady: false,
       reason: frameParity.reason,
+    },
+    /** G.% ladder 30→50 prep — GF-MESH-001 on disk + golden visibility; band HELD. */
+    gfMesh001: {
+      letter: gfMesh001.letter,
+      fixtureId: gfMesh001.fixtureId,
+      ready: gfMesh001.ready,
+      status: gfMesh001.status,
+      fixtureOnDisk: gfMesh001.fixtureOnDisk,
+      meshletCount: gfMesh001.meshletCount,
+      goldenVisibilityHash: gfMesh001.goldenVisibilityHash,
+      evidenceFingerprint: gfMesh001.evidenceFingerprint,
+      naniteReady: false,
+      openUsdStageReady: false,
+      g3CodeDepthPercent: gfMesh001.g3CodeDepthPercent,
+      g3Band30To50Passed: false,
+      band30To50HeldReason: gfMesh001.band30To50HeldReason,
+      reason: gfMesh001.reason,
     },
     fsrSrg: {
       letter: 'ci',
