@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4ac | **Engine PP-03 60s soak + session claim PARTIAL (no UI):** exclusive present-session token; refuse second start; `product_present_soak_60s` Instant wall soak (min/mean/max/count, LOOP_DROPPED fail-closed, no FPS); PP-02 HELD documented; **`product_present_ready=false`**; G.3 stays ~15%; **15→30 HELD**. Gates: check+clippy green. |
 | 2026-08-10 | 1.4ab | **Engine persistent present loop PARTIAL (no UI):** `engine_owned_present_loop.rs` + CapScore `gpu_soak_scale` — every-frame frame-graph on engine-owned surface; Instant IPC start/stop/status; OOM fail-closed; **`product_present_ready=false`**. **No new gpu_* passes.** **G.3 stays ~15%**; **15→30 HELD** (session wire / PP-02 / 3B.2 / Critic band). Gates: check+clippy green. |
 | 2026-08-10 | 1.4aa | **Docs+honesty — G.% Evidence Ladder (no UI):** Progress §G.% Evidence Ladder (15→30→50→80→100) + harsh secondary_winit critique (64² / 4³ / 64 chunks); CapScore SRG `g3CodeDepthPercent=15` lock; AAA Parity / Index / 3B.3 sync. **Claim >15% = NO.** |
 | 2026-08-10 | 1.4z | **Engine product present adapter PARTIAL (no UI):** `product_present_adapter.rs` HWND inventory + refuse WebView exclusive attach + engine-owned secondary_winit frame-graph present soak; IPC honesty/soak; **`product_present_ready=false`** / **`webview_exclusive_present_ready=false`**; TICKET-PP-01..04. AAA flags stay false. **3B.3 stays PARTIAL**. G.3 stays ~15%. Gates: check+clippy green. |

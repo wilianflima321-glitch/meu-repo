@@ -584,6 +584,10 @@ pub struct PersistentPresentHooks {
     pub live: Arc<Mutex<crate::engine_owned_present_loop::PersistentPresentLiveMetrics>>,
     pub max_frames: u32,
     pub prove_frames: u32,
+    /// When set, stop after wall-clock Instant ≥ this many ms (60s soak).
+    pub min_wall_ms: Option<u64>,
+    /// Fail-closed: break and stamp LOOP_DROPPED on frame-graph pass Err.
+    pub fail_closed_on_pass_drop: bool,
 }
 
 /// Engine-owned persistent present — CapScore-gated; does not flip product_present_ready.
@@ -638,10 +642,11 @@ fn present_probe_on_secondary_window_ex(
 ) -> RendererPresentProbeReport {
     let is_persistent = opts.persistent.is_some();
     let frames_requested = if is_persistent {
-        frames_requested.clamp(1, 8_000)
+        frames_requested.clamp(1, 120_000)
     } else {
         frames_requested.clamp(1, MAX_PRESENT_SOAK_FRAMES)
     };
+    let loop_wall0 = std::time::Instant::now();
 
     let mut event_loop_builder = EventLoopBuilder::new();
     let event_loop = match event_loop_builder.build() {
@@ -1038,10 +1043,16 @@ fn present_probe_on_secondary_window_ex(
         .as_ref()
         .map(|h| h.prove_frames)
         .unwrap_or(0);
+    let mut loop_dropped = false;
     for frame_i in 0..frames_requested {
         if let Some(hooks) = opts.persistent.as_ref() {
             if hooks.stop.load(Ordering::SeqCst) {
                 break;
+            }
+            if let Some(min_wall) = hooks.min_wall_ms {
+                if loop_wall0.elapsed().as_millis() as u64 >= min_wall && frames_presented > 0 {
+                    break;
+                }
             }
         }
         // Frame 0 builds pyramid with occlusion off; frame ≥1 samples prior Hi-Z.
@@ -1061,11 +1072,35 @@ fn present_probe_on_secondary_window_ex(
             occlusion_enabled,
         ) {
             Ok(outcome) => {
+                let g = &outcome.graph;
+                if opts
+                    .persistent
+                    .as_ref()
+                    .is_some_and(|h| h.fail_closed_on_pass_drop)
+                    && !g.all_passes_completed
+                {
+                    loop_dropped = true;
+                    last_err = Some(format!(
+                        "LOOP_DROPPED: frame-graph pass incomplete (completed={}/{})",
+                        g.passes_completed, g.passes_expected
+                    ));
+                    if let Some(hooks) = opts.persistent.as_ref() {
+                        if let Ok(mut live) = hooks.live.lock() {
+                            live.loop_dropped = true;
+                            live.last_error = last_err.clone().unwrap_or_default();
+                            live.running = false;
+                            live.soak_wall_ms = loop_wall0.elapsed().as_secs_f64() * 1000.0;
+                            live.product_present_ready = false;
+                            live.webview_exclusive_present_ready = false;
+                            live.pp02_webview_carveout_held = true;
+                        }
+                    }
+                    break;
+                }
                 submitted = true;
                 frames_presented = frames_presented.saturating_add(1);
                 cull_dispatches = cull_dispatches.saturating_add(1);
                 indirect_draws = indirect_draws.saturating_add(1);
-                let g = &outcome.graph;
                 hiz_downsample_passes =
                     hiz_downsample_passes.saturating_add(g.hiz_downs);
                 hiz_build_ms_total += g.pass_ms("hiz");
@@ -1088,6 +1123,7 @@ fn present_probe_on_secondary_window_ex(
                 }
                 let frame_elapsed_ms = t0.elapsed().as_secs_f64() * 1000.0;
                 frame_ms.push(frame_elapsed_ms);
+                let wall_ms_now = loop_wall0.elapsed().as_secs_f64() * 1000.0;
                 if let Some(hooks) = opts.persistent.as_ref() {
                     if let Ok(mut live) = hooks.live.lock() {
                         live.running = true;
@@ -1108,13 +1144,15 @@ fn present_probe_on_secondary_window_ex(
                         live.present_height = budget.present_height;
                         live.capability_score = budget.capability_score;
                         live.fidelity_tier = tier_label(budget.tier).into();
+                        live.soak_wall_ms = wall_ms_now;
+                        live.loop_dropped = false;
                         live.persistent_loop_proven =
                             frames_presented >= prove_frames && g.all_passes_completed;
                         live.product_present_ready = false;
                         live.webview_exclusive_present_ready = false;
+                        live.pp02_webview_carveout_held = true;
                         live.note = format!(
-                            "Persistent present frame {frames_presented}/{} — CapScore {} {}x{}; product_present_ready=false",
-                            hooks.max_frames,
+                            "Persistent present frame {frames_presented} wall_ms={wall_ms_now:.1} — CapScore {} {}x{}; no FPS; product_present_ready=false; PP-02 HELD",
                             budget.capability_score,
                             budget.present_width,
                             budget.present_height
@@ -1123,11 +1161,25 @@ fn present_probe_on_secondary_window_ex(
                 }
             }
             Err(e) => {
-                last_err = Some(e.clone());
+                loop_dropped = opts
+                    .persistent
+                    .as_ref()
+                    .is_some_and(|h| h.fail_closed_on_pass_drop);
+                let msg = if loop_dropped {
+                    format!("LOOP_DROPPED: {e}")
+                } else {
+                    e.clone()
+                };
+                last_err = Some(msg.clone());
                 if let Some(hooks) = opts.persistent.as_ref() {
                     if let Ok(mut live) = hooks.live.lock() {
-                        live.last_error = e;
+                        live.last_error = msg;
+                        live.loop_dropped = loop_dropped;
                         live.running = false;
+                        live.soak_wall_ms = loop_wall0.elapsed().as_secs_f64() * 1000.0;
+                        live.product_present_ready = false;
+                        live.webview_exclusive_present_ready = false;
+                        live.pp02_webview_carveout_held = true;
                     }
                 }
                 break;
@@ -1277,8 +1329,16 @@ fn present_probe_on_secondary_window_ex(
         0.0
     };
 
-    let presented = frames_presented > 0;
+    let presented = frames_presented > 0 && !loop_dropped;
     let mut reasons = Vec::new();
+    if loop_dropped {
+        reasons.push(
+            last_err
+                .clone()
+                .unwrap_or_else(|| "LOOP_DROPPED: frame-graph present failed".into()),
+        );
+        reasons.push("presented stays false — fail-closed on pass drop".into());
+    }
     if presented {
         reasons.push(format!(
             "Presented {frames_presented}/{frames_requested} frame(s) on secondary_winit via ScalableRenderGraph-style frame graph (no CPU readback on hot path)"
@@ -1362,7 +1422,7 @@ fn present_probe_on_secondary_window_ex(
             "hiz_ready / lumen_ready / micro_poly_aaa_ready / vsm_aaa_ready / fsr_aaa_ready / entropy_aaa_ready / chaos_aaa_ready / frame_graph_aaa_ready / MULTI_DRAW_INDIRECT AAA / Nanite / bindless descriptor heap still HELD"
                 .into(),
         );
-    } else {
+    } else if !loop_dropped {
         reasons.push(
             last_err.unwrap_or_else(|| "Present loop produced zero frames".into()),
         );

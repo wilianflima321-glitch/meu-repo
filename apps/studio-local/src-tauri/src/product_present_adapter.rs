@@ -24,7 +24,7 @@ use crate::wgpu_renderer::{
 /// Concrete engineering tickets required before product WebView exclusive present.
 pub const PRODUCT_PRESENT_ENGINEERING_TICKETS: &[&str] = &[
     "TICKET-PP-01: Host Studio viewport as engine-owned HWND child (or Tauri native window) instead of Chromium-composited WebView pixels for exclusive wgpu present.",
-    "TICKET-PP-02: WebView2/Tauri composition carve-out — document or disable Chromium ownership of the viewport HWND region before raw_window_handle exclusive claim.",
+    "TICKET-PP-02: WebView2/Tauri composition carve-out — HELD: Chromium still owns Studio product HWND; exclusive wgpu on WebView refused (see PP02_WEBVIEW_CARVEOUT_HELD_REASON).",
     "TICKET-PP-03: Persist engine-owned present loop (not soak-only) with resize/DPI + frame-graph execute wired to product session lifetime.",
     "TICKET-PP-04: Screenshot/parity gate (3B.2) — web preview vs desktop engine-owned present before marketing product present ready.",
 ];

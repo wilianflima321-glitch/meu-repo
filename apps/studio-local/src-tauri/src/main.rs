@@ -404,6 +404,9 @@ fn main() {
             engine_owned_present_loop::product_present_persistent_start,
             engine_owned_present_loop::product_present_persistent_stop,
             engine_owned_present_loop::product_present_persistent_status,
+            engine_owned_present_loop::product_present_session_claim,
+            engine_owned_present_loop::product_present_session_release,
+            engine_owned_present_loop::product_present_soak_60s,
             physics_commands::poll_physics_state,
             scene_graph::scene_get_nodes,
             scene_graph::scene_select,
@@ -450,6 +453,8 @@ fn main() {
             // Onda M — WASM Shield real wasmtime instantiate + Law #48 host-PTY deny
             aethel_studio_local::wasm_shield::probe_wasm_shield_cmd,
             aethel_studio_local::wasm_shield::wasm_shield_agent_pty_deny_cmd,
+            // Orphan rendering/ quarantine honesty (ladder #10 — not pub mod rendering)
+            aethel_studio_local::rendering_quarantine::probe_rendering_quarantine_cmd,
             // GAS binary IPC soak / round-trip metrics (GAS_60HZ_BINARY_IPC_READY stays false)
             aethel_studio_local::gameplay_ability_system::probe_gas_binary_ipc_tick_cmd,
             aethel_studio_local::gameplay_ability_system::gas_binary_ipc_roundtrip_cmd,

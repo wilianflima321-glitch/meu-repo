@@ -173,9 +173,9 @@ pub fn build_native_kernel_manifest() -> NativeKernelManifest {
                     "src-tauri/src/wgpu_renderer.rs",
                 ],
                 blocker: Some(
-                    "TICKET-PP-03 PARTIAL: persistent CapScore-gated engine-owned frame-graph loop + Instant IPC exists; product_present_ready/webview_exclusive stay false (Chromium HWND; not Studio session viewport). PP-01 native child, PP-02 carve-out, PP-04 parity, 15→30 ladder gates still open. G.3 stays ~15%.",
+                    "TICKET-PP-03 deepen: exclusive session claim + 60s Instant soak IPC exist; product_present_ready=false; PP-02 WebView carve-out HELD (Chromium HWND). 15→30 still HELD (Critic band: PP-01 native child / Studio product viewport / g3CodeDepthPercent unlock). G.3 stays ~15%.",
                 ),
-                next_action: "Wire persistent loop to Studio session lifetime + PP-02/PP-04 before any product_present_ready or G.% uplift; never claim WebView exclusive from identity mount.",
+                next_action: "Close PP-02 + Studio product viewport wire + Critic 15→30 checklist before product_present_ready or G.% uplift; never claim WebView exclusive from identity mount.",
             },
             NativeKernelCapability {
                 id: "wasm-hot-reload-contract",
