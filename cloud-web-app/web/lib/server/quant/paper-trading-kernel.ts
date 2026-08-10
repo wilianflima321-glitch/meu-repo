@@ -1,13 +1,21 @@
 /**
- * N2 — Paper-trading kernel interface + walk-forward quarantine gate.
- * Fail-closed: live capital stays disabled until quarantine PASS evidence exists.
- * Every paper submit must pass N5 risk envelope (drawdown / leverage / kill-switch).
+ * N2 — Paper-trading kernel + walk-forward quarantine.
+ * Fail-closed: Maestro dual-mode (mode+timeframe) then N5 risk before any submit.
+ * liveBrokerReady always false — no broker / ORT RPA.
  */
 
 import { createHash, randomUUID } from 'node:crypto'
 
 import { createComponentLogger } from '@/lib/observability/logger'
 import type { EulaAcceptanceRecord } from '@/lib/server/quant/eula-risk-acceptance'
+import {
+  evaluateMaestroExecutionGuard,
+  type DualModeTradeIntent,
+  type ExecutionMode,
+  type MaestroExecutionGuardVerdict,
+  type TradeFrequencyClass,
+} from '@/lib/server/quant/dual-mode-execution'
+import type { ExchangeKeyRef } from '@/lib/server/quant/non-custodial-invariants'
 import {
   createRiskEnvelopeLimits,
   evaluateRisk,
@@ -20,7 +28,6 @@ const log = createComponentLogger('paper-trading-kernel')
 export const DEFAULT_LIVE_ENABLED = false as const
 
 export type QuarantineStatus = 'QUARANTINED' | 'PASS' | 'FAIL'
-
 export type TradingExecutionMode = 'paper' | 'live'
 
 export interface WalkForwardEvidence {
@@ -39,17 +46,42 @@ export interface PaperOrderIntent {
   limitPrice: number | null
 }
 
+/** Dual-Mode context required on every paper/live-intent submit. */
+export interface DualModeSubmitContext {
+  mode: ExecutionMode
+  frequency: TradeFrequencyClass
+  chartTimeframeMinutes: number
+  maestroTimelineCount?: number
+  sameBrowserProfile?: boolean
+  claimsMsExecution?: boolean
+  localApiKeyRef?: ExchangeKeyRef | string | null
+  quarantine?: QuarantineGateState | null
+  eula?: EulaAcceptanceRecord | null
+}
+
 export interface PaperOrderReceipt {
   receiptId: string
   mode: 'paper'
   intent: PaperOrderIntent
   filledAt: string
-  /** N5 risk envelope passed before fill. */
+  maestroCheck: 'pass'
+  maestroVerdict: MaestroExecutionGuardVerdict
   riskCheck: 'pass'
   notionalUsd: number
+  liveBrokerReady: false
 }
 
-/** N5 inputs required on every paper submit (fail-closed — no bypass). */
+/** Live-intent reject shape — always fail-closed; no broker / ORT RPA. */
+export interface LiveIntentRejectReceipt {
+  mode: 'live'
+  riskCheck: 'fail'
+  liveBrokerReady: false
+  liveOrtRpaReady: false
+  investmentGrade: false
+  code: string
+  message: string
+}
+
 export interface PaperRiskCheckInput {
   limits?: RiskEnvelopeLimits
   notionalUsd: number
@@ -61,7 +93,6 @@ export interface QuarantineGateState {
   strategyId: string
   status: QuarantineStatus
   walkForward: WalkForwardEvidence | null
-  /** Only true after explicit PASS — never defaulted. */
   liveUnlocked: boolean
 }
 
@@ -97,6 +128,49 @@ export function hashWalkForwardEvidence(input: {
   )
 }
 
+/** Default Manus RPA swing/position ≥15m dual-mode context for paper probes/tests. */
+export function defaultPaperManusDualMode(
+  overrides?: Partial<DualModeSubmitContext>,
+): DualModeSubmitContext {
+  return {
+    mode: 'manus_rpa_browser',
+    frequency: 'swing_or_position',
+    chartTimeframeMinutes: 15,
+    maestroTimelineCount: 1,
+    sameBrowserProfile: false,
+    ...overrides,
+  }
+}
+
+function toDualModeIntent(dualMode: DualModeSubmitContext): DualModeTradeIntent {
+  return {
+    mode: dualMode.mode,
+    frequency: dualMode.frequency,
+    chartTimeframeMinutes: dualMode.chartTimeframeMinutes,
+    maestroTimelineCount: dualMode.maestroTimelineCount,
+    sameBrowserProfile: dualMode.sameBrowserProfile,
+    claimsMsExecution: dualMode.claimsMsExecution,
+    localApiKeyRef: dualMode.localApiKeyRef,
+  }
+}
+
+function requireDualModeContext(
+  dualMode: DualModeSubmitContext | null | undefined,
+): PaperTradingResult<DualModeSubmitContext> {
+  if (
+    !dualMode ||
+    (dualMode.mode !== 'manus_rpa_browser' && dualMode.mode !== 'vanguard_hft_api') ||
+    !Number.isFinite(dualMode.chartTimeframeMinutes)
+  ) {
+    return {
+      ok: false,
+      code: 'maestro_context_required',
+      message: 'Dual-Mode context required — mode + frequency + chartTimeframeMinutes before submit',
+    }
+  }
+  return { ok: true, value: dualMode }
+}
+
 export function createPaperTradingSession(input: {
   projectId: string
   strategyId: string
@@ -121,10 +195,6 @@ export function createQuarantineGate(strategyId: string): QuarantineGateState {
   }
 }
 
-/**
- * Walk-forward quarantine — requires minimum windows and pass rate.
- * Does not unlock live on partial or synthetic Math.random books.
- */
 export function evaluateWalkForwardQuarantine(input: {
   strategyId: string
   windowCount: number
@@ -141,12 +211,10 @@ export function evaluateWalkForwardQuarantine(input: {
     minPassRate,
     evaluatedAt,
   })
-
-  const insufficientWindows = input.windowCount < MIN_WALK_FORWARD_WINDOWS
-  const insufficientPassRate = input.passRate < minPassRate
   const status: QuarantineStatus =
-    insufficientWindows || insufficientPassRate ? 'FAIL' : 'PASS'
-
+    input.windowCount < MIN_WALK_FORWARD_WINDOWS || input.passRate < minPassRate
+      ? 'FAIL'
+      : 'PASS'
   const walkForward: WalkForwardEvidence = {
     strategyId: input.strategyId,
     windowCount: input.windowCount,
@@ -155,37 +223,53 @@ export function evaluateWalkForwardQuarantine(input: {
     evaluatedAt,
     evidenceHash,
   }
-
   const gate: QuarantineGateState = {
     strategyId: input.strategyId,
     status,
     walkForward,
     liveUnlocked: status === 'PASS',
   }
-
   log.info('walk_forward_quarantine_evaluated', {
     strategyId: input.strategyId,
     status: gate.status,
     liveUnlocked: gate.liveUnlocked,
   })
-
   return gate
 }
 
-/** Paper-only submit — N5 risk_check first; never routes to a live broker adapter. */
+/** Paper submit — Maestro (mode+timeframe) then N5; never live broker. */
 export function submitPaperOrder(
   session: PaperTradingSession,
   intent: PaperOrderIntent,
   risk: PaperRiskCheckInput,
+  dualMode: DualModeSubmitContext,
   now?: string,
 ): PaperTradingResult<PaperOrderReceipt> {
   if (session.mode !== 'paper' || session.liveEnabled !== false) {
+    return { ok: false, code: 'live_mode_blocked', message: 'paper kernel rejects non-paper sessions' }
+  }
+
+  const ctx = requireDualModeContext(dualMode)
+  if (!ctx.ok) return ctx
+
+  const maestro = evaluateMaestroExecutionGuard(ctx.value.mode, toDualModeIntent(ctx.value), {
+    quarantine: ctx.value.quarantine,
+    eula: ctx.value.eula,
+  })
+  if (!maestro.ok) {
+    log.info('paper_submit_rejected_by_maestro', {
+      strategyId: session.strategyId,
+      code: maestro.code,
+      mode: ctx.value.mode,
+      chartTimeframeMinutes: ctx.value.chartTimeframeMinutes,
+    })
     return {
       ok: false,
-      code: 'live_mode_blocked',
-      message: 'paper kernel rejects non-paper sessions',
+      code: `maestro_${maestro.code}`,
+      message: `Maestro execution guard rejected: ${maestro.message}`,
     }
   }
+
   if (intent.quantity <= 0 || !Number.isFinite(intent.quantity)) {
     return { ok: false, code: 'invalid_intent', message: 'quantity must be positive' }
   }
@@ -210,12 +294,8 @@ export function submitPaperOrder(
     currentDrawdownBps: risk.currentDrawdownBps,
     wantsLive: false,
   })
-
   if (!verdict.ok) {
-    log.info('paper_submit_rejected_by_n5', {
-      strategyId: session.strategyId,
-      code: verdict.code,
-    })
+    log.info('paper_submit_rejected_by_n5', { strategyId: session.strategyId, code: verdict.code })
     return {
       ok: false,
       code: `risk_${verdict.code}` as `risk_${RiskRejectCode}`,
@@ -230,17 +310,69 @@ export function submitPaperOrder(
       mode: 'paper',
       intent,
       filledAt: now ?? new Date().toISOString(),
+      maestroCheck: 'pass',
+      maestroVerdict: maestro.value,
       riskCheck: 'pass',
       notionalUsd: risk.notionalUsd,
+      liveBrokerReady: false,
     },
   }
 }
 
-/**
- * Fail-closed live enable — requires N2 quarantine PASS + §23 EULA acceptance.
- * Even when policy gates pass, no live broker adapter exists (liveBrokerReady=false).
- * Default live=false forever until both gates pass; broker still HELD.
- */
+/** Live-intent — Maestro then N5 wantsLive; always reject (no broker / RPA CV). */
+export function submitLiveIntent(
+  session: PaperTradingSession,
+  intent: PaperOrderIntent,
+  risk: PaperRiskCheckInput,
+  dualMode: DualModeSubmitContext,
+  now?: string,
+): PaperTradingResult<never> {
+  void intent
+  void now
+  const ctx = requireDualModeContext(dualMode)
+  if (!ctx.ok) return { ok: false, code: ctx.code, message: ctx.message }
+
+  const maestro = evaluateMaestroExecutionGuard(ctx.value.mode, toDualModeIntent(ctx.value), {
+    quarantine: ctx.value.quarantine,
+    eula: ctx.value.eula,
+  })
+  if (!maestro.ok) {
+    log.info('live_intent_rejected_by_maestro', {
+      strategyId: session.strategyId,
+      code: maestro.code,
+      mode: ctx.value.mode,
+      chartTimeframeMinutes: ctx.value.chartTimeframeMinutes,
+    })
+    return {
+      ok: false,
+      code: `maestro_${maestro.code}`,
+      message: `Maestro execution guard rejected live intent: ${maestro.message}`,
+    }
+  }
+
+  const limits = risk.limits ?? createRiskEnvelopeLimits()
+  const verdict = evaluateRisk(limits, {
+    strategyId: session.strategyId,
+    notionalUsd: risk.notionalUsd,
+    leverageX100: risk.leverageX100,
+    currentDrawdownBps: risk.currentDrawdownBps,
+    wantsLive: true,
+  })
+  const code = verdict.ok ? 'live_broker_held' : `risk_${verdict.code}`
+  const message = verdict.ok
+    ? 'live intent blocked — no broker adapter (liveBrokerReady=false)'
+    : `live intent blocked by N5: ${verdict.reason}`
+  log.warn('live_intent_fail_closed', {
+    strategyId: session.strategyId,
+    liveBrokerReady: false,
+    liveOrtRpaReady: false,
+    investmentGrade: false,
+    code,
+  })
+  return { ok: false, code, message }
+}
+
+/** Live enable policy — quarantine PASS + EULA; broker still HELD. */
 export function attemptEnableLive(
   session: PaperTradingSession,
   gate: QuarantineGateState,
@@ -252,11 +384,7 @@ export function attemptEnableLive(
   liveBrokerReady: false
 }> {
   if (session.strategyId !== gate.strategyId) {
-    return {
-      ok: false,
-      code: 'strategy_mismatch',
-      message: 'quarantine gate strategyId must match session',
-    }
+    return { ok: false, code: 'strategy_mismatch', message: 'quarantine gate strategyId must match session' }
   }
   if (gate.status !== 'PASS' || !gate.liveUnlocked || gate.walkForward === null) {
     return {
@@ -275,7 +403,6 @@ export function attemptEnableLive(
   log.warn('live_enable_policy_gates_passed_broker_held', {
     strategyId: gate.strategyId,
     evidenceHash: gate.walkForward.evidenceHash,
-    eulaAttestationHash: eula.attestationHash.slice(0, 16),
     liveBrokerReady: false,
   })
   return {
@@ -295,12 +422,15 @@ export interface PaperTradingKernel {
     session: PaperTradingSession,
     intent: PaperOrderIntent,
     risk: PaperRiskCheckInput,
+    dualMode: DualModeSubmitContext,
   ): PaperTradingResult<PaperOrderReceipt>
-  evaluateQuarantine(
-    strategyId: string,
-    windowCount: number,
-    passRate: number,
-  ): QuarantineGateState
+  submitLive(
+    session: PaperTradingSession,
+    intent: PaperOrderIntent,
+    risk: PaperRiskCheckInput,
+    dualMode: DualModeSubmitContext,
+  ): PaperTradingResult<never>
+  evaluateQuarantine(strategyId: string, windowCount: number, passRate: number): QuarantineGateState
   requestLiveEnable(
     session: PaperTradingSession,
     gate: QuarantineGateState,
@@ -316,7 +446,10 @@ export interface PaperTradingKernel {
 export function createPaperTradingKernel(): PaperTradingKernel {
   return {
     createSession: (projectId, strategyId) => createPaperTradingSession({ projectId, strategyId }),
-    submitPaper: (session, intent, risk) => submitPaperOrder(session, intent, risk),
+    submitPaper: (session, intent, risk, dualMode) =>
+      submitPaperOrder(session, intent, risk, dualMode),
+    submitLive: (session, intent, risk, dualMode) =>
+      submitLiveIntent(session, intent, risk, dualMode),
     evaluateQuarantine: (strategyId, windowCount, passRate) =>
       evaluateWalkForwardQuarantine({ strategyId, windowCount, passRate }),
     requestLiveEnable: (session, gate, eula) => attemptEnableLive(session, gate, eula),

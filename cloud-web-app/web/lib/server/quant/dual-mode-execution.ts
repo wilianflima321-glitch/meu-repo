@@ -400,6 +400,8 @@ export interface DualModeReadinessProbe {
     note: string
   }
   maestroGuardWired: boolean
+  /** Paper/live-intent submit paths must call evaluateMaestroExecutionGuard — see paper-trading-kernel. */
+  maestroGuardOnSubmitPath: 'paper-trading-kernel.submitPaper|submitLive'
   investmentGrade: false
 }
 
@@ -437,7 +439,7 @@ export function probeDualModeExecutionReadiness(): DualModeReadinessProbe {
       investmentGrade: false,
       path: 'lib/server/quant/dual-mode-execution.ts',
       note: guardWired
-        ? 'Policy gates wired (local key + N2 + EULA); live broker / FIX / ms claims HELD — home Wi-Fi ≠ colocation.'
+        ? 'Policy gates wired (local key + N2 + EULA); live broker / FIX / ms claims HELD — home Wi-Fi ≠ colocation. Paper/live-intent submit calls evaluateMaestroExecutionGuard.'
         : 'Vanguard HFT dual-mode probe failed.',
     },
     manusRpaBrowser: {
@@ -449,10 +451,11 @@ export function probeDualModeExecutionReadiness(): DualModeReadinessProbe {
       investmentGrade: false,
       path: 'lib/server/quant/dual-mode-execution.ts',
       note: guardWired
-        ? 'Maestro auto-blocks HFT/scalping; ≥15m swing/position only; live ORT/CV RPA HELD (ToS/market-abuse risk).'
+        ? 'Maestro auto-blocks HFT/scalping; ≥15m swing/position only; live ORT/CV RPA HELD (ToS/market-abuse risk). Submit paths require mode+timeframe guard.'
         : 'Manus RPA dual-mode probe failed.',
     },
     maestroGuardWired: guardWired,
+    maestroGuardOnSubmitPath: 'paper-trading-kernel.submitPaper|submitLive',
     investmentGrade: false,
   }
 }

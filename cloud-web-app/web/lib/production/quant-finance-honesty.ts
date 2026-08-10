@@ -17,6 +17,7 @@ import {
   createPaperTradingKernel,
   createPaperTradingSession,
   createQuarantineGate,
+  defaultPaperManusDualMode,
 } from '@/lib/server/quant/paper-trading-kernel'
 import {
   createTradeAuditLedger,
@@ -32,6 +33,7 @@ import { probeAcceptanceAttestationReadiness } from '@/lib/server/quant/acceptan
 import { probeDualModeExecutionReadiness } from '@/lib/server/quant/dual-mode-execution'
 import { probeSessionTapeReadiness } from '@/lib/production/unified-session-tape'
 import { probeSignedWormReadiness } from '@/lib/production/signed-worm-evidence-store'
+import { probeMonotonicTimebaseReadiness } from '@/lib/production/monotonic-timebase'
 
 const log = createComponentLogger('quant-finance-honesty')
 
@@ -67,7 +69,7 @@ export type OndaNCoreReadiness = {
 }
 
 export type SubstrateSfReadiness = {
-  id: 'SF1' | 'SF2'
+  id: 'SF1' | 'SF2' | 'SF3'
   label: string
   status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   path: string
@@ -85,6 +87,7 @@ export type QuantFinanceHonestyReport = {
   ondaNCores: OndaNCoreReadiness[]
   substrateSf1: SubstrateSfReadiness
   substrateSf2: SubstrateSfReadiness
+  substrateSf3: SubstrateSfReadiness
   section23: {
     nonCustodial: ReturnType<typeof probeNonCustodialReadiness>
     eulaAcceptance: ReturnType<typeof probeEulaRiskAcceptanceReadiness>
@@ -110,17 +113,40 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
   const n2LiveBlocked = !attemptEnableLive(n2Session, n2Gate).ok && n2Session.liveEnabled === DEFAULT_LIVE_ENABLED
   const n2Kernel = createPaperTradingKernel()
   const n2QuarantineWorks = n2Kernel.evaluateQuarantine('probe-strat', 5, 0.8).status === 'PASS'
+  const dualOk = defaultPaperManusDualMode()
+  const dualBlocked = defaultPaperManusDualMode({
+    frequency: 'hft',
+    chartTimeframeMinutes: 1,
+  })
   const n2RiskPass = n2Kernel.submitPaper(
     n2Session,
     { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
     { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+    dualOk,
   )
   const n2RiskReject = n2Kernel.submitPaper(
     n2Session,
     { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
     { notionalUsd: 10, leverageX100: 9999, currentDrawdownBps: 0 },
+    dualOk,
   )
-  const n2RiskWired = n2RiskPass.ok === true && n2RiskReject.ok === false
+  const n2MaestroReject = n2Kernel.submitPaper(
+    n2Session,
+    { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
+    { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+    dualBlocked,
+  )
+  const n2LiveIntentReject = n2Kernel.submitLive(
+    n2Session,
+    { symbol: 'PROBE', side: 'buy', quantity: 1, limitPrice: 10 },
+    { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+    dualOk,
+  )
+  const n2RiskWired =
+    n2RiskPass.ok === true &&
+    n2RiskReject.ok === false &&
+    n2MaestroReject.ok === false &&
+    n2LiveIntentReject.ok === false
   const n2Ready = n2LiveBlocked && n2QuarantineWorks && n2RiskWired
 
   const n3Ledger = createTradeAuditLedger({ projectId: 'probe-n3' })
@@ -150,8 +176,8 @@ function probeOndaNCores(): OndaNCoreReadiness[] {
       path: 'lib/server/quant/paper-trading-kernel.ts',
       ready: n2Ready,
       note: n2Ready
-        ? 'live=false default; submitPaper requires N5 evaluateRisk; quarantine PASS + EULA before live policy; no broker.'
-        : 'Quarantine or N5 risk wire probe failed.',
+        ? 'live=false default; submitPaper requires Maestro(mode+timeframe)+N5 evaluateRisk; live intent fail-closed; quarantine PASS + EULA before live policy; no broker.'
+        : 'Quarantine, Maestro, or N5 risk wire probe failed.',
     },
     {
       id: 'N3',
@@ -210,6 +236,18 @@ function probeSubstrateSf2(): SubstrateSfReadiness {
     path: worm.path,
     ready: worm.ready,
     note: worm.note,
+  }
+}
+
+function probeSubstrateSf3(): SubstrateSfReadiness {
+  const tb = probeMonotonicTimebaseReadiness()
+  return {
+    id: 'SF3',
+    label: 'Monotonic timebase (sim tick vs wall; optional exchange hook)',
+    status: tb.status,
+    path: tb.path,
+    ready: tb.ready,
+    note: tb.note,
   }
 }
 
@@ -392,8 +430,8 @@ function buildReusableInfra(): QuantFinanceCapabilityRow[] {
       specSection: '§1',
       label: 'Deterministic fixed-point / rollback sim',
       status: 'PARTIAL',
-      path: 'lib/production/unified-session-tape.ts',
-      note: 'SF1 session tape records sim ticks + paper trades — not portfolio backtest replay.',
+      path: 'lib/production/monotonic-timebase.ts',
+      note: 'SF3 monotonic timebase isolates sim tick vs wall; SF1 tape records anchors — not portfolio backtest replay.',
     },
     {
       id: 'high-risk-firewall',
@@ -421,6 +459,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
   const ondaNCores = probeOndaNCores()
   const substrateSf1 = probeSubstrateSf1()
   const substrateSf2 = probeSubstrateSf2()
+  const substrateSf3 = probeSubstrateSf3()
   const capabilities = buildQuantFinanceCapabilities(ondaNCores)
   const reusableInfra = buildReusableInfra()
   const section23 = {
@@ -452,6 +491,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     `onda N cores ready=${p0Ready}/5 (N1 vault, N2 paper quarantine, N3 trade audit, N4 ingest stub, N5 risk envelope).`,
     `SF1 session tape: ${substrateSf1.status} — ${substrateSf1.note}`,
     `SF2 signed WORM: ${substrateSf2.status} — ${substrateSf2.note}`,
+    `SF3 monotonic timebase: ${substrateSf3.status} — ${substrateSf3.note}`,
     `§23 non-custodial: ${section23.nonCustodial.note}`,
     `§23 EULA: ${section23.eulaAcceptance.note}`,
     `§23 GPU mux: ${section23.gpuPriorityMux.note}`,
@@ -460,7 +500,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     `Dual-Mode Vanguard HFT: ${dualModeExecution.vanguardHftApi.note}`,
     `Dual-Mode Manus RPA: ${dualModeExecution.manusRpaBrowser.note}`,
     'N1–N5 fail-closed cores only — no FIX broker, licensed L2 feed, or live adapter.',
-    'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd; paper submitPaper calls evaluateRisk.',
+    'N5 Rust risk_envelope + web mirror — live trading hard-disabled; IPC probe_risk_envelope_cmd; paper/live-intent call Maestro then evaluateRisk.',
     'N3 optional SF2 WORM sink — local durable OK; cloudMirror requires explicit consent (no silent telemetry).',
     'Legacy packages/aethel-cli-legacy/.../trading/ is dead code — do not import.',
     `onnx fixture wired=${ONNX_FIXTURE_HONESTY_WIRED} — finance Mini-IA not started.`,
@@ -484,6 +524,7 @@ export function probeQuantFinanceHonesty(): QuantFinanceHonestyReport {
     ondaNCores,
     substrateSf1,
     substrateSf2,
+    substrateSf3,
     section23,
     dualModeExecution,
     wedgeConflict,

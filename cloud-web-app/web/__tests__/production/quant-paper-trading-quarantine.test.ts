@@ -13,7 +13,9 @@ import {
   attemptEnableLive,
   createPaperTradingSession,
   createQuarantineGate,
+  defaultPaperManusDualMode,
   evaluateWalkForwardQuarantine,
+  submitLiveIntent,
   submitPaperOrder,
 } from '@/lib/server/quant/paper-trading-kernel'
 
@@ -80,7 +82,7 @@ describe('paper trading quarantine (N2)', () => {
     }
   })
 
-  it('routes orders to paper only after N5 risk_check — never live broker path', () => {
+  it('routes orders to paper only after Maestro+N5 — never live broker path', () => {
     const session = createPaperTradingSession({
       projectId: 'proj-paper-3',
       strategyId: 'strat-gamma',
@@ -98,11 +100,36 @@ describe('paper trading quarantine (N2)', () => {
         leverageX100: 100,
         currentDrawdownBps: 0,
       },
+      defaultPaperManusDualMode({ chartTimeframeMinutes: 60 }),
     )
     expect(receipt.ok).toBe(true)
     if (receipt.ok) {
       expect(receipt.value.mode).toBe('paper')
+      expect(receipt.value.maestroCheck).toBe('pass')
       expect(receipt.value.riskCheck).toBe('pass')
+      expect(receipt.value.liveBrokerReady).toBe(false)
+      expect(receipt.value.maestroVerdict.investmentGrade).toBe(false)
+      expect(receipt.value.maestroVerdict.liveOrtRpaReady).toBe(false)
+    }
+  })
+
+  it('rejects paper submit when Maestro blocks HFT on RPA mode', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-paper-maestro',
+      strategyId: 'strat-maestro',
+    })
+    const blocked = submitPaperOrder(
+      session,
+      { symbol: 'AAPL', side: 'buy', quantity: 1, limitPrice: 10 },
+      { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+      defaultPaperManusDualMode({
+        frequency: 'hft',
+        chartTimeframeMinutes: 1,
+      }),
+    )
+    expect(blocked.ok).toBe(false)
+    if (!blocked.ok) {
+      expect(blocked.code).toBe('maestro_rpa_hft_blocked')
     }
   })
 
@@ -115,10 +142,39 @@ describe('paper trading quarantine (N2)', () => {
       session,
       { symbol: 'AAPL', side: 'buy', quantity: 1, limitPrice: 10 },
       { notionalUsd: 10, leverageX100: 9999, currentDrawdownBps: 0 },
+      defaultPaperManusDualMode(),
     )
     expect(blocked.ok).toBe(false)
     if (!blocked.ok) {
       expect(blocked.code).toBe('risk_leverage_exceeded')
+    }
+  })
+
+  it('live-intent path always fail-closed after Maestro — no broker / no RPA CV', () => {
+    const session = createPaperTradingSession({
+      projectId: 'proj-live-intent',
+      strategyId: 'strat-live',
+    })
+    const live = submitLiveIntent(
+      session,
+      { symbol: 'AAPL', side: 'buy', quantity: 1, limitPrice: 10 },
+      { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+      defaultPaperManusDualMode(),
+    )
+    expect(live.ok).toBe(false)
+    if (!live.ok) {
+      expect(live.code).toBe('risk_live_trading_disabled')
+    }
+
+    const maestroBlocked = submitLiveIntent(
+      session,
+      { symbol: 'AAPL', side: 'buy', quantity: 1, limitPrice: 10 },
+      { notionalUsd: 10, leverageX100: 100, currentDrawdownBps: 0 },
+      defaultPaperManusDualMode({ frequency: 'scalping', chartTimeframeMinutes: 5 }),
+    )
+    expect(maestroBlocked.ok).toBe(false)
+    if (!maestroBlocked.ok) {
+      expect(maestroBlocked.code.startsWith('maestro_')).toBe(true)
     }
   })
 })

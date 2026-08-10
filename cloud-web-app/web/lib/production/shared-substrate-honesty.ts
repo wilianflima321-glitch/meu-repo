@@ -6,6 +6,7 @@
 
 import { probeCompetitiveRollbackHonesty } from '@/lib/netcode/competitive-rollback-honesty'
 import { runDeterministicReplayFixture } from '@/lib/networking/deterministic-rollback-replay'
+import { probeMonotonicTimebaseReadiness } from '@/lib/production/monotonic-timebase'
 import {
   appendChainedTaskEvidence,
   createTaskEvidenceLedger,
@@ -28,6 +29,9 @@ export interface SharedSubstrateHonestyReport {
   /** SF2 — signed WORM evidence store (HMAC + optional durable JSONL). */
   sf2SignedWormReady: boolean
   sf2Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
+  /** SF3 — sim-tick vs wall isolation + optional exchange timestamp hook. */
+  sf3MonotonicTimebaseReady: boolean
+  sf3Status: 'PARTIAL' | 'NOT_IMPLEMENTED'
   deterministicWebReplayReady: boolean
   competitiveRollbackSoakReady: boolean
   evidenceAuditChainReady: boolean
@@ -102,9 +106,16 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     notes.push('evidenceAuditChainReady HELD — audit chain verification failed')
   }
 
-  const monotonicTimebaseReady = competitive.soakFrames > 0
+  const sf3 = probeMonotonicTimebaseReadiness()
+  const sf3MonotonicTimebaseReady = sf3.ready
+  const sf3Status: SharedSubstrateHonestyReport['sf3Status'] = sf3.status
+  const monotonicTimebaseReady = sf3MonotonicTimebaseReady
   if (!monotonicTimebaseReady) {
-    notes.push('monotonicTimebaseReady HELD — competitive soak produced zero frames')
+    notes.push('monotonicTimebaseReady HELD — SF3 sim/wall isolation probe failed')
+  } else {
+    notes.push(
+      `sf3MonotonicTimebaseReady PARTIAL — ${sf3.note}; PTP / licensed exchange ingest HELD`,
+    )
   }
 
   const sessionTape = probeSessionTapeReadiness()
@@ -164,6 +175,8 @@ export function probeSharedSubstrateHonesty(): SharedSubstrateHonestyReport {
     sf1Status,
     sf2SignedWormReady,
     sf2Status,
+    sf3MonotonicTimebaseReady,
+    sf3Status,
     deterministicWebReplayReady,
     competitiveRollbackSoakReady: competitive.competitiveRollbackSoakReady,
     evidenceAuditChainReady,

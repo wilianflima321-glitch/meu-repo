@@ -198,6 +198,7 @@ describe('quant dual-mode execution', () => {
     expect(dual.vanguardHftApi.liveBrokerReady).toBe(false)
     expect(dual.manusRpaBrowser.liveOrtRpaReady).toBe(false)
     expect(dual.maestroGuardWired).toBe(true)
+    expect(dual.maestroGuardOnSubmitPath).toBe('paper-trading-kernel.submitPaper|submitLive')
     expect(dual.vanguardHftApi.status).toBe('PARTIAL')
     expect(dual.manusRpaBrowser.status).toBe('PARTIAL')
 

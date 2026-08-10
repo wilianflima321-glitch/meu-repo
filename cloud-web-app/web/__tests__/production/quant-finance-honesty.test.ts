@@ -38,6 +38,8 @@ describe('quant finance honesty probe', () => {
     expect(report.substrateSf1.ready).toBe(true)
     expect(report.substrateSf2.status).toBe('PARTIAL')
     expect(report.substrateSf2.ready).toBe(true)
+    expect(report.substrateSf3.status).toBe('PARTIAL')
+    expect(report.substrateSf3.ready).toBe(true)
     const byId = Object.fromEntries(report.capabilities.map((c) => [c.id, c]))
     expect(byId['domain-isolation-l14']?.status).toBe('PARTIAL')
     expect(byId['paper-trading-quarantine']?.status).toBe('PARTIAL')
