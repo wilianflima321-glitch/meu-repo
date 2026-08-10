@@ -1012,7 +1012,7 @@ Law XVI + Bridge generate choke ? L.5 ? tree-authority ? **`chat-spend-session` 
 |---|------|------------|--------|
 | 3B.1 | Create/wire `scalable-render-graph` + `hardware-profile` (Capability Score) | Law XV; scores 0???100 | **DONE CORE 2026-07-11ab** ??? web probe + blueprint registry; Auto Fidelity + honesty wire; frame graph still HELD |
 | 3B.2 | wgpu frame graph feeds editor viewport (not surface-only) | Screenshot parity gate web preview vs desktop | **HELD** ??? wgpu surface probe only |
-| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit cook→cull→`draw_indirect`→micro-poly→VSM→**FSR temporal**→Hi-Z→radiance (`gpu_fsr.rs`); `nanite_ready`/`hiz_ready`/`lumen_ready`/`micro_poly_aaa_ready`/`vsm_aaa_ready`/`fsr_aaa_ready`/`multi_draw_indirect_aaa_ready`/product WebView **HELD** |
+| 3B.3 | GPU culling path used in frame (extend `gpu_culling.rs`) | CPU frustum hot path deleted at scale | **PARTIAL** ??? secondary_winit cook→cull→`draw_indirect`→micro-poly→VSM→FSR→**Entropy debris**→Hi-Z→radiance (`gpu_entropy_destruction.rs`); `nanite_ready`/`hiz_ready`/`lumen_ready`/`micro_poly_aaa_ready`/`vsm_aaa_ready`/`fsr_aaa_ready`/`entropy_aaa_ready`/`chaos_aaa_ready`/`multi_draw_indirect_aaa_ready`/product WebView **HELD** |
 | 3B.4 | Live Cook-Torrance BRDF in material shaders | PBR sphere shows specular (ENG-007) | **HELD** |
 
 #### Round 3C ??? Advanced paths (P1 ??? only after 3A/3B)
@@ -1270,6 +1270,7 @@ Mega-PR series. Plans Canonical v1.1 + PAYG spec v1.1 are binding.
 
 | Date | Ver | Change |
 |------|-----|--------|
+| 2026-08-10 | 1.4x | **Engine Entropy / GPU destruction substrate PARTIAL (no UI):** `gpu_entropy_destruction.rs` fracture chunk SoA + GPU impulse/debris integrate on secondary_winit; Instant metrics; `entropy_substrate_proven` when chunks update; **`entropy_aaa_ready`/`chaos_aaa_ready`/`nanite_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4w | **Engine FSR / temporal upsample substrate PARTIAL (no UI):** `gpu_fsr.rs` LR→HR history buffer + reactive mask stub on secondary_winit; Instant metrics; `fsr_substrate_proven` evidence; **`fsr_aaa_ready`/`nanite_ready`/`micro_poly_aaa_ready`/`lumen_ready`/`vsm_aaa_ready` stay false**. Law XV honesty — not FSR3 AAA. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4v | **Engine VSM / cascade shadow substrate PARTIAL (no UI):** `gpu_vsm.rs` page table + physical depth atlas on secondary_winit; Instant metrics; `vsm_substrate_proven` when pages write depth; **`vsm_aaa_ready`/`nanite_ready`/`micro_poly_aaa_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
 | 2026-08-10 | 1.4u | **Engine micro-poly soft-raster substrate PARTIAL (no UI):** `gpu_micropoly_raster.rs` cooked meshlet tris + cull visibility → 64² soft-raster; Instant metrics; `micro_poly_substrate_proven` evidence; **`micro_poly_aaa_ready`/`nanite_ready`/`lumen_ready` stay false**. G.3 stays ~15%. 3B.3 deepened. Gates: check+clippy green. |
