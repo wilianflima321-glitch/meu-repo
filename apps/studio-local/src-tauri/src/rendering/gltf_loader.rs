@@ -1,5 +1,4 @@
 use crate::rendering::pbr_graphics::Vertex;
-use gltf::Gltf;
 
 pub struct MeshData {
     pub vertices: Vec<Vertex>,
@@ -21,24 +20,20 @@ pub fn load_gltf(
         for primitive in mesh.primitives() {
             let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()]));
 
-            let mut positions: Vec<[f32; 3]> = Vec::new();
-            if let Some(iter) = reader.read_positions() {
-                positions = iter.collect();
-            }
+            let positions: Vec<[f32; 3]> = reader
+                .read_positions()
+                .map(|iter| iter.collect())
+                .unwrap_or_default();
 
-            let mut normals: Vec<[f32; 3]> = Vec::new();
-            if let Some(iter) = reader.read_normals() {
-                normals = iter.collect();
-            } else {
-                normals = vec![[0.0, 1.0, 0.0]; positions.len()];
-            }
+            let normals: Vec<[f32; 3]> = reader
+                .read_normals()
+                .map(|iter| iter.collect())
+                .unwrap_or_else(|| vec![[0.0, 1.0, 0.0]; positions.len()]);
 
-            let mut uvs: Vec<[f32; 2]> = Vec::new();
-            if let Some(iter) = reader.read_tex_coords(0) {
-                uvs = iter.into_f32().collect();
-            } else {
-                uvs = vec![[0.0, 0.0]; positions.len()];
-            }
+            let uvs: Vec<[f32; 2]> = reader
+                .read_tex_coords(0)
+                .map(|iter| iter.into_f32().collect())
+                .unwrap_or_else(|| vec![[0.0, 0.0]; positions.len()]);
 
             let mut vertices = Vec::with_capacity(positions.len());
             for i in 0..positions.len() {
@@ -83,5 +78,5 @@ pub fn load_gltf(
         }
     }
 
-    Ok(meshes)
+    loaded_mesh_ids
 }

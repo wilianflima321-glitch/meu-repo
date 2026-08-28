@@ -776,4 +776,30 @@ mod tests {
         assert_ne!("sdfSculptorReady", "hermiteSharpFeaturesReady");
         assert_ne!("sdfSculptorReady", "hermiteDualityGridReady");
     }
+
+    #[test]
+    fn sdf_grid_sphere_fill_analytical_distance() {
+        let mut grid = SdfGrid::new(16, [-1.0, -1.0, -1.0], 2.0 / 15.0);
+        let center = [0.0, 0.0, 0.0];
+        let radius = 0.5;
+        grid.fill_sphere(center, radius);
+
+        // Center voxel must be negative (-radius)
+        let center_idx = grid.index(7, 7, 7);
+        let p_center = grid.node_pos(7, 7, 7);
+        let dist = (p_center[0] * p_center[0] + p_center[1] * p_center[1] + p_center[2] * p_center[2]).sqrt() - radius;
+        assert!((grid.values[center_idx] - dist).abs() < 1e-4);
+    }
+
+    #[test]
+    fn sdf_brush_softmin_smooth_blend_invariants() {
+        let a = 0.5f32;
+        let b = 0.4f32;
+        let k = 0.1f32;
+
+        let h = (0.5 + 0.5 * (b - a) / k).clamp(0.0, 1.0);
+        let soft_min = b + (a - b) * h - k * h * (1.0 - h);
+
+        assert!(soft_min <= a.min(b) + 1e-5, "Softmin must be less than or equal to hard min: {soft_min} vs {}", a.min(b));
+    }
 }

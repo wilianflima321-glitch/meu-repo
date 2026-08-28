@@ -78,6 +78,19 @@ export interface WorldPartitionCell {
 - Output: **instanced transforms SoA** + HISM batches — not empty arrays
 - Cook-time bake for static; runtime regen for dynamic (budget cap)
 
+### 4-Layer World Synthesis Hierarchy (Anti-"Empty World" Protocol)
+
+To ensure generated open worlds possess AAA organic density and narrative intentionality:
+1. **Layer 0 (Macro Topology):** Global elevation, biome classification (Whittaker Diagram), and primary road spline networks.
+2. **Layer 1 (Meso Architectural Assembly):** Modular USD structural kits combined via Wave Function Collapse (WFC) into unique building footprints with varied heights, facades, and roof silhouettes.
+3. **Layer 2 (Micro Environmental Scatter):** Ground clutter (debris, fallen leaves, curbs, manholes, utility poles, weathering decals) scattered via density-masked Poisson disk sampling.
+4. **Layer 3 (Hero Narrative Pass):** Automated/directed placement of high-detail unique props, key lighting accents, and mission staging points.
+
+### Mass Crowd & Traffic Synthesis (SoA + Mood Modulators)
+
+- **Scale:** 10,000+ simulated crowd and traffic agents executing in memory-contiguous SoA arrays.
+- **Organic Motion Matching:** Procedural mood modulators (pace, posture, fatigue, environmental reaction) layered onto base motion capture data to ensure every NPC exhibits unique kinetic behavior.
+
 ---
 
 ## Delivery (S2.0 → S2.4)

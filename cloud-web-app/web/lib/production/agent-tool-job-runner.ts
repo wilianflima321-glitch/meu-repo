@@ -34,6 +34,10 @@ import {
   type ArchitectureLawsGateInput,
   type ArchitectureLawsGateResult,
 } from '@/lib/ai/architecture-laws-gate'
+import {
+  evaluateMiniIaToolDispatch,
+  mapAgentToolToMiniIaName,
+} from '@/lib/production/mini-ia-tool-dispatch'
 
 export type GovernedToolJobEnforcement = 'enforced' | 'observe'
 
@@ -60,6 +64,11 @@ export interface GovernedAgentToolJobInput {
   /** Decision #58 — required for mutating apply when enforceArchitectureLaws */
   architectureContext?: Omit<ArchitectureLawsGateInput, 'projectId' | 'intent'>
   enforceArchitectureLaws?: boolean
+  /**
+   * Mini-IA / simple creative UX surface — enforce allowlist (host PTY fail-closed).
+   * Maestro remains orchestration choke; set when chat/agent acts as Mini-IA.
+   */
+  miniIaSurface?: boolean
 }
 
 export interface GovernedAgentToolJobDecision {
@@ -186,6 +195,32 @@ export function evaluateGovernedAgentToolJob(
 
   const toolDecision = evaluateAgentToolInvocation(buildAgentToolInvocation(input))
 
+  const miniIaSurface =
+    input.miniIaSurface === true ||
+    (input.mode === 'Creative' && input.agent.toLowerCase().includes('mini'))
+  let miniIaBlockers: string[] = []
+  let miniIaLedgerExtra: Parameters<typeof appendTaskEvidence>[1] | null = null
+  if (miniIaSurface) {
+    const mapped = mapAgentToolToMiniIaName(String(input.toolId))
+    const mini = evaluateMiniIaToolDispatch({
+      projectId: input.projectId,
+      toolName: mapped,
+      callerSurface: 'mini-ia',
+      now,
+    })
+    if (!mini.ok) {
+      miniIaBlockers = [mini.message, `mini-ia:${mini.code}`]
+      miniIaLedgerExtra = {
+        kind: 'validation',
+        title: 'Mini-IA allowlist denied',
+        summary: mini.message,
+        refs: mini.evidence.refs,
+        actor: input.agent,
+        createdAt: now,
+      }
+    }
+  }
+
   const baseLedger = createTaskEvidenceLedger({
     taskId,
     projectId: input.projectId,
@@ -193,7 +228,10 @@ export function evaluateGovernedAgentToolJob(
     ownerAgent: input.agent,
     now,
   })
-  const ledger = seedLedgerWithAvailableEvidence(baseLedger, input, now)
+  let ledger = seedLedgerWithAvailableEvidence(baseLedger, input, now)
+  if (miniIaLedgerExtra) {
+    ledger = appendTaskEvidence(ledger, miniIaLedgerExtra)
+  }
   const evidenceReadiness = evaluateTaskEvidenceReadiness(ledger, toolDecision)
 
   let architectureLaws: ArchitectureLawsGateResult | undefined
@@ -210,11 +248,13 @@ export function evaluateGovernedAgentToolJob(
   }
 
   const lawsBlocked = architectureLaws?.verdict === 'BLOCK' && (input.enforceArchitectureLaws === true || isMutating)
-  const ready = toolDecision.allowed && evidenceReadiness.ready && !lawsBlocked
+  const miniIaBlocked = miniIaBlockers.length > 0
+  const ready = toolDecision.allowed && evidenceReadiness.ready && !lawsBlocked && !miniIaBlocked
   const blockers = unique([
     ...toolDecision.blockers,
     ...evidenceReadiness.blockers,
     ...(lawsBlocked && architectureLaws ? [architectureLaws.message] : []),
+    ...miniIaBlockers,
   ])
 
   return {

@@ -57,7 +57,7 @@ describe('CW1 consolidation truth matrix', () => {
     expect(forge?.marketingAllowed).toBe(false)
     expect(forge?.lastEvidence).toMatch(/firecracker=false/)
     expect(cw2?.status).toBe('PARTIAL')
-    expect(cw7?.status).toBe('PARTIAL')
+    expect(cw7?.status).toBe('IMPLEMENTED')
   })
 
   it('keeps marketingAllowed false for HELD AAA names', () => {

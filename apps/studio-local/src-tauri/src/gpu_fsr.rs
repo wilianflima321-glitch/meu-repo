@@ -12,13 +12,14 @@
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 
-/// Substrate low-res edge (not product viewport).
-pub const FSR_INPUT_EDGE: u32 = 32;
+/// Substrate low-res edge — product-class 320→640 2× (CapScore soak overrides
+/// to 540→1080-class per tier). Still not the AMD FSR3 FG product path.
+pub const FSR_INPUT_EDGE: u32 = 320;
 /// Upscale factor for this substrate (Law XV internal scale 0.5 → 2× present).
 pub const FSR_SCALE: u32 = 2;
 pub const FSR_OUTPUT_EDGE: u32 = FSR_INPUT_EDGE * FSR_SCALE;
 
-const _: () = assert!(FSR_OUTPUT_EDGE == 64);
+const _: () = assert!(FSR_OUTPUT_EDGE == 640);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
@@ -31,6 +32,11 @@ struct FsrParams {
     jitter: [f32; 2],
     history_weight: f32,
     reactive_threshold: f32,
+    /// RCAS-class contrast-adaptive sharpen strength (0 = off).
+    sharpen: f32,
+    _pad0: f32,
+    _pad1: f32,
+    _pad2: f32,
 }
 
 #[repr(C)]
@@ -40,6 +46,8 @@ pub struct FsrStats {
     pub output_texels_written: u32,
     pub history_samples_blended: u32,
     pub reactive_mask_texels: u32,
+    /// Texels sharpened by the RCAS pass (5th atomic — 20 B, WGSL-synced).
+    pub sharpened_texels: u32,
 }
 
 const FILL_SHADER: &str = r#"
@@ -51,6 +59,10 @@ struct FsrParams {
     jitter: vec2<f32>,
     history_weight: f32,
     reactive_threshold: f32,
+    sharpen: f32,
+    _pad0: f32,
+    _pad1: f32,
+    _pad2: f32,
 };
 
 struct Stats {
@@ -58,6 +70,7 @@ struct Stats {
     output_texels_written: atomic<u32>,
     history_samples_blended: atomic<u32>,
     reactive_mask_texels: atomic<u32>,
+    sharpened_texels: atomic<u32>,
 };
 
 @group(0) @binding(0) var<uniform> params: FsrParams;
@@ -91,6 +104,10 @@ struct FsrParams {
     jitter: vec2<f32>,
     history_weight: f32,
     reactive_threshold: f32,
+    sharpen: f32,
+    _pad0: f32,
+    _pad1: f32,
+    _pad2: f32,
 };
 
 struct Stats {
@@ -98,6 +115,7 @@ struct Stats {
     output_texels_written: atomic<u32>,
     history_samples_blended: atomic<u32>,
     reactive_mask_texels: atomic<u32>,
+    sharpened_texels: atomic<u32>,
 };
 
 @group(0) @binding(0) var<uniform> params: FsrParams;
@@ -162,12 +180,77 @@ fn upsample_main(@builtin(global_invocation_id) gid: vec3<u32>) {
 }
 "#;
 
+/// RCAS-class contrast-adaptive cross sharpen (not an AMD RCAS bit-port —
+/// parity is forbidden until a golden pins it): 4-tap Laplacian weighted by
+/// the neighborhood contrast span, in-place on the upsample output (each
+/// invocation reads completed upsample texels and writes only its own pixel).
+const SHARPEN_SHADER: &str = r#"
+struct FsrParams {
+    input_edge: u32,
+    output_edge: u32,
+    scale: u32,
+    frame_index: u32,
+    jitter: vec2<f32>,
+    history_weight: f32,
+    reactive_threshold: f32,
+    sharpen: f32,
+    _pad0: f32,
+    _pad1: f32,
+    _pad2: f32,
+};
+
+struct Stats {
+    input_texels_filled: atomic<u32>,
+    output_texels_written: atomic<u32>,
+    history_samples_blended: atomic<u32>,
+    reactive_mask_texels: atomic<u32>,
+    sharpened_texels: atomic<u32>,
+};
+
+@group(0) @binding(0) var<uniform> params: FsrParams;
+@group(0) @binding(1) var<storage, read_write> output_color: array<vec4<f32>>;
+@group(0) @binding(2) var<storage, read_write> stats: Stats;
+
+@compute @workgroup_size(8, 8, 1)
+fn sharpen_main(@builtin(global_invocation_id) gid: vec3<u32>) {
+    let x = gid.x;
+    let y = gid.y;
+    if (x >= params.output_edge || y >= params.output_edge) {
+        return;
+    }
+    if (params.sharpen <= 0.0) {
+        return;
+    }
+    let idx = y * params.output_edge + x;
+    let b = output_color[idx].rgb;
+    let xl = select(0u, x - 1u, x > 0u);
+    let xr = min(x + 1u, params.output_edge - 1u);
+    let yu = select(0u, y - 1u, y > 0u);
+    let yd = min(y + 1u, params.output_edge - 1u);
+    let up = output_color[yu * params.output_edge + x].rgb;
+    let dn = output_color[yd * params.output_edge + x].rgb;
+    let lf = output_color[y * params.output_edge + xl].rgb;
+    let rt = output_color[y * params.output_edge + xr].rgb;
+    // Contrast span over the cross (per channel) → adaptive weight: flat
+    // regions sharpen less, edges more (RCAS-class adaptation).
+    let mn = min(b, min(up, min(dn, min(lf, rt))));
+    let mx = max(b, max(up, max(dn, max(lf, rt))));
+    let span = mx - mn;
+    let w = clamp(1.0 - span * 4.0, vec3<f32>(0.2), vec3<f32>(1.0));
+    let delta = b * 4.0 - (up + dn + lf + rt);
+    let out_c = clamp(b + delta * params.sharpen * w, vec3<f32>(0.0), vec3<f32>(1.0));
+    output_color[idx] = vec4<f32>(out_c, output_color[idx].a);
+    atomicAdd(&stats.sharpened_texels, 1u);
+}
+"#;
+
 const CLEAR_STATS_SHADER: &str = r#"
 struct Stats {
     input_texels_filled: atomic<u32>,
     output_texels_written: atomic<u32>,
     history_samples_blended: atomic<u32>,
     reactive_mask_texels: atomic<u32>,
+    sharpened_texels: atomic<u32>,
 };
 
 @group(0) @binding(0) var<storage, read_write> stats: Stats;
@@ -177,7 +260,8 @@ fn clear_stats_main() {
     atomicStore(&stats.input_texels_filled, 0u);
     atomicStore(&stats.output_texels_written, 0u);
     atomicStore(&stats.history_samples_blended, 0u);
-    atomicStore(&stats.reactive_mask_texels, 0u);
+        atomicStore(&stats.reactive_mask_texels, 0u);
+        atomicStore(&stats.sharpened_texels, 0u);
 }
 "#;
 
@@ -200,14 +284,19 @@ pub struct FsrTemporalUpsample {
     fill_bind_group: wgpu::BindGroup,
     upsample_pipeline: wgpu::ComputePipeline,
     upsample_bind_group: wgpu::BindGroup,
+    sharpen_pipeline: wgpu::ComputePipeline,
+    sharpen_bind_group: wgpu::BindGroup,
     pub input_edge: u32,
     pub output_edge: u32,
     pub scale: u32,
     frame_index: u32,
+    /// Audio→render cue: impact strength 0..=1 scales the visible shake in
+    /// the upscale jitter (sound-physics kb events drive this via MPSC).
+    impact_shake: std::sync::atomic::AtomicU32,
 }
 
 impl FsrTemporalUpsample {
-    /// Default toy edges (32→64) — CapScore soak uses [`Self::new_with_edges`].
+    /// Default substrate edges (320→640) — CapScore soak uses [`Self::new_with_edges`].
     #[allow(dead_code)]
     pub fn new(device: &wgpu::Device) -> Result<Self, String> {
         Self::new_with_edges(device, FSR_INPUT_EDGE, FSR_SCALE)
@@ -233,6 +322,10 @@ impl FsrTemporalUpsample {
             jitter: [0.0, 0.0],
             history_weight: 0.85,
             reactive_threshold: 0.08,
+            sharpen: 0.15,
+            _pad0: 0.0,
+            _pad1: 0.0,
+            _pad2: 0.0,
         };
 
         let input_len = (input_edge * input_edge) as usize;
@@ -245,6 +338,7 @@ impl FsrTemporalUpsample {
             output_texels_written: 0,
             history_samples_blended: 0,
             reactive_mask_texels: 0,
+        sharpened_texels: 0,
         };
 
         let params_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -411,6 +505,50 @@ impl FsrTemporalUpsample {
             ],
         });
 
+        // ---- RCAS-class sharpen (post-upsample, in-place on the output) ----
+        let sharpen_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Aethel FSR RCAS Sharpen Shader"),
+            source: wgpu::ShaderSource::Wgsl(SHARPEN_SHADER.into()),
+        });
+        let sharpen_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Aethel FSR Sharpen BGL"),
+            entries: &[
+                uniform_entry(0),
+                storage_entry(1, false),
+                storage_entry(2, false),
+            ],
+        });
+        let sharpen_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("Aethel FSR Sharpen Layout"),
+            bind_group_layouts: &[&sharpen_bgl],
+            push_constant_ranges: &[],
+        });
+        let sharpen_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("Aethel FSR RCAS Sharpen Pipeline"),
+            layout: Some(&sharpen_layout),
+            module: &sharpen_shader,
+            entry_point: "sharpen_main",
+            compilation_options: Default::default(),
+        });
+        let sharpen_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Aethel FSR Sharpen BG"),
+            layout: &sharpen_bgl,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: params_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: output_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: stats_buffer.as_entire_binding(),
+                },
+            ],
+        });
+
         Ok(Self {
             params,
             params_buffer,
@@ -425,11 +563,27 @@ impl FsrTemporalUpsample {
             fill_bind_group,
             upsample_pipeline,
             upsample_bind_group,
+            sharpen_pipeline,
+            sharpen_bind_group,
             input_edge,
             output_edge,
             scale,
             frame_index: 1,
+            impact_shake: std::sync::atomic::AtomicU32::new(0.0f32.to_bits()),
         })
+    }
+
+    /// Audio→render cue consumption: impact strength (0..=1).
+    pub fn set_impact_shake(&self, strength: f32) {
+        self.impact_shake.store(
+            strength.clamp(0.0, 1.0).to_bits(),
+            std::sync::atomic::Ordering::Relaxed,
+        );
+    }
+
+    /// Effective impact shake (evidence).
+    pub fn effective_impact_shake(&self) -> f32 {
+        f32::from_bits(self.impact_shake.load(std::sync::atomic::Ordering::Relaxed))
     }
 
     /// Clear stats → fill LR color → temporal upsample into HR + history + reactive mask.
@@ -439,9 +593,13 @@ impl FsrTemporalUpsample {
         let phase = (self.frame_index % 8) as f32;
         self.params.frame_index = self.frame_index;
         let edge = self.output_edge as f32;
+        // Audio→render cue: impact strength scales the jitter amplitude
+        // (visible shake — the cinematic link from the audio pillar).
+        let shake = self.effective_impact_shake();
+        let amp = 1.0 + shake * 3.0;
         self.params.jitter = [
-            ((phase * 0.125) - 0.5) / edge,
-            (((phase * 0.375) % 1.0) - 0.5) / edge,
+            ((phase * 0.125) - 0.5) / edge * amp,
+            (((phase * 0.375) % 1.0) - 0.5) / edge * amp,
         ];
         queue.write_buffer(&self.params_buffer, 0, bytemuck::bytes_of(&self.params));
 
@@ -474,6 +632,19 @@ impl FsrTemporalUpsample {
             });
             pass.set_pipeline(&self.upsample_pipeline);
             pass.set_bind_group(0, &self.upsample_bind_group, &[]);
+            pass.dispatch_workgroups(
+                self.output_edge.div_ceil(8),
+                self.output_edge.div_ceil(8),
+                1,
+            );
+        }
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                label: Some("Aethel FSR RCAS Sharpen"),
+                timestamp_writes: None,
+            });
+            pass.set_pipeline(&self.sharpen_pipeline);
+            pass.set_bind_group(0, &self.sharpen_bind_group, &[]);
             pass.dispatch_workgroups(
                 self.output_edge.div_ceil(8),
                 self.output_edge.div_ceil(8),
@@ -544,10 +715,10 @@ mod tests {
 
     #[test]
     fn fsr_layout_contracts() {
-        assert_eq!(std::mem::size_of::<FsrStats>(), 16);
-        assert_eq!(std::mem::size_of::<FsrParams>(), 32);
-        assert_eq!(FSR_INPUT_EDGE, 32);
-        assert_eq!(FSR_OUTPUT_EDGE, 64);
+        assert_eq!(std::mem::size_of::<FsrStats>(), 20);
+        assert_eq!(std::mem::size_of::<FsrParams>(), 48);
+        assert_eq!(FSR_INPUT_EDGE, 320);
+        assert_eq!(FSR_OUTPUT_EDGE, 640);
         assert_eq!(FSR_SCALE, 2);
     }
 }

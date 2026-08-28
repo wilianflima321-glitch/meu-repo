@@ -1,16 +1,21 @@
 //! Path-Traced Radiance Cascades & Neural Denoising Kernel — letter **ip10** (quality **hu**).
 //!
-//! Provides real-time infinite-bounce global illumination (GI), sky radiance cascades,
-//! and Tensor Core neural spatio-temporal denoising.
-//! Establishes technological supremacy over Unreal Engine 5.5 Lumen by achieving zero-lag
-//! path tracing on RTX 3060 / 4090 GPUs.
+//! Real-time infinite-bounce global illumination (GI) probe substrate with sky
+//! radiance cascades. **Honesty correction (2026-08-14, round kg):** the earlier
+//! module doc over-claimed "Tensor Core neural spatio-temporal denoising",
+//! "zero-lag path tracing on RTX 3060 / 4090 GPUs" and "supremacy over Unreal
+//! Engine 5.5 Lumen" while the code only hardcodes `denoise_confidence[i] = 0.99`
+//! (no actual denoising). Real spatio-temporal denoising lives in
+//! [`crate::spatio_temporal_denoiser`] (letter **kg** — SVGF/BMFR-lite on CPU);
+//! GPU / Tensor-Core neural parity is **HELD** (`neural_upscale_aaa_ready` /
+//! `full_restit_class_denoiser_aaa_ready` / `gpu_execution_verified` false).
 //!
-//! Features:
+//! Features (honest scope):
 //! - Multi-interval Radiance Cascade hierarchy $C_0, C_1, C_2, C_3$.
 //! - Angular probes with 360-degree spherical radiance accumulation.
-//! - Tensor Core neural Bilateral Spatio-Temporal Denoising ($I_{\text{denoised}} = \mathcal{N}(I_{\text{raw}}, \vec{N}, Z, \vec{v})$).
 //! - 64-byte Cache-Line aligned SoA radiance buffer (`RadianceCascadeSoA`).
-//! - Honesty probe `pathTracedRadianceCascadesReady` / `path_traced_radiance_cascades_ready`.
+//! - Honesty probe `pathTracedRadianceCascadesReady` / `path_traced_radiance_cascades_ready`
+//!   (radiance accumulation only — NOT a claim of GPU/neural denoising).
 
 use serde::{Deserialize, Serialize};
 
@@ -93,6 +98,9 @@ impl RadianceCascadeSoA {
             self.cascade0_r[i] = (self.cascade0_r[i] * 0.9 + sky_intensity * 0.1).clamp(0.0, 10.0);
             self.cascade0_g[i] = (self.cascade0_g[i] * 0.9 + sky_intensity * 0.1).clamp(0.0, 10.0);
             self.cascade0_b[i] = (self.cascade0_b[i] * 0.9 + sky_intensity * 0.1).clamp(0.0, 10.0);
+            // Hardcoded confidence — this module performs NO actual denoising.
+            // The real CPU spatio-temporal denoiser is `crate::spatio_temporal_denoiser`
+            // (kg, SVGF/BMFR-lite); GPU/neural denoising parity remains HELD.
             self.denoise_confidence[i] = 0.99;
         }
     }

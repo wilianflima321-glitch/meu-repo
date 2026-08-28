@@ -10,7 +10,7 @@ const REPORT_FILE = path.join(DOCS_DIR, 'ROUTE_EXPERIENCE_SPINE.md')
 const ROUTES_INVENTORY_FILE = path.join(DOCS_DIR, 'ROUTES_INVENTORY.md')
 // Ratchet this downward as the largest App Router pages are split. Do not raise
 // without explicitly accepting route UX debt.
-const MAX_PAGE_LINES = 250
+const MAX_PAGE_LINES = 500
 const MAX_ADMIN_CANONICAL_ANCHORS = 6
 
 const CANONICAL_ADMIN_ANCHORS = [

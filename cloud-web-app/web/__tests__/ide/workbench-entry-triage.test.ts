@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   resolveWorkbenchEntryLane,
   resolveWorkbenchEntryProfile,
-} from '../../components/ide/fullscreen/workbench-entry-triage';
+} from '@aethel/ide-ui/fullscreen/workbench-entry-triage';
 
 describe('workbench entry triage', () => {
   it('routes cloud starters to a runtime-first Studio profile', () => {

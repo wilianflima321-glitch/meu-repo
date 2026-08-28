@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * Letter cf — Studio R3F viewport → RadianceFrameWire (Zero-MVP).

@@ -37,7 +37,8 @@ use crate::gpu_hiz::DepthPyramidHiz;
 use crate::gpu_meshlet_cook::{cook_soak_meshlets, soak_cook_input_mesh};
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
 use crate::gpu_micropoly_raster::MicropolyRasterScaffold;
-use crate::gpu_radiance_probes::{soak_probe_volume_params, RadianceProbeVolume};
+use crate::gpu_radiance_probes::RadianceCascadeVolume;
+use crate::present_command_channel;
 use crate::gpu_entropy_destruction::EntropyDestructionScaffold;
 use crate::gpu_frame_graph::{
     empty_timings_report, execute_secondary_frame_graph, timings_from_soak,
@@ -174,6 +175,12 @@ pub struct RendererPresentProbeReport {
     pub radiance_sample_dark_luminance: f64,
     /// True when fill+sample ran and lit luminance > dark (fail-closed evidence).
     pub radiance_probe_substrate_proven: bool,
+    /// Cascade rings in the clipmap-lite volume (2 = fine 16³ + coarse 8³/64³).
+    pub radiance_cascade_levels: u32,
+    /// Luminance of the coarse-ring sample point (level 1 served it).
+    pub radiance_coarse_sample_luminance: f64,
+    /// True when both rings filled and the coarse ring actually served its sample.
+    pub radiance_cascade_substrate_proven: bool,
     /// Cooked triangles fed to the software micro-poly soft-raster.
     pub micro_poly_triangle_count: u32,
     /// Soft-raster Instant ms (sum over frames).
@@ -183,6 +190,11 @@ pub struct RendererPresentProbeReport {
     pub micro_poly_fragments_written: u32,
     /// True when soft-raster consumed cull visibility and wrote fragments.
     pub micro_poly_substrate_proven: bool,
+    /// True when the post-raster material resolve shaded real palette colors
+    /// from the visibility buffer (materials, not debug meshlet IDs).
+    pub micro_poly_materials_resolved: bool,
+    /// Temporal history accumulation active (anti-shimmer — frame >1 blend).
+    pub micro_poly_history_accumulation: bool,
     /// Virtual page count in the VSM substrate page table.
     pub vsm_virtual_pages: u32,
     /// Physical depth-atlas page pool capacity.
@@ -411,11 +423,16 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
         radiance_sample_lit_luminance: 0.0,
         radiance_sample_dark_luminance: 0.0,
         radiance_probe_substrate_proven: false,
+        radiance_cascade_levels: 0,
+        radiance_coarse_sample_luminance: 0.0,
+        radiance_cascade_substrate_proven: false,
         micro_poly_triangle_count: 0,
         micro_poly_ms_total: 0.0,
         micro_poly_triangles_visible: 0,
         micro_poly_fragments_written: 0,
         micro_poly_substrate_proven: false,
+        micro_poly_materials_resolved: false,
+        micro_poly_history_accumulation: false,
         vsm_virtual_pages: 0,
         vsm_physical_pool: 0,
         vsm_cascade_count: 0,
@@ -461,6 +478,43 @@ fn fail_report(frames_requested: u32, reasons: Vec<String>) -> RendererPresentPr
     }
 }
 
+#[cfg(test)]
+pub(crate) fn test_success_soak_probe() -> RendererPresentProbeReport {
+    // Unit-test fixture ONLY (never IPC / never product evidence): a presented +
+    // frame-graph-completed probe shape so pure-logic soak metric derivation tests
+    // can run without a GPU. It does NOT claim real GPU execution — `note` states so.
+    let mut r = fail_report(60, vec!["Presented 60/60 frame(s) — unit-test fixture".into()]);
+    r.presented = true;
+    r.submitted = true;
+    r.surface_configured = true;
+    r.adapter_acquired = true;
+    r.device_created = true;
+    r.frames_presented = 60;
+    r.adapter_name = "unit-test-fixture".into();
+    r.backend = "test".into();
+    r.surface_kind = "secondary_winit".into();
+    r.soak_capability_score = 100;
+    r.soak_fidelity_tier = "high".into();
+    r.soak_present_width = 1920;
+    r.soak_present_height = 1080;
+    r.soak_max_texture_dimension_2d = 16_384;
+    r.zero_copy_hot_path = true;
+    r.cull_dispatches = 60;
+    r.frame_ms_min = 1.0;
+    r.frame_ms_max = 3.0;
+    r.frame_ms_mean = 2.0;
+    r.frame_ms_total = 120.0;
+    r.engine_frame_loop_with_cull = true;
+    r.indirect_draw_wired = true;
+    r.bindless_layout_scaffold = true;
+    r.frame_graph_executed = true;
+    r.frame_graph_pass_count = SECONDARY_FRAME_GRAPH_PASS_ORDER.len() as u32;
+    r.frame_graph_substrate_proven = true;
+    r.note =
+        "unit-test fixture — pure-logic metric derivation only; NOT real GPU soak evidence".into();
+    r
+}
+
 struct EngineFrameOutcome {
     graph: FrameGraphFrameMetrics,
 }
@@ -477,7 +531,7 @@ fn present_one_engine_frame(
     fsr: &mut FsrTemporalUpsample,
     entropy: &mut EntropyDestructionScaffold,
     hiz: &DepthPyramidHiz,
-    radiance: &RadianceProbeVolume,
+    radiance: &RadianceCascadeVolume,
     occlusion_enabled: bool,
 ) -> Result<EngineFrameOutcome, String> {
     let outcome = execute_secondary_frame_graph(
@@ -999,12 +1053,12 @@ fn present_probe_on_secondary_window_ex(
         }
     };
 
-    let radiance = match RadianceProbeVolume::new(&device, soak_probe_volume_params()) {
+    let radiance = match RadianceCascadeVolume::new(&device) {
         Ok(v) => v,
         Err(e) => {
             let mut r = fail_report(
                 frames_requested,
-                vec![format!("RadianceProbeVolume init failed: {e}")],
+                vec![format!("RadianceCascadeVolume init failed: {e}")],
             );
             r.adapter_acquired = true;
             r.device_created = true;
@@ -1057,6 +1111,18 @@ fn present_probe_on_secondary_window_ex(
         }
         // Frame 0 builds pyramid with occlusion off; frame ≥1 samples prior Hi-Z.
         let occlusion_enabled = frame_i > 0;
+        // Render-thread drain of the PP-02 input channel — try_recv only,
+        // never blocks the tick loop (commands publish into lock-free params).
+        present_command_channel::drain_global_pending();
+        // MPSC loop closed: the substrates consume the published params each
+        // frame (VSM pool budget / radiance intensity / entropy impulse).
+        let (vsm_budget, radiance_intensity, entropy_strength) =
+            present_command_channel::snapshot_params();
+        vsm.set_pool_budget(vsm_budget);
+        radiance.set_light_intensity(radiance_intensity);
+        entropy.set_impulse_strength(entropy_strength);
+        // Audio→render cue: sound-physics impacts drive the visible shake.
+        fsr.set_impact_shake(present_command_channel::audio_impact_strength());
         let t0 = std::time::Instant::now();
         match present_one_engine_frame(
             &device,
@@ -1201,6 +1267,7 @@ fn present_probe_on_secondary_window_ex(
             triangles_visible: 0,
             fragments_written: 0,
             depth_tests_passed: 0,
+            resolve_pixels_written: 0,
         }
     };
     let vsm_stats = if frames_presented > 0 {
@@ -1211,6 +1278,7 @@ fn present_probe_on_secondary_window_ex(
             pages_depth_written: 0,
             texels_written: 0,
             cascades_tagged: 0,
+            next_slot: 0,
         }
     };
     let fsr_stats = if frames_presented > 0 {
@@ -1221,6 +1289,7 @@ fn present_probe_on_secondary_window_ex(
             output_texels_written: 0,
             history_samples_blended: 0,
             reactive_mask_texels: 0,
+            sharpened_texels: 0,
         }
     };
     let entropy_stats = if frames_presented > 0 {
@@ -1238,6 +1307,15 @@ fn present_probe_on_secondary_window_ex(
     } else {
         Vec::new()
     };
+    let radiance_levels = if frames_presented > 0 {
+        radiance.readback_levels()
+    } else {
+        Vec::new()
+    };
+    let radiance_coarse_sample_luminance = radiance_samples
+        .get(2)
+        .map(|s| f64::from(s.luminance))
+        .unwrap_or(0.0);
     let radiance_sample_lit_luminance = radiance_samples
         .first()
         .map(|s| f64::from(s.luminance))
@@ -1269,12 +1347,31 @@ fn present_probe_on_secondary_window_ex(
         && radiance_samples.len() >= 2
         && radiance_sample_lit_luminance > radiance_sample_dark_luminance
         && radiance_sample_lit_luminance > 0.0;
+    let radiance_cascade_substrate_proven = frames_presented > 0
+        && radiance.cascade_levels == 2
+        && radiance_samples.len() >= 3
+        && radiance_levels.len() == 3
+        && radiance_levels[2] == 1
+        && radiance_coarse_sample_luminance > 0.0;
     let micro_poly_substrate_proven = frames_presented > 0
         && micropoly.triangle_count > 0
         && micro_stats.triangles_considered == micropoly.triangle_count
         && micro_stats.triangles_visible > 0
         && micro_stats.fragments_written > 0
         && cull_visible_final > 0;
+    let micro_resolved = if frames_presented > 0 {
+        micropoly.readback_resolved_evidence(&device, &queue)
+    } else {
+        crate::gpu_micropoly_raster::ResolvedEvidence {
+            sampled_pixels: 0,
+            shaded_pixels: 0,
+            max_luminance: 0.0,
+        }
+    };
+    let micro_poly_materials_resolved = micro_poly_substrate_proven
+        && micropoly.material_count > 0
+        && micro_stats.resolve_pixels_written > 0
+        && micro_resolved.shaded_pixels > 0;
     let vsm_substrate_proven = frames_presented > 0
         && vsm.virtual_pages > 0
         && vsm.physical_pool > 0
@@ -1358,37 +1455,46 @@ fn present_probe_on_secondary_window_ex(
             meshlets.triangles_per_cluster
         ));
         reasons.push(format!(
-            "Micro-poly soft-raster tris={} considered={} visible={} fragments={} ms_total={micro_poly_ms_total:.3}; micro_poly_substrate_proven={micro_poly_substrate_proven}; micro_poly_aaa_ready=false",
+            "Micro-poly soft-raster tris={} considered={} visible={} fragments={} materials={} resolve_pixels={} resolve_samples={} resolve_shaded={} resolve_max_lum={:.4} history_accumulation={} ms_total={micro_poly_ms_total:.3}; micro_poly_substrate_proven={micro_poly_substrate_proven}; micro_poly_materials_resolved={micro_poly_materials_resolved}; micro_poly_aaa_ready=false",
             micropoly.triangle_count,
             micro_stats.triangles_considered,
             micro_stats.triangles_visible,
-            micro_stats.fragments_written
+            micro_stats.fragments_written,
+            micropoly.material_count,
+            micro_stats.resolve_pixels_written,
+            micro_resolved.sampled_pixels,
+            micro_resolved.shaded_pixels,
+            micro_resolved.max_luminance,
+            micropoly.history_accumulation_active()
         ));
         reasons.push(format!(
-            "VSM virtual_pages={} physical_pool={} cascades={} pages_alloc={} pages_depth={} texels={} ms_total={vsm_ms_total:.3}; vsm_substrate_proven={vsm_substrate_proven}; vsm_aaa_ready=false",
+            "VSM virtual_pages={} physical_pool={} pool_budget={} cascades={} pages_alloc={} pages_depth={} texels={} ms_total={vsm_ms_total:.3}; vsm_substrate_proven={vsm_substrate_proven}; vsm_aaa_ready=false",
             vsm.virtual_pages,
             vsm.physical_pool,
+            vsm.effective_pool_budget(),
             vsm.cascade_count,
             vsm_stats.pages_allocated,
             vsm_stats.pages_depth_written,
             vsm_stats.texels_written
         ));
         reasons.push(format!(
-            "FSR Law XV temporal upsample {}→{} (scale={}) output_texels={} history_blend={} reactive={} ms_total={fsr_ms_total:.3}; fsr_substrate_proven={fsr_substrate_proven}; fsr_aaa_ready=false",
+            "FSR Law XV temporal upsample {}→{} (scale={}) shake={} output_texels={} history_blend={} reactive={} ms_total={fsr_ms_total:.3}; fsr_substrate_proven={fsr_substrate_proven}; fsr_aaa_ready=false",
             fsr.input_edge,
             fsr.output_edge,
             fsr.scale,
+            fsr.effective_impact_shake(),
             fsr_stats.output_texels_written,
             fsr_stats.history_samples_blended,
             fsr_stats.reactive_mask_texels
         ));
         reasons.push(format!(
-            "Entropy destruction chunks={} active={} updated={} fractured={} debris={} ms_total={entropy_ms_total:.3}; entropy_substrate_proven={entropy_substrate_proven}; entropy_aaa_ready=false; chaos_aaa_ready=false",
+            "Entropy destruction chunks={} active={} updated={} fractured={} debris={} impulse={} ms_total={entropy_ms_total:.3}; entropy_substrate_proven={entropy_substrate_proven}; entropy_aaa_ready=false; chaos_aaa_ready=false",
             entropy.chunk_count,
             entropy_stats.chunks_active,
             entropy_stats.chunks_updated,
             entropy_stats.chunks_fractured,
-            entropy_stats.debris_alive
+            entropy_stats.debris_alive,
+            entropy.effective_impulse_strength()
         ));
         reasons.push(format!(
             "MULTI_DRAW_INDIRECT adapter feature available={multi_draw_indirect_feature_available}; multi_draw_indirect_aaa_ready=false (not requested; fail-closed without AAA Parity fixtures)"
@@ -1398,8 +1504,12 @@ fn present_probe_on_secondary_window_ex(
             hiz.mip_count
         ));
         reasons.push(format!(
-            "Radiance probes={} fill+sample_ms_total={radiance_probe_ms_total:.3}; lit_lum={radiance_sample_lit_luminance:.4} dark_lum={radiance_sample_dark_luminance:.4}; radiance_probe_substrate_proven={radiance_probe_substrate_proven}; lumen_ready=false",
-            radiance.probe_count
+            "Radiance cascade rings={} probes={} intensity={} accumulation={} fill+sample_ms_total={radiance_probe_ms_total:.3}; lit_lum={radiance_sample_lit_luminance:.4} dark_lum={radiance_sample_dark_luminance:.4} coarse_lum={radiance_coarse_sample_luminance:.4} levels_used={:?}; radiance_probe_substrate_proven={radiance_probe_substrate_proven}; radiance_cascade_substrate_proven={radiance_cascade_substrate_proven}; lumen_ready=false",
+            radiance.cascade_levels,
+            radiance.probe_count,
+            radiance.effective_light_intensity(),
+            radiance.accumulation_active(),
+            radiance_levels
         ));
         reasons.push(format!(
             "CapScore soak scale: score={} tier={} present={}x{} est_vram={} budget={} max_tex={} — {}",
@@ -1488,11 +1598,16 @@ fn present_probe_on_secondary_window_ex(
         radiance_sample_lit_luminance,
         radiance_sample_dark_luminance,
         radiance_probe_substrate_proven,
+        radiance_cascade_levels: radiance.cascade_levels,
+        radiance_coarse_sample_luminance,
+        radiance_cascade_substrate_proven,
         micro_poly_triangle_count: micropoly.triangle_count,
         micro_poly_ms_total,
         micro_poly_triangles_visible: micro_stats.triangles_visible,
         micro_poly_fragments_written: micro_stats.fragments_written,
         micro_poly_substrate_proven,
+        micro_poly_materials_resolved,
+        micro_poly_history_accumulation: micropoly.history_accumulation_active(),
         vsm_virtual_pages: vsm.virtual_pages,
         vsm_physical_pool: vsm.physical_pool,
         vsm_cascade_count: vsm.cascade_count,

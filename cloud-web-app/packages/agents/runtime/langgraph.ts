@@ -2,7 +2,7 @@ import { StateGraph, Annotation, START, END } from '@langchain/langgraph'
 import { BaseMessage, AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { replaceFunctionBlockTool } from './tools/replace-function-block'
-import type { AgentType } from '../../../web/lib/agent-orchestrator'
+import type { AgentType } from './agent-roles'
 
 export const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({

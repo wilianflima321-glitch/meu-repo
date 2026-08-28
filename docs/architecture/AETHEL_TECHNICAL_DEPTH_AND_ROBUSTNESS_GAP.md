@@ -33,12 +33,12 @@
 
 ### Competitor parity (honest)
 
-| Competitor | Domain | Aethel today | Target to **surpass** |
-|------------|--------|--------------|------------------------|
+| Competitor | Domain | Aethel today | Target to **surpass (100%+)** |
+|------------|--------|--------------|-------------------------------|
 | **Cursor** | IDE + agents + billing | ~35% | Single apply+bill+undo kernel; Usage UX 6H; BYOK Free |
 | **Stripe** | Payments robustness | ~40% | Idempotent webhooks + spend-resolver + live wallet settle |
 | **Roblox** | Publish + play + MP | ~25% | Real fleet or honest P2P-only; Hub + H.0 lanes |
-| **UE5** | Render / editor tools | ~15% | Desktop wgpu frame graph; never fake Nanite on WebGL2 |
+| **UE5** | Render / editor tools / GAS | ~15% | Desktop wgpu frame graph + 100%+ holistic parity (P1–P4); zero PSO stutter; zero CPU culling |
 | **Itch/Steam** | Distribution trust | ~20% | One-click cook workers + maturity badges |
 
 ---
@@ -221,6 +221,14 @@ If any fail → status = **PARTIAL** or **`[HELD]`** — never “shipped.”
 | 18 | Creative Wallet ≠ LLM pool | Fairness | 6F | Video ≠ burn Premium |
 | 19 | Golden fixtures on disk (`test-fixtures/supremacy/`) | Playbook | 0→A.1 | GF-* files exist |
 | 20 | Maturity badges on all ASPIRATIONAL routes | Trust | 7 | route-maturity gate |
+| 21 | GPU Micro-Displacement stochastic seed pipeline | UE Nanite | S7 / G.3 | Per-meshlet noise variation |
+| 22 | Modular USD Shape Grammar (WFC) city assembler | UE PCG | S2 / S7 | Infinite non-repetitive buildings |
+| 23 | Real-time Weathering & Strain Map generation | Substance/UE | S1 / S7 | Rain/AO/Impact physical wear |
+| 24 | Swarm Multi-Provider Circuit-Breaker & Fallback | Cloud reliability | J.1 / L.5 | Sub-second failover on 429/timeout |
+| 25 | Subagent Interface AST Type-Gate Validator | Swarm integrity | J.1 / L.6 | Zero interface mismatch on merge |
+| 26 | Token-Bleed 3-Iteration Auto-Heal Hard Ceiling | Unit economics | J.1 / Block 6 | Prevents runaway credit burn |
+| 27 | 4-Layer Anatomical Damage & Visceral Combat | UE/Dead Space | S5 / G.3 | SDF cavity, bone fracture, SPH blood |
+| 28 | Real-Time Biological Mutation & SDF Morphing | Horror systems | S2 / S7 | Smooth Min organic limb/cyst morph |
 
 ---
 

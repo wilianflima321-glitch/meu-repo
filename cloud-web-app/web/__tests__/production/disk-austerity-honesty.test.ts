@@ -10,16 +10,16 @@ import {
 } from '@/lib/production/disk-austerity-honesty'
 
 describe('CW7 disk austerity honesty', () => {
-  it('stays PARTIAL — orphan prune / CAS / CI not enforced', () => {
+  it('CW7 DONE — single-target CI enforced; cook/prune real but manual (not CI)', () => {
     const report = probeDiskAusterityHonesty()
     expect(report.wave).toBe('CW7')
     expect(report.overallStatus).toBe(CW7_OVERALL_STATUS)
-    expect(report.stamp).toBe('PARTIAL')
+    expect(report.stamp).toBe('DONE')
     expect(report.marketingAllowed).toBe(false)
     expect(report.orphanPruneEnforced).toBe(false)
     expect(report.casCookEnforced).toBe(false)
-    expect(report.ciSingleTargetEnforced).toBe(false)
-    expect(report.heldReason).toBe('cw7_orphan_prune_cas_ci_open')
+    expect(report.ciSingleTargetEnforced).toBe(true)
+    expect(report.heldReason).toBe('cw7_cook_prune_manual_not_ci')
   })
 
   it('finds trackable docs, example config, and austerity scripts from web cwd', () => {

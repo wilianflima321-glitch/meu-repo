@@ -1,5 +1,4 @@
-import type { AgentType } from '../../web/lib/agent-orchestrator'
-import { SUPPORTED_AGENT_TYPES } from '../../web/lib/agent-orchestrator'
+import { SUPPORTED_AGENT_TYPES, type AgentType } from './runtime/agent-roles'
 import type { ContextMemorySpinePlan } from '../../web/lib/production/context-memory-spine'
 
 export type AgentRuntimeState =

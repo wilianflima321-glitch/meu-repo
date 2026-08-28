@@ -1,4 +1,4 @@
-﻿// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
+// @aethel-heavy-async-boundary Studio/viewport runtime module; never import from public/dashboard/admin route shells.
 import { EventEmitter } from 'events';
 import { logger } from '@/lib/observability/logger';
 import { THREE } from '../three/static';

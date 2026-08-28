@@ -36,15 +36,15 @@ pub const DEFAULT_PROJECT_ITERS: u32 = 20;
 /// Cell spacing (unit square domain).
 pub const DEFAULT_DX: f32 = 1.0;
 /// Min |Δmean |v|| for soak velocity evidence.
-const MIN_VELOCITY_DELTA: f32 = 1e-4;
+pub const MIN_VELOCITY_DELTA: f32 = 1e-4;
 /// Max mean |div| after project (bounded mass/divergence).
-const MAX_MEAN_ABS_DIV: f32 = 0.15;
+pub const MAX_MEAN_ABS_DIV: f32 = 0.15;
 /// Relative momentum-proxy drift ε over free evolution (**hu** conservation soak).
-const MOMENTUM_DRIFT_EPS: f32 = 0.75;
+pub const MOMENTUM_DRIFT_EPS: f32 = 0.75;
 /// Free-evolution steps after inject for conservation ε.
-const CONSERVATION_FREE_STEPS: u32 = 8;
+pub const CONSERVATION_FREE_STEPS: u32 = 8;
 /// Float compare epsilon.
-const EPS: f32 = 1e-6;
+pub const EPS: f32 = 1e-6;
 /// Soak sample count (force → diffuse → advect → project).
 pub const SOAK_SAMPLE_COUNT: u32 = 4;
 
@@ -636,7 +636,7 @@ pub struct AerodynamicNavierStokesSoakReport {
 /// Stable-fluids diffuse+advect+project evidence shape (≠ LBM dust / FEA Ku solve).
 pub const NS_EVIDENCE_KIND: &str = "stable_fluids_diffuse_advect_project";
 
-fn ns_evidence_fingerprint(
+pub fn ns_evidence_fingerprint(
     velocity_field_changed: bool,
     divergence_bounded: bool,
     mass_proxy_bounded: bool,
@@ -764,7 +764,7 @@ fn ns_held(
 }
 
 /// Soak grid: localized wind impulse near center.
-fn soak_fluid_grid() -> FluidGrid2D {
+pub fn soak_fluid_grid() -> FluidGrid2D {
     let mut g = FluidGrid2D::new(SOAK_GRID_N);
     let n = g.n;
     let cx = n / 2;
@@ -788,6 +788,8 @@ fn soak_fluid_grid() -> FluidGrid2D {
 ///
 /// Does **not** claim full CFD / Chaos fluid AAA.
 pub fn run_aerodynamic_navier_stokes_soak() -> AerodynamicNavierStokesSoakReport {
+    static CACHE: std::sync::OnceLock<AerodynamicNavierStokesSoakReport> = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| {
     let mut grid = soak_fluid_grid();
     let speed_before = grid.mean_speed();
     let mass_before = grid.mass_proxy_l1();
@@ -937,6 +939,8 @@ pub fn run_aerodynamic_navier_stokes_soak() -> AerodynamicNavierStokesSoakReport
         gr_raymarch_ready: false,
         dual_timeline_240_ready: false,
     }
+    })
+    .clone()
 }
 
 /// Honesty probe — soak-gated `aerodynamic_navier_stokes_ready` (**gv**).
@@ -1136,5 +1140,24 @@ mod tests {
         assert_eq!(count, 1);
         assert!(world.vel_x[e.0 as usize] > initial_vx, "Drag force must accelerate entity");
         assert!(grid.u[k] < initial_fluid_u, "Entity reaction must decelerate fluid cell");
+    }
+
+    #[test]
+    fn navier_stokes_pressure_poisson_reduces_divergence() {
+        let mut grid = FluidGrid2D::new(16);
+        // Inject divergent forces in center cells
+        for j in 6..10 {
+            for i in 6..10 {
+                let k = cell_idx(16, i, j);
+                grid.u[k] = (i as f32 - 7.5) * 2.0;
+                grid.v[k] = (j as f32 - 7.5) * 2.0;
+            }
+        }
+
+        let div_before = grid.mean_abs_divergence(DEFAULT_DX);
+        let (_, div_after) = project(&mut grid, DEFAULT_DX, DEFAULT_PROJECT_ITERS);
+
+        assert!(div_after < div_before, "Project must reduce divergence: before={div_before}, after={div_after}");
+        assert!(div_after <= MAX_MEAN_ABS_DIV);
     }
 }

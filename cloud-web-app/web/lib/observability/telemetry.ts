@@ -11,7 +11,7 @@
  *   - Kill switch feature flag transport (see kill-switch/route.ts)
  *
  * In production, spans are exported to a collector via OTLP/HTTP.
- * In development, they are logged to the console.
+ * In development, they are logged via the structured component logger.
  *
  * Usage:
  *   const span = telemetry.startSpan('ai.generate', { prompt: '...' });
@@ -20,6 +20,10 @@
  *
  *   telemetry.counter('api.requests').add(1, { route: '/api/ai/chat' });
  */
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const telemetryLog = createComponentLogger('telemetry');
 
 // ---------------------------------------------------------------------------
 // Span / Trace
@@ -227,10 +231,13 @@ export class AethelTelemetry {
       timestamp: new Date().toISOString(),
     };
 
-    console[severity === 'critical' ? 'error' : severity === 'warning' ? 'warn' : 'info'](
-      `[ALERT][${severity.toUpperCase()}] ${message}`,
-      context,
-    );
+    if (severity === 'critical') {
+      telemetryLog.error(`[ALERT][CRITICAL] ${message}`, context);
+    } else if (severity === 'warning') {
+      telemetryLog.warn(`[ALERT][WARNING] ${message}`, context);
+    } else {
+      telemetryLog.info(`[ALERT][INFO] ${message}`, context);
+    }
 
     if (this.config.alertWebhookUrl) {
       try {
@@ -244,7 +251,7 @@ export class AethelTelemetry {
           ),
         });
       } catch (e) {
-        console.error('[Telemetry] Alert webhook failed:', e);
+        telemetryLog.error('[Telemetry] Alert webhook failed:', e);
       }
     }
   }
@@ -268,12 +275,12 @@ export class AethelTelemetry {
           }),
         });
       } catch (e) {
-        console.error('[Telemetry] OTLP export failed:', e);
+        telemetryLog.error('[Telemetry] OTLP export failed:', e);
       }
     } else {
       // Dev: log to console
       for (const span of spansToExport) {
-        console.debug(`[Span] ${span.name} ${span.durationMs.toFixed(1)}ms [${span.status}]`, span.attributes);
+        telemetryLog.debug(`[Span] ${span.name} ${span.durationMs.toFixed(1)}ms [${span.status}]`, span.attributes);
       }
     }
   }

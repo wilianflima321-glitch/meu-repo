@@ -30,6 +30,28 @@ import type { PcgLegoMeshRef } from '@/lib/world-forge/pcg-hybrid-scatter'
 
 let _nextBufferId = 0n
 
+/**
+ * Deterministic lego mesh template pool. The plan materializes `legoCount` distinct
+ * refs by cycling these templates with padded unique ids — honoring the input instead
+ * of returning a hard-coded 2-ref stub. All heroProp are false: the plan never claims
+ * hero-prop/hero-mesh derivation from the prompt (Zero-MVP honesty).
+ */
+const LEGO_MESH_TEMPLATES: ReadonlyArray<Omit<PcgLegoMeshRef, 'id'>> = [
+  { foliageTypeId: 'type_tree', sockets: ['ground'], heroProp: false },
+  { foliageTypeId: 'type_rock', sockets: ['ground'], heroProp: false },
+  { foliageTypeId: 'type_ruin', sockets: ['ground', 'stone'], heroProp: false },
+  { foliageTypeId: 'type_crystal', sockets: ['ground'], heroProp: false },
+]
+
+function buildLegoMeshRefs(count: number): PcgLegoMeshRef[] {
+  const refs: PcgLegoMeshRef[] = []
+  for (let i = 0; i < count; i++) {
+    const template = LEGO_MESH_TEMPLATES[i % LEGO_MESH_TEMPLATES.length]!
+    refs.push({ id: `lego_${String(i + 1).padStart(3, '0')}`, ...template })
+  }
+  return refs
+}
+
 export function buildWorldForgeMaestroPlan(input: {
   prompt?: string
   seed?: number
@@ -45,6 +67,8 @@ export function buildWorldForgeMaestroPlan(input: {
   densityMode: 'hybrid' | 'perlin' | 'wfc-lite'
   ecsPayloadRefId: bigint
   buffer: Uint8Array
+  /** Always false — the prompt seeds math, never a literal derived city claim (Zero-MVP honesty). */
+  cityFromPromptClaim: false
 } {
   const prompt = input.prompt ?? 'forest'
   const seed = input.seed ?? 1337
@@ -60,13 +84,11 @@ export function buildWorldForgeMaestroPlan(input: {
     prompt,
     seed,
     biomePrompt: `${prompt} biome`,
-    legoMeshes: [
-      { id: 'tree_01', foliageTypeId: 'type_tree', sockets: ['ground'], heroProp: false },
-      { id: 'rock_01', foliageTypeId: 'type_rock', sockets: ['ground'], heroProp: false },
-    ],
+    legoMeshes: buildLegoMeshRefs(count),
     densityMode: 'hybrid',
     ecsPayloadRefId: id,
     buffer,
+    cityFromPromptClaim: false,
   }
 }
 

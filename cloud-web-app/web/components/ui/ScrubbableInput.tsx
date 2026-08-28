@@ -12,6 +12,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ScrubbableInputProps {
@@ -256,6 +257,7 @@ export function Vector3Input({
   value,
   onChange,
   onCommit,
+  defaultValue,
   labels = ['X', 'Y', 'Z'],
   step = 0.01,
   precision = 3,
@@ -266,6 +268,7 @@ export function Vector3Input({
   value: [number, number, number];
   onChange: (value: [number, number, number]) => void;
   onCommit?: (value: [number, number, number]) => void;
+  defaultValue?: [number, number, number];
   labels?: [string, string, string];
   step?: number;
   precision?: number;
@@ -280,6 +283,12 @@ export function Vector3Input({
     'text-[var(--aethel-success-light)]',
     'text-[var(--aethel-info-light)]',
   ];
+
+  const isModified =
+    defaultValue !== undefined &&
+    (Math.abs(value[0] - defaultValue[0]) > 0.0001 ||
+      Math.abs(value[1] - defaultValue[1]) > 0.0001 ||
+      Math.abs(value[2] - defaultValue[2]) > 0.0001);
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
@@ -306,6 +315,24 @@ export function Vector3Input({
           className="flex-1"
         />
       ))}
+
+      {defaultValue !== undefined && (
+        <button
+          type="button"
+          disabled={!isModified}
+          aria-label={`Reset to default (${defaultValue.join(', ')})`}
+          title={isModified ? `Reset to default (${defaultValue.join(', ')})` : 'Already at default value'}
+          onClick={() => onChange(defaultValue)}
+          className={cn(
+            'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-all duration-150',
+            isModified
+              ? 'text-[var(--aethel-warning)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] active:scale-90 cursor-pointer'
+              : 'text-[var(--aethel-text-quaternary)] opacity-20 cursor-default pointer-events-none'
+          )}
+        >
+          <RotateCcw className="h-3 w-3" />
+        </button>
+      )}
     </div>
   );
 }

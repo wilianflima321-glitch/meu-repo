@@ -401,6 +401,55 @@ These were found by code audit + gates; GLM may not have listed them.
 ---
 
 ## 7. Changelog
+### 2026-08-22 engine backend sweep (items 1-8 closed)
+
+Evidence in AETHEL_FOCUS1_EXECUTION_PROGRESS.md rows 2026-08-22:
+
+- MPSC channel closed: substrates consume published params per frame (VSM pool budget clamp, Radiance target intensity, Entropy impulse override, FSR audio-impact shake) — the channel is real, not a contract stub.
+- Multi-GPU pin policy: GOLDEN_PIN_HARDWARE_NOTE documents vulkan-rtx-class pins; cross-vendor = re-pin or tolerance band, never fudge.
+- Temporal history in the resolve (anti-shimmer; frame 1 raw so goldens hold) + Radiance GI accumulation (alpha 0.15, race-free per-index blend).
+- RCAS-class sharpen in FSR (contrast-adaptive cross Laplacian; documented as NOT an AMD bit-port).
+- Terminal time-machine backend: ewind_events_to(tick) replays the structured event ring without mutating it.
+- Full frame-graph one-shot: all compute passes in ONE encoder/ONE submit with canonical PASS_ORDER (draw pass deferred to PP-02).
+### REMAINING INTERNAL BACKLOG (2026-08-22, backend-only - canonical list)
+
+Noted from the 2026-08-22 analysis. Everything below is BACKEND (zero UI); the UI-side blocker (PP-01/02/04 product present) belongs to the Founder/Claude UI domain and is recorded separately in the Master Map.
+
+R-B1. VSM shadow sample is NOT yet wired into the material resolve - the substrate-level sample pass exists and is device-proven (lit > shadowed), but the resolve shader does not consume it yet. Wire: resolve binds VSM atlas + params, computes the shadow factor from the surface world position, multiplies the diffuse term. Needs the raster to write a world-position buffer alongside the vis buffer.
+R-B2. VSM and Radiance are fed by SYNTHETIC casters (blob / single occluder), not real scene geometry. Real-scene fixtures: VSM write from actual meshlet depth; Radiance occluders from scene AABBs. Until then every shadow/GI evidence is substrate-scope, not scene-scope.
+R-B3. Radiance cascade is proven at substrate level only; product-graph consumption (real frame graph in the product present) is pending PP.
+R-B4. Cross-GPU validation: golden pins are vulkan-rtx-class; the tolerance-band policy is documented (GOLDEN_PIN_HARDWARE_NOTE) but NOT validated on AMD/Intel hardware.
+R-B5. Real-scene measurement at scale: no large-scene perf budgets measured (draw-call counts, PSO compile stutter, memory at AAA density). The G-ACC ladder needs measured numbers, not substrate numbers.
+R-B6. FSR ladder item ">=720 to 1080 with history": substrate is 2x (320-640 / 540-1080); the 1.5x path (720p -> 1080p) is NOT implemented.
+R-B7. RCAS has no golden pin (documented as RCAS-class, not AMD bit-port) - parity forbidden until pinned.
+R-B8. Temporal history exists for the resolve but NOT for the product draw pass (draw pass joins at PP-02).
+R-B9. Entropy is 4k uniform chunks; voronoi-cooked fracture (Chaos-class) is NOT implemented and NOT claimed.
+R-B10. HELDs requiring Founder/toolchain decisions: OpenUSD (C++ toolchain), ONNX native, MaterialX, OpenVDB, sqlite-vec, lora weights, sqlite native ABI.
+R-B11. World Forge reification: GF-WORLD web fixture exists; the engine-side large-scale population (kernel densification is grid_extent 2 by design) is not yet a product-density path.
+R-B12. Audio-render cue is shake-only; per-scenario audio-visual links (reverb-scene tint, muzzle flash timing) are not implemented.
+### 2026-08-22 honesty mirrors audit (kernel <-> TS)
+
+Audited all 44 *honesty* mirrors. Conclusion: the mirror system is healthy — mirrors are declarative (letters/doctrine); the only NUMERIC mirrors are kernel-asset-quality-gate-honesty.ts (bw, anti-drift GAP1-3) and kernel-load-scale-honesty.ts (sf). metasounds-compiler.ts (Web Audio, S4.0) and kernel metasounds_dsp_compiler (DSP bake) are documented as DISTINCT LAYERS, not mirrors. Added a cross-layer anti-drift contract: kernel_baked_cascade_constants_are_pinned_through_the_wire pins the kernel's real adiance_cascades_gi constants (3 levels) through its wire against the engine's interactive 2-ring substrate — a kernel refactor now fails a test instead of drifting silently.
+### 2026-08-20 GPU terminal substrate (TT-01..TT-06)
+
+Added (evidence in AETHEL_FOCUS1_EXECUTION_PROGRESS.md 2026-08-20 row gpu-terminal-tt):
+
+- Glyph atlas (VRAM) + cell diff + ONE indexed draw call + pixel readback proof — Alacritty-class pipeline architecture, no parity claim.
+- Typed object shell (TerminalEvent records with severity/3D anchor/tick_id) — AI workers read raw structs, never parsed text (aligned with the existing binary SAB ring + RollbackJournal, not a duplicate).
+- CPU-priority fixes: dirty-list emit O(delta), O(1) scroll ring, measured emit metrics + ingest soak. Honest CPU/GPU split: PTY ingest is CPU-inherent; render is a single GPU draw call; the target is CPU O(delta) + render O(1) — measured, not asserted.
+### 2026-08-20 closing pass (engine backend rounds - zero UI)
+
+Struck (evidence in AETHEL_FOCUS1_EXECUTION_PROGRESS.md rows 2026-08-20):
+
+- **CIEDE2000 half-angle bug** (kernel spectral_light_pipeline) - sin(rad(dh/2)) restored; Sharma reference pairs validate (pair1 = 2.0425). Test green 1813/1813.
+- **narrative tension fail-closed** - 	ension_at ignores the envelope for NaN/negative time.
+- **CostGuard durability (TOCTOU / restart leak)** - append-only JSONL journal with AWAITED flushes on all four transitions, replay field validation + ceiling re-clamp, hasHold adapter confirmation (recovered pool holds fail closed to cancelled), durable derives from write health, incomplete flag on malformed lines, redacted path.
+- **WebGPU device-loss recovery** - single-attempt auto-recovery, serialized init, stale-handler identity guard, getHealth().
+- **vitest harness repair** - Windows ESM module-identity (3 instances of chunk-artifact proven by tracing); patch direction corrected to uppercase + self-heal; pool: vmThreads on win32 only.
+- **Real-device validation class** - CullingFrustum._pad2: array<u32,3> illegal in uniform (naga) -> 3 scalars; VsmStats buffer 16B vs WGSL 20B (5th atomic) fixed; GF-MESH-001 GPU parity PROVEN on RTX 3060/Vulkan (coverage exact 400/400; depth 8-bit <=1 silhouette pixel; FMA drift <=0.02 documented).
+- **Hard Gate #72 fixtures** - GF-MESH-001 (Rust golden + Hi-Z win 66.7%), GF-WORLD-001/002/003 (web), GF-AI-001/002/003 (web), GF-INTEGRATED-SCENE-001 (P1+P2+P3+P4 in one tick loop), substrates device validation (VSM/Radiance/FSR/Entropy).
+- **PP-01/03 backend** - persistent product-session present consumes GF evidence (golden pin + device parity + substrate validation) in PersistentPresentLiveMetrics; product_present_ready stays false (PP-02/04 pending).
+- **Hygiene** - fixer1-5.rs/exe, error.txt, fail logs, .f3/.f4_build, web temp files, one-off scripts deleted; orphan baseline regenerated (kernel 344 documented bin); kernel .cargo/config.toml (weight gate PASS).
 
 | Date | Author | Change |
 |------|--------|--------|

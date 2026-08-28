@@ -155,7 +155,6 @@ export async function GET(req: NextRequest) {
     gfMeshPbrReady: gfMeshPbr.ready,
     hizWinReady: hizWin.ready,
     g3Band1530Ready: g3Band1530.ready,
-    g3Band15To30Passed: false,
   })
 
   return NextResponse.json({

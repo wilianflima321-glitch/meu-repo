@@ -72,6 +72,40 @@ const FILE_ALLOWLIST = {
     "Literal Stripe brand colour (#635BFF) on the \"Continue with Stripe\" button, required by Stripe Connect brand guidelines.",
   'components/agents/chat/live/LiveVoiceWaveform.tsx':
     'Canvas 2D `createLinearGradient`/`shadowColor` fill colours — the Canvas API does not resolve CSS custom properties, so literal values (chosen to mirror the accent/neon-cyan palette) are required.',
+  'components/audio/MetaSoundsGraph.tsx':
+    'Node-graph category/port colors and SVG wire gradients (visual audio node routing, analogous to Unreal MetaSounds/Wwise graph palette).',
+  'components/audio/SoundCueEditor.tsx':
+    'Sound cue graph connection and modulation node palette colors.',
+  'components/character/CharacterAppearanceCustomizer.tsx':
+    '3D character skin tone swatches, armor metallic shader presets and hologram turntable stage colors.',
+  'components/cinematics/CinematicSequencer.tsx':
+    'NLE timeline track types, keyframe curve markers and clip region colors for multi-track sequencer.',
+  'components/cinematics/ColorGradingWheels.tsx':
+    'ACES 1.3 3-way color grading wheel spectrum colors and RGB parade scope channels.',
+  'components/cinematics/PhotoModeStudio.tsx':
+    'Photo mode virtual camera post-processing simulation, LUT presets and viewport vignette emulation.',
+  'components/engine/GameHUDOverlay.tsx':
+    'Dynamic HUD shader overlays, crosshair bloom indicators and compass cardinal navigation marks.',
+  'components/engine/NiagaraVFXEditor.tsx':
+    'GPU particle emitter gradient stops, additive blend color ramps, and spline curve visualizer.',
+  'components/engine/UIWidgetDesigner.tsx':
+    'UMG UI widget sample canvas properties, anchor coordinate pins, and responsive design grid presets.',
+  'components/engine/BlueprintGraphStudio.tsx':
+    'Unreal Blueprints typed pin palette colors (execution, boolean, number, vector3, string, actor, object) and SVG wire rendering.',
+  'components/environment/EnvironmentLightMixer.tsx':
+    'Sky atmosphere Rayleigh/Mie scattering colors, sun Kelvin temperature rendering, and ACES post-process volume grading.',
+  'components/physics/PhysicsMatrixStudio.tsx':
+    'Collision matrix interaction grid channel responses, physical material restitution presets and joint dynamics.',
+  'components/scene-editor/WorldOutlinerStudio.tsx':
+    'World Outliner actor class hierarchy tags, component trees, and transform coordinate axes.',
+  'components/viewport/ViewportContentDrawerLiveEditor.tsx':
+    'In-viewport Content Drawer thumbnail grid, transform coordinates and live PBR shading adjuster.',
+  'components/cinematics/CurveEditorStudio.tsx':
+    'Cinematic F-Curve animation spline channels (RGB Translation, FOV, Tangent Handles) and keyframe diamonds.',
+  'components/narrative/DialogueTreeStudio.tsx':
+    'Branching conversation graph node categories, skill check DC difficulty indicators and live simulator runner.',
+  'components/ai/BehaviorTreeStudio.tsx':
+    'AI Behavior tree composite selectors, blackboard key indicators, and execution state highlights.',
 }
 
 function walk(dir) {

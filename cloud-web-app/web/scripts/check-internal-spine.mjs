@@ -143,7 +143,7 @@ requirePattern('lib/server/ai-change-apply/executor.ts', /mirrorAppliedChangesTo
 requireFile('lib/server/ai-change-apply/mirror-canonical-store.ts', 'apply pipeline needs a canonical-store mirror for serverless/db runtimes')
 
 requireFile('lib/server/agent-context/assemble-agent-context.ts', 'agents need task-relevant repository context wired into the loop')
-requirePattern('lib/server/agent-context/assemble-agent-context.ts', /searchSemanticCodebase/, 'agent context must use semantic retrieval')
+requirePattern('lib/server/agent-context/assemble-agent-context.ts', /queryRepoGraphRAG/, 'agent context must use AST semantic retrieval')
 requirePattern('lib/server/agent-context/assemble-agent-context.ts', /mustReadFirst/, 'agent context must use cartography mustReadFirst')
 requirePattern('lib/ai-agent-system.ts', /assembleAgentContext/, 'AgentExecutor must inject assembled repository context into its prompt')
 requireFile('__tests__/server/assemble-agent-context.test.ts', 'agent context assembler tests must exist')

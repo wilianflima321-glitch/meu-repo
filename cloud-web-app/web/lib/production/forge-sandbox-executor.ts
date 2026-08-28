@@ -57,9 +57,15 @@ export type ForgeSandboxNetworkPolicy = 'none' | 'npm-registry' | 'allowlist'
 
 /** Forge minutes billing weight — 1 sandbox-minute == 1000 CostGuard token-weight units. */
 export const FORGE_SANDBOX_WEIGHT_PER_MINUTE = 1000
+/** Settle ceiling for sandbox minutes — sessions legitimately overrun the estimate (bounded 1.5×). */
+const FORGE_SANDBOX_SETTLE_CEILING_MULTIPLIER = 1.5
 const DEFAULT_ESTIMATED_MINUTES = 5
 const DEFAULT_EXEC_TIMEOUT_MS = 30_000
 const DEFAULT_MAX_OUTPUT_BYTES = 1_000_000
+/** Torn-down session/ledger retention window before the sweep prunes them (bounds memory). */
+const FORGE_SANDBOX_TEARDOWN_RETENTION_MS = 10 * 60_000
+/** Hard cap on retained runtime states; the sweep evicts the oldest torn-down entries first. */
+const FORGE_SANDBOX_MAX_RETAINED_SESSIONS = 64
 
 export interface ForgeSandboxSession {
   sessionId: string
@@ -92,6 +98,50 @@ interface ForgeSandboxRuntimeState {
 
 const RUNTIME_SESSIONS = new Map<string, ForgeSandboxRuntimeState>()
 const LEDGERS = new Map<string, TaskEvidenceLedger>()
+
+/**
+ * Bounds memory on long-running servers. Prunes torn-down sessions/ledgers whose teardown is
+ * older than FORGE_SANDBOX_TEARDOWN_RETENTION_MS and enforces an LRU cap
+ * (FORGE_SANDBOX_MAX_RETAINED_SESSIONS) by evicting the oldest torn-down states first.
+ *
+ * Live (non-torn-down) sessions are NEVER evicted here — they own running processes,
+ * killables, and an open CostGuard reservation and must be closed via
+ * `teardownForgeSandboxSession` (which settles billing and kills children).
+ */
+export function sweepForgeSandboxSessions(now = Date.now()): number {
+  const stale: string[] = []
+  for (const [sessionId, state] of RUNTIME_SESSIONS) {
+    if (!state.session.teardownAt) continue
+    const teardownMs = Date.parse(state.session.teardownAt)
+    if (Number.isFinite(teardownMs) && now - teardownMs >= FORGE_SANDBOX_TEARDOWN_RETENTION_MS) {
+      stale.push(sessionId)
+    }
+  }
+
+  for (const id of stale) {
+    RUNTIME_SESSIONS.delete(id)
+    LEDGERS.delete(id)
+  }
+
+  // LRU cap — evict the oldest torn-down entries first (never live sessions).
+  if (RUNTIME_SESSIONS.size > FORGE_SANDBOX_MAX_RETAINED_SESSIONS) {
+    const tornDown = Array.from(RUNTIME_SESSIONS.entries())
+      .filter(([, s]) => Boolean(s.session.teardownAt))
+      .sort((a, b) => Date.parse(a[1].session.teardownAt!) - Date.parse(b[1].session.teardownAt!))
+    const overflow = RUNTIME_SESSIONS.size - FORGE_SANDBOX_MAX_RETAINED_SESSIONS
+    const evictCount = Math.min(overflow, tornDown.length)
+    for (let i = 0; i < evictCount; i++) {
+      const [sessionId] = tornDown[i]
+      RUNTIME_SESSIONS.delete(sessionId)
+      LEDGERS.delete(sessionId)
+    }
+  }
+
+  if (stale.length > 0) {
+    log.info('forge_sandbox_sweep', { evicted: stale.length, retained: RUNTIME_SESSIONS.size })
+  }
+  return stale.length
+}
 
 export type ForgeSandboxAvailabilityReason =
   | 'ready'
@@ -250,7 +300,9 @@ export async function streamInForgeSandbox(input: StreamExecOptions): Promise<St
   return new Promise((resolve) => {
     const child = spawn(commandGuard.normalized, args, {
       cwd: cwdGuard.resolved,
-      env: buildScrubbedEnv(state.session.networkPolicy, input.extraEnv),
+      // Scrub is intentionally partial (child never inherits secrets) → assert to the
+      // ProcessEnv the spawn API expects; same boundary pattern as execLocalIsolated.
+      env: buildScrubbedEnv(state.session.networkPolicy, input.extraEnv) as NodeJS.ProcessEnv,
       // stdin ignored for one-shot stream; L.4 duplex uses openForgeSandboxDuplex instead
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -322,6 +374,8 @@ export function getForgeSandboxExecContext(sessionId: string): {
 export async function createForgeSandboxSession(
   input: ForgeSandboxCreateInput,
 ): Promise<ForgeSandboxCreateResult> {
+  // Opportunistic memory bound — reclaim torn-down sessions/ledgers before allocating new state.
+  sweepForgeSandboxSessions()
   const availability = await resolveForgeSandboxAvailability(input.provider)
 
   // Law #48 — the shell policy, not this module, is the final arbiter of whether an
@@ -346,6 +400,7 @@ export async function createForgeSandboxSession(
       projectId: input.projectId,
       domain: 'forge-sandbox',
       estimatedTokenWeight: estimatedMinutes * FORGE_SANDBOX_WEIGHT_PER_MINUTE,
+      settleCeilingMultiplier: FORGE_SANDBOX_SETTLE_CEILING_MULTIPLIER,
       byokProfileId: input.byokProfileId,
       planId: input.planId,
     },
@@ -1096,6 +1151,9 @@ export async function teardownForgeSandboxSession(
   }
 
   RUNTIME_SESSIONS.set(sessionId, { ...state, session })
+  // Retain the torn-down state briefly so callers can still read the teardown result, then let
+  // the sweep prune it (TTL + LRU cap) instead of leaking the entry for the server lifetime.
+  sweepForgeSandboxSessions()
   log.info('forge_sandbox_teardown', { sessionId, provider: session.provider, minutes })
   return { session, ledger: ledger as TaskEvidenceLedger }
 }

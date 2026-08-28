@@ -397,7 +397,7 @@ export function removeAuthoringKeyframe(
   const tracks = timeline.tracks.map((track) => {
     if (track.locked) return track
     const clips = track.clips
-      .map((clip) => {
+      .map((clip): SequencerClip | null => {
         if (clip.id === keyframeId || `${clip.id}-start` === keyframeId) {
           if (track.kind === 'marker') {
             removed = true

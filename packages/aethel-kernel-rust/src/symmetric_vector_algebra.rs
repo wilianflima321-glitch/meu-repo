@@ -258,12 +258,41 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    pub const ZERO: Self = Self::zero();
+
     #[inline]
     pub const fn zero() -> Self {
         Self {
             x: 0.0,
             y: 0.0,
             z: 0.0,
+        }
+    }
+
+    #[inline]
+    pub fn scale(self, s: f32) -> Self {
+        Self {
+            x: self.x * s,
+            y: self.y * s,
+            z: self.z * s,
+        }
+    }
+
+    #[inline]
+    pub fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+
+    #[inline]
+    pub fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
         }
     }
 
@@ -778,5 +807,188 @@ mod tests {
         let b = run_symmetric_vector_algebra_soak();
         assert_eq!(a.fingerprint, b.fingerprint);
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn rodrigues_cardinal_rotations() {
+        use std::f32::consts::FRAC_PI_2;
+        // 90 deg around X: Y -> Z, Z -> -Y
+        let rx = Mat4::from_axis_angle_translation(Vec3::new(1.0, 0.0, 0.0), FRAC_PI_2, Vec3::ZERO);
+        let py = rx.transform_point3(Vec3::new(0.0, 1.0, 0.0));
+        assert!((py.x - 0.0).abs() < 1e-4);
+        assert!((py.y - 0.0).abs() < 1e-4);
+        assert!((py.z - 1.0).abs() < 1e-4);
+
+        // 90 deg around Y: Z -> X, X -> -Z
+        let ry = Mat4::from_axis_angle_translation(Vec3::new(0.0, 1.0, 0.0), FRAC_PI_2, Vec3::ZERO);
+        let pz = ry.transform_point3(Vec3::new(0.0, 0.0, 1.0));
+        assert!((pz.x - 1.0).abs() < 1e-4);
+        assert!((pz.y - 0.0).abs() < 1e-4);
+        assert!((pz.z - 0.0).abs() < 1e-4);
+
+        // 90 deg around Z: X -> Y, Y -> -X
+        let rz = Mat4::from_axis_angle_translation(Vec3::new(0.0, 0.0, 1.0), FRAC_PI_2, Vec3::ZERO);
+        let px = rz.transform_point3(Vec3::new(1.0, 0.0, 0.0));
+        assert!((px.x - 0.0).abs() < 1e-4);
+        assert!((px.y - 1.0).abs() < 1e-4);
+        assert!((px.z - 0.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn rodrigues_angle_reversal_is_identity() {
+        use std::f32::consts::PI;
+        let axis = Vec3::new(1.0, 2.0, 3.0).normalize_or_unit_z();
+        let angle = PI / 3.0;
+        let r_pos = Mat4::from_axis_angle_translation(axis, angle, Vec3::ZERO);
+        let r_neg = Mat4::from_axis_angle_translation(axis, -angle, Vec3::ZERO);
+        let combined = r_pos.mul(r_neg);
+        assert!(combined.approx_eq(Mat4::identity(), 1e-4));
+    }
+
+    #[test]
+    fn vector_cross_anticommutative_and_self_zero() {
+        let v1 = Vec3::new(2.5, -1.8, 4.2);
+        let v2 = Vec3::new(-0.7, 3.3, 1.1);
+        let c1 = v1.cross(v2);
+        let c2 = v2.cross(v1);
+        assert!((c1.x + c2.x).abs() < 1e-5);
+        assert!((c1.y + c2.y).abs() < 1e-5);
+        assert!((c1.z + c2.z).abs() < 1e-5);
+
+        let self_cross = v1.cross(v1);
+        assert!(self_cross.length() < 1e-5);
+    }
+
+    #[test]
+    fn scalar_triple_product_cyclic_invariance() {
+        let a = Vec3::new(1.0, 2.0, 3.0);
+        let b = Vec3::new(-2.0, 1.0, 4.0);
+        let c = Vec3::new(0.5, -1.5, 2.0);
+
+        let vol1 = a.dot(b.cross(c));
+        let vol2 = b.dot(c.cross(a));
+        let vol3 = c.dot(a.cross(b));
+
+        assert!((vol1 - vol2).abs() < 1e-4);
+        assert!((vol2 - vol3).abs() < 1e-4);
+    }
+
+    #[test]
+    fn vector_triple_product_lagrange_expansion() {
+        let a = Vec3::new(3.0, -1.0, 2.0);
+        let b = Vec3::new(1.0, 4.0, -2.0);
+        let c = Vec3::new(-2.0, 1.0, 5.0);
+
+        // a x (b x c)
+        let lhs = a.cross(b.cross(c));
+        // b(a . c) - c(a . b)
+        let rhs = b.scale(a.dot(c)).sub(c.scale(a.dot(b)));
+
+        assert!((lhs.x - rhs.x).abs() < 1e-4);
+        assert!((lhs.y - rhs.y).abs() < 1e-4);
+        assert!((lhs.z - rhs.z).abs() < 1e-4);
+    }
+
+    #[test]
+    fn transpose_product_rule() {
+        let (a, b, _, _, _, _, _) = seeded_fixtures(SOAK_SEED);
+        // (AB)^T == B^T A^T
+        let ab_t = a.mul(b).transpose();
+        let bt_at = b.transpose().mul(a.transpose());
+        assert!(ab_t.approx_eq(bt_at, 1e-4));
+    }
+
+    #[test]
+    fn inverse_product_rule() {
+        let (a, _, c, _, _, _, _) = seeded_fixtures(SOAK_SEED);
+        let ia = a.try_inverse().expect("invertible");
+        let ic = c.try_inverse().expect("invertible");
+
+        // (AC)^-1 == C^-1 A^-1
+        let ac_inv = a.mul(c).try_inverse().expect("invertible product");
+        let ic_ia = ic.mul(ia);
+        assert!(ac_inv.approx_eq(ic_ia, 1e-3));
+    }
+
+    #[test]
+    fn transform_origin_yields_translation() {
+        let t = Vec3::new(42.0, -13.5, 108.2);
+        let mat = Mat4::from_axis_angle_translation(Vec3::new(0.0, 1.0, 0.0), 0.75, t);
+        let p = mat.transform_point3(Vec3::ZERO);
+        assert!((p.x - t.x).abs() < 1e-4);
+        assert!((p.y - t.y).abs() < 1e-4);
+        assert!((p.z - t.z).abs() < 1e-4);
+    }
+
+    #[test]
+    fn pure_rotation_preserves_length() {
+        let axis = Vec3::new(1.0, 1.0, 1.0).normalize_or_unit_z();
+        let r = Mat4::from_axis_angle_translation(axis, 1.234, Vec3::ZERO);
+        let p = Vec3::new(5.0, -3.0, 7.0);
+        let orig_len = p.length();
+        let rot_len = r.transform_point3(p).length();
+        assert!((orig_len - rot_len).abs() < 1e-4);
+    }
+
+    #[test]
+    fn singular_matrix_inversion_fails_closed() {
+        let zero_mat = Mat4 { m: [0.0; 16] };
+        assert!(zero_mat.try_inverse().is_none());
+
+        // Collinear / rank-1 matrix
+        let rank1_mat = Mat4 {
+            m: [
+                1.0, 2.0, 3.0, 4.0,
+                2.0, 4.0, 6.0, 8.0,
+                3.0, 6.0, 9.0, 12.0,
+                4.0, 8.0, 12.0, 16.0,
+            ],
+        };
+        assert!(rank1_mat.try_inverse().is_none());
+    }
+
+    #[test]
+    fn zero_vector_normalization_fallback() {
+        let z = Vec3::ZERO;
+        let n = z.normalize_or_unit_z();
+        assert_eq!(n, Vec3::new(0.0, 0.0, 1.0));
+        assert!((n.length() - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn vec3_cross_product_anticommutative() {
+        let u = Vec3::new(3.0, -2.0, 7.0);
+        let v = Vec3::new(-1.0, 4.0, 5.0);
+
+        let u_cross_v = u.cross(v);
+        let v_cross_u = v.cross(u);
+
+        assert!((u_cross_v.x + v_cross_u.x).abs() < 1e-6);
+        assert!((u_cross_v.y + v_cross_u.y).abs() < 1e-6);
+        assert!((u_cross_v.z + v_cross_u.z).abs() < 1e-6);
+
+        let u_cross_u = u.cross(u);
+        assert!(u_cross_u.length() < 1e-6);
+    }
+
+    #[test]
+    fn cauchy_schwarz_inequality_holds() {
+        let u = Vec3::new(12.5, -3.2, 0.8);
+        let v = Vec3::new(-4.1, 9.7, 6.3);
+
+        let dot_abs = u.dot(v).abs();
+        let norms_product = u.length() * v.length();
+
+        assert!(dot_abs <= norms_product + 1e-5);
+    }
+
+    #[test]
+    fn mat4_rotation_determinant_is_positive_one() {
+        let axis = Vec3::new(0.0, 1.0, 0.0);
+        let r = Mat4::from_axis_angle_translation(axis, 0.87, Vec3::ZERO);
+        let inv = r.try_inverse();
+        assert!(inv.is_some(), "Rotation matrix must be invertible");
+        let i = r.mul(inv.unwrap());
+        assert!(i.approx_eq(Mat4::identity(), 1e-4));
     }
 }

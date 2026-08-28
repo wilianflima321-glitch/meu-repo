@@ -13,6 +13,7 @@
 //! is wired when a depth pyramid texture is bound and `occlusion_enabled=1`
 //! (next-frame evidence on secondary_winit). Full Nanite/HZB product occlusion
 //! and Micro-Poly AAA remain HELD — see `gpu_hiz.rs` honesty docs.
+use crate::gpu_micropoly_raster::MicropolyCamera;
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -28,16 +29,30 @@ pub struct ObjectBounds {
 }
 
 /// The 6 frustum planes (left, right, bottom, top, near, far) as
-/// `ax + by + cz + d = 0`, plus an occlusion toggle. `_padding` keeps the
-/// struct's size a multiple of 16 bytes, which is required for WGSL
-/// uniform buffer layout.
-#[repr(C)]
+/// `ax + by + cz + d = 0`, plus the occlusion toggle and a data-driven
+/// projection (`view_proj`, column-major `cols[c][r]`) with a projection mode:
+///
+/// - `projection_mode == 0` — legacy hardcoded ortho mapping
+///   (`ndc = center.xy / 25`, `depth = 0.5 + center.z / 50`). Byte-identical
+///   to the pre-parametrization substrate; keeps existing soaks bit-stable.
+/// - `projection_mode == 1` — data-driven `clip = view_proj * (p, 1)`,
+///   `ndc = clip.xyz / clip.w`, `depth = ndc_z * 0.5 + 0.5` (perspective or any
+///   ortho authored into `view_proj`). One camera now drives cull + Hi-Z +
+///   raster, eliminating the divergent hardcoded projections (doctrine #73).
+///
+/// `_padding` / `_pad2` keep the struct's size a multiple of 16 bytes (208) —
+/// WGSL uniform address space requires every member aligned AND scalar arrays
+/// are illegal there (stride 4 < 16), so `_pad2` is a `vec4`, not an array.
+#[repr(C, align(16))]
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
 pub struct CullingFrustum {
     pub planes: [[f32; 4]; 6],
     pub object_count: u32,
     pub occlusion_enabled: u32,
     pub _padding: [u32; 2],
+    pub view_proj: [[f32; 4]; 4],
+    pub projection_mode: u32,
+    pub _pad2: [u32; 3],
 }
 
 const CULLING_SHADER_SOURCE: &str = r#"
@@ -51,6 +66,11 @@ struct CullingFrustum {
     object_count: u32,
     occlusion_enabled: u32,
     _padding: vec2<u32>,
+    view_proj: mat4x4<f32>,
+    projection_mode: u32,
+    _pad2a: u32,
+    _pad2b: u32,
+    _pad2c: u32,
 };
 
 @group(0) @binding(0) var<storage, read> objects: array<ObjectBounds>;
@@ -70,18 +90,60 @@ fn sphere_in_frustum(center: vec3<f32>, radius: f32) -> bool {
     return true;
 }
 
+fn project_to_clip(p: vec3<f32>) -> vec4<f32> {
+    // Column-major (WGSL mat4x4 is column-major): clip = view_proj * vec4(p, 1).
+    let m = frustum.view_proj;
+    return m[0] * p.x + m[1] * p.y + m[2] * p.z + m[3];
+}
+
 fn hiz_occluded(center: vec3<f32>, radius: f32) -> bool {
     if (frustum.occlusion_enabled == 0u) {
         return false;
     }
-    // Match draw NDC mapping (center.xy / 25) → UV.
-    let ndc = center.xy / 25.0;
-    let uv = ndc * 0.5 + vec2<f32>(0.5, 0.5);
+    var uv = vec2<f32>(0.0, 0.0);
+    var radius_ndc: f32 = 0.0;
+    var obj_near: f32 = 0.0;
+    if (frustum.projection_mode == 0u) {
+        // Legacy fixed ortho mapping — byte-identical to the pre-param substrate.
+        let ndc = center.xy / 25.0;
+        uv = ndc * 0.5 + vec2<f32>(0.5, 0.5);
+        radius_ndc = max(radius / 25.0, 0.001);
+        obj_near = clamp(0.5 + center.z / 50.0 - radius / 50.0, 0.0, 1.0);
+    } else {
+        // Data-driven: clip = view_proj * (center, 1); ndc = clip.xyz / clip.w.
+        let clip = project_to_clip(center);
+        if (clip.w <= 0.0) {
+            return false;
+        }
+        let raw = clip.xyz / clip.w;
+        uv = raw.xy * 0.5 + vec2<f32>(0.5, 0.5);
+        let sx = abs(frustum.view_proj[0][0]);
+        let sy = abs(frustum.view_proj[1][1]);
+        radius_ndc = max(max(sx, sy) * radius / clip.w, 0.001);
+        // True sphere near-depth: the nearest surface point sits on the
+        // camera->center ray at view distance `clip.w - radius`. Its NDC z is
+        // `-a + b / t_near`, where a and b are the perspective depth constants
+        // (clip.z = -a*t + b for view distance t = clip.w), recovered from the
+        // composite view_proj of the rigid look_at camera:
+        //   a = -vp[2][2] / vp[2][3]   (vp[2][3] = forward z, non-zero here)
+        //   b =  vp[3][2] + a * vp[3][3]
+        // A sphere crossing the near plane can never be treated as occluded.
+        let a = -frustum.view_proj[2][2] / frustum.view_proj[2][3];
+        let b = frustum.view_proj[3][2] + a * frustum.view_proj[3][3];
+        let t_near = clip.w - radius;
+        if (t_near <= 0.0) {
+            return false;
+        }
+        let ndc_z_near = -a + b / t_near;
+        if (ndc_z_near < -1.0 || ndc_z_near > 1.0) {
+            return false;
+        }
+        obj_near = clamp(0.5 * ndc_z_near + 0.5, 0.0, 1.0);
+    }
     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
         return false;
     }
     let level0 = textureDimensions(depth_pyramid, 0);
-    let radius_ndc = max(radius / 25.0, 0.001);
     let radius_px = radius_ndc * f32(level0.x) * 0.5;
     var mip_i: i32 = 0;
     if (radius_px > 1.0) {
@@ -95,8 +157,6 @@ fn hiz_occluded(center: vec3<f32>, radius: f32) -> bool {
         clamp(i32(uv.y * f32(dims.y)), 0, i32(dims.y) - 1),
     );
     let max_z = textureLoad(depth_pyramid, coord, mip_i).r;
-    // Fixture depth proxy matches draw clip.z = 0.5 + center.z/50.
-    let obj_near = clamp(0.5 + center.z / 50.0 - radius / 50.0, 0.0, 1.0);
     return obj_near > (max_z + 0.002);
 }
 
@@ -566,6 +626,15 @@ pub struct GpuCullingSoakReport {
     pub reasons: Vec<String>,
 }
 
+/// Column-major 4x4 identity (placeholder for legacy-mode frusta; mode 0 never
+/// reads `view_proj`).
+const IDENTITY_COLS: [[f32; 4]; 4] = [
+    [1.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0],
+];
+
 pub(crate) fn identity_frustum(count: u32) -> CullingFrustum {
     CullingFrustum {
         planes: [
@@ -579,6 +648,137 @@ pub(crate) fn identity_frustum(count: u32) -> CullingFrustum {
         object_count: count,
         occlusion_enabled: 0,
         _padding: [0, 0],
+        view_proj: IDENTITY_COLS,
+        projection_mode: 0,
+        _pad2: [0, 0, 0],
+    }
+}
+
+impl CullingFrustum {
+    /// Builds a frustum fully from a camera: real Gribb–Hartmann plane extraction
+    /// from `view_proj` (planes normalized so `sphere_in_frustum`'s
+    /// `distance < -radius` test is exact) plus the same data-driven projection
+    /// used by `hiz_occluded` (`projection_mode` mirrors the camera). One camera
+    /// authoritatively drives cull + Hi-Z + raster, eliminating the divergent
+    /// hardcoded projections (doctrine #73).
+    #[allow(dead_code)] // retained substrate — wired when product cameras call `from_camera`
+    pub fn from_camera(
+        count: u32,
+        camera: &MicropolyCamera,
+        occlusion_enabled: u32,
+    ) -> CullingFrustum {
+        CullingFrustum {
+            planes: Self::extract_frustum_planes(&camera.view_proj.cols),
+            object_count: count,
+            occlusion_enabled,
+            _padding: [0, 0],
+            view_proj: camera.view_proj.cols,
+            projection_mode: camera.projection_mode,
+            _pad2: [0, 0, 0],
+        }
+    }
+
+    /// Gribb–Hartmann frustum-plane extraction for a column-major projection
+    /// matrix (`cols[c][r]` = `m[c][r]`, `clip = M * (p, 1)`). Each plane is
+    /// normalized so `dot(n, p) + d >= 0` means "inside" (the shader convention).
+    fn extract_frustum_planes(m: &[[f32; 4]; 4]) -> [[f32; 4]; 6] {
+        let row = |i: usize| [m[0][i], m[1][i], m[2][i], m[3][i]];
+        let add = |a: [f32; 4], b: [f32; 4]| [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
+        let sub = |a: [f32; 4], b: [f32; 4]| [a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3]];
+        let r3 = row(3);
+        [
+            Self::normalize_plane(add(r3, row(0))), // left
+            Self::normalize_plane(sub(r3, row(0))), // right
+            Self::normalize_plane(add(r3, row(1))), // bottom
+            Self::normalize_plane(sub(r3, row(1))), // top
+            Self::normalize_plane(add(r3, row(2))), // near
+            Self::normalize_plane(sub(r3, row(2))), // far
+        ]
+    }
+
+    fn normalize_plane(p: [f32; 4]) -> [f32; 4] {
+        let len = (p[0] * p[0] + p[1] * p[1] + p[2] * p[2]).sqrt();
+        if len <= f32::EPSILON {
+            return p;
+        }
+        [p[0] / len, p[1] / len, p[2] / len, p[3] / len]
+    }
+
+    /// CPU mirror of the WGSL `sphere_in_frustum` test over the 6 planes.
+    #[allow(dead_code)] // retained CPU mirror for golden fixtures / TS parity
+    pub fn sphere_in_frustum_cpu(&self, center: [f32; 3], radius: f32) -> bool {
+        self.planes
+            .iter()
+            .all(|p| p[0] * center[0] + p[1] * center[1] + p[2] * center[2] + p[3] >= -radius)
+    }
+
+    /// Projects a world-space point through `view_proj` (column-major) into clip
+    /// space — the CPU mirror of WGSL `project_to_clip`.
+    #[allow(dead_code)] // retained CPU mirror for golden fixtures / TS parity
+    pub fn project_clip_cpu(&self, p: [f32; 3]) -> [f32; 4] {
+        let c = &self.view_proj;
+        [
+            c[0][0] * p[0] + c[1][0] * p[1] + c[2][0] * p[2] + c[3][0],
+            c[0][1] * p[0] + c[1][1] * p[1] + c[2][1] * p[2] + c[3][1],
+            c[0][2] * p[0] + c[1][2] * p[1] + c[2][2] * p[2] + c[3][2],
+            c[0][3] * p[0] + c[1][3] * p[1] + c[2][3] * p[2] + c[3][3],
+        ]
+    }
+
+    /// Deterministic CPU mirror of the WGSL `hiz_occluded` decision (both
+    /// projection modes). Texture sampling is GPU-side, so `sample_max_depth`
+    /// carries the already-sampled Hi-Z value at the selected mip; every other
+    /// step (projection, radius→NDC, depth bias, bounds, epsilon) is reproduced
+    /// byte-for-byte so golden fixtures can prove the occlusion decision off-GPU.
+    #[allow(dead_code)] // retained CPU mirror for golden fixtures / TS parity
+    pub fn hiz_occluded_cpu(&self, center: [f32; 3], radius: f32, sample_max_depth: f32) -> bool {
+        if self.occlusion_enabled == 0 {
+            return false;
+        }
+        // `_radius_ndc` is only intermediate (feeds `obj_near` inside each branch);
+        // the tuple binding is not read again, mirroring the WGSL shape.
+        let (uv, _radius_ndc, obj_near) = if self.projection_mode == 0 {
+            let ndc = [center[0] / 25.0, center[1] / 25.0];
+            let uv = [ndc[0] * 0.5 + 0.5, ndc[1] * 0.5 + 0.5];
+            let radius_ndc = (radius / 25.0).max(0.001);
+            let obj_near = (0.5 + center[2] / 50.0 - radius / 50.0).clamp(0.0, 1.0);
+            (uv, radius_ndc, obj_near)
+        } else {
+            let clip = self.project_clip_cpu(center);
+            if clip[3] <= 0.0 {
+                return false;
+            }
+            let raw = [clip[0] / clip[3], clip[1] / clip[3], clip[2] / clip[3]];
+            let uv = [raw[0] * 0.5 + 0.5, raw[1] * 0.5 + 0.5];
+            let sx = self.view_proj[0][0].abs();
+            let sy = self.view_proj[1][1].abs();
+            let radius_ndc = (sx.max(sy) * radius / clip[3]).max(0.001);
+            // True sphere near-depth mirror of the WGSL branch: the nearest
+            // surface point on the camera->center ray is at view distance
+            // `clip.w - radius`. Its NDC z = -a + b / t_near, where a and b are
+            // the perspective depth constants (clip.z = -a*t + b for view
+            // distance t = clip.w), recovered from the composite view_proj of
+            // the rigid look_at camera:
+            //   a = -vp[2][2] / vp[2][3]   (vp[2][3] = forward z, non-zero here)
+            //   b =  vp[3][2] + a * vp[3][3]
+            // A sphere crossing the near plane can never be treated as occluded.
+            let a = -self.view_proj[2][2] / self.view_proj[2][3];
+            let b = self.view_proj[3][2] + a * self.view_proj[3][3];
+            let t_near = clip[3] - radius;
+            if t_near <= 0.0 {
+                return false;
+            }
+            let ndc_z_near = -a + b / t_near;
+            if !(-1.0..=1.0).contains(&ndc_z_near) {
+                return false;
+            }
+            let obj_near = (0.5 * ndc_z_near + 0.5).clamp(0.0, 1.0);
+            (uv, radius_ndc, obj_near)
+        };
+        if uv[0] < 0.0 || uv[0] > 1.0 || uv[1] < 0.0 || uv[1] > 1.0 {
+            return false;
+        }
+        obj_near > sample_max_depth + 0.002
     }
 }
 
@@ -838,13 +1038,17 @@ mod tests {
             object_count: count,
             occlusion_enabled: 0,
             _padding: [0, 0],
+            view_proj: super::IDENTITY_COLS,
+            projection_mode: 0,
+            _pad2: [0, 0, 0],
         }
     }
 
     #[test]
     fn object_bounds_and_frustum_are_pod_and_16_byte_aligned() {
         assert_eq!(std::mem::size_of::<ObjectBounds>(), 16);
-        assert_eq!(std::mem::size_of::<CullingFrustum>() % 16, 0);
+        assert_eq!(std::mem::size_of::<CullingFrustum>(), 192);
+        assert_eq!(std::mem::align_of::<CullingFrustum>(), 16);
     }
 
     #[test]
@@ -865,5 +1069,89 @@ mod tests {
         assert_eq!(r.frames_requested, 8);
         assert_eq!(r.frame_ms_total, 0.0);
         assert_eq!(r.letter, "cull-soak");
+    }
+
+    #[test]
+    fn legacy_frustum_hiz_decision_matches_fixed_mapping() {
+        let mut f = identity_frustum(1);
+        f.occlusion_enabled = 1; // the Hi-Z path only runs when enabled
+        // obj_near(origin, r=0.5) = 0.5 + 0 - 0.5/50 = 0.49 → occluded by nearer 0.2.
+        assert!(f.hiz_occluded_cpu([0.0, 0.0, 0.0], 0.5, 0.2));
+        // obj_near 0.49 vs stored 0.6 → survives.
+        assert!(!f.hiz_occluded_cpu([0.0, 0.0, 0.0], 0.5, 0.6));
+        // obj_near([0,0,20], r=0.5) = 0.5 + 0.4 - 0.01 = 0.89 → occluded by 0.6.
+        assert!(f.hiz_occluded_cpu([0.0, 0.0, 20.0], 0.5, 0.6));
+    }
+
+    #[test]
+    fn disabled_occlusion_never_occludes() {
+        let f = identity_frustum(1);
+        assert!(!f.hiz_occluded_cpu([0.0, 0.0, 20.0], 0.5, 0.0));
+    }
+
+    #[test]
+    fn from_camera_extracts_planes_and_projects_perspective() {
+        let view = crate::gpu_micropoly_raster::Mat4::look_at(
+            [0.0, 0.0, 5.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+        );
+        let camera = crate::gpu_micropoly_raster::MicropolyCamera::perspective(
+            view,
+            1.0,
+            std::f32::consts::FRAC_PI_3,
+            0.1,
+            100.0,
+        );
+        let frustum = CullingFrustum::from_camera(2, &camera, 1);
+        assert_eq!(frustum.projection_mode, 1);
+        assert_eq!(frustum.object_count, 2);
+
+        // Real Gribb–Hartmann planes: cull a sphere far outside the 60° fov,
+        // keep the view axis.
+        assert!(frustum.sphere_in_frustum_cpu([0.0, 0.0, 0.0], 0.4));
+        assert!(!frustum.sphere_in_frustum_cpu([6.0, 0.0, 0.0], 0.1));
+
+        // Perspective Hi-Z: an occluder ~0.4 units ahead of the camera stores
+        // depth ≈ 0.75 → hides the cluster at the origin (obj_near ≈ 0.84);
+        // a tiny cluster 0.3 units ahead (obj_near ≈ 0.38) survives.
+        assert!(frustum.hiz_occluded_cpu([0.0, 0.0, 0.0], 0.4, 0.75));
+        assert!(!frustum.hiz_occluded_cpu([0.0, 0.0, 4.7], 0.05, 0.75));
+    }
+
+    #[test]
+    fn perspective_hiz_culls_sphere_fully_behind_occluder() {
+        // Real perspective scene: hero cube at the origin, occluder wall at
+        // view distance 1.5 (world z = 0.5), background cube at z = -2.1. The
+        // true sphere near-depth test must keep the hero's front face, cull its
+        // back hemisphere, and cull the entire background cube — a robust,
+        // honest occlusion win that the naive `depth(center) - radius_ndc`
+        // screen-radius heuristic fails to produce.
+        let view = crate::gpu_micropoly_raster::Mat4::look_at(
+            [0.0, 0.0, 2.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+        );
+        let camera = crate::gpu_micropoly_raster::MicropolyCamera::perspective(
+            view,
+            1.0,
+            std::f32::consts::FRAC_PI_3,
+            0.1,
+            12.0,
+        );
+        let frustum = CullingFrustum::from_camera(3, &camera, 1);
+        assert_eq!(frustum.projection_mode, 1);
+        assert_eq!(frustum.occlusion_enabled, 1);
+
+        // Occluder wall at view distance 1.5 -> depth ~= 0.94118.
+        let occluder_depth = 0.94118;
+        let r = std::f32::consts::FRAC_1_SQRT_2; // dogfood cube half-diagonal
+
+        // Hero front face (nearest surface ~= 0.793 away) survives the wall.
+        assert!(!frustum.hiz_occluded_cpu([0.0, 0.0, 0.5], r, occluder_depth));
+        // Hero back face (nearest surface ~= 1.793 away) is occluded by the wall.
+        assert!(frustum.hiz_occluded_cpu([0.0, 0.0, -0.5], r, occluder_depth));
+        // Background cube front face (~= 3.393 away) is fully occluded.
+        assert!(frustum.hiz_occluded_cpu([0.0, 0.0, -2.1], r, occluder_depth));
     }
 }

@@ -110,7 +110,9 @@
     "qa:v30-internal-contracts": "npm --prefix cloud-web-app/web run qa:v30-internal-contracts",
     "qa:v30-heavy-runtime-boundaries": "npm --prefix cloud-web-app/web run qa:v30-heavy-runtime-boundaries",
     "qa:v30-quality-scorecard": "npm --prefix cloud-web-app/web run qa:v30-quality-scorecard",
-    "qa:v30-story-coverage-ratchet": "npm --prefix cloud-web-app/web run qa:v30-story-coverage-ratchet"
+    "qa:v30-story-coverage-ratchet": "npm --prefix cloud-web-app/web run qa:v30-story-coverage-ratchet",
+    "patch:vitest": "node scripts/patch-vitest-win-drive-case.mjs --strict",
+    "postinstall": "node scripts/patch-vitest-win-drive-case.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

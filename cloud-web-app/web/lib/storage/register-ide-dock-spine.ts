@@ -4,7 +4,11 @@
  * Legacy flat-key writes only while the one-way mirror window is active (expired).
  */
 
-import { registerWorkspaceLayoutPersistence } from '@aethel/ide-ui/docking'
+// Leaf import (NOT the `@aethel/ide-ui/docking` barrel): WorkspaceProvider pulls this
+// module at top level while the barrel is still mid-evaluation, so a barrel re-export
+// here creates a re-export TDZ cycle that Vite/vitest (and any ESM runtime) cannot
+// resolve — the binding arrives as `undefined`. The leaf is acyclic and identical.
+import { registerWorkspaceLayoutPersistence } from '@aethel/ide-ui/docking/workspaceStore'
 import {
   getIdeDockLayout,
   getViewportDockLayoutForMode,

@@ -1,5 +1,4 @@
 use image::GenericImageView;
-use wgpu::util::DeviceExt;
 
 pub struct Texture {
     pub texture: wgpu::Texture,

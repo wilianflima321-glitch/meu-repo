@@ -20,6 +20,7 @@ import { markExportFailed, updateExportState } from './build-queue-worker-state'
 import { addSourceFilesToExport } from './build-queue-worker.source-export'
 import { getErrorMessage, getRuntimeTemplatesDir, listFilesRecursive, nowIso, parseS3Url, recordWorkerMetric, runGltfTransformSimplify, safeFileName } from './build-queue-worker.utils'
 import { PROCESSING_QUEUE, SOURCE_QUEUE, type AssetManifest, type BuildQueueMessage, type RedisClient } from './build-queue-worker-contracts'
+import type { Prisma } from '@prisma/client'
 
 const log = createComponentLogger('workers/build-queue-worker')
 
@@ -385,7 +386,7 @@ async function processExportJob(redis: RedisClient, msg: BuildQueueMessage) {
       downloadUrl: downloadUrl,
       downloadExpiresAt: downloadExpiresAt,
       fileSize: measured.evidence.fileSize,
-      options,
+      options: options as Prisma.InputJsonValue,
       error: null,
     },
   });

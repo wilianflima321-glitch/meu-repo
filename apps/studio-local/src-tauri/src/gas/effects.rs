@@ -2,25 +2,26 @@
 
 use std::collections::HashMap;
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use super::attributes::{AttributeModifierOp, AttributeTable, Entity};
 use super::tags::{GameplayTagRegistry, TagSetTable};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GameplayEffectModifier {
     pub attribute: String,
     pub operation: AttributeModifierOp,
     pub magnitude: f32,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum GameplayEffectDurationPolicy {
     Instant,
     Duration,
     Infinite,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GameplayEffectDefinition {
     pub id: String,
     pub duration_policy: GameplayEffectDurationPolicy,
@@ -51,6 +52,7 @@ pub struct GameplayCueEvent {
     pub effect_id: String,
 }
 
+#[derive(Clone)]
 pub struct GameplayEffectPool {
     entity: Vec<Entity>,
     source: Vec<Option<Entity>>,
@@ -78,6 +80,21 @@ impl GameplayEffectPool {
 
     pub fn active_count(&self) -> usize {
         self.alive.iter().filter(|&&is_alive| is_alive).count()
+    }
+
+    /// Total allocated rows (alive + free), i.e. `self.entity.len()`.
+    pub fn stored_row_count(&self) -> usize {
+        self.entity.len()
+    }
+
+    /// Immutable view of one row: `(entity, definition, remaining_ms, row)`.
+    /// Returns `None` for a dead/out-of-range/freed row (fail-closed).
+    pub fn effect_at(&self, row: usize) -> Option<(Entity, &GameplayEffectDefinition, f64, usize)> {
+        if row >= self.entity.len() {
+            return None;
+        }
+        let definition = self.definitions.get(row)?.as_ref()?;
+        Some((self.entity[row], definition, self.remaining_ms[row], row))
     }
 
     fn allocate_row(&mut self) -> usize {
@@ -137,6 +154,14 @@ impl GameplayEffectPool {
         let base = attributes.base_value(entity, attribute_index);
         let value = override_value.unwrap_or((base + additive) * multiplicative);
         attributes.set_current(entity, attribute_index, value);
+    }
+
+    /// Public recompute of `current` for one entity+attribute from `base` and
+    /// all standing modifiers. Direct base mutations (e.g. the `Damage`
+    /// command) must call this so the published binary frame reflects the true
+    /// current value — `add_to_base` alone leaves `current` stale.
+    pub fn recompute_attribute_for(&self, attributes: &mut AttributeTable, entity: Entity, attribute: &str) {
+        self.recompute_attribute(attributes, entity, attribute);
     }
 
     fn recompute_affected_attributes(&self, attributes: &mut AttributeTable, entity: Entity, modifiers: &[GameplayEffectModifier]) {

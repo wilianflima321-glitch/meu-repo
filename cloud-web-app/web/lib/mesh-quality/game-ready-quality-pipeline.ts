@@ -4,15 +4,16 @@
  * Meshy/Tripo = clay; Aethel = game-ready refine. Zero-MVP · Law XVI Travas.
  */
 
+/* global TextEncoder */
+
 import { createComponentLogger } from '@/lib/observability/logger'
 import { runAutoRetopology } from '@/lib/mesh-quality/auto-retopology'
-import { buildMeshLodCascade } from '@/lib/mesh-quality/mesh-lod-cascade'
+import { buildMeshLodCascade, type MeshLodLevel, type NativeGenLodCaConsumerPayload } from '@/lib/mesh-quality/mesh-lod-cascade'
 import { ensureAndValidateUvs } from '@/lib/mesh-quality/mesh-uv-validate'
-import { cookMeshColliders } from '@/lib/mesh-quality/mesh-collider-cook'
+import { cookMeshColliders, type CookedCollider } from '@/lib/mesh-quality/mesh-collider-cook'
 import { runMeshAutoRigger, type MeshAutoRigResult } from '@/lib/mesh-quality/mesh-auto-rigger'
 import { assignContextualPbr, type ContextualPbrResult, type ScenePbrContext } from '@/lib/mesh-quality/contextual-pbr'
 import type { ClayTextureBuffer } from '@/lib/mesh-quality/delighting-pbr'
-import type { NativeGenLodCaConsumerPayload } from '@/lib/mesh-quality/mesh-lod-cascade'
 import type { SemanticLandmark } from '@/lib/mesh-quality/semantic-retopology'
 import {
   ingestClayMesh,
@@ -44,8 +45,15 @@ import {
 } from '@/lib/production/creative-artifact-bridge'
 import { CREATIVE_WEIGHTED_TOKEN_ESTIMATES } from '@/lib/creative-provider-matrix'
 import { writeAethelPack } from '@/lib/immunity/aethel-pack-writer'
-import type { CookedCollider } from '@/lib/mesh-quality/mesh-collider-cook'
-import type { MeshLodLevel } from '@/lib/mesh-quality/mesh-lod-cascade'
+import { measureMeshTopology } from '@/lib/mesh-quality/mesh-topology-metrics'
+import {
+  evaluateAssetQualityManifest,
+  failClosedAssetQualityVerdict,
+  maxPreviewTrianglesForTier,
+  type AssetQualityManifestInput,
+  type AssetQualityVerdictMirror,
+} from '@/lib/production/asset-quality-gate-verdict'
+import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
 
 const log = createComponentLogger('game-ready-quality-pipeline')
 
@@ -77,6 +85,23 @@ export interface GameReadyPipelineInput {
   clayTexture?: ClayTextureBuffer
   /** Force delighting even without clayTexture. */
   runDelighting?: boolean
+  /**
+   * Tier alvo do asset (letter bw). Quando presente, o conveyor:
+   * 1) passa o tier ao critic — o piso topológico do tier (60/80/90/95) é aplicado no
+   *    caminho principal de ship, não apenas na consulta J.1 pós-hoc;
+   * 2) usa o budget de preview do catálogo como alvo de retopo quando `targetTriangles`
+   *    não é informado;
+   * 3) monta um veredito bw honesto a partir da REALIDADE medida (triângulos, LoDs,
+   *    colisão, topologia) — nunca fabrica readiness.
+   */
+  targetTier?: GameAssetQualityTier
+  /**
+   * Manifesto declarado pelo cooker/loader (dims de textura, texels/m, proveniência).
+   * O conveyor SOBRESCREVE os campos que ele mesmo mede (triângulos, LoDs, colisão,
+   * topologia) com a realidade. Ausente → veredito fail-closed quando `targetTier` está
+   * presente (honestidade: sem manifesto não há claim de readiness).
+   */
+  qualityManifest?: AssetQualityManifestInput
 }
 
 export interface GameReadyPipelineResult {
@@ -105,6 +130,8 @@ export interface GameReadyPipelineResult {
   semanticCommercialParityReady: false
   delightingCommercialParityReady: false
   notes: string[]
+  /** Veredito bw honesto quando `targetTier` foi informado (fail-closed sem manifesto). */
+  qualityVerdict?: AssetQualityVerdictMirror
 }
 
 export async function runGameReadyQualityPipeline(
@@ -121,6 +148,8 @@ export async function runGameReadyQualityPipeline(
   ]
 
   let mesh: RawMeshBuffer | undefined = input.clayMesh
+  // Veredito bw honesto — preenchido quando targetTier está presente (após o critic).
+  let qualityVerdict: AssetQualityVerdictMirror | undefined
 
   // 1. Clay ingest (optional when clayMesh provided)
   if (!mesh) {
@@ -156,9 +185,16 @@ export async function runGameReadyQualityPipeline(
   }
 
   // 2. Auto-retopo (letter bz deepen — Instant Meshes parity still HELD)
+  // Alvo de retopo: tier-aware — budget de preview do catálogo canônico do kernel quando
+  // targetTier é informado e nenhum alvo explícito foi passado (fonte única de truth).
+  const retopoTarget =
+    input.targetTriangles ??
+    (input.targetTier !== undefined
+      ? maxPreviewTrianglesForTier(input.targetTier) || DEFAULT_RETOPO_TARGET_TRIANGLES
+      : DEFAULT_RETOPO_TARGET_TRIANGLES)
   const retopo = runAutoRetopology({
     mesh,
-    targetTriangles: input.targetTriangles ?? DEFAULT_RETOPO_TARGET_TRIANGLES,
+    targetTriangles: retopoTarget,
     capabilityScore: input.capabilityScore ?? 100,
     allowInlineOnWeakGpu: (input.capabilityScore ?? 100) >= 45,
     preferNativeWorker: true,
@@ -235,8 +271,8 @@ export async function runGameReadyQualityPipeline(
   const colliders = cookMeshColliders({ mesh })
   stages.push(colliders.receipt)
 
-  // 8. Topology critic
-  const critic = critiqueMeshTopology({ mesh })
+  // 8. Topology critic — o tier é passado ao critic (piso topológico aplicado no ship path).
+  const critic = critiqueMeshTopology({ mesh, tier: input.targetTier })
   stages.push(critic.receipt)
   if (!critic.approved) {
     return blocked(`topology_critic:${critic.rejectReasons.join(',')}`, stages, notes, {
@@ -246,6 +282,27 @@ export async function runGameReadyQualityPipeline(
       pbr,
       colliders: { convex: colliders.convex, trimesh: colliders.trimesh },
     })
+  }
+
+  // 8b. Veredito bw honesto da REALIDADE medida (nunca fabricado). Quando targetTier é
+  // informado: sem manifesto → fail-closed (não há claim); com manifesto → os campos que o
+  // conveyor mede (triângulos, LoDs, colisão, topologia) SOBRESCREVEM o declarado.
+  if (input.targetTier !== undefined) {
+    qualityVerdict = input.qualityManifest
+      ? evaluateAssetQualityManifest(
+          assembleQualityManifestFromPipeline({
+            tier: input.targetTier,
+            mesh,
+            lods: lods.lods,
+            declared: input.qualityManifest,
+          }),
+        )
+      : failClosedAssetQualityVerdict()
+    notes.push(
+      qualityVerdict.ready
+        ? `bw-verdict:ready tier=${input.targetTier} blockers=0 topo=${qualityVerdict.topologyGrade}/${qualityVerdict.minTopologyGrade}`
+        : `bw-verdict:fail_closed tier=${input.targetTier} blockers=${qualityVerdict.blockerCount} topo=${qualityVerdict.topologyGrade}/${qualityVerdict.minTopologyGrade}`,
+    )
   }
 
   // 9. Optional AethelPack entry + FusionTx stamp
@@ -280,6 +337,7 @@ export async function runGameReadyQualityPipeline(
         rig,
         pbr,
         colliders: { convex: colliders.convex, trimesh: colliders.trimesh },
+        qualityVerdict,
       })
     }
     packBytes = written.packBytes
@@ -355,6 +413,7 @@ export async function runGameReadyQualityPipeline(
       packBytes,
       packSha256,
       remeshQualityDeepened: retopo.remeshQualityDeepened,
+      qualityVerdict,
     })
   }
   notes.push(`clay-refine-evidence:${refineSeal.value.fingerprint}`)
@@ -382,6 +441,40 @@ export async function runGameReadyQualityPipeline(
     semanticCommercialParityReady: false,
     delightingCommercialParityReady: false,
     notes,
+    qualityVerdict,
+  }
+}
+
+/**
+ * Monta o manifesto do gate bw a partir do que o conveyor REALMENTE mediu (nunca
+ * fabricado): triângulos reais, LoDs reais, colisão real (convex+trimesh cozidos na etapa
+ * 7), topologia real (kernel-mirror). Os campos que o conveyor não produz (dims de
+ * textura, texels/m, proveniência) vêm do manifesto declarado pelo cooker/loader.
+ */
+function assembleQualityManifestFromPipeline(input: {
+  tier: GameAssetQualityTier
+  mesh: RawMeshBuffer
+  lods: MeshLodLevel[]
+  declared: AssetQualityManifestInput
+}): AssetQualityManifestInput {
+  const triangles = Math.floor(input.mesh.indices.length / 3)
+  const metrics = measureMeshTopology(input.mesh)
+  return {
+    ...input.declared,
+    tier: input.tier,
+    previewTriangles: triangles,
+    heroTriangles: triangles,
+    lodLevelsPresent: input.lods.length,
+    hasCollisionProxy: true,
+    hasNavmeshProxy: true,
+    topology: {
+      vertices: metrics.vertices,
+      triangles: metrics.triangles,
+      degenerateFaces: metrics.degenerateFaces,
+      nonManifoldEdges: metrics.nonManifoldEdges,
+      openBoundaryLoops: metrics.openBoundaryLoops,
+      isolatedVertices: metrics.isolatedVertices,
+    },
   }
 }
 
@@ -444,6 +537,7 @@ async function runTextureRefineViaBridge(input: GameReadyPipelineInput): Promise
           planId: input.planId ?? 'pro',
         },
         requiresFusionWrite: false,
+        targetTier: input.targetTier,
       },
       adapter: input.costGuardAdapter,
       provider: async () => ({

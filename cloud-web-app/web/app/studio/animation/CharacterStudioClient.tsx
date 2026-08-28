@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Suspense, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
@@ -43,7 +43,7 @@ const GameReadyCharacterGenerator = dynamic(
   { ssr: false, loading: () => <CreativeStudioLoading label="Generate character…" /> },
 )
 
-const TOOL_VIEWPORTS: Record<string, React.ComponentType> = {
+const TOOL_VIEWPORTS: Record<string, React.ComponentType<any>> = {
   animation: AnimationBlueprint,
   rig: ControlRigEditor,
   facial: FacialAnimationEditor,

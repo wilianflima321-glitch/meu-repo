@@ -2,6 +2,7 @@
 
 import { PRIMITIVE_GEOMETRY_TYPES } from './scene-editor-models';
 import type { SceneObject } from './scene-editor-models';
+import { ScrubbableInput, Vector3Input } from '@/components/ui/ScrubbableInput';
 
 interface PropertiesPanelProps {
   object: SceneObject | null;
@@ -14,348 +15,269 @@ type RigidBodySettings = {
 };
 
 function asRigidBody(value: unknown): RigidBodySettings {
-  return typeof value === 'object' && value !== null ? value as RigidBodySettings : {};
+  return typeof value === 'object' && value !== null ? (value as RigidBodySettings) : {};
+}
+
+function radToDeg(value: number) {
+  return (value * 180) / Math.PI;
+}
+
+function degToRad(value: number) {
+  return (value * Math.PI) / 180;
 }
 
 export function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
   if (!object) {
     return (
-      <div style={{
-        width: '280px',
-        background: 'var(--aethel-surface-primary)',
-        borderLeft: '1px solid var(--aethel-border-secondary)',
-        padding: '16px',
-        color: 'var(--aethel-text-quaternary)',
-        fontSize: '13px',
-      }}>
-        Select an object to view its properties.
+      <div className="w-72 border-l border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] p-6 text-center text-xs text-[var(--aethel-text-quaternary)]">
+        Select an object in the scene or hierarchy to inspect and edit its properties.
       </div>
     );
   }
-  const updatePosition = (axis: number, value: number) => {
-    const newPos: [number, number, number] = [...object.position];
-    newPos[axis] = value;
-    onChange({ position: newPos });
-  };
-  const updateRotation = (axis: number, value: number) => {
-    const newRot: [number, number, number] = [...object.rotation];
-    newRot[axis] = value * (Math.PI / 180); // Degrees to radians
-    onChange({ rotation: newRot });
-  };
-  const updateScale = (axis: number, value: number) => {
-    const newScale: [number, number, number] = [...object.scale];
-    newScale[axis] = value;
-    onChange({ scale: newScale });
-  };
-  const inputStyle = {
-    width: '60px',
-    padding: '4px 8px',
-    background: 'var(--aethel-surface-tertiary)',
-    border: '1px solid var(--aethel-border-primary)',
-    borderRadius: '4px',
-    color: 'var(--aethel-text-primary)',
-    fontSize: '12px',
-  };
-  const labelStyle = {
-    width: '20px',
-    textAlign: 'center' as const,
-    fontWeight: 'bold' as const,
-  };
+
   const properties = object.properties;
   const rigidbody = asRigidBody(properties.rigidbody);
+
   return (
-    <div style={{
-      width: '280px',
-      background: 'var(--aethel-surface-primary)',
-      borderLeft: '1px solid var(--aethel-border-secondary)',
-      overflowY: 'auto',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '12px',
-        borderBottom: '1px solid var(--aethel-border-secondary)',
-      }}>
+    <div className="flex w-72 flex-col overflow-y-auto border-l border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] text-xs text-[var(--aethel-text-secondary)]">
+      {/* Header — Object Name */}
+      <div className="border-b border-[var(--aethel-border-subtle)] p-3">
+        <label className="block mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+          Actor Name
+        </label>
         <input
           type="text"
           value={object.name}
           onChange={(e) => onChange({ name: e.target.value })}
-          style={{
-            width: '100%',
-            padding: '8px',
-            background: 'var(--aethel-surface-tertiary)',
-            border: '1px solid var(--aethel-border-primary)',
-            borderRadius: '4px',
-            color: 'var(--aethel-text-primary)',
-            fontSize: '14px',
-            fontWeight: 'bold',
-          }}
+          className="w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] outline-none focus:border-[var(--aethel-primary)] transition-colors"
         />
       </div>
-      {/* Transform */}
-      <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
-        <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
-          TRANSFORM
+
+      {/* Transform Section */}
+      <div className="border-b border-[var(--aethel-border-subtle)] p-3 space-y-3">
+        <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+          Transform
         </h4>
+
         {/* Position */}
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
+        <div>
+          <span className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
             Position
-          </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.position[0].toFixed(2)}
-              onChange={(e) => updatePosition(0, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.position[1].toFixed(2)}
-              onChange={(e) => updatePosition(1, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.position[2].toFixed(2)}
-              onChange={(e) => updatePosition(2, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-          </div>
+          </span>
+          <Vector3Input
+            value={object.position}
+            defaultValue={[0, 0, 0]}
+            step={0.05}
+            precision={2}
+            ariaLabelPrefix="Position"
+            onChange={(next) => onChange({ position: next })}
+          />
         </div>
+
         {/* Rotation */}
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-            Rotation (degrees)
-          </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
-            <input
-              type="number"
-              step="1"
-              value={(object.rotation[0] * (180 / Math.PI)).toFixed(0)}
-              onChange={(e) => updateRotation(0, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
-            <input
-              type="number"
-              step="1"
-              value={(object.rotation[1] * (180 / Math.PI)).toFixed(0)}
-              onChange={(e) => updateRotation(1, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
-            <input
-              type="number"
-              step="1"
-              value={(object.rotation[2] * (180 / Math.PI)).toFixed(0)}
-              onChange={(e) => updateRotation(2, parseFloat(e.target.value) || 0)}
-              style={inputStyle}
-            />
-          </div>
+        <div>
+          <span className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+            Rotation
+          </span>
+          <Vector3Input
+            value={object.rotation.map(radToDeg) as [number, number, number]}
+            defaultValue={[0, 0, 0]}
+            step={1}
+            precision={1}
+            suffix="°"
+            ariaLabelPrefix="Rotation"
+            onChange={(next) => onChange({ rotation: next.map(degToRad) as [number, number, number] })}
+          />
         </div>
+
         {/* Scale */}
         <div>
-          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
+          <span className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
             Scale
-          </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.scale[0].toFixed(2)}
-              onChange={(e) => updateScale(0, parseFloat(e.target.value) || 1)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.scale[1].toFixed(2)}
-              onChange={(e) => updateScale(1, parseFloat(e.target.value) || 1)}
-              style={inputStyle}
-            />
-            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
-            <input
-              type="number"
-              step="0.1"
-              value={object.scale[2].toFixed(2)}
-              onChange={(e) => updateScale(2, parseFloat(e.target.value) || 1)}
-              style={inputStyle}
-            />
-          </div>
+          </span>
+          <Vector3Input
+            value={object.scale}
+            defaultValue={[1, 1, 1]}
+            step={0.05}
+            precision={2}
+            ariaLabelPrefix="Scale"
+            onChange={(next) => onChange({ scale: next })}
+          />
         </div>
       </div>
-      {/* Type-specific properties */}
+
+      {/* Type-specific: Mesh */}
       {object.type === 'mesh' && (
         <>
-          <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
-            <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
-              MESH
+          <div className="border-b border-[var(--aethel-border-subtle)] p-3 space-y-3">
+            <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+              Mesh Geometry
             </h4>
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-                Geometry
-              </div>
+            <div>
+              <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+                Primitive Type
+              </label>
               <select
                 value={(object.properties.geometry as string) || 'box'}
-                onChange={(e) => onChange({
-                  properties: { ...object.properties, geometry: e.target.value }
-                })}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  background: 'var(--aethel-surface-tertiary)',
-                  border: '1px solid var(--aethel-border-primary)',
-                  borderRadius: '4px',
-                  color: 'var(--aethel-text-primary)',
-                }}
+                onChange={(e) =>
+                  onChange({
+                    properties: { ...object.properties, geometry: e.target.value },
+                  })
+                }
+                className="w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1.5 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-[var(--aethel-primary)]"
               >
-                {PRIMITIVE_GEOMETRY_TYPES.map(g => (
-                  <option key={g} value={g}>{g}</option>
+                {PRIMITIVE_GEOMETRY_TYPES.map((g) => (
+                  <option key={g} value={g}>
+                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
+
             <div>
-              <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-                Color
-              </div>
+              <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+                Tint Color
+              </label>
               <input
                 type="color"
                 value={`#${((object.properties.color as number) || 0x4a90d9).toString(16).padStart(6, '0')}`}
-                onChange={(e) => onChange({
-                  properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) }
-                })}
-                style={{
-                  width: '100%',
-                  height: '32px',
-                  padding: '0',
-                  border: '1px solid var(--aethel-border-primary)',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                onChange={(e) =>
+                  onChange({
+                    properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) },
+                  })
+                }
+                className="h-8 w-full cursor-pointer rounded-lg border border-[var(--aethel-border-subtle)] bg-transparent p-0"
               />
             </div>
           </div>
-          {/* PHYSICS PANEL */}
-          <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
-             <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
-               PHYSICS
-               <input
-                 type="checkbox"
-                 checked={Boolean(properties.rigidbody)}
-                 onChange={(e) => {
-                   if (e.target.checked) {
-                     onChange({ properties: { ...properties, rigidbody: { mass: 1, type: 'dynamic' } } });
-                   } else {
-                     const { rigidbody, ...rest } = properties;
-                     onChange({ properties: rest });
-                   }
-                 }}
-               />
-             </h4>
-             {Boolean(properties.rigidbody) && (
-               <>
-                 <div style={{ marginBottom: '8px' }}>
-                   <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>Type</div>
-                   <select
-                     value={rigidbody.type || 'dynamic'}
-                     onChange={(e) => {
-                       onChange({ properties: { ...properties, rigidbody: { ...rigidbody, type: e.target.value } } });
-                     }}
-                     style={{ width: '100%', background: 'var(--aethel-surface-tertiary)', color: 'var(--aethel-text-primary)', border: '1px solid var(--aethel-border-primary)', padding: '4px' }}
-                   >
-                     <option value="dynamic">Dynamic</option>
-                     <option value="static">Static (Floor)</option>
-                     <option value="kinematic">Kinematic</option>
-                   </select>
-                 </div>
-                 <div style={{ marginBottom: '8px' }}>
-                   <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>Mass</div>
-                   <input
-                     type="number"
-                     step="0.1"
-                     value={rigidbody.mass || 1}
-                     onChange={(e) => {
-                        onChange({ properties: { ...properties, rigidbody: { ...rigidbody, mass: parseFloat(e.target.value) } } });
-                     }}
-                     style={{ width: '100%', background: 'var(--aethel-surface-tertiary)', color: 'var(--aethel-text-primary)', border: '1px solid var(--aethel-border-primary)', padding: '4px' }}
-                   />
-                 </div>
-               </>
-             )}
+
+          {/* Physics Section */}
+          <div className="border-b border-[var(--aethel-border-subtle)] p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                RigidBody Physics
+              </h4>
+              <input
+                type="checkbox"
+                checked={Boolean(properties.rigidbody)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    onChange({
+                      properties: { ...properties, rigidbody: { mass: 1, type: 'dynamic' } },
+                    });
+                  } else {
+                    const { rigidbody: _rigidbody, ...rest } = properties;
+                    onChange({ properties: rest });
+                  }
+                }}
+                className="rounded border-[var(--aethel-border-subtle)] accent-[var(--aethel-primary)] cursor-pointer"
+              />
+            </div>
+
+            {Boolean(properties.rigidbody) && (
+              <div className="space-y-2.5 pt-1">
+                <div>
+                  <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+                    Body Type
+                  </label>
+                  <select
+                    value={rigidbody.type || 'dynamic'}
+                    onChange={(e) => {
+                      onChange({
+                        properties: { ...properties, rigidbody: { ...rigidbody, type: e.target.value } },
+                      });
+                    }}
+                    className="w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1.5 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-[var(--aethel-primary)]"
+                  >
+                    <option value="dynamic">Dynamic (Full Simulation)</option>
+                    <option value="static">Static (Environment / Floor)</option>
+                    <option value="kinematic">Kinematic (Code Driven)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+                    Mass (kg)
+                  </label>
+                  <ScrubbableInput
+                    value={rigidbody.mass || 1}
+                    onChange={(v) => {
+                      onChange({
+                        properties: { ...properties, rigidbody: { ...rigidbody, mass: v } },
+                      });
+                    }}
+                    min={0.01}
+                    max={10000}
+                    step={0.1}
+                    precision={1}
+                    suffix="kg"
+                    ariaLabel="RigidBody Mass"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
+
+      {/* Type-specific: Light */}
       {object.type === 'light' && (
-        <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
-          <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
-            LIGHT
+        <div className="border-b border-[var(--aethel-border-subtle)] p-3 space-y-3">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            Light Source
           </h4>
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-              Type
-            </div>
+
+          <div>
+            <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+              Light Type
+            </label>
             <select
               value={(object.properties.lightType as string) || 'point'}
-              onChange={(e) => onChange({
-                properties: { ...object.properties, lightType: e.target.value }
-              })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                background: 'var(--aethel-surface-tertiary)',
-                border: '1px solid var(--aethel-border-primary)',
-                borderRadius: '4px',
-                color: 'var(--aethel-text-primary)',
-              }}
+              onChange={(e) =>
+                onChange({
+                  properties: { ...object.properties, lightType: e.target.value },
+                })
+              }
+              className="w-full rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1.5 text-xs text-[var(--aethel-text-primary)] outline-none focus:border-[var(--aethel-primary)]"
             >
-              <option value="point">Point</option>
-              <option value="directional">Directional</option>
-              <option value="spot">Spot</option>
+              <option value="point">Point Light (Omni)</option>
+              <option value="directional">Directional (Sun)</option>
+              <option value="spot">Spot Light</option>
             </select>
           </div>
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-              Intensity
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              step="0.1"
+
+          <div>
+            <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+              Intensity (Lumens)
+            </label>
+            <ScrubbableInput
               value={(object.properties.intensity as number) || 1}
-              onChange={(e) => onChange({
-                properties: { ...object.properties, intensity: parseFloat(e.target.value) }
-              })}
-              style={{ width: '100%' }}
+              onChange={(v) =>
+                onChange({
+                  properties: { ...object.properties, intensity: v },
+                })
+              }
+              min={0}
+              max={100}
+              step={0.1}
+              precision={2}
+              ariaLabel="Light Intensity"
             />
           </div>
+
           <div>
-            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
-              Color
-            </div>
+            <label className="block mb-1 text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">
+              Color Tint
+            </label>
             <input
               type="color"
               value={`#${((object.properties.color as number) || 0xffffff).toString(16).padStart(6, '0')}`}
-              onChange={(e) => onChange({
-                properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) }
-              })}
-              style={{
-                width: '100%',
-                height: '32px',
-                padding: '0',
-                border: '1px solid var(--aethel-border-primary)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
+              onChange={(e) =>
+                onChange({
+                  properties: { ...object.properties, color: parseInt(e.target.value.slice(1), 16) },
+                })
+              }
+              className="h-8 w-full cursor-pointer rounded-lg border border-[var(--aethel-border-subtle)] bg-transparent p-0"
             />
           </div>
         </div>

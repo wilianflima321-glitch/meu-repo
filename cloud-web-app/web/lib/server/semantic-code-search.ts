@@ -6,6 +6,10 @@ import { getScopedWorkspaceRoot, toVirtualWorkspacePath } from '@/lib/server/wor
 
 type SearchScope = 'project' | 'repository'
 
+/**
+ * @deprecated Superseded by L.12 RepoGraphRAG (`lib/server/repo-graph-rag/repo-graph-rag.ts`).
+ * This legacy TF-IDF hash search violates MultiSurfaceContextPack limits at scale.
+ */
 export interface SemanticCodeSearchResult {
   id: string
   filePath: string

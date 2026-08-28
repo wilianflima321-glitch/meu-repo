@@ -22,7 +22,7 @@
 | Do we have plans to surpass Unreal on render/motor? | **Yes — planning depth ~100%.** AAA bible + Laws + S1–S7 + G/K/M are enough. |
 | Do we need many new engine plans? | **No.** More docs without wiring = pollution. Execute C→G + Block 3. |
 | Are we best-in-market on engine **today**? | **No (~15% code).** Libraries exist unwired; Nanite/RT names would be lies. |
-| Where can we **honestly** beat UE? | Iteration speed, web+desktop one stack, AI-governed IDE, Hub publish, WASM isolation, Capability Score honesty — **not** Day-1 Nanite polygon crown on web. |
+| Where can we **honestly** beat UE? | Iteration speed, web+desktop one stack, AI-governed IDE, Hub publish, WASM isolation, Capability Score honesty. E principalmente: **Zero-AI UX Supremacy**. O editor (IDE) tem que inicializar em 3 segundos, ter hot-reload de WASM sem compilar C++ e suportar colaboração Yjs sem travar, destruindo o Slate Editor mesmo sem internet ou IA. |
 | How do users get best UX without new UIs? | **Deepen existing** viewport, outliner, inspector, Material, VFX, Film, Usage — **zero new AAA dashboards**. |
 
 ---
@@ -90,13 +90,14 @@
 | Vector | Why users feel it | Do not dilute with |
 |--------|-------------------|--------------------|
 | **Web + desktop one product** | Create in browser, AAA on Tauri | Split “web engine” vs “real engine” UIs |
+| **Zero-AI UX Supremacy** | The IDE itself (React + Yjs) is faster, collaborative, and more ergonomic than Slate Editor, even offline. | Bloated UIs that only work if Claude/Gemini is online |
 | **AI-governed creation (XVI + L)** | Evidence + undo + cost | Random new AI panels |
 | **Instant web demo + Hub** | Publish → play in minutes | Fake store before H.0 |
 | **WASM script isolation** | Gameplay scripts don’t crash host | Host PTY for agents |
 | **Capability Score** | Game runs on their laptop honestly | “Ultra” preset that ignores score |
 | **Agent-first IDE** | Cursor-class in game context | Second IDE shell |
 
-**Strategic rule:** Beat UE on **iteration + distribution + honesty + AI**. Match UE on **desktop nuclear render** over years (C→G). Never claim web RT crown.
+**Strategic rule:** Beat UE on **iteration + distribution + honesty + UX**. Match UE on **desktop nuclear render** over years (C→G). Never claim web RT crown.
 
 ---
 
@@ -259,3 +260,10 @@ Rules:
 | Date | Ver | Change |
 |------|-----|--------|
 | 2026-07-09 | 1.0 | Critique of UE/motor plans; honest surpass matrix; UI non-pollution; fidelity single control; RT clarity; executor checklist |
+
+
+---
+
+## Adendo 2026-08-22 - UI Discipline reforcada para o Dual-Mode
+
+O Founder autorizou UMA excecao estrutural a regra "no new AAA panels": a casca Dual-Mode (Canvas Mode primario + Monaco Mode on-demand). Isso NAO autoriza paineis novos por painel: as ~60 areas de componentes legadas (canvas/scene-editor/viewport/editor/editors/ide/studio) DEVEM ser consolidadas sob a casca unica, com as superficies existentes aprofundadas (Inspector, Outliner, Asset Drawer, Timeline, Chat). Critica maxima e reutilizacao obrigatoria. Detalhes: UNIVERSAL_IDE_FORGE_SPEC (Auditoria UI/UX 2026-08-22) + UX_AND_ROBUSTNESS_ALIGNMENT_MASTER (gates UX-G-DM1..6).

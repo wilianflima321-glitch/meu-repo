@@ -1,5 +1,4 @@
 use crate::rendering::pbr_graphics::Vertex;
-use wgpu::util::DeviceExt;
 
 /// A monolithic buffer holder for all static geometry in the world.
 /// This allows a single `set_vertex_buffer` call, and then we just use

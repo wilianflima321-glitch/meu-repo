@@ -9,7 +9,11 @@
  */
 
 import { adaptiveMoAWidth, type ApexTaskDomain } from '@/lib/ai/fusion-specialist-registry'
-import type { ChewedWorkerTask, MaestroDelegationPlan } from '@/lib/production/maestro-delegation'
+import {
+  type MaestroDelegationPlan,
+  type ChewedWorkerTask,
+  buildMaestroDelegationPlan,
+} from '@/lib/production/maestro-delegation'
 import type { GraphOperatorTarget } from '@/lib/production/graph-operator'
 
 export interface NexusSquadTask {
@@ -174,16 +178,16 @@ export function dispatchNexusSquad(input: NexusSquadInput | NexusSquadTask[]): N
     generatorWidth: 1,
   }))
 
-  const maestro: MaestroDelegationPlan = {
+  const maestro: MaestroDelegationPlan = buildMaestroDelegationPlan({
     missionId: Array.isArray(input) ? 'mission_squad' : (input.missionId ?? 'mission_default'),
     maestroModelId: Array.isArray(input) ? 'default' : (input.maestroModelId ?? 'default'),
-    trivialBypass: false,
-    criticalTask,
-    peripheralTasks,
+    planId,
     projectMemoryDigestId: Array.isArray(input) ? 'mem_squad' : (input.projectMemoryDigestId ?? 'mem_default'),
     lawsPackId: Array.isArray(input) ? 'laws_default' : (input.lawsPackId ?? 'laws_default'),
     contextPackId: Array.isArray(input) ? 'ctx_default' : (input.contextPackId ?? 'ctx_default'),
-  }
+    critical: criticalTask,
+    peripherals: peripheralTasks,
+  })
 
   return {
     dispatched: true,

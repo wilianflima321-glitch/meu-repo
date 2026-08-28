@@ -127,6 +127,7 @@ export function billingRuntimeCapabilityResponse(
     metadata: {
       status: state.status,
       activeGateway: state.gateway.activeGateway,
+      supportedGateway: 'stripe',
       provider: state.provider.id,
       providerLabel: state.provider.label,
       setupEnv: state.provider.setupEnv,

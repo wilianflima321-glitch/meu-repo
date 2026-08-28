@@ -2,12 +2,14 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 pub type Entity = u32;
 pub type AttributeId = usize;
 
 pub const CORE_ATTRIBUTE_NAMES: [&str; 4] = ["Health", "Mana", "Stamina", "MovementSpeed"];
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AttributeModifierOp {
     Add,
     Multiply,
@@ -21,6 +23,7 @@ pub struct AttributeBounds {
 }
 
 /// Flat `Vec<f32>`-backed attribute storage.
+#[derive(Clone)]
 pub struct AttributeTable {
     attribute_count: usize,
     name_to_index: HashMap<String, AttributeId>,
@@ -47,6 +50,16 @@ impl AttributeTable {
 
     pub fn attribute_index(&self, attribute: &str) -> Option<AttributeId> {
         self.name_to_index.get(attribute).copied()
+    }
+
+    pub fn attribute_count(&self) -> usize {
+        self.attribute_count
+    }
+
+    /// Number of entities that currently have storage slots allocated.
+    /// Guards against division by zero when `attribute_count == 0`.
+    pub fn stored_entity_count(&self) -> usize {
+        self.base.len().checked_div(self.attribute_count).unwrap_or(0)
     }
 
     pub fn set_bounds(&mut self, attribute: &str, bounds: AttributeBounds) {

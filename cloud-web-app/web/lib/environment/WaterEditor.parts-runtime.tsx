@@ -1,5 +1,6 @@
-import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 'use client';
+
+import { tokenColor } from '@/lib/design-system/DesignTokenSync'
 
 // @aethel-heavy-async-boundary
 

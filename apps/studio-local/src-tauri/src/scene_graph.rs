@@ -33,6 +33,10 @@ pub struct SceneNode {
     pub node_type: String,
     pub visible: bool,
     pub locked: bool,
+    /// Parent node id — `None` = scene root. Flat list stays authoritative;
+    /// UI builds a tree for Outliner3D from this field.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_id: Option<String>,
     pub position: [f32; 3],
     pub rotation: [f32; 3],
     pub scale: [f32; 3],
@@ -50,6 +54,7 @@ impl SceneNode {
             node_type,
             visible: true,
             locked: false,
+            parent_id: None,
             position: [0.0, 0.0, 0.0],
             rotation: [0.0, 0.0, 0.0],
             scale: [1.0, 1.0, 1.0],
@@ -211,6 +216,52 @@ pub fn scene_remove_node(
     }
     guard.order.retain(|existing| existing != &id);
     guard.selected_ids.retain(|existing| existing != &id);
+    // Orphan children to root — fail-closed (no silent delete cascade).
+    for node in guard.nodes.values_mut() {
+        if node.parent_id.as_deref() == Some(id.as_str()) {
+            node.parent_id = None;
+        }
+    }
+    broadcast(&app_handle, &guard);
+    Ok(())
+}
+
+/// Reparent `id` under `parent_id` (`None` → scene root). Rejects missing
+/// nodes, self-parent, and cycles so the Outliner tree stays acyclic.
+#[tauri::command]
+pub fn scene_reparent(
+    id: String,
+    parent_id: Option<String>,
+    state: State<'_, Mutex<SceneGraphState>>,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let mut guard = lock(&state)?;
+    if !guard.nodes.contains_key(&id) {
+        return Err(format!("Studio Local scene node not found: {id}"));
+    }
+    if let Some(ref pid) = parent_id {
+        if pid == &id {
+            return Err("Studio Local scene reparent refused: cannot parent a node to itself.".to_string());
+        }
+        if !guard.nodes.contains_key(pid) {
+            return Err(format!("Studio Local scene parent not found: {pid}"));
+        }
+        // Walk ancestors of the proposed parent; if we hit `id`, this is a cycle.
+        let mut cursor = Some(pid.clone());
+        while let Some(current) = cursor {
+            if current == id {
+                return Err(
+                    "Studio Local scene reparent refused: would create a parent cycle.".to_string(),
+                );
+            }
+            cursor = guard.nodes.get(&current).and_then(|n| n.parent_id.clone());
+        }
+    }
+    let node = guard
+        .nodes
+        .get_mut(&id)
+        .ok_or_else(|| format!("Studio Local scene node not found: {id}"))?;
+    node.parent_id = parent_id;
     broadcast(&app_handle, &guard);
     Ok(())
 }
@@ -248,6 +299,46 @@ mod tests {
         assert_eq!(after_removal.nodes.len(), 1);
         assert_eq!(after_removal.nodes[0].name, "Light");
         assert!(after_removal.selected_ids.is_empty());
+    }
+
+    #[test]
+    fn reparent_rejects_cycles_and_orphans_on_remove() {
+        let mut state = SceneGraphState::default();
+        state.next_id += 1;
+        let id_a = format!("native-node-{}", state.next_id);
+        state
+            .nodes
+            .insert(id_a.clone(), SceneNode::new(id_a.clone(), "Root".into(), "group".into()));
+        state.order.push(id_a.clone());
+
+        state.next_id += 1;
+        let id_b = format!("native-node-{}", state.next_id);
+        let mut child = SceneNode::new(id_b.clone(), "Child".into(), "mesh".into());
+        child.parent_id = Some(id_a.clone());
+        state.nodes.insert(id_b.clone(), child);
+        state.order.push(id_b.clone());
+
+        // Cycle: parent A under B while B already under A.
+        let mut cursor = Some(id_b.clone());
+        let mut would_cycle = false;
+        while let Some(current) = cursor {
+            if current == id_a {
+                would_cycle = true;
+                break;
+            }
+            cursor = state.nodes.get(&current).and_then(|n| n.parent_id.clone());
+        }
+        assert!(would_cycle, "walking B's ancestors must hit A");
+
+        // Remove parent → orphan child to root.
+        state.nodes.remove(&id_a);
+        state.order.retain(|existing| existing != &id_a);
+        for node in state.nodes.values_mut() {
+            if node.parent_id.as_deref() == Some(id_a.as_str()) {
+                node.parent_id = None;
+            }
+        }
+        assert_eq!(state.nodes.get(&id_b).and_then(|n| n.parent_id.clone()), None);
     }
 
     #[test]

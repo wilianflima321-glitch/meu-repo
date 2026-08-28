@@ -678,4 +678,22 @@ mod tests {
         assert_ne!("sdfOctreeHashingReady", "sdfAdaptiveCascadesReady");
         assert_ne!("sdfOctreeHashingReady", "sdfSculptorReady");
     }
+
+    #[test]
+    fn world_to_cell_grid_spacing_invariants() {
+        let hash = SdfSpatialHash::new(0.25, 0.35);
+        let cell_0 = hash.world_to_cell([0.1, 0.1, 0.1]);
+        let cell_1 = hash.world_to_cell([0.1 + 0.25, 0.1, 0.1]);
+
+        assert_eq!(cell_0[0] + 1, cell_1[0]);
+        assert_eq!(cell_0[1], cell_1[1]);
+        assert_eq!(cell_0[2], cell_1[2]);
+    }
+
+    #[test]
+    fn empty_hash_brick_count_is_zero() {
+        let hash = SdfSpatialHash::new(CELL_SIZE, SURFACE_BAND);
+        assert_eq!(hash.brick_count(), 0);
+        assert!(hash.query_world([0.0, 0.0, 0.0]).is_none());
+    }
 }

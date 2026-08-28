@@ -359,9 +359,9 @@ export function buildConsolidationTruthMatrix(
     },
     {
       id: 'disk.austerity.cw7',
-      claim: 'CW7 disk austerity — docs + example cargo target; prune/CAS/CI HELD',
+      claim: 'CW7 disk austerity — single-target CI gate + orphan gate + weight gate; prune/CAS real (manual ops)',
       path: 'lib/production/disk-austerity-honesty.ts',
-      status: 'PARTIAL',
+      status: 'IMPLEMENTED',
       marketingAllowed: false,
       heldReason: cw7.heldReason,
       note: cw7.notes[2],

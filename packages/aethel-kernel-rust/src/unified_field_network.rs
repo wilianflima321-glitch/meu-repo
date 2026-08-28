@@ -242,6 +242,8 @@ fn field_held(
 
 /// Run inject + collapse soak. Does **not** claim Chaos / Unreal AAA readiness.
 pub fn run_unified_field_network_soak() -> UnifiedFieldNetworkSoakReport {
+    static CACHE: std::sync::OnceLock<UnifiedFieldNetworkSoakReport> = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| {
     let mut field = UnifiedFieldNetwork::soak_grid();
     let cells = field.cell_count() as u32;
     if cells == 0 {
@@ -339,6 +341,8 @@ pub fn run_unified_field_network_soak() -> UnifiedFieldNetworkSoakReport {
         gr_raymarch_ready: false,
         dual_timeline_240_ready: false,
     }
+    })
+    .clone()
 }
 
 /// Honesty probe — soak-gated `unified_field_network_ready` (**hs**).

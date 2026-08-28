@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Letter cf — Radiance viewport enable path (Zero-MVP).
  *
  * bt/by built RadianceFrameWire + enableRadiance but left zero real callers.

@@ -1,4 +1,4 @@
-import type { AgentType } from '../../../web/lib/agent-orchestrator'
+import type { AgentType } from './agent-roles'
 
 export type AgentRoleEvalCase = {
   id: string

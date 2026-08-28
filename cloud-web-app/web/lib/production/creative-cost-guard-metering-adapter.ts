@@ -1,13 +1,15 @@
 /**
- * CostGuard ↔ live metering adapter (Focus 1A → Block 6 bridge)
- * Routes subscription-pool reserves through consumeMeteredUsage.
- * Full spend-resolver (single debit path) remains Block 6A.
+ * @deprecated Single-phase metering adapter — FAIL-CLOSED. Use createSpendResolverCostGuardAdapter
+ * (lib/production/creative-cost-guard-spend-adapter) for the refundable two-phase metering path.
+ *
+ * The old single-phase design consumed UsageBucket on reserve and could NOT refund on settleZero —
+ * a silent-billing liability under Law XVI Trava I. Block 6A (spend-resolver) ships the correct
+ * path: reserve holds quota, settle debits UsageBucket, settleZero charges $0. This adapter no
+ * longer consumes anything: reserve refuses, so no path can bill UsageBucket without a refundable
+ * reservation.
  */
 
-import {
-  consumeMeteredUsage,
-  type MeteringDecision,
-} from '@/lib/metering'
+import { type MeteringDecision } from '@/lib/metering'
 import type { PlanLimits } from '@/lib/plans'
 import type { CostGuardLedgerAdapter, CostGuardBlockReason } from './creative-cost-guard'
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -24,10 +26,8 @@ export type MeteringCostGuardAdapter = CostGuardLedgerAdapter & {
 }
 
 /**
- * Adapter that debits weighted tokens from UsageBucket on reserve.
- * Settle/cancel are best-effort no-ops until spend-resolver ships (6A) —
- * reserve already consumed; settleZero cannot refund UsageBucket without ledger.
- * Callers must prefer BYOK or wallet for refundable paths until 6A.
+ * @deprecated Fail-closed — do not use. Single-phase reserve consumed UsageBucket and could not
+ * refund on settleZero. Migrate to createSpendResolverCostGuardAdapter (refundable two-phase).
  */
 export function createMeteringCostGuardAdapter(
   options: MeteringCostGuardOptions,
@@ -42,35 +42,20 @@ export function createMeteringCostGuardAdapter(
       return options.hasByok(userId, byokProfileId)
     },
     async reservePool(input) {
-      try {
-        const limits = await options.getPlanLimits(input.userId)
-        const decision: MeteringDecision = await consumeMeteredUsage({
-          userId: input.userId,
-          limits,
-          cost: { requests: 1, tokens: input.estimatedTokenWeight },
-        })
-        lastDecision = decision
-        log.info('metering_reserve_ok', {
-          userId: input.userId,
-          estimatedTokenWeight: input.estimatedTokenWeight,
-          remainingMonth: decision.remaining?.tokensPerMonth,
-        })
-        return { ok: true, funding: 'usage_bucket' }
-      } catch (err) {
-        const reason: CostGuardBlockReason = 'credits_exhausted'
-        log.warn('metering_reserve_denied', {
-          userId: input.userId,
-          message: err instanceof Error ? err.message : 'denied',
-        })
-        return { ok: false, reason }
-      }
+      const reason: CostGuardBlockReason = 'cost_guard_denied'
+      log.warn('metering_adapter_deprecated_fail_closed', {
+        userId: input.userId,
+        estimatedTokenWeight: input.estimatedTokenWeight,
+        reason,
+        message: 'use createSpendResolverCostGuardAdapter (refundable two-phase spend-resolver)',
+      })
+      return { ok: false, reason }
     },
     async settlePool() {
-      // UsageBucket already incremented on reserve — true settle/refund needs spend-resolver (6A)
+      // Fail-closed: reserve never created a hold — nothing to settle.
     },
     async cancelPool() {
-      // Cannot safely refund UsageBucket without reservation ledger — Block 6A
-      log.warn('metering_cancel_noop_until_spend_resolver', {})
+      // Fail-closed: reserve never created a hold — nothing to refund.
     },
   }
 }

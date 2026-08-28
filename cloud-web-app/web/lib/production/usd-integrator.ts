@@ -530,9 +530,10 @@ export async function runUsdIntegrator(input: {
   })
 
   const primaryExt = input.libraryAssets[0]?.libraryPath.split('.').pop()?.toLowerCase()
-  const primaryFormat = (
-    ['glb', 'gltf', 'fbx', 'obj', 'usd', 'usda', 'usdz'] as const
-  ).includes(primaryExt as ViewportAssetImportFormat)
+  const supportedPrimaryFormats = ['glb', 'gltf', 'fbx', 'obj', 'usd', 'usda', 'usdz'] as const
+  const primaryFormat = supportedPrimaryFormats.includes(
+    primaryExt as (typeof supportedPrimaryFormats)[number],
+  )
     ? (primaryExt as ViewportAssetImportFormat)
     : undefined
 

@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
-import { DOMAIN_MATERIAL_SWATCHES } from '@/lib/design-system/domain-color-presets'
+import { DOMAIN_MATERIAL_SWATCHES } from '@/lib/design-system/domain-color-presets';
 
 // ============================================================================
 // TIPOS
@@ -19,24 +19,17 @@ export interface MaterialNodeData extends Record<string, unknown> {
   properties: MaterialProperty[];
   outputs: { name: string; type: string }[];
   inputs: { name: string; type: string }[];
-  /**
-   * Phase 4 (AAA Studio Deepening Sweep) — commits a property edit back into
-   * this node's `properties` array in the ReactFlow graph state. Optional so
-   * existing node-definition literals (`NODE_DEFINITIONS`) stay valid without
-   * this field; `MaterialEditor.runtime.tsx` injects it when instantiating
-   * nodes so `PropertyInput` edits are no longer dropped on the floor.
-   */
   onPropertyChange?: (propertyName: string, value: unknown) => void;
 }
 
 export type MaterialPort = { name: string; type: string };
 
 export type MaterialNodeDefinition = {
-	label: string;
-	type: string;
-	inputs: MaterialPort[];
-	outputs: MaterialPort[];
-	defaultProperties: MaterialProperty[];
+  label: string;
+  type: string;
+  inputs: MaterialPort[];
+  outputs: MaterialPort[];
+  defaultProperties: MaterialProperty[];
 };
 
 export interface MaterialGraph {
@@ -51,19 +44,20 @@ export interface MaterialGraph {
 // ============================================================================
 
 export const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
-  // OUTPUT
+  // OUTPUT — Master PBR Canonical Node
   'material_output': {
-    label: 'Material Output',
+    label: 'Master PBR Output',
     type: 'output',
     inputs: [
-      { name: 'Albedo', type: 'color' },
+      { name: 'Base Color', type: 'color' },
       { name: 'Metallic', type: 'float' },
       { name: 'Roughness', type: 'float' },
+      { name: 'Specular', type: 'float' },
       { name: 'Normal', type: 'vector3' },
       { name: 'AO', type: 'float' },
-      { name: 'Emission', type: 'color' },
-      { name: 'Height', type: 'float' },
+      { name: 'Emissive', type: 'color' },
       { name: 'Opacity', type: 'float' },
+      { name: 'World Position Offset', type: 'vector3' },
     ],
     outputs: [],
     defaultProperties: [],
@@ -311,4 +305,3 @@ export const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
     ],
   },
 };
-

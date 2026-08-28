@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Letter cm — Ocean viewport / playtest wire Vitest.
  */
 

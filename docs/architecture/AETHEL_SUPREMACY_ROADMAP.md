@@ -4,7 +4,7 @@
 **Status:** **PLANEJAMENTO A.0 100% ENCERRADO.** Execução **A.1** autorizada pelo Chief Architect.  
 **Product path:** `cloud-web-app/web/` (Next 14) + `apps/studio-local/` (Tauri/wgpu)  
 **Companion:** [Blueprint v4.7](.cursor/plans/blueprint_de_supremacia_aaa_a7b2ca8f.plan.md)  
-**Master index (full corpus map):** [AETHEL_STUDIO_SUPREMACY_INDEX.md](AETHEL_STUDIO_SUPREMACY_INDEX.md) **v1.5** — **§ Document Authority**  
+**Master index (full corpus map):** [AETHEL_STUDIO_SUPREMACY_INDEX.md](AETHEL_STUDIO_SUPREMACY_INDEX.md) **v1.7** — **§ Document Authority**
 **Execution playbook:** [AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md](AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md) v1.1  
 **Completeness:** [AETHEL_PLANNING_COMPLETENESS.md](AETHEL_PLANNING_COMPLETENESS.md) **v1.2** — **100% planning**  
 **Executor map (task queue):** [AETHEL_CLAUDE_EXECUTION_MASTER_MAP.md](AETHEL_CLAUDE_EXECUTION_MASTER_MAP.md) **v1.4**  
@@ -13,13 +13,13 @@
 **Game Hub spec:** [AETHEL_GAME_HUB_PLATFORM_GROWTH_SPEC.md](AETHEL_GAME_HUB_PLATFORM_GROWTH_SPEC.md) (Law XIV)  
 **Hardware scalability:** [AETHEL_HARDWARE_SCALABILITY_SPEC.md](AETHEL_HARDWARE_SCALABILITY_SPEC.md) (Law XV)  
 **AI / Creative Fusion:** [AETHEL_AI_FUSION_CREATIVE_SPEC.md](AETHEL_AI_FUSION_CREATIVE_SPEC.md) (Law XVI)  
-**AAA Parity Targets (Onda G Bible):** [AETHEL_AAA_PARITY_TARGETS.md](AETHEL_AAA_PARITY_TARGETS.md) (Micro-Poly, Radiance, Entropy)  
+**AAA Parity Targets (Absolute Parity Bible):** [AETHEL_AAA_PARITY_TARGETS.md](AETHEL_AAA_PARITY_TARGETS.md) (Micro-Poly, Radiance, Entropy + GAS + World Forge + Workforce AI — doctrine #72 + **Absolute Supremacy Elevation — doctrine #73**)
 **Vanguard Technologies (Onda K Bible):** [AETHEL_VANGUARD_TECHNOLOGIES_SPEC.md](AETHEL_VANGUARD_TECHNOLOGIES_SPEC.md) (Neural, 3DGS, Spatial XR)  
 **Universal IDE Forge (Onda L Bible):** [AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md](AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md) (Cursor / v0 / Devin parity class)  
 **Runtime Immunity (Onda M Bible):** [AETHEL_RUNTIME_IMMUNITY_SPEC.md](AETHEL_RUNTIME_IMMUNITY_SPEC.md) (PSO Vault, Zero-Copy IO, WASM Shield)  
 **Studio Pillars S1→S7:** [AETHEL_STUDIO_SUPREMACY_INDEX.md](AETHEL_STUDIO_SUPREMACY_INDEX.md) — Material, World, Animation, MetaSounds, Gameplay, Netcode, Content  
 
-**Execution order (binding):** **Focus 1** (AI brain + real files) → **Focus 2** (renderer + terrain) → **Block 6** (billing) → then Hub/G marketing. Doctrines **#55–#64** + **#66** bind. **Anti-Hype:** Swarm §0a. No new planning unless new competitor surface. **Theoretical docs closed 2026-07-09** — execute via Master Map. Billing-first only on live payment fire. See [Apex Doctrine](AETHEL_APEX_DOCTRINE_AND_EXECUTION_FOCUS.md).
+**Execution order (binding):** **Focus 1** (AI brain + real files) → **Focus 2** (renderer + terrain) → **Block 6** (billing) → **Launch Hard Gate #72** → then Hub/G marketing. Doctrines **#55–#64** + **#66** + **#72** + **#73** bind. **Anti-Hype:** Swarm §0a + **#72 simulation-fidelity amendment** + **#73 supremacy-earned clause** (no supremacy marketing label before acceptance suite green). No new planning unless new competitor surface. **Theoretical docs closed 2026-07-09** — execute via Master Map. Billing-first only on live payment fire. See [Apex Doctrine](AETHEL_APEX_DOCTRINE_AND_EXECUTION_FOCUS.md) + [Index § Absolute Supremacy](AETHEL_STUDIO_SUPREMACY_INDEX.md).
 
 ### Document Authority (this Roadmap is laws — not the task list)
 
@@ -1038,9 +1038,9 @@ flowchart TD
 
 ### Onda K — The Vanguard (Neural, 3DGS Hybrid, Spatial XR)
 
-**Goal:** Next-decade rendering **without regressing** the Onda G nuclear stack (Micro-Poly, Radiance, Entropy). Neural upscale, hybrid Gaussian splats, and WebXR/PCVR ship **after G acceptance** — foundation contracts land in **C–D** so Wedge is not delayed.
+**Goal:** Next-decade rendering **without regressing** the Onda G nuclear stack (Micro-Poly, Radiance, Entropy). Neural upscale, hybrid Gaussian splats, and WebXR/PCVR ship **after G acceptance** — foundation contracts land in **C–D** so the **parallel dev trains are not delayed (public launch gated by #72, not by K)**.
 
-**Prerequisite:** **G.3** (Micro-Poly depth path + Scalable Render Graph stable). **Parallel** with H/I/J — K does **not** block RTv1 Hub or Wedge #1.
+**Prerequisite:** **G.3** (Micro-Poly depth path + Scalable Render Graph stable). **Parallel** with H/I/J — K does **not** block RTv1 Hub or the **parallel dev trains (public launch waits for #72)**.
 
 | Step | Deliverable | Laws / deps |
 |------|-------------|-------------|
@@ -1067,7 +1067,7 @@ flowchart TD
 
 **Goal:** **Universal IDE** — parity class with **Cursor** (code comprehension), **v0 / Lovable** (Agentic UI + live preview), and **Devin** (autonomous sandbox engineering). Extends Law XI (validation gates) and Law XVI (custody + evidence) into general software and web development.
 
-**Prerequisite:** **J.1** (`CreativeBridge` + `CreativeCostGuard`). **Parallel** with H/I/K and **does NOT delay** Wedge #1 or **A.1**.
+**Prerequisite:** **J.1** (`CreativeBridge` + `CreativeCostGuard`). **Parallel** with H/I/K and **does NOT delay** the **parallel dev trains** or **A.1** (public launch waits for #72).
 
 | Step | Deliverable | Pilar | Laws / deps |
 |------|-------------|-------|-------------|
@@ -1107,7 +1107,7 @@ flowchart TD
 
 **Goal:** Eliminate UE5's three chronic player defects via **Rust/wgpu/WASM-native** architecture — **PSO Vault** (shader stutter), **Zero-Copy IO** (loading), **WASM Shield** (script crash isolation).
 
-**Prerequisite:** **Onda C** foundation (Render Graph, Law VII WASM path, async IO hooks). **Parallel** with J/L/K — **does NOT delay** Wedge #1 or **A.1**.
+**Prerequisite:** **Onda C** foundation (Render Graph, Law VII WASM path, async IO hooks). **Parallel** with J/L/K — **does NOT delay** the **parallel dev trains** or **A.1** (public launch waits for #72).
 
 | Step | Deliverable | UE defect targeted | Laws / deps |
 |------|-------------|-------------------|-------------|
@@ -1131,7 +1131,7 @@ flowchart TD
 
 ## Studio Pillars S1→S7 — Production Tool Supremacy (vs UE5 Editor)
 
-**Goal:** Close the **artist/animator/designer/technical artist** gap — where UE5 spends 80% of studio time. Parallel to Ondas; **S.0 hooks** in A–D; **does NOT delay** Wedge.
+**Goal:** Close the **artist/animator/designer/technical artist** gap — where UE5 spends 80% of studio time. Parallel to Ondas; **S.0 hooks** in A–D; **does NOT delay** the **parallel dev trains** (public launch waits for #72).
 
 **Master index:** [AETHEL_STUDIO_SUPREMACY_INDEX.md](AETHEL_STUDIO_SUPREMACY_INDEX.md)
 
@@ -1355,6 +1355,8 @@ flowchart TD
 | 69 | **Render always local** — no pixel-streaming AAA; GPU diversity ≠ cloud COGS |
 | 70 | **Creator pays variable cloud** — cross-save, cook, sandbox, servers via **Starter/Pro/Studio/Enterprise** entitlements or UsageBucket |
 | 71 | **Hub launch 2k impressions = platform CAC** — Lane C Promoted = Coins only |
+| 72 | **Launch Hard Gate (2026-08-16)** — annuls "Indie Web first" and 50% partial parity; public launch locked until **100%+ holistic UE5 parity** — P1 Rendering (G.3 + G.% = 100) + P2 GAS Rust/Zero-Copy (S5/S6) + P3 World Forge density (S2) + P4 Workforce AI parallel (J/L) — all acceptance-green **together** |
+| 73 | **Absolute Supremacy Mandate (2026-08-16)** — 100% parity (#72) is the **floor**, 100%+ supremacy is the **ceiling**; absorb every competitor strength (UE, Cursor, v0/Devin, Meshy/Tripo/Luma, Roblox, Steam/Epic, Stripe, Runway/Veo) + supersede **on user hardware** (Law XV); **Deepen & Robustify register S-01..S-10** binds via Master Map; see Index § Absolute Supremacy Mandate |
 
 ---
 

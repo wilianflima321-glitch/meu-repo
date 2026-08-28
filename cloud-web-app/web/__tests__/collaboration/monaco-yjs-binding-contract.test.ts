@@ -9,9 +9,9 @@ function read(path: string) {
 }
 
 describe('native Monaco Yjs binding contract', () => {
-  const bindingHook = read('cloud-web-app/web/components/ide/fullscreen/useNativeMonacoYjsBinding.ts')
-  const canvas = read('cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorCanvas.tsx')
-  const realtimeHook = read('cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts')
+  const bindingHook = read('cloud-web-app/packages/ide-ui/fullscreen/useNativeMonacoYjsBinding.ts')
+  const canvas = read('cloud-web-app/packages/ide-ui/fullscreen/WorkbenchEditorCanvas.tsx')
+  const realtimeHook = read('cloud-web-app/packages/ide-ui/fullscreen/useWorkbenchRealtimeCollaboration.ts')
   const yjsModule = read('cloud-web-app/web/lib/yjs-collaboration.ts')
 
   it('uses y-monaco as the primary document binding for production editor surfaces', () => {

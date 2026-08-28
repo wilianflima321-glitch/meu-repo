@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Check } from 'lucide-react';
 
 type OnboardingStep = 'intro' | 'kyc' | 'bank' | 'tax' | 'complete';
 
@@ -27,7 +28,7 @@ function StepIndicator({ current }: { current: OnboardingStep }) {
                 : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
             }`}
           >
-            {i < idx ? '✓' : i + 1}
+            {i < idx ? <Check className="h-3.5 w-3.5 stroke-[2.5]" /> : i + 1}
           </div>
           <span className={`hidden text-xs sm:block ${i === idx ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
             {step.label}
@@ -45,9 +46,11 @@ export default function PayoutSetupPage() {
   const [step, setStep] = useState<OnboardingStep>('intro');
   const [loading, setLoading] = useState(false);
   const [stripeUrl, setStripeUrl] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const startStripeOnboarding = async () => {
     setLoading(true);
+    setErrorMsg(null);
     try {
       const res = await fetch('/api/marketplace/stripe/onboard', {
         method: 'POST',
@@ -58,9 +61,11 @@ export default function PayoutSetupPage() {
       if (data.url) {
         setStripeUrl(data.url);
         window.location.href = data.url;
+      } else if (data.error) {
+        setErrorMsg(data.error);
       }
     } catch {
-      alert('Failed to start Stripe onboarding. Please try again.');
+      setErrorMsg('Failed to start Stripe onboarding. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,6 +82,12 @@ export default function PayoutSetupPage() {
           Earn 70% of every sale. Payouts via Stripe Connect — supports 40+ countries.
         </p>
       </header>
+
+      {errorMsg && (
+        <div className="mb-6 rounded-lg border border-red-500/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+          {errorMsg}
+        </div>
+      )}
 
       <StepIndicator current={step} />
 
@@ -175,8 +186,8 @@ export default function PayoutSetupPage() {
 
         {step === 'complete' && (
           <div className="space-y-4 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-600/20 text-3xl">
-              ✓
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]">
+              <Check className="h-8 w-8 stroke-[2.5]" />
             </div>
             <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Payout Setup Complete!</h2>
             <p className="text-sm text-[var(--aethel-text-secondary)]">

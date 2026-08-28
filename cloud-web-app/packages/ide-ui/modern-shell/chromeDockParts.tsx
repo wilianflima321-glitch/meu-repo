@@ -200,16 +200,36 @@ interface StatusMetricProps {
   icon: React.ReactNode;
   label: string;
   title?: string;
+  onClick?: () => void;
 }
 
-export function StatusMetric({ icon, label, title }: StatusMetricProps) {
+export function StatusMetric({ icon, label, title, onClick }: StatusMetricProps) {
+  const content = (
+    <>
+      {icon}
+      <span>{label}</span>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        title={title ?? label}
+        onClick={onClick}
+        className="flex items-center gap-1.5 rounded px-1.5 py-0.5 transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
+      >
+        {content}
+      </button>
+    );
+  }
+
   return (
     <div
       title={title ?? label}
-      style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'], cursor: title ? 'help' : 'default' }}
+      className={`flex items-center gap-1.5 ${title ? 'cursor-help' : 'cursor-default'}`}
     >
-      {icon}
-      <span>{label}</span>
+      {content}
     </div>
   );
 }

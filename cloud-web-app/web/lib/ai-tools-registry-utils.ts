@@ -5,6 +5,8 @@ export type ToolExecutionContext = {
   enforceAgentScope?: boolean
   /** When true, mutating tools route through enforced tool-bus governance. */
   enforceToolBus?: boolean
+  /** Mini-IA / simple creative UX — allowlist enforce on tool dispatch. */
+  miniIa?: boolean
 }
 
 export function getContext(params: Record<string, unknown>): ToolExecutionContext {
@@ -18,10 +20,14 @@ export function getContext(params: Record<string, unknown>): ToolExecutionContex
   const agent = typeof contextRecord.agent === 'string' ? contextRecord.agent.trim() : undefined
   const enforceAgentScope = contextRecord.enforceAgentScope === true
   const enforceToolBus = contextRecord.enforceToolBus === true
+  const miniIa =
+    contextRecord.miniIa === true ||
+    contextRecord.callerSurface === 'mini-ia' ||
+    params.__aethelMiniIa === true
   if (!userId) {
     throw Object.assign(new Error('MISSING_USER'), { code: 'MISSING_USER' })
   }
-  return { userId, projectId, agent, enforceAgentScope, enforceToolBus }
+  return { userId, projectId, agent, enforceAgentScope, enforceToolBus, miniIa }
 }
 
 export function getStringParam(params: Record<string, unknown>, key: string, fallback = ''): string {

@@ -122,10 +122,12 @@ function parseAdvancedChatError(raw: string, status: number): AdvancedChatReques
           : raw || `Request failed with HTTP ${status}.`
     const capability = typeof data?.capability === 'string' ? data.capability : undefined
     const capabilityStatus = typeof data?.capabilityStatus === 'string' ? data.capabilityStatus : undefined
-    const metadata =
-      typeof data?.metadata === 'object' && data.metadata !== null
-        ? { ...(data.metadata as Record<string, unknown>), quotaBody: data }
-        : ({ quotaBody: data } as Record<string, unknown>)
+    const metadata: Record<string, unknown> = {
+      ...(typeof data?.metadata === 'object' && data.metadata !== null
+        ? (data.metadata as Record<string, unknown>)
+        : {}),
+      quotaBody: data,
+    }
     const setupUrl =
       typeof data?.setupUrl === 'string'
         ? data.setupUrl

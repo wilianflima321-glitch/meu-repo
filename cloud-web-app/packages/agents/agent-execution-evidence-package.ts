@@ -6,7 +6,7 @@ import {
   validateAgentRuntimeSpinePlan,
   type AgentRuntimeSpinePlan,
 } from './agent-runtime-spine'
-import type { AgentType } from '../../web/lib/agent-orchestrator'
+import type { AgentType } from './runtime/agent-roles'
 
 export const AGENT_EXECUTION_EVIDENCE_PACKAGE_CAPABILITY = 'AETHEL_AGENT_EXECUTION_EVIDENCE_PACKAGE'
 

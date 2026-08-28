@@ -10,7 +10,7 @@ import {
 } from '@/lib/production/agent-read-receipts'
 import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
 import { readResearchIntelligencePacketFromSettings } from '@/lib/production/research-intelligence-bridge'
-import { CAPABILITY, RUN_SOURCE, type ApplyBody, type ApplyChangeInput, type PreparedApplyChange } from './types'
+import { CAPABILITY, RUN_SOURCE, type ApplyBody, type ApplyChangeInput } from './types'
 
 export type ApplyAgentGuardsResult =
   | {
@@ -21,16 +21,33 @@ export type ApplyAgentGuardsResult =
     }
   | { ok: false; response: NextResponse }
 
+/**
+ * Normalize a raw requested filePath into the same virtual-path shape the scope
+ * enforcement, read-receipt and surface-lock consumers expect (leading slashes
+ * stripped, backslashes normalized). This guard runs BEFORE the L.5 preflight
+ * loop so cheap, deterministic gates (scope manifest 428, read receipts 428,
+ * surface locks) fail fast without burning an in-memory typecheck on requests
+ * that can never be applied.
+ */
+function deriveTargetPaths(requestedChanges: ApplyChangeInput[]): string[] {
+  return requestedChanges
+    .map((change) => change.filePath ?? '')
+    .map((path) => path.replace(/\\/g, '/').replace(/^\/+/, '').trim())
+    .filter(Boolean)
+}
+
 export async function enforceAgentApplyGuards(params: {
   userId: string
   projectId: string
   runId: string
   body: ApplyBody
   requestedChanges: ApplyChangeInput[]
-  preparedChanges: PreparedApplyChange[]
   enforceAgentScope: boolean
 }): Promise<ApplyAgentGuardsResult> {
-  const { userId, projectId, runId, body, requestedChanges, preparedChanges, enforceAgentScope } = params
+  const { userId, projectId, runId, body, requestedChanges, enforceAgentScope } = params
+  const targetPaths = deriveTargetPaths(requestedChanges)
+  const primaryPath = targetPaths[0] ?? ''
+
   const handoff = await loadAgentHandoffContext({
     userId,
     projectId,
@@ -38,17 +55,16 @@ export async function enforceAgentApplyGuards(params: {
     requestedAgent: body.agent,
     promptText: requestedChanges.map((change) => `${change.filePath ?? ''}
 ${change.language ?? ''}`).join('\n'),
-    filePath: preparedChanges[0]?.virtualPath,
+    filePath: primaryPath,
   })
 
   const scopeDecision = evaluateAgentApplyScope({
     packet: handoff.packet,
-    virtualPaths: preparedChanges.map((change) => change.virtualPath),
+    virtualPaths: targetPaths,
     enforceAgentScope,
     broadEdit: requestedChanges.length > 1,
-    pathModifiedAt: Object.fromEntries(
-      preparedChanges.map((change) => [change.virtualPath, change.lastModified])
-    ),
+    // No per-change mtimes are available pre-preflight; the manifest's own
+    // owned-surface lastModified is authoritative for stale detection.
   })
 
   if (!scopeDecision.allowed) {
@@ -57,7 +73,7 @@ ${change.language ?? ''}`).join('\n'),
       capability: CAPABILITY,
       userId,
       projectId,
-      filePath: preparedChanges[0]?.virtualPath || 'agent-scope',
+      filePath: primaryPath || 'agent-scope',
       outcome: 'blocked',
       metadata: {
         reason: scopeDecision.code,
@@ -100,7 +116,7 @@ ${change.language ?? ''}`).join('\n'),
 
         return evaluateAgentReadinessForApply({
           agent: handoff.agent,
-          targetPaths: preparedChanges.map((change) => change.virtualPath),
+          targetPaths,
           enforceReadReceipts: true,
           manifest: readRepositoryCartographyManifestFromSettings(project?.settings),
           researchPacket: readResearchIntelligencePacketFromSettings(project?.settings),
@@ -115,7 +131,7 @@ ${change.language ?? ''}`).join('\n'),
       capability: CAPABILITY,
       userId,
       projectId,
-      filePath: preparedChanges[0]?.virtualPath || 'agent-read-receipts',
+      filePath: primaryPath || 'agent-read-receipts',
       outcome: 'blocked',
       metadata: {
         reason: readReceiptDecision.code,
@@ -149,7 +165,7 @@ ${change.language ?? ''}`).join('\n'),
         projectId,
         agent: handoff.agent,
         ownerUserId: userId,
-        paths: preparedChanges.map((change) => change.virtualPath),
+        paths: targetPaths,
         source: 'apply',
         reason: CAPABILITY,
         runId,
@@ -162,7 +178,7 @@ ${change.language ?? ''}`).join('\n'),
       capability: CAPABILITY,
       userId,
       projectId,
-      filePath: preparedChanges[0]?.virtualPath || 'agent-surface-lock',
+      filePath: primaryPath || 'agent-surface-lock',
       outcome: 'blocked',
       metadata: {
         reason: surfaceLockDecision.code,

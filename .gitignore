@@ -69,6 +69,7 @@ data.json
 *.patch
 *.bundle
 build-output*.txt
+cloud-web-app/web/temp/
 
 # Copilot/agent chat artifacts
 .zencoder/

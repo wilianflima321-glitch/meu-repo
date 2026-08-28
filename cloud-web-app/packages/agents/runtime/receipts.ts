@@ -1,4 +1,4 @@
-import type { AgentType } from '../../../web/lib/agent-orchestrator'
+import type { AgentType } from './agent-roles'
 import type { AgentRuntimeReceipt } from './types'
 
 export function createAgentRuntimeReceipt(input: Omit<AgentRuntimeReceipt, 'id'> & { id?: string }): AgentRuntimeReceipt {

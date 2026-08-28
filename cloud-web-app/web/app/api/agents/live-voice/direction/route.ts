@@ -14,6 +14,7 @@ import {
   LIVE_VOICE_HONESTY,
   runLiveVoiceDirectionTurn,
 } from '@/lib/production/live-voice-operator'
+import { expandJarvisIntent } from '@/lib/ai/neural-intent-protocol'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 export const runtime = 'nodejs'
@@ -50,10 +51,12 @@ export async function POST(request: NextRequest) {
 
     demoLedger.grant(user.userId, 100_000)
 
+    const expansion = expandJarvisIntent(directionText, { mapName: projectId })
+
     const result = await runLiveVoiceDirectionTurn({
       projectId,
       userId: user.userId,
-      directionText,
+      directionText: expansion.humanResponse,
       voiceId: body.voiceId,
       sessionId: body.sessionId,
       planId: body.planId ?? 'pro',
@@ -97,6 +100,10 @@ export async function POST(request: NextRequest) {
       duplexWebRtcStatus: LIVE_VOICE_DUPLEX_WEBRTC_SHIP_STATUS,
       executionLane: LIVE_VOICE_CORE_LANE,
       evidenceKinds: result.ledger.events.map((e) => e.kind),
+      nimpStream: expansion.nimpStream,
+      intentLabel: expansion.packet.intentLabel,
+      instructionCount: expansion.packet.instructions.length,
+      estimatedExecutionMs: expansion.packet.estimatedExecutionMs,
     })
   } catch (error) {
     log.error('live_voice_direction_failed', error instanceof Error ? error : new Error(String(error)))

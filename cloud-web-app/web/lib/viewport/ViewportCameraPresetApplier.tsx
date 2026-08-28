@@ -4,6 +4,7 @@
 
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
+import type { PerspectiveCamera } from 'three'
 import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 
 export { VIEWPORT_CAMERA_PRESETS } from '@/components/viewport/viewport-camera-presets'
@@ -44,3 +45,34 @@ export function CameraPresetApplier({
 
   return null
 }
+
+export function CameraBookmarkApplier() {
+  const { camera, invalidate } = useThree()
+
+  useEffect(() => {
+    // Dynamic import safety for Zustand subscriber inside R3F fiber canvas
+    const { useViewportSceneStore } = require('@/lib/stores/viewport-scene-store')
+    const unsubscribe = useViewportSceneStore.subscribe(
+      (state: any) => state.cameraJumpRequest,
+      (jumpReq: any) => {
+        if (!jumpReq) return
+        const state = useViewportSceneStore.getState()
+        const bookmark = state.cameraBookmarks?.[jumpReq.slot]
+        if (!bookmark) return
+
+        camera.position.set(bookmark.position[0], bookmark.position[1], bookmark.position[2])
+        camera.lookAt(bookmark.target[0], bookmark.target[1], bookmark.target[2])
+        if (bookmark.fov && 'fov' in camera) {
+          ;(camera as PerspectiveCamera).fov = bookmark.fov
+        }
+        camera.updateProjectionMatrix()
+        invalidate()
+      }
+    )
+
+    return () => unsubscribe()
+  }, [camera, invalidate])
+
+  return null
+}
+

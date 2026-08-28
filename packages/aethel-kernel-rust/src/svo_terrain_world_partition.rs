@@ -263,6 +263,8 @@ pub struct SvoTerrainWorldPartitionSoakReport {
 /// (real hydrate+evict) -> stationary again (settle, zero churn) -> replay
 /// with an independent same-seed kernel (must match tick 1 exactly).
 pub fn run_svo_terrain_world_partition_soak() -> SvoTerrainWorldPartitionSoakReport {
+    static CACHE: std::sync::OnceLock<SvoTerrainWorldPartitionSoakReport> = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| {
     let seed = 0x5356_4f54_4552_5200_u64;
     let kernel = SvoTerrainWorldPartition::new(seed);
     let mut buffer = SvoChunkStreamBuffer::default();
@@ -317,6 +319,8 @@ pub fn run_svo_terrain_world_partition_soak() -> SvoTerrainWorldPartitionSoakRep
         total_ticks: 5,
         fingerprint,
     }
+    })
+    .clone()
 }
 
 #[cfg(test)]

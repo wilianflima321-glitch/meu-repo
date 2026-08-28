@@ -23,10 +23,38 @@ Law IV mandates **one spatial audio core** + **MetaSounds compiler**. Today `Sou
 |------|--------|
 | `spatial-audio-manager-core.ts` | REAL (423 LoC) |
 | Occlusion | partial unwired |
-| MetaSounds compiler | **AUSENTE** |
+| MetaSounds compiler (web) | **AUSENTE** (Web Audio DAG still open) |
+| **Desktop DSP substrate (Rust kernel)** | **REAL — shipped** (see register below) |
 | `SoundCueEditor` | UI + play-log |
 | VS `audio:play` | stub |
 | Generative ingest (Law IX) | HTTP REAL; agent stub |
+
+---
+
+## Shipped desktop kernels (2026-08-14kc reconciliation)
+
+The desktop Rust kernel now carries a **real, soak-gated Law IV substrate** that this
+spec's "State today" previously did not reference — reconciled here (ledger-vivo). Each
+kernel ships a distinct soak-gated readiness probe with `*_aaa_ready` **HELD false**
+(no full UE MetaSounds / MetaHuman-class AAA claim):
+
+| Kernel (letter) | Module | Probe | Evidence |
+|------------------|--------|-------|----------|
+| **jx** | `metasounds_dsp_compiler` | `metasoundsDspReady` | real 48 kHz DSP graph VM (poly-blep + RBJ + modal + granular + FFT conv + Kelly-Lochbaum + Lighthill + JSON graph) |
+| **jx2** | `metasounds_dsp_compiler` | `hybridExportReady` | SIMD FFT convolution + Bouncer 16-bit PCM + 3-mode hybrid export + SidechainDucker/BusTree |
+| **ka** | `acoustic_raytracing_solver` | `acousticRaytracingSolverReady` | octave-band absorption, sonic raycast, knife-edge diffraction, bounded IR, voice virtualization |
+| **kb** | `sound_physics_duplex` | `soundPhysicsDuplexReady` | blast energy → impedance overpressure → real muscle PD + LBM dust + Beer–Lambert extinction |
+| **kc** | `facial_performance` | `facialPerformanceReady` | spectral frame → phoneme → viseme → vocal-muscle → micro-saccade gaze (20-80 Hz) + Lux SSS + multilingual retarget |
+| **ej** | `fm_additive_synthesis` | `fmAdditiveSynthesisReady` | physical collision → FM/additive audio buffer |
+| **ei** | `acoustic_reverb_geometry` | `acousticReverbGeometryReady` | SDF bounces → RT60 + early reflections |
+| **ef** | `acoustic_raytracing_echo` | `acousticRaytracingEchoReady` | discrete echo tap physics |
+| **ex** | `sdf_audio_raymarching` | `sdfAudioRaymarchingReady` | SDF occlusion raymarch over WorldSoA |
+
+Studio-local wires: `kernel_metasounds_dsp_compiler_wire`, `kernel_acoustic_raytracing_solver_wire`,
+`kernel_sound_physics_duplex_wire`, `kernel_facial_performance_wire`, `kernel_fm_additive_synthesis_wire`,
+`kernel_acoustic_reverb_geometry_wire` — Tauri IPC, 2 cmds each. All kernel tests green
+(current round kc: **1028/1028**); studio `cargo check --lib` + `cargo clippy -- -D warnings` clean.
+`metasounds_aaa_ready: false` (full UE MetaSounds parity HELD) — the web compiler remains **AUSENTE**.
 
 ---
 

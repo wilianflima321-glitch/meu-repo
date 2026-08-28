@@ -1,7 +1,7 @@
 /**
  * J.4 VectorIndex — shared types (Law XVI / L.12 foundation).
- * Store: SQLite (node:sqlite). Similarity: JS cosine fallback (PARTIAL).
- * Native sqlite-vec extension = HELD until package+loadExtension soak lands.
+ * Store: SQLite (node:sqlite). Native sqlite-vec vec0 when probe-certified;
+ * JS cosine fallback when package/ABI/OS soak fails.
  */
 
 export type VectorEmbedProviderKind = 'local-hash' | 'byok-cloud'
@@ -42,6 +42,8 @@ export interface VectorIndexStats {
   /** Honest: true only when native sqlite-vec load proven */
   sqliteVecExtension: boolean
   sqliteVecStatus: 'available' | 'held'
+  /** Active retrieval backend for this project DB */
+  annBackend: 'sqlite-vec-vec0' | 'js-cosine'
   watcherActive: boolean
 }
 

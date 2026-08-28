@@ -91,13 +91,14 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const meshRef = useRef<THREE.Mesh | null>(null);
+  const [meshType, setMeshType] = useState<'sphere' | 'box' | 'cylinder' | 'torus'>('sphere');
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     // Setup scene
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a);
+    scene.background = new THREE.Color(0x0a0a0f);
     sceneRef.current = scene;
 
     // Camera
@@ -116,10 +117,10 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
     rendererRef.current = renderer;
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
 
@@ -144,6 +145,19 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
     };
   }, []);
 
+  // Switch geometry
+  useEffect(() => {
+    if (!meshRef.current) return;
+    let geom: THREE.BufferGeometry;
+    if (meshType === 'box') geom = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+    else if (meshType === 'cylinder') geom = new THREE.CylinderGeometry(0.8, 0.8, 1.6, 32);
+    else if (meshType === 'torus') geom = new THREE.TorusKnotGeometry(0.65, 0.22, 64, 16);
+    else geom = new THREE.SphereGeometry(1, 64, 64);
+
+    meshRef.current.geometry.dispose();
+    meshRef.current.geometry = geom;
+  }, [meshType]);
+
   // Update material when it changes
   useEffect(() => {
     if (meshRef.current) {
@@ -152,14 +166,53 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
   }, [material]);
 
   return (
-    <div className="absolute right-4 top-20 bg-[var(--aethel-surface-secondary)] rounded-lg p-3 shadow-xl">
-      <h3 className="text-[var(--aethel-text-primary)] font-medium mb-2">Preview</h3>
-      <canvas ref={canvasRef} className="rounded" />
-      <div className="mt-2 space-y-1">
-        <button type="button" className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded">
-          Export GLSL
+    <div className="absolute right-4 top-20 w-72 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)] p-4 shadow-[var(--aethel-shadow-xl)] backdrop-blur-xl z-20">
+      {/* Header with WGSL status badge */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--aethel-text-primary)]">
+          PBR Viewport
+        </h3>
+        <span className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_12%,transparent)] px-2 py-0.5 font-mono text-[9px] font-bold text-[var(--aethel-neon-cyan)] shadow-sm">
+          WGSL: 60 FPS
+        </span>
+      </div>
+
+      {/* 3D Preview Canvas */}
+      <div className="overflow-hidden rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] shadow-inner">
+        <canvas ref={canvasRef} className="w-full aspect-square" />
+      </div>
+
+      {/* Mesh switcher pills */}
+      <div className="mt-3 flex gap-1 justify-between">
+        {(['sphere', 'box', 'cylinder', 'torus'] as const).map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => setMeshType(type)}
+            aria-pressed={meshType === type}
+            className={`flex-1 rounded-lg border py-1 text-[10px] font-semibold capitalize transition ${
+              meshType === type
+                ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+                : 'border-[var(--aethel-border-subtle)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
+            }`}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+
+      {/* Action buttons */}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] py-2 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)]"
+        >
+          Export WGSL
         </button>
-        <button type="button" className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded">
+        <button
+          type="button"
+          className="rounded-xl bg-[var(--aethel-primary)] py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[var(--aethel-primary-light)]"
+        >
           Save Material
         </button>
       </div>

@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-06-26T12:29:43.450Z`
+- Generated at: `2026-08-26T17:42:26.905Z`
 - Scope: `app/`, `components/`
-- Files scanned: `1467`
+- Files scanned: `1490`
 
 ## Summary
 
@@ -10,7 +10,7 @@
 - `admin-light-theme-tokens` (high): 0
 - `admin-status-light-tokens` (high): 0
 - `blocking-browser-dialogs` (medium): 0
-- `not-implemented-ui` (info): 0
+- `not-implemented-ui` (info): 1
 - `deprecated-surface-usage` (medium): 0
 - `frontend-workspace-route-usage` (high): 0
 - `legacy-editor-shell-usage` (high): 0
@@ -51,9 +51,11 @@
 
 - Metric ID: `not-implemented-ui`
 - Severity: `info`
-- Total matches: `0`
+- Total matches: `1`
 
-- No matches
+| File | Matches |
+| --- | ---: |
+| `app/api/runtime/quant-finance-honesty/route.ts` | 1 |
 
 ## Deprecated surface references (_deprecated)
 

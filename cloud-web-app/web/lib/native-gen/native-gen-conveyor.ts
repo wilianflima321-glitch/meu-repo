@@ -41,6 +41,10 @@ import {
   paintHeatDiffusionSkinWeights,
   type HeatDiffusionSkinResult,
 } from '@/lib/native-gen/heat-diffusion-skin'
+import {
+  bindCreativeQualityTier,
+  type CreativeQualityTierBinding,
+} from '@/lib/production/creative-quality-tier-binding'
 
 const log = createComponentLogger('native-gen-conveyor')
 
@@ -63,6 +67,17 @@ export interface NativeGenConveyorInput {
   maxHulls?: number
   /** Skip ONNX submit (tests focusing on mesh path). */
   skipOnnx?: boolean
+  /**
+   * Letter cq — CapScore → fidelity band cook budget bind (Law XV + XVI).
+   * When provided the conveyor binds the creative cook budget (maxTrisHint /
+   * lodCascadeDepth / textureEdgePx) into the mesh path. Fail-closed when the
+   * bind refuses (missing CapScore, no cloud lane).
+   */
+  qualityTier?: {
+    capabilityScore?: number | null
+    preferCloudCook?: boolean
+    ignoreCapabilityScore?: boolean
+  }
 }
 
 export interface NativeGenConveyorResult {
@@ -85,6 +100,13 @@ export interface NativeGenConveyorResult {
   instantMeshesParityReady: false
   tripoLocalParityReady: false
   notes: string[]
+  /**
+   * Letter cq — CapScore fidelity band + cook budget bound into this cook
+   * (null when the caller requested a bind and it was refused).
+   */
+  qualityTier?: CreativeQualityTierBinding | null
+  /** Letter cq — quality-tier denial reason when the bind refused the cook. */
+  tierDeniedReason?: string
 }
 
 export async function runNativeGenConveyor(
@@ -103,6 +125,48 @@ export async function runNativeGenConveyor(
     capabilityScore: score,
     dedicatedVramMb: input.dedicatedVramMb,
   })
+
+  // Letter cq — CapScore → fidelity band cook budget bind. When the caller opts
+  // into a tier bind, fail-closed if the bind refuses (missing CapScore, no cloud
+  // lane). The bound cook budget drives retopo maxTrisHint + LOD cascade depth.
+  let qualityBinding: CreativeQualityTierBinding | null | undefined
+  if (input.qualityTier) {
+    qualityBinding = bindCreativeQualityTier({
+      capabilityScore: input.qualityTier.capabilityScore,
+      preferCloudCook: input.qualityTier.preferCloudCook,
+      ignoreCapabilityScore: input.qualityTier.ignoreCapabilityScore,
+      domain: 'mesh',
+    })
+    if (!qualityBinding.ok) {
+      notes.push(`quality tier refused: ${qualityBinding.reason}`)
+      log.info('native_gen_quality_tier_denied', { rejectCode: qualityBinding.rejectCode })
+      return {
+        letter: NATIVE_GEN_LETTER,
+        pipelineId: NATIVE_GEN_PIPELINE_ID,
+        success: false,
+        zeroUi: gate.zeroUiFallback,
+        blockedReason: qualityBinding.reason,
+        stages,
+        nativeOnnxReady: false,
+        vramPagerReady: false,
+        splatToMeshReady: false,
+        vhacdReady: false,
+        heatDiffusionReady: false,
+        instantMeshesParityReady: false,
+        tripoLocalParityReady: false,
+        notes,
+        qualityTier: null,
+        tierDeniedReason: qualityBinding.reason,
+      }
+    }
+    notes.push(
+      `CapScore ${qualityBinding.capabilityScore} → ${qualityBinding.fidelityBand} (cookPasses=${qualityBinding.cook.cookPasses}, textureEdgePx=${qualityBinding.cook.textureEdgePx}, maxTrisHint=${qualityBinding.cook.maxTrisHint}, lodCascadeDepth=${qualityBinding.cook.lodCascadeDepth})`,
+    )
+    log.info('native_gen_quality_tier_bound', {
+      band: qualityBinding.fidelityBand,
+      lane: qualityBinding.executionLane,
+    })
+  }
 
   let mesh = input.mesh
   let splatToMeshReady = false
@@ -158,7 +222,7 @@ export async function runNativeGenConveyor(
     const retopo = runAutoRetopology({
       mesh,
       targetTriangles: Math.min(
-        10_000,
+        qualityBinding && qualityBinding.ok ? qualityBinding.cook.maxTrisHint : 10_000,
         Math.max(200, Math.floor(mesh.indices.length / 3) || 2000),
       ),
       capabilityScore: score,
@@ -220,8 +284,13 @@ export async function runNativeGenConveyor(
     })
     stages.push({
       stage: 'lod-cascade',
-      status: lod.receipt.status as NativeGenStageStatus,
-      evidence: [...lod.receipt.evidence, 'native-conveyor-bw-lod', 'lod2-far-tier'],
+      status: lod.receipt.status as any,
+      evidence: [
+        ...lod.receipt.evidence,
+        'native-conveyor-bw-lod',
+        'lod2-far-tier',
+        `lodCascadeDepth=${qualityBinding && qualityBinding.ok ? qualityBinding.cook.lodCascadeDepth : 3}`,
+      ],
     })
     lods = lod.lods
     mesh = lod.lods[0]?.mesh ?? mesh
@@ -361,6 +430,7 @@ export async function runNativeGenConveyor(
     instantMeshesParityReady: false,
     tripoLocalParityReady: false,
     notes,
+    qualityTier: qualityBinding,
   }
 }
 

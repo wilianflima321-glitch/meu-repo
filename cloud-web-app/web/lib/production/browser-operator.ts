@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AI-v1-f / J.8 — BrowserOperator CORE
  * Evidence-backed web research: governed allowlisted fetch/snapshot →
  * browser-operator-safety → CreativeBridge CostGuard → evidence ledger → Nexus.

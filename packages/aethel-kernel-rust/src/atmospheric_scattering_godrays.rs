@@ -733,4 +733,31 @@ mod tests {
         assert_eq!(a.fingerprint, b.fingerprint);
         assert_eq!(a, b);
     }
+
+    #[test]
+    fn beer_lambert_optical_depth_transmittance_formula() {
+        let tau_1 = 1.0_f32;
+        let t_1 = (-tau_1).exp();
+        assert!((t_1 - 0.367_879_44).abs() < 1e-5);
+
+        let tau_2 = 2.0_f32;
+        let t_2 = (-tau_2).exp();
+        assert!(t_2 < t_1);
+        assert!((t_2 - t_1 * t_1).abs() < 1e-5);
+    }
+
+    #[test]
+    fn occluder_slab_containment_invariants() {
+        let slab = OccluderSlab {
+            min: [-1.0, -1.0, -1.0],
+            max: [1.0, 1.0, 1.0],
+            density_mul: 5.0,
+        };
+
+        assert!(slab.contains([0.0, 0.0, 0.0]));
+        assert!(slab.contains([-1.0, 0.5, 0.5]));
+        assert!(slab.contains([1.0, 1.0, 1.0]));
+        assert!(!slab.contains([1.01, 0.0, 0.0]));
+        assert!(!slab.contains([0.0, -2.0, 0.0]));
+    }
 }

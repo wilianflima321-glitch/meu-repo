@@ -228,3 +228,86 @@ Before coding any Block:
 | Date | Ver | Change |
 |------|-----|--------|
 | 2026-07-09 | 1.0 | Critique×plan×block matrix; UX/RB/MK gates; journeys; plan-by-plan debts |
+
+
+---
+
+## Adendo Dual-Mode 2026-08-22 (gates para o executor UI)
+
+Novos gates UX-G/UX-M para o modo dual (auditoria completa no UNIVERSAL_IDE_FORGE_SPEC - secao Auditoria UI/UX 2026-08-22):
+
+- **UX-G-DM1**: toggle Canvas<->Monaco em <150ms percebidos, ZERO context loss (canvas singleton). Falha = gate falho.
+- **UX-G-DM2**: 60fps no viewport com chat em streaming + compilacao em background (medido, nao estimado).
+- **UX-G-DM3**: toda acao de IA tem preview fantasma + undo atomico (Ctrl+Z) no canvas E no Monaco.
+- **UX-G-DM4**: foco nunca roubado: usuario digitando > IA adia; Esc sempre retorna ao escopo anterior.
+- **UX-G-DM5**: sem GPU/sem internet/sem IA = fluxo manual completo, sem dead-ends (rota offline + LocalAssetDepot + CapScore tier honesto).
+- **UX-G-DM6**: uma unica casca dual-mode; areas legadas consolidadas; nenhum painel novo sem justificativa (UI discipline).
+
+---
+
+## Gates UX-G-DM7..DM26 (sistemas de usuario, 2026-08-22)
+
+Detalhes na secao I do AETHEL_UNIVERSAL_IDE_FORGE_SPEC (Auditoria UI/UX 2026-08-22, secoes H/I/K):
+
+- UX-G-DM7: FTUE - primeiro asset na cena em <= 2 min sem ajuda.
+- UX-G-DM8: Command palette - qualquer acao em <= 2 teclas.
+- UX-G-DM9: Gizmos - transformacao de precisao sem inspector.
+- UX-G-DM10: Outliner - 10k objetos navegaveis sem lag.
+- UX-G-DM11: Inspector - todos os tipos de propriedade + undo por propriedade.
+- UX-G-DM12: Undo universal atomico (cena/inspector/material/timeline).
+- UX-G-DM13: Viewport QoL (vistas ortograficas, bookmarks, F=focus, HUD).
+- UX-G-DM14: Asset browser com thumbnails do engine + drag-drop.
+- UX-G-DM15: Material/Shader Graph com preview (kernel ac como fonte).
+- UX-G-DM16: Sequencer visual (ju/kw backend pronto).
+- UX-G-DM17: AI diff inline por hunk + plano do agente + logs multi-agente.
+- UX-G-DM18: Metros de custo/creditos vivos (Trava I visivel).
+- UX-G-DM19: Colaboracao (presence, comentarios, version history).
+- UX-G-DM20: Acessibilidade (keyboard-first, AA, screen reader, reduced motion).
+- UX-G-DM21: Theming/workspace profiles (densidade, zoom).
+- UX-G-DM22: Performance UX (skeletons, carga prioritaria, cancel).
+- UX-G-DM23: Erro/recuperacao (context loss, unsaved guard, conflitos offline).
+- UX-G-DM24: Desktop nativo (menus, dialogs, GPU terminal TT-01..06, hardware report).
+- UX-G-DM25: Store/marketplace (descoberta, 1-clique, licencas, checkout H.0).
+- UX-G-DM26: i18n PT/EN + Core Web Vitals com budgets + input < 16ms.
+
+---
+
+## Auditoria MD-by-MD de edicao/usabilidade 2026-08-22 (lacunas, unificacoes, exigencia de mercado)
+
+Formato por area: [existe] / [lacunas] / [unificacao exigida] / [gate]. Zero codigo - requisitos para o executor UI (Claude). Backend citado = ja existe no disco.
+
+1. **Game Hub (Law XIV - discovery/reviews/social)** [hub/ + I.5/I.6 F2P tabs] / [lacunas: moderacao de reviews visivel ao autor, paginas de criador, busca ranqueada, wishlist, notificacoes, selo cross-save] / [unificar com marketplace: UMA superficie de descoberta, nao duas] / gate UX-G-MD1: buscar->instalar->jogar em <= 3 acoes.
+
+2. **Commerce/LiveOps (Laws XII-XIII + H.0)** [marketplace/billing/ + RevenueLane 30/70 no backend] / [lacunas: checkout H.0 ainda HELD, coins/backpack UX, refund flow, receipts, clareza de licenca] / [unificar com PAYG: um unico sistema de saldo visivel (coins + credits + wallet)] / gate UX-G-MD2: preco+licenca visiveis ANTES do clique de compra.
+
+3. **PAYG/Wallet ($ meters, spend caps, composer chip)** [spec v1.1 + CostGuard journal duravel] / [lacunas: aviso PROATIVO de budget (nao so passivo), top-up UX, estimativa de custo ANTES de gerar (CostGuard tem o dado, a UI nao mostra), historico de gastos] / [exigir: estimativa de custo obrigatoria antes de toda geracao IA (Trava I visivel)] / gate UX-G-MD3.
+
+4. **Plans canonical (J1-J7)** [UX journeys J1-J7 vinculantes] / [lacuna: nao existe jornada offline/sem-IA (J8 necessario)] / [exigir J8: jornada manual completa sem rede/sem IA, sem dead-ends] / gate UX-G-MD4.
+
+5. **AI Fusion (Law XVI - 3 Travas + custody)** [CreativeBridge + Yjs undo + video scaffold prontos] / [lacunas de UX: preview fantasma de TODA acao IA, painel de aprovacao por lote, indicacao do que a IA ve (context chips), aviso de Trava III quando video->mecanica] / gate UX-G-MD5: nenhuma acao IA aplica sem preview ou apropriacao (definido no DM3/DM17).
+
+6. **Apex Router / Intelligent Routing (Laws #55-58)** [Apex Router + MoA no backend] / [lacuna: transparencia de roteamento ao usuario (qual modelo, por que, custo), gestao de BYOK (chaves, perfis), fallback visivel quando offline] / gate UX-G-MD6: usuario ve modelo+custo ANTES de cada chamada paga.
+
+7. **Apex Fast Swarm (Maestro/MoA/Auto-Heal)** [orquestracao pronta] / [lacuna: painel de squads vivos (planos/status/heal), logs por agente, abort/cancel por squad] / gate UX-G-MD7 (reforca DM17).
+
+8. **Cinematic Director (#63)** [auto_photography kw + cinema_frame_graph] / [lacuna: UI de diretor (sugestoes de camera, storyboard, approve/reject de takes)] / gate UX-G-MD8.
+
+9. **Audio Library-First (#64)** [freesound search + metasounds + sound-cue-models] / [lacuna: browser de audio com preview na cena, edicao de sound cue visual, licencas de foley visiveis] / gate UX-G-MD9.
+
+10. **Hardware Scalability (Law XV + chips)** [CapScore + hardware spec + user pediu criacao de chips/hardware] / [lacuna: relatorio de device amigavel, settings por tier, paleta de criacao de hardware/chips com preview (capacidade existe no motor, superficie nao)] / gate UX-G-MD10.
+
+11. **Studio Pillars S1-S7 (Index + 7 bibles)** [pilares definidos] / [exigir: cada pilar com uma superficie de edicao unica (verificar bibles) - nenhum pilar sem superficie; consolidar sob a casca dual-mode] / gate UX-G-MD11.
+
+12. **Vanguard (Neural/3DGS/XR - Onda K)** [neural-radiance-inference-honesty + webxr-honesty] / [lacuna: viewer 3DGS com honestidade, UX de XR espacial com fallbacks, avisos de suporte] / gate UX-G-MD12.
+
+13. **Runtime Immunity (Onda M)** [spec] / [lacuna: dashboard de imunidade/status amigavel (nao so badges), explicacao do que foi bloqueado] / gate UX-G-MD13.
+
+14. **Margin/Creative/Wallet turns calculator** [calculator spec] / [lacuna: a calculadora deve ser VISIVEL no composer (mix de margin/creditos/turns), nao um doc] / gate UX-G-MD14.
+
+15. **AAA Parity Targets (flags honestos)** [RendererHonestyBadge etc.] / [exigir: pagina de status unica com TODOS os flags (o que e real vs substrate vs HELD) - transparencia total] / gate UX-G-MD15.
+
+16. **Anti-Laziness (LazyInspector #66)** [protocolo interno] / [lacuna: o usuario deve VER a qualidade do plano (chunks, evidencia) - LazyInspector visivel como checklist do plano do agente] / gate UX-G-MD16.
+
+17. **Doc hygiene (unificacao de MDs)** [4 docs de comercio se sobrepoem: Hub/Growth + Commerce + PAYG + Margin-calculator; 2 docs de UX se sobrepoem: Plans J1-J7 + UX master] / [exigir: uma fonte de verdade de UX por dominio (discovery, commerce, AI, editor) - as specs tecnicas ficam, as superficies se unificam; executar na proxima rodada de alinhamento] / gate DOC-H1: nenhuma superficie nova sem apontar a spec unica.
+
+Conclusao MD-by-MD: 16 areas de usuario auditadas; o padrao e uniforme - backend pronto, superficie ausente ou fragmentada. A exigencia unica para o Claude: CADA area acima recebe uma superficie sob a casca dual-mode, com o gate correspondente, e as 4 specs de comercio + 2 de UX viram uma fonte por dominio.

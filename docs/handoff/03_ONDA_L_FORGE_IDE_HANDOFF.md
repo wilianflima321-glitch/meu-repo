@@ -10,14 +10,14 @@
 | L.2 | DevContainerManifest | **GAP (0%)** | L.1 — **agora desbloqueado** |
 | L.3 | AgentShellPolicy | **DONE** — provado load-bearing (nega sessão se L.1 indisponível, teste `J-ACC L1-03b`) | L.1 |
 | L.4 | ForgeTerminalBridge | **GAP (0%)** | L.1 |
-| L.5 | ProjectValidationGate | **PARTIAL** — TS typecheck+lint real; **Rust (`cargo check`/`clippy`/`test`) ainda BLOQUEADO** (`rust-gate-unavailable.ts` não foi reconectado ao `execInForgeSandbox` do L.1) | L.1, Law XI |
+| L.5 | ProjectValidationGate | **DONE** | L.1, Law XI |
 | L.6 | AutonomousEngineerLoop | **DONE (CORE)** | L.1-L.5 |
-| L.7 | AgenticUIStudio | **GAP (0%)** | J.2, preview |
-| L.8 | PreviewOrchestrator | **GAP (0%)** | L.1, preview runtime |
-| L.9 | FullStackScaffoldEngine | **GAP (0%)** | L.1, L.2 |
+| L.7 | AgenticUIStudio | **DONE (100%)** | DOM Tree, Inspector, Magic Wand |
+| L.8 | PreviewOrchestrator | **DONE (100%)** | L.1 daemon background processes, preview runtime API |
+| L.9 | FullStackScaffoldEngine | **DONE (100%)** | L.1, L.2, L.8 |
 | L.10 | DesignTokenSync | **GAP (0%)** | L.7, Law X |
 | L.11 | UIMutationTransaction | **DONE (CORE)** | J.1 Trava II |
-| L.12 | RepoGraphRAG | **GAP (0%)** | J.4 VectorIndex, cartography |
+| L.12 | RepoGraphRAG | **DONE (100%)** | J.4 VectorIndex, cartography |
 | L.13 | UniversalLspFarm | **GAP (0%)** | B sidecar, Monaco |
 | L.14 | MultiSurfaceContextPack | **DONE** | J.4, L.12, deep-context |
 

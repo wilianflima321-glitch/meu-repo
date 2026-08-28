@@ -157,7 +157,7 @@ Rough **engineering-weeks** per milestone for staffing models (1 senior + 1 mid 
 | M IMMUNITY-v1 | 6–8 | Rust IO + WASM |
 | K Vanguard | 8–10 | ONNX + XR |
 
-**Wedge #1** can ship at **A.5 + partial I** without G, K, L, M, or STUDIO-ζ.
+**Launch Hard Gate #72 (doctrine 2026-08-12) supersedes "Wedge #1 ships without G".** No public launch at **A.5 + partial I** without G, K, L, M, STUDIO-ζ — and P2/P3/P4 — acceptance-green **together**. Capability trains still run in parallel; the **launch** waits for the gate.
 
 ---
 

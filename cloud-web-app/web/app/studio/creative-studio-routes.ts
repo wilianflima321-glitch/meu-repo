@@ -1,4 +1,4 @@
-﻿export type CreativeStudioDomain = 'world' | 'film' | 'audio' | 'runtime'
+export type CreativeStudioDomain = 'world' | 'film' | 'audio' | 'runtime'
 export type CreativeStudioGroup = 'world' | 'character' | 'fx' | 'film' | 'logic'
 export type CreativeStudioMaturity = 'BETA' | 'ALPHA'
 

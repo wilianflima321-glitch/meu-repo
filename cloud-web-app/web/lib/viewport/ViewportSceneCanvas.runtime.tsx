@@ -7,7 +7,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Environment, GizmoHelper, GizmoViewport, Grid, Line, OrbitControls } from '@react-three/drei'
 import { EffectComposer, Outline, Selection } from '@react-three/postprocessing'
-import { CameraPresetApplier } from '@/components/viewport/ViewportCameraPresetApplier'
+import { CameraBookmarkApplier, CameraPresetApplier } from '@/components/viewport/ViewportCameraPresetApplier'
 import type { ViewportCameraPreset } from '@/components/viewport/viewport-camera-presets'
 import type {
   AethelViewport3DProps,
@@ -213,6 +213,7 @@ export function ViewportScene({
         focusTarget={focusTarget}
         focusNonce={focusNonce}
       />
+      <CameraBookmarkApplier />
       <AssetDropRaycastBridge onReady={onRaycastReady} />
       <RenderStatsProbe pipelineLabel={fidelity.pipelineLabel} onStats={onRenderStats} />
       <RadianceStudioViewportBridge capabilityScore={capabilityScore} />

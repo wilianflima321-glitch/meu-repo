@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Block 7A.5 — Visual Script port magnetism (critique #11 / IMPROVE-VS-012).
  * Pure geometry helper; ReactFlow uses connectionRadius={20} on the canvas.
  */

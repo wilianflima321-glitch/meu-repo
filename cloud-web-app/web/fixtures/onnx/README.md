@@ -1,4 +1,4 @@
-﻿# ONNX fixtures (letters cu + da)
+# ONNX fixtures (letters cu + da)
 
 Expected soak weight path: `tiny-text-to-3d.onnx` in this directory.
 

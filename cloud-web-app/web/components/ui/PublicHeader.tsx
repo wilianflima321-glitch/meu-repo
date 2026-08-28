@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import { PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
 
-const PRIMARY_HREFS = new Set(['/arcade', '/pricing', '/compare', '/docs'])
+const PRIMARY_HREFS = new Set(['/arcade', '/marketplace', '/pricing', '/compare', '/docs'])
 const PRIMARY_LINKS = PUBLIC_NAV_LINKS.filter((link) => PRIMARY_HREFS.has(link.href))
 const SECONDARY_LINKS = PUBLIC_NAV_LINKS.filter((link) => !PRIMARY_HREFS.has(link.href))
 

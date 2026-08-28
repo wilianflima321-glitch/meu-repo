@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * Letter cb — Honesty badges: native ONNX vs BYOK clay path.

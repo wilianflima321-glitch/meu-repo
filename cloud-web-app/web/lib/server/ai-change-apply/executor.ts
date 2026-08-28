@@ -88,6 +88,21 @@ export async function applyAiChanges(params: {
     return cachedFullAccessGrant
   }
 
+  // Cheap deterministic gates first (scope manifest 428, read receipts 428,
+  // surface locks) so requests that can never be applied fail fast without
+  // burning the expensive L.5 preflight typecheck on each change.
+  const guardDecision = await enforceAgentApplyGuards({
+    userId,
+    projectId,
+    runId,
+    body,
+    requestedChanges,
+    enforceAgentScope,
+  })
+  if (guardDecision.ok === false) return guardDecision.response
+
+  const { readReceiptDecision, surfaceLockDecision } = guardDecision
+
   const preparedChanges: PreparedApplyChange[] = []
   for (const requested of requestedChanges) {
     const prepared = await buildPreparedChange({
@@ -104,19 +119,6 @@ export async function applyAiChanges(params: {
     if (prepared.ok === false) return prepared.response
     preparedChanges.push(prepared.value)
   }
-
-  const guardDecision = await enforceAgentApplyGuards({
-    userId,
-    projectId,
-    runId,
-    body,
-    requestedChanges,
-    preparedChanges,
-    enforceAgentScope,
-  })
-  if (guardDecision.ok === false) return guardDecision.response
-
-  const { readReceiptDecision, surfaceLockDecision } = guardDecision
 
   if (executionMode === 'sandbox') {
     await appendChangeRunLedgerEvent({

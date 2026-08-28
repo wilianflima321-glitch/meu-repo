@@ -6,7 +6,8 @@
  * Pattern mirrors `l9-scaffold-soak.ts`.
  */
 
-import type { E2BRemoteHmrReason, PreviewHmrEngine } from '@/lib/production/e2b-remote-hmr'
+import type { E2BRemoteHmrReason } from '@/lib/production/e2b-remote-hmr'
+import type { PreviewHmrEngine } from '@/lib/preview/vite-hmr-detect'
 
 export const L_ACC_08_BUDGET_MS = 15_000 as const
 /** Minimum measured remote-HMR confirmations before Universal IDE may cite L-ACC-08. */

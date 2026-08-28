@@ -4,6 +4,7 @@ use super::attributes::{AttributeTable, Entity};
 use super::effects::{GameplayCueEvent, GameplayEffectDefinition, GameplayEffectPool};
 use super::tags::{GameplayTagRegistry, TagSetTable};
 
+#[derive(Clone)]
 pub struct GasWorld {
     next_entity: Entity,
     pub attributes: AttributeTable,
@@ -30,6 +31,11 @@ impl GasWorld {
         self.next_entity += 1;
         self.attributes.init_entity(entity, initial_values);
         entity
+    }
+
+    /// Number of entities ever created (next free entity id).
+    pub fn entity_count(&self) -> Entity {
+        self.next_entity
     }
 
     pub fn add_tag(&mut self, entity: Entity, tag: &str) {

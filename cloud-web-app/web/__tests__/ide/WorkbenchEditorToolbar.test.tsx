@@ -2,8 +2,8 @@ import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import WorkbenchEditorToolbar from '../../components/ide/fullscreen/WorkbenchEditorToolbar'
-import type { WorkbenchCollaborationStatus } from '../../components/ide/fullscreen/types'
+import WorkbenchEditorToolbar from '@aethel/ide-ui/fullscreen/WorkbenchEditorToolbar'
+import type { WorkbenchCollaborationStatus } from '@aethel/ide-ui/fullscreen/types'
 import type { RemotePeer } from '../../hooks/useCollaborationAwareness'
 
 function buildStatus(

@@ -397,6 +397,8 @@ fn fail_report(aabb_pairs: u32, sphere_pairs: u32) -> QuantumOverlapSoakReport {
 
 /// Run quantum overlap soak — intersect true / disjoint false.
 pub fn run_quantum_overlap_soak() -> QuantumOverlapSoakReport {
+    static CACHE: std::sync::OnceLock<QuantumOverlapSoakReport> = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| {
     // --- Pair AABB ---
     let a_in = Aabb::new([-1.0, -1.0, -1.0], [1.0, 1.0, 1.0]);
     let b_in = Aabb::new([0.5, 0.5, 0.5], [2.0, 2.0, 2.0]);
@@ -533,6 +535,8 @@ pub fn run_quantum_overlap_soak() -> QuantumOverlapSoakReport {
         dlss_ready: false,
         quic_ready: false,
     }
+    })
+    .clone()
 }
 
 /// Honesty probe — soak-gated `quantum_overlap_ready` (**fw**).

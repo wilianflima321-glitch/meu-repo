@@ -1,6 +1,6 @@
 # Aethel Engine — Hardware Scalability & Dynamic Render Graph Spec
 
-**Version:** 1.3 (Law XV — + Unit Economics alignment)  
+**Version:** 1.4 (Law XV — + Unit Economics alignment + **Absolute Supremacy Elevation, doctrine #73**)
 **Status:** **Binding** — extends **Law V**; formalized as **Law XV — Scalable Fidelity**  
 **Canonical:** [`AETHEL_SUPREMACY_ROADMAP.md`](AETHEL_SUPREMACY_ROADMAP.md) v4.7  
 **Unit economics:** [`AETHEL_UNIT_ECONOMICS_AND_SUBSCRIPTION_ALIGNMENT.md`](AETHEL_UNIT_ECONOMICS_AND_SUBSCRIPTION_ALIGNMENT.md) — **cloud quotas × subscription**
@@ -185,6 +185,17 @@ const BLUEPRINTS: Record<RenderTier, RenderGraphBlueprint> = {
 ## 4. Lei XV — Fidelidade Escalável (Scalable Fidelity)
 
 **Mandato irrevogável:** *Nenhum jogo exportado pela Aethel Engine pode assumir que o jogador possui GPU dedicada. O Render Graph adapta fidelidade visual pelo **Capability Score (0–100)**. Marketing claims seguem tier detectado.*
+
+**Absolute Supremacy Elevation (doctrine #73, binding 2026-08-12 — hardware-first):**
+- Law XV is a **supremacy vector**, not a limitation. Aethel does not merely *scale down* to user hardware — it **over-delivers on every tier**. Enthusiast blueprint = full nuclear stack (RT, bindless, G.% 50+); discrete/entry = rich simulation + baked light + FSR; integrated GPU = rich simulation + baked lightmaps; webgl2/Safari is **never excluded** (Diretoria Decision 2).
+- **Supremacy is measured on the LOWEST supported tier, not the highest.** "Works on my 4090" = **failure** (Index § Absolute Supremacy Mandate #73 + AAA Parity §0.1). A parity-50% UE5 scene must hold **stable** on entry/discrete hardware — not only on enthusiast silicon.
+- **Cloud assist compensates weak local hardware** (§9 cloud quotas): heavy neural/baked passes may degrade to cloud cook **only** when entitlement exists — local-first always, Law VIII airgapped respected.
+- **Supremacy KPI:** the same scene rises in fidelity ceiling with Capability Score across every tier; **no tier ships below "rich + stable"**.
+
+**Rust-first engine supremacy + AI-optimal constraints (binding — Chief Architect directive 2026-08-12):**
+- **The engine IS Rust.** Core identity = the **Rust kernel** (`apps/studio-local/src-tauri/`: wgpu renderer, `physics_kernel`, GPU culling, GAS native) — compiled, memory-safe, zero-GC, fastest-and-best-quality target. Web/webgl2 is a **distribution tier**, never the engine's core identity; no web-demo-first engineering.
+- **Zero demo / zero MVP:** no demo-grade scaffolding, proxy capsules, or play-log placeholders are accepted as engine work. Every engine PR ships **G-readiness + J-readiness** graded (AGENTS.md quality gates), or it is rejected (Law XI).
+- **AI-optimal constraints = quality rails:** the "ideal limitations" are *designed* so the agentic workforce operates at maximum quality — Law XI dual-stack validation gates (TS + Rust), Anti-Laziness protocol (truncation ban, chunk ≤ 300, `settle: 0` on lazy reject), evidence-ledger discipline (no hallucinated claims), S-01 Rust Kernel reachability (76/88 unreachable wires), and the Deepen & Robustify register S-01..S-10. These rails are **features**, not friction — they are what make supreme (not placebo) code the only possible output.
 
 **Wave ownership:** **B.1** (HardwareDetector static) → **C** (ScalableRenderGraph + CullingPolicy) → **D** (FSR + RT enthusiast) → publish **`baked-lighting`** stage (mandatory).
 

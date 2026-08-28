@@ -43,7 +43,6 @@ vi.mock('@/lib/db', () => ({
 }));
 
 import {
-  CreditWallet,
   CreditCheckResult,
   CreditReservation,
   AIOperationType,
@@ -52,6 +51,7 @@ import {
   calculateTokenCost,
   calculateEstimatedCost,
 } from '@/lib/credit-wallet';
+import { CreditWallet } from '@/lib/credit-wallet-legacy';
 import { prisma } from '@/lib/db';
 
 describe('CreditWallet', () => {

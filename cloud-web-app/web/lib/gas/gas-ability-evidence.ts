@@ -53,10 +53,16 @@ function fingerprint(parts: string[]): string {
  */
 function ensureEvidenceWorkerStub(): void {
   if (typeof (globalThis as { Worker?: unknown }).Worker !== 'undefined') return
-  ;(globalThis as { Worker: new (url: string | URL) => { terminate: () => void; postMessage: () => void; onmessage: null } }).Worker =
+  ;(globalThis as {
+    Worker: new (url: string | URL) => {
+      terminate: () => void
+      postMessage: (message?: unknown, transfer?: Transferable[]) => void
+      onmessage: null
+    }
+  }).Worker =
     class {
       onmessage: null = null
-      postMessage(): void {}
+      postMessage(_message?: unknown, _transfer?: Transferable[]): void {}
       terminate(): void {}
       constructor(_url: string | URL) {}
     }

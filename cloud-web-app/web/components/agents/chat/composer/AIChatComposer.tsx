@@ -277,7 +277,10 @@ export function AIChatComposer({
         </details>
       ) : (
         <div className="mt-2 flex items-center justify-between text-[11px] text-[var(--aethel-text-quaternary)]">
-          <span>{modePreset.helper}</span>
+          <div className="flex items-center gap-2">
+            <span>{modePreset.helper}</span>
+            <ComposerCostChip modelId={currentModel} promptText={input} byokActive={isByokEnabledFlag()} />
+          </div>
           <span className="flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[9px] uppercase tracking-[0.08em] text-[var(--aethel-info)]" title="Use Alt+D no Preview para carregar elementos visuais e Blueprints direto no Chat">
              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--aethel-info)]" />
              Visual Diff (Alt+D)

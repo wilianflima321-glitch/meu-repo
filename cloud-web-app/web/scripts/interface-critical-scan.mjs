@@ -11,7 +11,7 @@ const METRICS = [
   {
     id: 'legacy-accent-tokens',
     label: 'Legacy accent tokens (violet/purple/indigo/pink)',
-    regex: /\b(from-violet|from-purple|fuchsia|pink|bg-purple|text-purple|ring-violet|ring-purple|indigo-)\b/g,
+    regex: /\b(from-violet|from-purple|fuchsia|pink|bg-purple|text-purple|ring-violet|ring-purple|(?:from|to|via|bg|text|border|ring|accent)-indigo-)\b/g,
     severity: 'high',
   },
   {

@@ -5,6 +5,7 @@
 
 export * from '@/lib/mesh-quality/types'
 export * from '@/lib/mesh-quality/mesh-topology-metrics'
+export * from '@/lib/mesh-quality/topology-grader'
 export * from '@/lib/mesh-quality/semantic-retopology'
 export * from '@/lib/mesh-quality/delighting-pbr'
 export * from '@/lib/mesh-quality/auto-retopology'

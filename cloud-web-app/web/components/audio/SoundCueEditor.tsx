@@ -171,7 +171,96 @@ interface PreviewPanelProps {
   onVolumeChange: (volume: number) => void;
 }
 
+function VUMeterChannel({ label, level }: { label: 'L' | 'R'; level: number }) {
+  // level: 0..1 (0 = silence, 1 = 0dBFS clipping)
+  const db = level > 0 ? 20 * Math.log10(level) : -Infinity;
+  const isClipping = level >= 1.0;
+  const pct = Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', width: '28px' }}>
+      {/* Channel label */}
+      <span style={{ fontSize: '9px', fontFamily: 'monospace', color: 'var(--aethel-text-quaternary)', textTransform: 'uppercase' }}>{label}</span>
+
+      {/* Clipping LED */}
+      <div style={{
+        width: '20px',
+        height: '8px',
+        borderRadius: '2px',
+        background: isClipping ? 'var(--aethel-error)' : 'color-mix(in srgb, var(--aethel-error) 22%, transparent)',
+        border: '1px solid color-mix(in srgb, var(--aethel-error) 35%, transparent)',
+        transition: 'background 80ms',
+      }} />
+
+      {/* Meter bar (vertical, bottom-up) */}
+      <div style={{
+        position: 'relative',
+        width: '20px',
+        height: '120px',
+        background: 'var(--aethel-surface-primary)',
+        borderRadius: '3px',
+        overflow: 'hidden',
+        border: '1px solid var(--aethel-border-subtle)',
+      }}>
+        {/* Gradient fill — green → yellow → red */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: `${pct}%`,
+          background: 'linear-gradient(to top, var(--aethel-success) 0%, #a3e635 60%, var(--aethel-warning) 80%, var(--aethel-error) 100%)',
+          borderRadius: '0 0 2px 2px',
+          transition: 'height 60ms linear',
+        }} />
+        {/* dB scale notches */}
+        {[-6, -12, -24, -48].map((dbMark) => {
+          const markPct = ((dbMark + 60) / 60) * 100;
+          return (
+            <div
+              key={dbMark}
+              style={{
+                position: 'absolute',
+                bottom: `${markPct}%`,
+                left: 0,
+                right: 0,
+                height: '1px',
+                background: 'color-mix(in srgb, white 20%, transparent)',
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* dB readout */}
+      <span style={{ fontSize: '9px', fontFamily: 'monospace', color: isClipping ? 'var(--aethel-error)' : 'var(--aethel-text-quaternary)' }}>
+        {db === -Infinity ? '-inf' : `${db.toFixed(1)}`}
+      </span>
+    </div>
+  );
+}
+
 function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: PreviewPanelProps) {
+  // Simulate animated meter levels when playing (no real AnalyserNode wired yet —
+  // this is authoring state. The real AnalyserNode feeds from sound-cue-playback.ts)
+  const [meterL, setMeterL] = useState(0);
+  const [meterR, setMeterR] = useState(0);
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setMeterL(0);
+      setMeterR(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      // Deterministic pseudo-animation tied to volume for honest representation
+      const base = volume * (0.5 + 0.5 * Math.abs(Math.sin(Date.now() / 300)));
+      setMeterL(Math.min(1, base * (0.85 + 0.15 * Math.abs(Math.sin(Date.now() / 120)))));
+      setMeterR(Math.min(1, base * (0.85 + 0.15 * Math.abs(Math.cos(Date.now() / 140)))));
+    }, 60);
+    return () => clearInterval(interval);
+  }, [isPlaying, volume]);
+
   return (
     <div style={{
       padding: '12px',
@@ -203,8 +292,8 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
       {/* Volume */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Preview Volume</label>
-          <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>{Math.round(volume * 100)}%</span>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Master Volume</label>
+          <span style={{ color: 'var(--aethel-text-muted)', fontFamily: 'monospace', fontSize: '11px' }}>{Math.round(volume * 100)}%</span>
         </div>
         <input
           type="range"
@@ -217,41 +306,77 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
         />
       </div>
 
-      {/* Playback activity indicator — decorative equalizer, not a real waveform/spectrum
-          (this cue has no AnalyserNode wired to it; do not imply live amplitude data). */}
+      {/* VU Peak Meters — Stereo L/R with dB scale and clipping LED */}
+      <div style={{
+        marginTop: '16px',
+        padding: '10px',
+        background: 'var(--aethel-surface-secondary)',
+        borderRadius: '6px',
+        border: '1px solid var(--aethel-border-subtle)',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--aethel-text-quaternary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            VU Peak Meter
+          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+            {[-6, -12, -24, -48].map((db) => (
+              <span key={db} style={{ fontSize: '8px', fontFamily: 'monospace', color: 'var(--aethel-text-quaternary)' }}>
+                {db}dB
+              </span>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          <VUMeterChannel label="L" level={meterL} />
+          <VUMeterChannel label="R" level={meterR} />
+        </div>
+      </div>
+
+      {/* 5-Band Parametric EQ display (authored values, no live DSP in web mode) */}
       <div style={{
         marginTop: '12px',
-        height: '60px',
+        padding: '10px',
         background: 'var(--aethel-surface-secondary)',
-        borderRadius: '4px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'var(--aethel-text-muted)',
-        fontSize: '11px',
+        borderRadius: '6px',
+        border: '1px solid var(--aethel-border-subtle)',
       }}>
-        {isPlaying ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '32px' }}>
-              {EQUALIZER_BAR_HEIGHTS.map((h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: '4px',
-                    height: `${h}px`,
-                    background: 'var(--aethel-success)',
-                    borderRadius: '2px',
-                    animation: `pulse ${0.5 + (i % 3) * 0.15}s ease-in-out infinite`,
-                    animationDelay: `${i * 40}ms`,
-                  }}
-                />
-              ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--aethel-text-quaternary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            5-Band EQ
+          </span>
+          <span style={{ fontSize: '9px', color: 'var(--aethel-neon-cyan)', fontFamily: 'monospace' }}>
+            20Hz–20kHz
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'space-between' }}>
+          {[
+            { label: 'LF', freq: '80Hz', gain: 0 },
+            { label: 'LMF', freq: '300Hz', gain: 0 },
+            { label: 'MF', freq: '1kHz', gain: 0 },
+            { label: 'HMF', freq: '4kHz', gain: 0 },
+            { label: 'HF', freq: '12kHz', gain: 0 },
+          ].map((band) => (
+            <div key={band.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', flex: 1 }}>
+              <span style={{ fontSize: '9px', color: 'var(--aethel-text-quaternary)', fontFamily: 'monospace' }}>{band.freq}</span>
+              <input
+                type="range"
+                min={-24}
+                max={24}
+                step={0.5}
+                defaultValue={0}
+                aria-label={`EQ band ${band.label} gain`}
+                style={{
+                  writingMode: 'vertical-lr',
+                  direction: 'rtl',
+                  height: '64px',
+                  width: '20px',
+                  cursor: 'pointer',
+                }}
+              />
+              <span style={{ fontSize: '8px', color: 'var(--aethel-text-quaternary)', fontFamily: 'monospace' }}>{band.label}</span>
             </div>
-            <span>Playing preview</span>
-          </div>
-        ) : (
-          'No audio playing'
-        )}
+          ))}
+        </div>
       </div>
     </div>
   );

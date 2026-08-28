@@ -46,7 +46,7 @@ export class MeshletBuilder {
     const meshlets = this.buildMeshlets(vertexBuffer, indexBuffer);
 
     // Construir hierarquia de clusters
-    const clusters = this.buildClusterHierarchy(meshlets, vertexBuffer);
+    const clusters = this.buildClusterHierarchy(meshlets, vertexBuffer, indexBuffer);
 
     return {
       id: crypto.randomUUID(),
@@ -242,7 +242,7 @@ export class MeshletBuilder {
   /**
    * Constrói hierarquia de clusters para LOD
    */
-  private buildClusterHierarchy(meshlets: Meshlet[], vertices: Float32Array): MeshletCluster[] {
+  private buildClusterHierarchy(meshlets: Meshlet[], vertices: Float32Array, indices: Uint32Array): MeshletCluster[] {
     const clusters: MeshletCluster[] = [];
     let clusterId = 0;
 
@@ -302,7 +302,8 @@ export class MeshletBuilder {
         const simplifiedMeshlets = this.simplifyMeshlets(
           childClusters.flatMap(c => c.meshlets),
           0.5, // Reduzir para 50%
-          vertices
+          vertices,
+          indices
         );
 
         const parentSphere = this.mergeBoundingSpheres(
@@ -393,39 +394,55 @@ export class MeshletBuilder {
     return v;
   }
 
-  private simplifyMeshlets(meshlets: Meshlet[], ratio: number, globalVertices: Float32Array): Meshlet[] {
-    // Para uma clusterização topológica correta, deveríamos extrair os vértices,
-    // criar um BufferGeometry temporário, aplicar Quadric Error Metrics com Edge Locking
-    // e depois recortar em novos Meshlets.
-    // Como simplificação robusta para a interface atual, delegamos para o simplifyMeshQuadric.
-    
-    // Agrupar todos os triângulos dos meshlets numa geometria temporária
+  private simplifyMeshlets(
+    meshlets: Meshlet[],
+    ratio: number,
+    globalVertices: Float32Array,
+    globalIndices: Uint32Array
+  ): Meshlet[] {
     const tempPositions: number[] = [];
     const tempIndices: number[] = [];
     const globalToLocal = new Map<number, number>();
     
     for (const m of meshlets) {
-      // O construtor não nos passou o globalIndices de volta (apenas globalVertices).
-      // Em uma engine AAA completa, armazenaríamos os indexBuffer globais no construtor
-      // e os referenciaríamos aqui. 
+      for (let i = 0; i < m.triangleCount * 3; i++) {
+        const globalIdx = globalIndices[m.triangleOffset + i];
+        let localIdx = globalToLocal.get(globalIdx);
+        if (localIdx === undefined) {
+          localIdx = tempPositions.length / 3;
+          globalToLocal.set(globalIdx, localIdx);
+          tempPositions.push(
+            globalVertices[globalIdx * 3],
+            globalVertices[globalIdx * 3 + 1],
+            globalVertices[globalIdx * 3 + 2]
+          );
+        }
+        tempIndices.push(localIdx);
+      }
     }
 
-    // Para esta iteração, simularemos o QEM preservando a estrutura 
-    // mas com foco na topologia dos clusters (usando o Morton Sort que acabou de agrupar espacialmente).
-    const targetCount = Math.max(1, Math.floor(meshlets.length * ratio));
-    const step = meshlets.length / targetCount;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(tempPositions, 3));
+    geometry.setIndex(tempIndices);
 
-    const simplified: Meshlet[] = [];
-    for (let i = 0; i < targetCount; i++) {
-      const idx = Math.floor(i * step);
-      const original = meshlets[idx];
+    const simplifiedGeo = simplifyMeshQuadric(geometry, ratio, false);
+    
+    if (!simplifiedGeo.getIndex()) {
+      return meshlets; // Fallback se simplificação falhar
+    }
 
-      simplified.push({
-        ...original,
-        id: simplified.length,
-        lodLevel: original.lodLevel + 1,
-        error: original.error * 2 + this.config.screenSpaceErrorThreshold, 
-      });
+    // Usar o MeshletBuilder para recriar os meshlets da geometria simplificada
+    const simplified = this.buildMeshlets(
+      simplifiedGeo.getAttribute('position').array as Float32Array,
+      new Uint32Array(simplifiedGeo.getIndex()!.array)
+    );
+
+    const maxLod = Math.max(...meshlets.map(m => m.lodLevel));
+    const maxError = Math.max(...meshlets.map(m => m.error));
+
+    for (const sm of simplified) {
+      sm.lodLevel = maxLod + 1;
+      sm.error = maxError * 2 + this.config.screenSpaceErrorThreshold;
     }
 
     return simplified;

@@ -77,7 +77,8 @@ export interface ClayRefineEvidenceReceipt {
   nativeOnnxReady: false
 }
 
-const THEATER_IDS = new Set(['mock', 'empty', 'theater', 'placeholder', 'fake'])
+/** Shared across seal + live soak — a single source of truth for theater/mock refusal (Law XVI). */
+export const THEATER_IDS = new Set(['mock', 'empty', 'theater', 'placeholder', 'fake'])
 
 function fingerprintParts(parts: string[]): string {
   return createHash('sha256').update(parts.join('|')).digest('hex').slice(0, 32)

@@ -59,7 +59,7 @@ export const AgentExecutionReceiptsPanel: React.FC<{ className?: string }> = ({ 
       <div className="flex items-center justify-between pb-3 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <Cpu className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">
+          <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-cyan-400 via-sky-300 to-[var(--aethel-primary)] bg-clip-text text-transparent">
             Agent Execution Receipts & Audit Ledger
           </h2>
         </div>

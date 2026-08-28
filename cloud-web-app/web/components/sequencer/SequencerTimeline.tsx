@@ -207,33 +207,68 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
           </button>
         </div>
 
-        {/* Time Display */}
+        {/* Time Display — dual SMPTE + Frame counter */}
         <div
           style={{
-            padding: "4px 12px",
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '3px 12px',
             background: colors.bg,
-            borderRadius: "4px",
-            fontFamily: "monospace",
-            fontSize: "12px",
-            color: colors.primary,
+            borderRadius: '4px',
           }}
         >
-          {formatTime(currentTime, sequence.frameRate)}
+          <span
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: colors.primary,
+              letterSpacing: '0.04em',
+            }}
+          >
+            {formatTime(currentTime, sequence.frameRate)}
+          </span>
+          <span
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '9px',
+              color: colors.textDim,
+              letterSpacing: '0.04em',
+            }}
+          >
+            Frame {Math.floor(currentTime * sequence.frameRate)}
+          </span>
         </div>
 
-        <span style={{ color: colors.textDim, fontSize: "11px" }}>/</span>
+        <span style={{ color: colors.textDim, fontSize: '11px' }}>/</span>
 
         <div
           style={{
-            padding: "4px 8px",
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '3px 8px',
             background: colors.bg,
-            borderRadius: "4px",
-            fontFamily: "monospace",
-            fontSize: "11px",
-            color: colors.textMuted,
+            borderRadius: '4px',
           }}
         >
-          {formatTime(sequence.duration, sequence.frameRate)}
+          <span
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '11px',
+              color: colors.textMuted,
+            }}
+          >
+            {formatTime(sequence.duration, sequence.frameRate)}
+          </span>
+          <span
+            style={{
+              fontFamily: 'monospace',
+              fontSize: '9px',
+              color: colors.textDim,
+            }}
+          >
+            {Math.round(sequence.duration * sequence.frameRate)} fr
+          </span>
         </div>
 
         {/* Spacer */}
@@ -404,6 +439,12 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
                   }
                   onKeyframeDrag={(kfId, newTime) =>
                     onKeyframeUpdate(track.id, kfId, { time: newTime })
+                  }
+                  onKeyframeEasingChange={(kfId, easing) =>
+                    onKeyframeUpdate(track.id, kfId, { easing })
+                  }
+                  onKeyframeDelete={(kfId) =>
+                    onKeyframeDelete(track.id, kfId)
                   }
                   onToggleLock={() =>
                     onSequenceUpdate({

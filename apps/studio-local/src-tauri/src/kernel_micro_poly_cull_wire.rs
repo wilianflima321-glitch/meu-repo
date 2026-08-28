@@ -1,4 +1,4 @@
-//! Micro-Poly GPU Culling desktop wire.
+//! Micro-Poly GPU Culling desktop wire — letter **gz** (P1/Onda G Micro-Poly Foundation).
 //!
 //! Thin studio-local IPC over `aethel_kernel_rust::gpu_culling_compute`.
 //! Exposes honesty probe for Compute Shader Frustum Culling integration to TypeScript.

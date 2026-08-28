@@ -1,12 +1,15 @@
-import type { AgentType } from '../../../web/lib/agent-orchestrator'
-import { SUPPORTED_AGENT_TYPES } from '../../../web/lib/agent-orchestrator'
+import { SUPPORTED_AGENT_TYPES, type AgentType } from './agent-roles'
 import { buildMissingReceipt, countReceipts } from './receipts'
 import { decideAgentRuntimeSandbox } from './sandbox-provider'
 import { buildAgentRoleEvalSuite, validateAgentRoleEvalSuite, type AgentRoleEvalSuite } from './role-eval-suite'
 import { buildAgentRoleManifest, validateAgentRoleManifest } from './tool-registry'
-import type { AgentRuntimeExecutionPlan, AgentRuntimeReceipt, AgentRuntimeRoleManifest, AgentRuntimeSandboxProvider } from './types'
-import { uniqueAgentRuntimeValues } from './types'
-import { runAgentMission } from './langgraph'
+import {
+  uniqueAgentRuntimeValues,
+  type AgentRuntimeExecutionPlan,
+  type AgentRuntimeReceipt,
+  type AgentRuntimeRoleManifest,
+  type AgentRuntimeSandboxProvider,
+} from './types'
 
 export type BuildAgentRuntimeExecutionPlanInput = {
   roles?: AgentType[]
@@ -55,7 +58,7 @@ export function buildAgentRuntimeExecutionPlan(input: BuildAgentRuntimeExecution
     blockers,
     nextAction: blockers.length > 0
       ? 'Attach tool, memory, sandbox, browser replay, eval, and approval receipts before agent apply claims.'
-      : 'LangGraph Autonomy Ready: Trigger runAgentMission() to enter cyclic execution loop after operator approval.',
+      : 'All evidence receipts attached. Operator approval required before any agent apply or autonomous loop trigger.',
   }
 }
 

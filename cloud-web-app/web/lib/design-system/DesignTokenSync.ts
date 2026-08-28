@@ -146,22 +146,40 @@ function colorDistance(rgb1: [number, number, number], rgb2: [number, number, nu
   return Math.sqrt(weightR * r * r + weightG * g * g + weightB * b * b)
 }
 
+/** Shade variants demoted below their canonical semantic sibling during snapping. */
+const VARIANT_SUFFIX_RE = /-(dark|light|soft)$/i
+
+function isVariantToken(name: string): boolean {
+  return VARIANT_SUFFIX_RE.test(name)
+}
+
 export function findClosestToken(hex: string): ColorToken | null {
   const rgb = hexToRgb(hex)
   if (!rgb) return null
 
-  let closestToken = AETHEL_TOKENS[0]
-  let minDistance = Infinity
+  // Canonical-preference window: when a shade variant (-dark/-light/-soft) is
+  // only somewhat closer than the canonical semantic token of the same family,
+  // the canonical wins — pure red #ff0000 snaps to --aethel-error, not
+  // --aethel-error-dark. Exact matches (distance 0) are always preserved
+  // because only the canonical itself sits at distance 0 in its family.
+  const CANONICAL_PREFERENCE_RATIO = 1.6
 
+  let minDistance = Infinity
   for (const token of AETHEL_TOKENS) {
     const dist = colorDistance(rgb, token.rgb)
-    if (dist < minDistance) {
-      minDistance = dist
-      closestToken = token
-    }
+    if (dist < minDistance) minDistance = dist
   }
 
-  return closestToken
+  const candidates = AETHEL_TOKENS
+    .map((token) => ({ token, dist: colorDistance(rgb, token.rgb) }))
+    .filter(({ dist }) => dist <= minDistance * CANONICAL_PREFERENCE_RATIO)
+    .sort((a, b) => {
+      const variantDiff = Number(isVariantToken(a.token.name)) - Number(isVariantToken(b.token.name))
+      if (variantDiff !== 0) return variantDiff
+      return a.dist - b.dist
+    })
+
+  return candidates[0]?.token ?? null
 }
 
 /**
@@ -170,7 +188,7 @@ export function findClosestToken(hex: string): ColorToken | null {
  * ASYNC VERSION: Yields to event loop to prevent starvation (DEBT-PERF/EVENT-LOOP CLOSED).
  */
 export async function normalizeAgentUiPatchAsync(code: string): Promise<string> {
-  const hexColorRegex = /(?<=[:=\[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
+  const hexColorRegex = /(?<=[:=[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
   
   let match
   let lastIndex = 0
@@ -200,7 +218,7 @@ export async function normalizeAgentUiPatchAsync(code: string): Promise<string> 
 
 // Keep synchronous version for tests and lightweight non-agentic payloads
 export function normalizeAgentUiPatch(code: string): string {
-  const hexColorRegex = /(?<=[:=\[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
+  const hexColorRegex = /(?<=[:=[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
   return code.replace(hexColorRegex, (match) => {
     const closest = findClosestToken(match)
     if (closest) {
@@ -212,7 +230,7 @@ export function normalizeAgentUiPatch(code: string): string {
 
 /** Same style-context hex matcher used by normalize — for apply-path QA. */
 const UI_HEX_COLOR_RE =
-  /(?<=[:=\[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
+  /(?<=[:=[,\s'"`])(#([a-fA-F0-9]{3,4}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8}))(?=[\]\s'"`},;}])/g
 
 /**
  * L.10 QA — scan remaining hardcoded hex colors in UI patch contexts.

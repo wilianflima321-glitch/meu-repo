@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
 
         // Create new agent
         const projectId = typeof bodyProjectId === 'string' && bodyProjectId.length > 0 ? bodyProjectId : undefined;
-        const agent = new AutonomousAgent({
+        const rawAgent = new AutonomousAgent({
           autonomyLevel: 'semi-autonomous',
           requireApproval: true,
           enableSelfCorrection: true,
@@ -163,6 +163,9 @@ export async function POST(req: NextRequest) {
             agent: 'autonomous-agent',
           }),
         });
+        
+        const { createValidatedAgent } = await import('@/lib/ai/agent-validation-integration');
+        const agent = createValidatedAgent(rawAgent);
         
         const newSessionId = sessionId || `agent-${Date.now()}`;
         activeAgents.set(agentKey(newSessionId), {

@@ -11,7 +11,7 @@ use wgpu::{Adapter, AdapterInfo, DeviceType, Limits};
 pub const SOAK_CAP_SCORE_ENV: &str = "AETHEL_SOAK_CAP_SCORE";
 
 /// Soft-raster pixel cap — storage-buffer soft raster is not a product viewport.
-pub const MICROPOLY_SOFT_RASTER_MAX_EDGE: u32 = 512;
+pub const MICROPOLY_SOFT_RASTER_MAX_EDGE: u32 = 1024;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -118,8 +118,12 @@ fn estimate_vram_bytes(
         .saturating_mul(u64::from(fsr_out))
         .saturating_mul(16)
         .saturating_mul(3); // history + output + reactive≈f32
-    // VSM atlas stays substrate-scale (~64k floats) — fixed overhead.
-    let vsm = 16u64 * 32 * 32 * 4;
+    // VSM atlas at the gpu_vsm substrate scale (constants owned there — no
+    // duplicated capacity numbers in the estimator).
+    let vsm = u64::from(crate::gpu_vsm::VSM_PHYSICAL_POOL)
+        * u64::from(crate::gpu_vsm::VSM_PAGE_PIXELS)
+        * u64::from(crate::gpu_vsm::VSM_PAGE_PIXELS)
+        * 4;
     present_stack
         .saturating_add(micropoly)
         .saturating_add(fsr_in_b)
@@ -149,7 +153,9 @@ fn micro_extent(present_w: u32, present_h: u32) -> (u32, u32) {
 }
 
 fn fsr_edges(present_w: u32, present_h: u32) -> (u32, u32, u32) {
-    let scale = 2u32;
+    // The 2× scale is the substrate's canonical constant — no duplicated
+    // policy literals in the budget estimator.
+    let scale = crate::gpu_fsr::FSR_SCALE;
     let out = present_w.min(present_h);
     // Keep even, ≥64; align to 8 for FSR workgroups.
     let out = ((out / 8).max(8) * 8).max(64);

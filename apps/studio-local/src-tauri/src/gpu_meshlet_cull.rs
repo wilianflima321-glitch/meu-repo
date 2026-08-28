@@ -51,6 +51,11 @@ struct CullingFrustum {
     object_count: u32,
     occlusion_enabled: u32,
     _padding: vec2<u32>,
+    view_proj: mat4x4<f32>,
+    projection_mode: u32,
+    _pad2a: u32,
+    _pad2b: u32,
+    _pad2c: u32,
 };
 
 @group(0) @binding(0) var<storage, read> clusters: array<MeshletCluster>;
@@ -79,17 +84,60 @@ fn cone_backface(axis: vec3<f32>, cutoff: f32, center: vec3<f32>) -> bool {
     return dot(axis, view_dir) < cutoff;
 }
 
+fn project_to_clip(p: vec3<f32>) -> vec4<f32> {
+    // Column-major (WGSL mat4x4 is column-major): clip = view_proj * vec4(p, 1).
+    let m = frustum.view_proj;
+    return m[0] * p.x + m[1] * p.y + m[2] * p.z + m[3];
+}
+
 fn hiz_occluded(center: vec3<f32>, radius: f32) -> bool {
     if (frustum.occlusion_enabled == 0u) {
         return false;
     }
-    let ndc = center.xy / 25.0;
-    let uv = ndc * 0.5 + vec2<f32>(0.5, 0.5);
+    var uv = vec2<f32>(0.0, 0.0);
+    var radius_ndc: f32 = 0.0;
+    var obj_near: f32 = 0.0;
+    if (frustum.projection_mode == 0u) {
+        // Legacy fixed ortho mapping — byte-identical to the pre-param substrate.
+        let ndc = center.xy / 25.0;
+        uv = ndc * 0.5 + vec2<f32>(0.5, 0.5);
+        radius_ndc = max(radius / 25.0, 0.001);
+        obj_near = clamp(0.5 + center.z / 50.0 - radius / 50.0, 0.0, 1.0);
+    } else {
+        // Data-driven: clip = view_proj * (center, 1); ndc = clip.xyz / clip.w.
+        let clip = project_to_clip(center);
+        if (clip.w <= 0.0) {
+            return false;
+        }
+        let raw = clip.xyz / clip.w;
+        uv = raw.xy * 0.5 + vec2<f32>(0.5, 0.5);
+        let sx = abs(frustum.view_proj[0][0]);
+        let sy = abs(frustum.view_proj[1][1]);
+        radius_ndc = max(max(sx, sy) * radius / clip.w, 0.001);
+        // True sphere near-depth: the nearest surface point sits on the
+        // camera->center ray at view distance `clip.w - radius`. Its NDC z is
+        // `-a + b / t_near`, where a and b are the perspective depth constants
+        // (clip.z = -a*t + b for view distance t = clip.w), recovered from the
+        // composite view_proj of the rigid look_at camera:
+        //   a = -vp[2][2] / vp[2][3]   (vp[2][3] = forward z, non-zero here)
+        //   b =  vp[3][2] + a * vp[3][3]
+        // A sphere crossing the near plane can never be treated as occluded.
+        let a = -frustum.view_proj[2][2] / frustum.view_proj[2][3];
+        let b = frustum.view_proj[3][2] + a * frustum.view_proj[3][3];
+        let t_near = clip.w - radius;
+        if (t_near <= 0.0) {
+            return false;
+        }
+        let ndc_z_near = -a + b / t_near;
+        if (ndc_z_near < -1.0 || ndc_z_near > 1.0) {
+            return false;
+        }
+        obj_near = clamp(0.5 * ndc_z_near + 0.5, 0.0, 1.0);
+    }
     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
         return false;
     }
     let level0 = textureDimensions(depth_pyramid, 0);
-    let radius_ndc = max(radius / 25.0, 0.001);
     let radius_px = radius_ndc * f32(level0.x) * 0.5;
     var mip_i: i32 = 0;
     if (radius_px > 1.0) {
@@ -103,7 +151,6 @@ fn hiz_occluded(center: vec3<f32>, radius: f32) -> bool {
         clamp(i32(uv.y * f32(dims.y)), 0, i32(dims.y) - 1),
     );
     let max_z = textureLoad(depth_pyramid, coord, mip_i).r;
-    let obj_near = clamp(0.5 + center.z / 50.0 - radius / 50.0, 0.0, 1.0);
     return obj_near > (max_z + 0.002);
 }
 
@@ -161,8 +208,21 @@ struct MeshletCluster {
     _pad: u32,
 };
 
+struct CullingFrustum {
+    planes: array<vec4<f32>, 6>,
+    object_count: u32,
+    occlusion_enabled: u32,
+    _padding: vec2<u32>,
+    view_proj: mat4x4<f32>,
+    projection_mode: u32,
+    _pad2a: u32,
+    _pad2b: u32,
+    _pad2c: u32,
+};
+
 @group(0) @binding(0) var<storage, read> clusters: array<MeshletCluster>;
 @group(0) @binding(1) var<storage, read> visible_indices: array<u32>;
+@group(0) @binding(2) var<uniform> frustum: CullingFrustum;
 
 struct VsOut {
     @builtin(position) clip_pos: vec4<f32>,
@@ -181,9 +241,28 @@ fn vs_main(
         vec2<f32>(0.05, -0.05),
         vec2<f32>(0.0, 0.06),
     );
-    let ndc = (c.center.xy / 25.0) + corners[vid];
+    var ndc = vec2<f32>(0.0, 0.0);
+    var depth = 0.5;
+    if (frustum.projection_mode == 0u) {
+        // Legacy fixed ortho mapping — byte-identical to the pre-param substrate.
+        ndc = (c.center.xy / 25.0) + corners[vid];
+        depth = clamp(0.5 + c.center.z / 50.0, 0.01, 0.99);
+    } else {
+        // Data-driven: clip = view_proj * (center, 1); ndc = clip.xy / clip.w.
+        // Draw depth must match the cull depth so raster + Hi-Z stay coherent.
+        let m = frustum.view_proj;
+        let clip = m[0] * c.center.x + m[1] * c.center.y + m[2] * c.center.z + m[3];
+        let ndc_xy = clip.xy / clip.w;
+        if (clip.w <= 0.0) {
+            // Behind the near plane — degenerate proxy outside NDC (clipped).
+            ndc = vec2<f32>(0.0, 2.0);
+        } else {
+            ndc = ndc_xy + corners[vid];
+        }
+        depth = clamp(0.5 * (clip.z / clip.w) + 0.5, 0.01, 0.99);
+    }
     var out: VsOut;
-    out.clip_pos = vec4<f32>(ndc, clamp(0.5 + c.center.z / 50.0, 0.01, 0.99), 1.0);
+    out.clip_pos = vec4<f32>(ndc, depth, 1.0);
     let t = f32(c.cluster_id) * 0.07;
     out.color = vec3<f32>(0.15 + t, 0.75 - t * 0.3, 0.35 + t * 0.4);
     return out;
@@ -418,6 +497,16 @@ impl MeshletCullScaffold {
                     },
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
             ],
         });
         let draw_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -469,6 +558,10 @@ impl MeshletCullScaffold {
                 wgpu::BindGroupEntry {
                     binding: 1,
                     resource: visible_indices_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: frustum_buffer.as_entire_binding(),
                 },
             ],
         });
@@ -609,5 +702,46 @@ mod tests {
         assert_eq!(clusters.len(), 8);
         assert_eq!(expected, 4);
         assert!(clusters.iter().all(|c| c.triangle_count == 128));
+    }
+
+    #[test]
+    fn cull_frustum_is_192_byte_pod_with_data_driven_projection() {
+        // Must stay in lock-step with gpu_culling::CullingFrustum (same uniform
+        // buffer feeds cull + draw): 192 B, 16-aligned, WGSL-uniform-compatible.
+        assert_eq!(std::mem::size_of::<CullingFrustum>(), 192);
+        assert_eq!(std::mem::align_of::<CullingFrustum>(), 16);
+        let frustum = crate::gpu_culling::identity_frustum(8);
+        assert_eq!(frustum.projection_mode, 0);
+        assert_eq!(frustum.view_proj[0][0], 1.0);
+        assert_eq!(frustum._pad2, [0, 0, 0]);
+    }
+
+    #[test]
+    fn identity_frustum_cpu_culls_fixture_to_four() {
+        // Off-GPU golden: the same identity frustum (legacy mode 0) that the
+        // soak expects must cull the 8 hand-placed fixture clusters to exactly
+        // the 4 survivors, proving CPU mirror ↔ GPU fixture coherence.
+        let frustum = crate::gpu_culling::identity_frustum(8);
+        let (clusters, expected) = soak_fixture_meshlets();
+        let visible = clusters
+            .iter()
+            .filter(|c| {
+                frustum.sphere_in_frustum_cpu(c.center, c.radius)
+                    && !frustum.hiz_occluded_cpu(c.center, c.radius, 0.0)
+            })
+            .count();
+        assert_eq!(visible, expected as usize);
+    }
+
+    #[test]
+    fn shaders_declare_data_driven_projection_in_lock_step() {
+        // Guards against drift: both the cull shader and the draw shader must
+        // expose the same data-driven uniform fields (one camera authority).
+        for shader in [CULL_SHADER, DRAW_SHADER] {
+            assert!(shader.contains("view_proj: mat4x4<f32>"), "missing view_proj");
+            assert!(shader.contains("projection_mode: u32"), "missing projection_mode");
+            assert!(shader.contains("_pad2a: u32"), "missing _pad2 scalars");
+            assert!(shader.contains("projection_mode == 0u"), "missing legacy branch");
+        }
     }
 }

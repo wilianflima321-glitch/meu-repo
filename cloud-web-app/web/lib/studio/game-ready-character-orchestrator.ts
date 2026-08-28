@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Letter cb — Native Gen → Studio IDE + CreativeBridge wire.
  *
  * Text → prefer native pager (ca) when nativeOnnxReady else BYOK clay poll (bx)

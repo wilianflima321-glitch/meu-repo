@@ -84,9 +84,9 @@ const CHECKS = [
   },
   {
     name: 'ide-workbench-runtime-accessibility',
-    file: 'components/ide/FullscreenIDE.tsx',
+    file: 'app/ide/page.tsx',
     surface: '/ide',
-    patterns: ['Suspense', 'role="status"'],
+    patterns: ['FullscreenIDE', 'IDELoadingShell'],
   },
 ]
 

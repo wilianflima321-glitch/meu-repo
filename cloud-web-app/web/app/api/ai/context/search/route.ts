@@ -43,12 +43,14 @@ export async function GET(request: NextRequest) {
       capability: 'AI_CODEBASE_CONTEXT_SEARCH',
       capabilityStatus: readiness.capabilityStatus,
       authority: 'canonical',
-      // Honest: JS cosine + local-hash is PARTIAL; sqlite-vec native + BYOK semantic still HELD/gated
+      // Honest: local-hash ≠ true semantic; BYOK semantic gated; native vec status from probe
       j4: {
         sqliteVecStatus: readiness.sqliteVecStatus,
+        sqliteVecReason: readiness.sqliteVecReason,
         searchQuality: readiness.searchQuality,
         platformPaysEmbeddings: false,
         trueSemanticRecall: readiness.trueSemanticRecall,
+        annBackend: stats?.annBackend ?? 'js-cosine',
       },
     })
   } catch (error) {

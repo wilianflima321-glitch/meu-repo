@@ -68,10 +68,10 @@ const TOOL_VIEWPORTS: Record<string, React.ComponentType> = {
 }
 
 const MATURITY_STYLE: Record<string, { cls: string; dot: string }> = {
-  stable:       { cls: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25', dot: 'bg-emerald-400' },
-  beta:         { cls: 'text-cyan-400    bg-cyan-400/10    border-cyan-400/25',    dot: 'bg-cyan-400'    },
-  experimental: { cls: 'text-amber-400   bg-amber-400/10   border-amber-400/25',   dot: 'bg-amber-400'   },
-  preview:      { cls: 'text-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-accent)_25%,transparent)]', dot: 'bg-[var(--aethel-accent)]' },
+  stable:       { cls: 'text-[var(--aethel-success-light)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_25%,transparent)]', dot: 'bg-[var(--aethel-success)]' },
+  beta:         { cls: 'text-[var(--aethel-neon-cyan)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-neon-cyan)_25%,transparent)]', dot: 'bg-[var(--aethel-neon-cyan)]' },
+  experimental: { cls: 'text-[var(--aethel-warning-light)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)]', dot: 'bg-[var(--aethel-warning)]' },
+  preview:      { cls: 'text-[var(--aethel-accent-light)] bg-[color-mix(in_srgb,var(--aethel-accent)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-accent)_25%,transparent)]', dot: 'bg-[var(--aethel-accent)]' },
 }
 
 function WorldToolPicker({

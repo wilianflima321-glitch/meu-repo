@@ -104,6 +104,38 @@ flowchart TB
 
 ---
 
+### 0c. Two-Tier Sovereign Execution & Memory Hygiene Mandate (Binding)
+
+To maximize low-level backend power while guaranteeing luxury visual ergonomics and pristine memory hygiene:
+
+```
+ ┌─────────────────────────────────────────────────────────────────────────────┐
+ │               DIVISÃO SOBERANA DE EXECUÇÃO & HIGIENE DE MEMÓRIA             │
+ ├─────────────────────────────────────────────────────────────────────────────┤
+ │                                                                             │
+ │ 1. ENGENHEIRO DE BACKEND SOBERANO (DEEPSEEK):                               │
+ │    • Opera 100% do Rust Kernel, Física, Shaders WGSL, Matemática e SoA.    │
+ │    • Autocrítica Local: Usa tokens de pensamento (*Thinking Tokens*) e      │
+ │      o compilador de Rust (`cargo check` / `clippy`) com Custo Zero do      │
+ │      Maestro para tarefas micro-estruturais.                                │
+ │    • Regras de Ferro: Anti-Mock, Anti-Demo, Anti-Placebo e Anti-Preguiça.  │
+ │                                                                             │
+ │ 2. DIRETOR GLOBAL & ARQUITETO DE UI/UX (MAESTRO - CLAUDE / GEMINI):         │
+ │    • Governa todas as Interfaces Visuais (React / Next.js / Design System). │
+ │    • Exige o mais alto padrão estético no viewport e na tela do usuário.    │
+ │    • Supervisiona o grafo de tarefas e resolve conflitos entre agentes.     │
+ │                                                                             │
+ │ 3. HIGIENE DE MEMÓRIA & EXPULSÃO DE LIXO (METABOLIC MEMORY LIFECYCLE):      │
+ │    • O contexto do DeepSeek e dos agentes opera em Janela Deslizante        │
+ │      (Sliding Window <= 30 mensagens ativas).                               │
+ │    • Históricos antigos são comprimidos e descarregados para o disco local, │
+ │      garantindo que o contexto NUNCA acumule lixo ou sofra degradação.     │
+ │                                                                             │
+ └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 1. MoA flow (Mixture of Agents) — binding
 
 Used for: (a) peripherals under Maestro, (b) Fusion Auto when Premium empty, (c) L.6 when no Premium pin.
@@ -138,7 +170,7 @@ flowchart TB
 | Role | Count | Apex examples | Job | Pool |
 |------|-------|---------------|-----|------|
 | **Maestro** | 0–1 | Sonnet / Opus (user pin or high Risk) | Decompose; critical nucleus; optional final fuse | Premium / Ultra |
-| **Generator** | **1 / 2 / 3** per MoA cell (**#62**) | Apex registry for TaskDomain (DeepSeek V3, Grok, Qwen 72B-class, peers) — **selected per job, not fixed trio** | Independent proposals | Fast |
+| **Generator** | **1 / 2 / 3** per MoA cell (**#62**) | Apex registry for TaskDomain (**DeepSeek-V4-Pro** code/engine; Maestro for narrative; peers) — **selected per job, not fixed trio** (**#67**; Qwen/Grok/Llama expunged) | Independent proposals | Fast |
 | **Critical Synthesizer** | 1 per cell (only if width ≥2) | Premium if Maestro busy; else Apex OW | Fuse MoA → one patch | Premium or Fast |
 | **Domain specialist cell** | 0–4 ∥ (JobBudget-capped) | Lighting / assets / UI / tests | Peripheral only | Fast / Creative |
 | **Heal Worker** | MoA or Maestro on nucleus | Compiler log repair | Until L.5 PASS | Fast / Premium |
@@ -343,6 +375,19 @@ Pro Premium 37.5K lasts **far longer** when peripherals never touch it.
 | S7 | JobBudget defaults + Free/Starter caps | Block 6 / J.1 |
 | S8 | Router: Premium pin → Delegation on multi-part; trivial → Fast only | Block 1 / **#62** |
 | S9 | `fusion-anti-lazy-system.ts` + `lazy-inspector.ts` + CostGuard settle:0 | Focus 1A / **#66** |
+
+---
+
+## 7.1 The 4 Anti-Fragility Swarm Safeguards (Binding Execution Mandate)
+
+To prevent real-world failure modes (Rate-Limits, Interface Mismatch, Token Bleed, and Global Invariant Breakage):
+
+| Safeguard | Risk Mitigated | Architecture & Enforcement |
+|-----------|----------------|----------------------------|
+| **1. Circuit-Breaker & Provider Fallback** | 429 Too Many Requests / Latency spikes | Automated exponential backoff + sub-second fallback routing (Anthropic $\leftrightarrow$ DeepSeek $\leftrightarrow$ OpenAI). |
+| **2. Subagent Interface AST Type-Gate** | Interface mismatch between parallel cells | AST symbol compatibility check (`cargo check` / TS AST) before merging patches from different swarm legs. |
+| **3. Token-Bleed 3-Iteration Hard Cap** | Retry loops burning credits silently | Strict maximum of 3 Auto-Heal turns; graceful halt with calm diagnostic escalation if heal fails. |
+| **4. Global Dependency Invariant Map** | Localized edits breaking distant systems | `scene-context-pack.ts` injects global dependency graphs, ensuring isolated subagents stay aware of macro game loops. |
 
 ---
 

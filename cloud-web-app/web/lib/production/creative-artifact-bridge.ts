@@ -8,6 +8,7 @@ import { randomUUID } from 'crypto'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
   cancelCreativeCost,
+  getCreativeCostReservation,
   reserveCreativeCost,
   settleCreativeCost,
   settleCreativeCostZero,
@@ -24,8 +25,16 @@ import {
   createTaskEvidenceLedger,
   type TaskEvidenceLedger,
 } from './task-evidence-ledger'
+import { consultAssetQualityGateForDispatch } from './kernel-asset-quality-gate-honesty'
+import type { GameAssetQualityTier } from './game-asset-quality-pipeline'
 
 const log = createComponentLogger('creative-artifact-bridge')
+
+/**
+ * Creative providers legitimately overshoot the token estimate — allow bounded 1.25× overage
+ * (debited) while capping runaway actuals beyond that with cost_guard_settle_capped evidence.
+ */
+const CREATIVE_SETTLE_CEILING_MULTIPLIER = 1.25
 
 export type CreativeArtifactDomain =
   | 'image'
@@ -51,16 +60,27 @@ export interface CreativeArtifactRequest {
   sceneSelection?: string[]
   targetPaths?: string[]
   evidenceKind?: string
+  /** Tier alvo do asset para a consulta do gate bw (J.1) — default ai-draft. */
+  targetTier?: GameAssetQualityTier
   costGuard: {
     byokProfileId?: string
     usageBucketId?: string
     estimatedTokenWeight: number
     planId?: string
+    /** Settle ceiling (multiple of estimate). Defaults to CREATIVE_SETTLE_CEILING_MULTIPLIER (1.25). */
+    settleCeilingMultiplier?: number
   }
   fusionTransactionId?: string
   /** Domains that mutate Yjs scopes require an open FusionTx */
   requiresFusionWrite?: boolean
   fusionScope?: FusionYDocScope
+  /**
+   * Conveyor nucleus (Creative #1): reuse a CostGuard reservation already held by a Maestro pulse
+   * instead of reserving a second one. Eliminates the reserve→cancel→re-reserve TOCTOU. The held
+   * reservation MUST still be 'reserved' and match this request's domain/userId/projectId/estimate —
+   * otherwise the bridge fails closed (never silently double-reserves).
+   */
+  existingReservationId?: string
 }
 
 export interface CreativeArtifactResult {
@@ -81,6 +101,7 @@ export interface CreativeArtifactResult {
 }
 
 export interface CreativeProviderDispatch {
+  // eslint-disable-next-line no-unused-vars -- provider dispatch signature (desktop/tests)
   (input: {
     request: CreativeArtifactRequest
     reservationId: string
@@ -123,6 +144,33 @@ export async function dispatchCreativeArtifact(input: {
       ownerAgent: 'CreativeBridge',
     })
 
+  // J.1 choke — Asset Quality Gate consult (letter bw). Domains de asset 3D/textura/world
+  // consultam o gate DECLARATIVO antes de qualquer provider: espelha as tabelas de budget
+  // do kernel Rust (triângulos/VRAM KTX2 vs RGBA8/LoD/proxies/texels/topologia), anexa
+  // evidência ao ledger e NUNCA declara readiness (compiled-only → ready=false até IPC
+  // desktop). O provider não é bloqueado aqui — o gate registra a consulta honesta; o
+  // release/final-claim de ai-draft permanece fail-closed via game-asset-quality-pipeline.
+  const QUALITY_GATE_DOMAINS: ReadonlySet<CreativeArtifactDomain> = new Set([
+    'mesh',
+    'texture',
+    'world-layout',
+  ])
+  const isQualityGateDomain = (domain: CreativeArtifactDomain): domain is 'mesh' | 'texture' | 'world-layout' =>
+    QUALITY_GATE_DOMAINS.has(domain)
+  if (isQualityGateDomain(request.domain)) {
+    const targetTier = request.targetTier ?? 'ai-draft'
+    const consulted = consultAssetQualityGateForDispatch(
+      {
+        domain: request.domain,
+        targetTier,
+        evidenceRefs: [],
+        finalClaim: false,
+      },
+      ledger,
+    )
+    ledger = consulted.ledger
+  }
+
   const requiresWrite = request.requiresFusionWrite ?? WRITE_DOMAINS.has(request.domain)
   try {
     assertFusionTransactionOpen(request.fusionTransactionId, requiresWrite)
@@ -150,31 +198,71 @@ export async function dispatchCreativeArtifact(input: {
     byokProfileId: request.costGuard.byokProfileId,
     usageBucketId: request.costGuard.usageBucketId,
     planId: request.costGuard.planId,
+    settleCeilingMultiplier:
+      request.costGuard.settleCeilingMultiplier ?? CREATIVE_SETTLE_CEILING_MULTIPLIER,
   }
 
-  const reserved = await reserveCreativeCost(guardInput, adapter)
-  if (!reserved.ok) {
-    ledger = appendTaskEvidence(ledger, {
-      kind: 'cost',
-      title: 'CostGuard denied',
-      summary: reserved.message,
-      refs: [`cost-guard:${reserved.reason}`],
-      actor: 'CreativeCostGuard',
-    })
-    return {
-      result: {
-        success: false,
-        artifactId: '',
-        provider: 'none',
-        costUsd: 0,
-        evidenceReceiptId: ledger.events[ledger.events.length - 1]?.id ?? '',
-        blockedReason: reserved.reason,
-      },
-      ledger,
+  // Conveyor nucleus (Creative #1): a Maestro pulse may already hold a CostGuard reservation for
+  // this dispatch (reserve → verdict → dispatch). Reuse it so settle debits the SAME hold — no
+  // reserve→cancel→re-reserve TOCTOU. A held reservation that is missing, consumed, or drifted
+  // from this request fails closed; the bridge never silently double-reserves.
+  let reservationId: string
+  if (request.existingReservationId) {
+    const held = getCreativeCostReservation(request.existingReservationId)
+    const drifted =
+      !held ||
+      held.status !== 'reserved' ||
+      held.domain !== request.domain ||
+      held.userId !== request.userId ||
+      held.projectId !== request.projectId ||
+      Math.abs(held.estimatedTokenWeight - request.costGuard.estimatedTokenWeight) > 1e-6
+    if (drifted) {
+      ledger = appendTaskEvidence(ledger, {
+        kind: 'cost',
+        title: 'Conveyor reservation rejected',
+        summary:
+          'existingReservationId missing, consumed, or drifted from request — fail closed, no double-reserve',
+        refs: [`reservation:${request.existingReservationId}`],
+        actor: 'CreativeBridge',
+      })
+      return {
+        result: {
+          success: false,
+          artifactId: '',
+          provider: 'none',
+          costUsd: 0,
+          evidenceReceiptId: ledger.events[ledger.events.length - 1]?.id ?? '',
+          blockedReason: 'cost_guard_denied',
+          reservationId: request.existingReservationId,
+        },
+        ledger,
+      }
     }
+    reservationId = held.reservationId
+  } else {
+    const reserved = await reserveCreativeCost(guardInput, adapter)
+    if (!reserved.ok) {
+      ledger = appendTaskEvidence(ledger, {
+        kind: 'cost',
+        title: 'CostGuard denied',
+        summary: reserved.message,
+        refs: [`cost-guard:${reserved.reason}`],
+        actor: 'CreativeCostGuard',
+      })
+      return {
+        result: {
+          success: false,
+          artifactId: '',
+          provider: 'none',
+          costUsd: 0,
+          evidenceReceiptId: ledger.events[ledger.events.length - 1]?.id ?? '',
+          blockedReason: reserved.reason,
+        },
+        ledger,
+      }
+    }
+    reservationId = reserved.reservation.reservationId
   }
-
-  const reservationId = reserved.reservation.reservationId
 
   try {
     const dispatched = await provider({ request, reservationId })
@@ -203,7 +291,19 @@ export async function dispatchCreativeArtifact(input: {
       }
     }
 
-    await settleCreativeCost(reservationId, dispatched.actualTokenWeight, adapter)
+    const settle = await settleCreativeCost(reservationId, dispatched.actualTokenWeight, adapter)
+
+    // Runaway actuals are never silently absorbed — surface the cap as ledger evidence so the
+    // conveyor receipt's evidence chain ties to the real charge (cost_guard_settle_capped parity).
+    if (settle.capped) {
+      ledger = appendTaskEvidence(ledger, {
+        kind: 'cost',
+        title: 'Cost settle capped',
+        summary: `actualTokenWeight=${settle.rawActual} capped to ${settle.cappedActual} by reservation ceiling`,
+        refs: [`reservation:${reservationId}`],
+        actor: 'CreativeCostGuard',
+      })
+    }
 
     ledger = appendTaskEvidence(ledger, {
       kind: 'artifact',

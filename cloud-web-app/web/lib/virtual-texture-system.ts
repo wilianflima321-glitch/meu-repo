@@ -239,11 +239,25 @@ export class VirtualTextureSystem {
     return this.feedbackBuffer.getRenderTarget();
   }
 
-  async update(renderer: THREE.WebGLRenderer): Promise<void> {
+  async update(renderer: THREE.WebGLRenderer, scene?: THREE.Scene, camera?: THREE.Camera): Promise<void> {
     this.frameCount++;
 
-    // Analyze feedback buffer
-    const requests = this.feedbackBuffer.analyze(renderer);
+    // Render feedback buffer if scene and camera are provided
+    if (scene && camera) {
+      const originalRenderTarget = renderer.getRenderTarget();
+      const originalOverrideMaterial = scene.overrideMaterial;
+
+      renderer.setRenderTarget(this.feedbackBuffer.getRenderTarget());
+      scene.overrideMaterial = this.feedbackMaterial;
+      renderer.clear();
+      renderer.render(scene, camera);
+
+      scene.overrideMaterial = originalOverrideMaterial;
+      renderer.setRenderTarget(originalRenderTarget);
+    }
+
+    // Analyze feedback buffer asynchronously
+    const requests = await this.feedbackBuffer.analyze(renderer);
 
     // Process requests
     let loadsThisFrame = 0;
@@ -404,11 +418,11 @@ export class VirtualTextureManager {
     }
   }
 
-  async update(): Promise<void> {
+  async update(scene?: THREE.Scene, camera?: THREE.Camera): Promise<void> {
     if (!this.renderer) return;
 
     for (const system of this.systems.values()) {
-      await system.update(this.renderer);
+      await system.update(this.renderer, scene, camera);
     }
   }
 

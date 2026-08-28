@@ -524,4 +524,72 @@ mod tests {
         }
         let _ = lane;
     }
+
+    #[test]
+    fn batch_scale_add_scalar_and_vector_consistency() {
+        let input = [1.0, -2.5, 3.0, 0.0, 10.0, -5.0, 7.5, 2.0];
+        let mut out = [0.0f32; 8];
+        let scale = 2.5f32;
+        let add = 1.0f32;
+
+        scale_add_f32_scalar(&input, scale, add, &mut out);
+
+        for i in 0..8 {
+            let expected = input[i] * scale + add;
+            assert!((out[i] - expected).abs() < SIMD_CLAY_EPS);
+        }
+    }
+
+    #[test]
+    fn batch_sdf_sphere_sample_monotonicity() {
+        let x = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 20.0];
+        let y = [0.0; 8];
+        let z = [0.0; 8];
+        let mut distances = [0.0f32; 8];
+
+        sdf_sphere_batch_scalar(&x, &y, &z, 0.0, 0.0, 0.0, 1.0, &mut distances);
+
+        // Distance from center (0,0,0) with unit radius R=1.0 is |x| - 1.0
+        for i in 0..8 {
+            let expected = x[i] - 1.0;
+            assert!((distances[i] - expected).abs() < SIMD_CLAY_EPS);
+        }
+
+        // Monotonically increasing check
+        for i in 1..8 {
+            assert!(distances[i] > distances[i - 1]);
+        }
+    }
+
+    #[test]
+    fn compute_sdf_simd_avx2_negative_and_diagonal_coordinates() {
+        let d_neg = compute_sdf_simd_avx2(-3.0, 0.0, 0.0);
+        assert!((d_neg - 2.0).abs() < 1e-4);
+
+        let d_diag = compute_sdf_simd_avx2(1.0, 1.0, 1.0);
+        let expected_diag = 3.0f32.sqrt() - 1.0;
+        assert!((d_diag - expected_diag).abs() < 1e-4);
+    }
+
+    #[test]
+    fn detect_lane_is_valid_str() {
+        let lane = detect_simd_clay_lane();
+        let s = lane.as_str();
+        assert!(s == "scalar" || s == "sse2" || s == "avx2");
+    }
+
+    #[test]
+    fn batch_scale_add_fractional_numbers() {
+        let input = [0.125, -0.375, 0.5, -0.625, 0.75, -0.875, 1.0, -1.125];
+        let mut out = [0.0f32; 8];
+        let scale = -0.5f32;
+        let add = 2.0f32;
+
+        scale_add_f32_scalar(&input, scale, add, &mut out);
+
+        for i in 0..8 {
+            let expected = input[i] * scale + add;
+            assert!((out[i] - expected).abs() < SIMD_CLAY_EPS);
+        }
+    }
 }

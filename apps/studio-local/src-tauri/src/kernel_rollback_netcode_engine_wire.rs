@@ -6,9 +6,7 @@
 //! and circular history buffer are zero-alloc, fast-forward deterministic,
 //! and properly detect state desyncs.
 
-use aethel_kernel_rust::rollback_netcode_engine::{
-    probe_rollback_netcode_engine as kernel_probe, RollbackNetcodeEngineProbeReport,
-};
+use aethel_kernel_rust::rollback_netcode_engine::probe_rollback_netcode_engine as kernel_probe;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

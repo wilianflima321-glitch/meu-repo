@@ -158,8 +158,9 @@ flowchart TB
     Mesh["Meshy / Tripo → USD ingest"]
     Audio["Suno / ElevenLabs / AudioLDM"]
     Vid["Video providers"]
+    Code["DeepSeek-V4-Pro — Code/Engine spine (Software Platform)"]
     LLM["OpenRouter / Anthropic / OpenAI"]
-    Local["WebLLM / ONNX sidecar"]
+    Local["WebLLM / ONNX sidecar — downloadable mini-IA (NPC dialogue)"]
   end
 
   subgraph Runtime["Engine runtime — not fifth stack"]
@@ -261,17 +262,17 @@ export interface CreativeFusionTransaction {
 
 ## Workforce routing (13 graphs → squads)
 
-| Mission | Squad | Primary agents | Output |
-|---------|-------|----------------|--------|
-| Full game | Game Production | game-designer, gameplay-engineer, cinematic-director | 13 spine graphs evidence-complete |
-| World / biomes | Game Production + World Architect | world-graph owner | PCG + terrain + streaming |
-| Characters / enemies | Technical Artist + USD path | asset-pipeline-graph | Rigged USD, not proxy capsule |
-| Combat / abilities | Combat Designer + GAS | combat-graph + VS WASM | Hit chain → GAS real |
-| Audio / music | Film & Audio | audio-composer, MetaSounds | **Library Foley first (#64)**; gen score/VO Plan B; Law IX ingest |
-| Cinematics | Film & Audio | cinematic-director | Sequencer + **engine capture** ([Director doctrine #63](./AETHEL_CINEMATIC_DIRECTOR_DOCTRINE.md)) — not Veo default |
-| Code / engine | Software Platform | engineer, qa, security-auditor | Law XI gated patches |
-| Research | Research Intelligence | researcher, fact-checker | Citations → ledger |
-| Browser / competitive intel | Browser Operations | browser-operator | Playwright evidence |
+| Mission | Squad | Primary agents | Output | Model lane (#67) |
+|---------|-------|----------------|--------|------------------|
+| Full game | Game Production | game-designer, gameplay-engineer, cinematic-director | 13 spine graphs evidence-complete | **Narrative → Claude/Maestro**; mechanics → DeepSeek |
+| World / biomes | Game Production + World Architect | world-graph owner | PCG + terrain + streaming | DeepSeek (logic) + Maestro (lore prose) |
+| Characters / enemies | Technical Artist + USD path | asset-pipeline-graph | Rigged USD, not proxy capsule | DeepSeek (USD pipeline) + Maestro (bio prose) |
+| Combat / abilities | Combat Designer + GAS | combat-graph + VS WASM | Hit chain → GAS real | **DeepSeek-V4-Pro (spine)** |
+| Audio / music | Film & Audio | audio-composer, MetaSounds | **Library Foley first (#64)**; gen score/VO Plan B; Law IX ingest | Maestro (lyrics/VO); DeepSeek (cue logic) |
+| Cinematics | Film & Audio | cinematic-director | Sequencer + **engine capture** ([Director doctrine #63](./AETHEL_CINEMATIC_DIRECTOR_DOCTRINE.md)) — not Veo default | Maestro (direction) + DeepSeek (graph logic) |
+| Code / engine | Software Platform | engineer, qa, security-auditor | Law XI gated patches | **DeepSeek-V4-Pro (spine)** |
+| Research | Research Intelligence | researcher, fact-checker | Citations → ledger | DeepSeek (logic) |
+| Browser / competitive intel | Browser Operations | browser-operator | Playwright evidence | DeepSeek (analysis) |
 
 **Human-held (never autonomous):** financial-investment squad, production deploy, commerce checkout until H.0 audited.
 
@@ -309,6 +310,7 @@ export interface CreativeFusionTransaction {
 - [ ] Critic pass if code touched (Law XI) — **TS:** typecheck+lint; **Rust:** cargo check+clippy+test
 - [ ] **Routing:** Apex for TaskDomain; Workers = Fusion Auto Apex; **Nano banned**
 - [ ] **Zero Amnesia:** Architecture Laws pack + L.14 before any write (#58)
+- [ ] **Cognitive Compression (#67):** State Digest (Problem Solved, Files Touched, Architectural Impact) replaces `<think>` raw history at task boundary; digest attached to ledger + `MultiSurfaceContextPack` — AI mental garbage never pollutes `task-evidence-ledger.ts`
 - [ ] **Decision #55–#58:** ban Nano; Apex-first; Laws gate; Focus doctrine
 - [ ] **Decision #59–#61:** Maestro Delegation + MoA + Auto-Heal; ProjectMemoryDigest on every leg
 - [ ] **J-ACC Maestro:** Premium pin multi-part → peripherals **not** solo on Premium (sun/texture/UI → Swarm)
@@ -376,7 +378,7 @@ export interface CreativeFusionTransaction {
 | `game-production-spine.ts` | 13 graphs = acceptance criteria for game missions |
 | `AETHEL_HARDWARE_SCALABILITY_SPEC.md` | Capability Score in multi-surface context (L.14) |
 | `AETHEL_UNIVERSAL_IDE_FORGE_SPEC.md` | Onda L — J.3 absorbed into L.14; J.4 feeds L.12 |
-| `AETHEL_INTELLIGENT_ROUTING_AND_CONTEXT_COMPRESSION.md` | **v1.2** Apex Router · elite OW · Laws gate · #55–#58 |
+| `AETHEL_INTELLIGENT_ROUTING_AND_CONTEXT_COMPRESSION.md` | **v1.3** DeepSeek-V4-Pro spine · CCC · NPC mini-IA · #55–#58 + #67 |
 | `AETHEL_APEX_DOCTRINE_AND_EXECUTION_FOCUS.md` | **Focus 1→2** · Zero Amnesia · Zero-MVP · #56–#58 |
 | `AETHEL_APEX_FAST_SWARM_ORCHESTRATION.md` | **#59–#61** Maestro Delegation · MoA · Auto-Heal · J.1/L.6 |
 | `AETHEL_CINEMATIC_DIRECTOR_DOCTRINE.md` | **#63** Engine Film — Fusion directs; GPU shoots; Veo demoted |
@@ -411,6 +413,7 @@ export interface CreativeFusionTransaction {
 | **63** | **Cinematic Director** — Fusion writes set/camera/lights; engine/GPU captures film ($0 video API); Veo/Sora opt-in B-roll only |
 | **64** | **Audio Library-First** — SFX via Treasury/Freesound + MetaSounds local transform ($0 gen); Suno/ElevenLabs only for exclusive OST lyrics + speech |
 | **66** | **Anti-Laziness Protocol** — truncation ban + LazyInspector pre-L.5 + chunk ≤300 LoC; CostGuard `settle: 0` on lazy reject — [`AETHEL_ANTI_LAZINESS_PROTOCOL.md`](./AETHEL_ANTI_LAZINESS_PROTOCOL.md) |
+| **67** | **DeepSeek-V4-Pro Supremacy + Cognitive Compression Cycle (CCC)** — DeepSeek = absolute backend spine (Complex code/Rust-Kernel, Critic/plan, Worker); Qwen 72B/Grok/Llama expunged from supported lanes; at task boundary `<think>` deleted → State Digest (150 tok) attached to `MultiSurfaceContextPack` + ledger; NPC dialogue → downloadable mini-IA first; narrative prose → Maestro (DeepSeek banned) |
 
 ---
 
@@ -458,6 +461,32 @@ export interface CreativeFusionTransaction {
 | Code / platform | J.11, J.12 | L Forge path |
 
 See [`AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md`](AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md) for GF-AI-001 definition.
+
+---
+
+## Roo-Loop Agêntico (binding — Law XI closed loop for Workforce)
+
+**Doctrine:** every Workforce / Maestro agent (P4) executes an **internal** Actor-Critic closed loop — **generate → test → criticize → regenerate** — before anything is surfaced. Intermediate attempts are **silent**: they never reach the developer context, the mission ledger, or the UI. Only the **master-grade** result (all gates green) is delivered. This is the anti-context-collapse discipline (GF-AI-003) applied at the agent level.
+
+| Loop stage | Mandate | Gate |
+|-----------|---------|------|
+| **Generate** | Produce a candidate against the mission spec | Candidate is a full artifact, never a `TODO`/stub |
+| **Test** | Run the real validation suite (TS/Rust gates, physical invariants) | Law XI dual-stack gates pass |
+| **Criticize** | Append-only critique identifies regressions vs the ledger + plan alignment | Critic is append-only, no auto-approval |
+| **Regenerate** | Iterate ≤3 then human escalate — never ship a rejected candidate | Max 3 Actor iterations |
+| **Deliver** | Surface ONLY the passing artifact + evidence receipt | Ledger records fingerprint + distinctness |
+
+**Zero-MVP coupling:** the Roo-Loop never presents a placeholder as production (Law XVI — no `success:true` + empty artifact). A rejected candidate is discarded, not patched silently.
+
+### The 3 Leis da Adaptação Universal (creative adaptation spine)
+
+| Lei | Name | Creative mandate | Real substrate |
+|-----|------|------------------|----------------|
+| **Lei 1** | **Automação Semântica (Cérebro Passivo)** | Creative output adapts to scene/data passively — no authorial setup; the semantic context (J.3/L.14) drives generation | `scene-context-pack.ts`, `vector-index/` (J.4) |
+| **Lei 2** | **Amortecedor Poético (Portão de Sanidade)** | Generative anomalies fail closed through a poetic dampener — an SDF/graph anomaly becomes a graceful boundary, never a crash or a mock | [`poetic_error_handler.rs`](../../packages/aethel-kernel-rust/src/poetic_error_handler.rs) (REAL) + CreativeFusionTransaction abort path (Trava II) |
+| **Lei 3** | **Parallax de Performance-LODs Dinâmicos** | Generation cost/detail scales with Capability Score (Law XV) + perception, never a flat tier | `model-cost-weights.ts` + Trava I CostGuard |
+
+**Cross-link:** the Phase 2 latent audio kernel (round ki — `latent_audio_adaptation.rs`) implements the 3 Leis on the Rust audio surface (Sólido vs Metamorfo) — see [`AETHEL_VANGUARD_TECHNOLOGIES_SPEC.md`](AETHEL_VANGUARD_TECHNOLOGIES_SPEC.md) § Latent Audio & AV-Sync Vanguard. J.11/J.12 remain **STOPPED**; strictly backend.
 
 ---
 

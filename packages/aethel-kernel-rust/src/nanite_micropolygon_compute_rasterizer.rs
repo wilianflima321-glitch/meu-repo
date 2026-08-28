@@ -132,7 +132,7 @@ impl NaniteMicropolygonComputeRasterizer {
         let dy1 = (v1y - v0y) as i64;
         let dy2 = (py - v0y) as i64;
         let dx2 = (v1x - v0x) as i64;
-        (dx1 * dy1) - (dy2 * dx2)
+        (dx2 * dy2) - (dx1 * dy1)
     }
 
     /// Computes 2D screen-space pixel area of a projected micro-triangle.
@@ -225,7 +225,7 @@ impl NaniteMicropolygonComputeRasterizer {
                 let e1 = Self::edge_function_fixed(p_fixed_x, p_fixed_y, v1x, v1y, v2x, v2y);
                 let e2 = Self::edge_function_fixed(p_fixed_x, p_fixed_y, v2x, v2y, v0x, v0y);
 
-                if e0 >= 0 && e1 >= 0 && e2 >= 0 {
+                if (e0 >= 0 && e1 >= 0 && e2 >= 0) || (e0 <= 0 && e1 <= 0 && e2 <= 0) {
                     let idx = py * 8 + px;
                     if avg_z < tile.depth[idx] {
                         tile.depth[idx] = avg_z;
@@ -346,5 +346,78 @@ mod tests {
         assert!(report.sw_rasterization_active);
         assert_eq!(report.visible_clusters, 1);
         assert_eq!(report.culled_clusters, 1);
+    }
+
+    #[test]
+    fn fixed_point_edge_function_inside_and_outside_points() {
+        // v0 = [0, 0], v1 = [8, 0], v2 = [0, 8]
+        let v0x = 0;
+        let v0y = 0;
+        let v1x = 8;
+        let v1y = 0;
+        let v2x = 0;
+        let v2y = 8;
+
+        // Center of triangle [2, 2] should have all 3 edge functions non-negative
+        let e01 = NaniteMicropolygonComputeRasterizer::edge_function_fixed(2, 2, v0x, v0y, v1x, v1y);
+        let e12 = NaniteMicropolygonComputeRasterizer::edge_function_fixed(2, 2, v1x, v1y, v2x, v2y);
+        let e20 = NaniteMicropolygonComputeRasterizer::edge_function_fixed(2, 2, v2x, v2y, v0x, v0y);
+
+        assert!(e01 >= 0);
+        assert!(e12 >= 0);
+        assert!(e20 >= 0);
+
+        // Point outside [10, 10]
+        let out_e12 = NaniteMicropolygonComputeRasterizer::edge_function_fixed(10, 10, v1x, v1y, v2x, v2y);
+        assert!(out_e12 < 0);
+    }
+
+    #[test]
+    fn cluster_cone_culling_facing_away_is_culled() {
+        let engine = NaniteMicropolygonComputeRasterizer;
+        let mut tile_buffer = TileDepthBuffer::default();
+
+        let frustum = ViewFrustum {
+            planes: [
+                [1.0, 0.0, 0.0, 10.0],
+                [-1.0, 0.0, 0.0, 10.0],
+                [0.0, 1.0, 0.0, 10.0],
+                [0.0, -1.0, 0.0, 10.0],
+                [0.0, 0.0, 1.0, 1.0],
+                [0.0, 0.0, -1.0, 100.0],
+            ],
+        };
+
+        // Cluster cone pointing in same direction as camera (+Z), facing away from view (-Z)
+        let cluster_backface = GeometryCluster {
+            cluster_id: 201,
+            bounds: ClusterBoundingSphere { center: [0.0, 0.0, 5.0], radius: 1.0 },
+            cone_axis: [0.0, 0.0, 1.0],
+            cone_cutoff: 0.99, // very tight cone pointing away
+            triangles: vec![],
+        };
+
+        let res = engine.process_cluster_batch(
+            &[cluster_backface],
+            &frustum,
+            [0.0, 0.0, 1.0],
+            &mut tile_buffer,
+        );
+
+        assert_eq!(res.culled_clusters, 1);
+        assert_eq!(res.frustum_visible_clusters, 0);
+    }
+
+    #[test]
+    fn tile_depth_buffer_updates_on_closer_fragments() {
+        let mut buffer = TileDepthBuffer::default();
+        assert_eq!(buffer.depth[0], 1.0);
+
+        // Overwrite with closer depth
+        buffer.depth[0] = 0.35;
+        buffer.cluster_id[0] = 42;
+
+        assert!((buffer.depth[0] - 0.35).abs() < 1e-6);
+        assert_eq!(buffer.cluster_id[0], 42);
     }
 }

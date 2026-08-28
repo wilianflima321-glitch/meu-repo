@@ -122,9 +122,13 @@ describe('maestro-creative-pulse', () => {
       expect(pulse.value.j12Stopped).toBe(true)
       expect(pulse.value.squad.dispatched).toBe(true)
       expect(pulse.value.quality.ok).toBe(true)
+      // Conveyor nucleus (Creative #1): preflight HOLDS the reservation — balance stays debited
+      // until dispatch settles or release refunds it. No reserve→cancel→re-reserve TOCTOU.
+      expect(pulse.value.reservationPreflightOk).toBe(true)
+      expect(pulse.value.reservationId.length).toBeGreaterThan(0)
+      expect(pulse.value.reservationFunding).toBe('usage_bucket')
+      expect(ledger.balances.get('u1')).toBe(10_000 - 200)
     }
-    // Preflight must refund — balance restored after cancel
-    expect(ledger.balances.get('u1')).toBe(10_000)
   })
 
   it('fail-closes when OrchestratorProd is requested (J.12 STOPPED)', async () => {

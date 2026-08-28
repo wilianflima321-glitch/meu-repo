@@ -74,7 +74,7 @@ If Aethel's interface relies on AI to overcome bad design, convoluted menus, or 
 | **Unreal Metahuman Creator** | Closed cloud SaaS app; slow downloading of 50GB+ assets; non-customizable facial rig math. | **Metahuman Face & Blendshape Studio (`FacialBlendshapePanel.tsx`):** Subsurface scattering skin shader (`lux_facial_subsurface_occlusion.rs`) with 64 ARKit blendshapes. |
 | **Unreal Niagara VFX System** | High node complexity; steep learning curve; separate module from material shaders. | **Niagara-Supremacy GPU VFX Graph (`NiagaraVfxGraphPanel.tsx`):** Unified fluid & particle solver (`lattice_boltzmann_fluid_solver.rs`) compiled to native WGSL. |
 | **Unreal Lumen GI & Nanite** | High VRAM consumption (requires 8GB+ GPU); non-functional on low-end WebGL/mobile. | **Radiance Field Splatting + VSVM (`ViewportStudioPanel.tsx`):** 3D Gaussian Splatting + Clustered VSVM running on WebGPU/Vulkan with 60 FPS on any hardware. |
-| **Cursor IDE Composer & Agent** | Simple chat interface; lacks 3D viewport inspection; truncates long responses; single-model reliance. | **AI Triumvirate MoA Hub (`AiTriumviratePanel.tsx`):** Parallel Qwen, Gemini, Llama 405B, Veo 3, and DeepSeek R1 working in tandem with zero truncation. |
+| **Cursor IDE Composer & Agent** | Simple chat interface; lacks 3D viewport inspection; truncates long responses; single-model reliance. | **AI Triumvirate MoA Hub (`AiTriumviratePanel.tsx`):** Parallel **DeepSeek-V4-Pro**, Gemini, Claude, and Veo 3 working in tandem with zero truncation (**#67**; Qwen/Llama expunged). |
 
 ---
 
@@ -140,10 +140,10 @@ If Aethel's interface relies on AI to overcome bad design, convoluted menus, or 
 
 #### A. Interface Layout & Components
 * **Header Bar:**
-  * Model Squad Status Badges: `Claude 3.5 Sonnet (Master)`, `Qwen 3.6 Plus (Code Auditor)`, `Gemini 2.5 Flash (Vision & Lore Auditor)`, `Llama 3.1 405B (Narrative Architect)`, `DeepSeek R1 (Math)`.
+  * Model Squad Status Badges: `Claude 3.5 Sonnet (Master)`, `DeepSeek-V4-Pro (Code/Engine Auditor)`, `Gemini 2.5 Flash (Vision & Lore Auditor)`, `GPT-4o (Narrative Architect)`, `mini-IA (NPC Dialogue)` (**#67**).
   * OpenRouter Fusion Status: `Connected | Latency: 42ms | Active Squad: 3 Sub-Agents`.
-* **Left Sub-Panel (Parallel Multi-Model Output Matrix):**
-  * Vertical split tabs showing live responses from Qwen, Gemini, Llama, and DeepSeek in real-time.
+  * **Left Sub-Panel (Parallel Multi-Model Output Matrix):**
+  * Vertical split tabs showing live responses from DeepSeek-V4-Pro, Gemini, Claude, and GPT-4o in real-time.
   * Individual Confidence Score meters (`99.4% Confidence`).
   * Status Pill: `Task 100% Completed (Zero-Truncation Guaranteed)`.
 * **Right Sub-Panel (Master Orchestrator Unified Synthesis & Command Prompt):**
@@ -362,7 +362,7 @@ If Aethel's interface relies on AI to overcome bad design, convoluted menus, or 
 
 #### A. Interface Layout & Components
 * **API Key & OpenRouter Configuration:**
-  * Encrypted input fields for OpenRouter API Key, Anthropic API Key, Google Gemini Key, Meta Llama Key.
+  * Encrypted input fields for OpenRouter API Key, Anthropic API Key, Google Gemini Key, DeepSeek API Key (**#67**; Llama expunged).
   * Balance Indicator & Cost Guard Thresholds (`$1.00 USD Reserve Guard active`).
 * **Project Knowledge Index Inspector (`.aethel/knowledge/`):**
   * Project ID, Symbol Graph Hash, Total Indexed Files, Cloud Sync Status (`Synced`).

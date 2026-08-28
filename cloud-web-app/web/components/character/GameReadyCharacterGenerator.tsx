@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * Letter cb — Studio tool: Generate game-ready character.

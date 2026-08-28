@@ -400,6 +400,36 @@ export const INTERNAL_RUNTIME_GOVERNANCE_DECISIONS: InternalRuntimeGovernanceDec
     evidenceSignals: ['provider-session', 'cost-receipt', 'approval-receipt'],
     nextAction: 'Ensure connections run server-side with strict key-vault protection.',
   },
+  {
+    modulePath: 'lib/wasm-runtime.ts',
+    decision: 'hold',
+    ownerSurface: 'agent-runtime',
+    boundary: 'worker-held',
+    reason: 'WasmRuntime is a scaffold: executeLogic returns null, initialize() exposes bound JS methods as a fake WasmModule, and checkCollision always returns false. Wiring it would ship a placeholder WASM executor as real determinism.',
+    risks: ['parallel-runtime', 'creative-gap'],
+    evidenceSignals: ['wasm-module', 'execution-receipt', 'determinism-fingerprint'],
+    nextAction: 'Hold as HELD until a real WASM/bytecode compile-execute path with evidence receipts replaces the placeholder; never expose getWasmRuntime() to game logic.',
+  },
+  {
+    modulePath: 'lib/world/orchestrator.ts',
+    decision: 'hold',
+    ownerSurface: 'generation-runtime',
+    boundary: 'server-only',
+    reason: 'WorldOrchestrator runGenerationQueue marks every task "done" after a 100ms sleep (simulated generation) and emits world_ready progress 1 without any AI/asset call. Wiring it would fabricate a generated world.',
+    risks: ['agent-safety-risk', 'parallel-runtime'],
+    evidenceSignals: ['generation-id', 'asset-receipt', 'policy-check'],
+    nextAction: 'Hold as HELD until tasks dispatch to real generation endpoints with cost, policy, and provenance receipts; never emit world_ready from the simulated path.',
+  },
+  {
+    modulePath: 'lib/terminal/terminal-manager.ts',
+    decision: 'hold',
+    ownerSurface: 'ide-terminal',
+    boundary: 'ide-only',
+    reason: 'startProblemMatching is a log-only placeholder while BUILTIN_PROBLEM_MATCHERS patterns exist but are never applied to terminal output. Terminal execution is wired through ide-integration, so problem matching must be real or explicitly held.',
+    risks: ['debug-surface-risk', 'developer-experience-risk'],
+    evidenceSignals: ['problem-match-count', 'terminal-session', 'pattern-owner'],
+    nextAction: 'Keep IDE-only and implement real problem matching against session output, or keep the feature HELD; do not claim diagnostics from unparsed output.',
+  },
 ]
 
 export function listInternalRuntimeGovernanceDecisions(

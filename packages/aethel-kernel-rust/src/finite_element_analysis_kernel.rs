@@ -488,7 +488,7 @@ pub struct FiniteElementAnalysisSoakReport {
 /// Bar-truss global stiffness assemble+solve evidence shape (≠ LBM dust / NS project).
 pub const FEA_EVIDENCE_KIND: &str = "bar_truss_global_stiffness_solve";
 
-fn fea_evidence_fingerprint(
+pub fn fea_evidence_fingerprint(
     residual_small: bool,
     tip_displaced: bool,
     free_dof_in_range: bool,
@@ -877,5 +877,24 @@ mod tests {
         // Free tip diagonal blocks should be > 0.
         assert!(k[4 * n + 4] > 0.0);
         assert!(k[5 * n + 5] > 0.0);
+    }
+
+    #[test]
+    fn bar_element_axial_rigidity_positive() {
+        let bar = BarElement {
+            i: 0,
+            j: 1,
+            ea: SOAK_EA,
+        };
+        assert!(bar.ea > 0.0);
+        assert_ne!(bar.i, bar.j);
+    }
+
+    #[test]
+    fn fea_step_result_identity_invariants() {
+        let res = FeaStepResult::IDENTITY;
+        assert!(res.is_finite());
+        assert_eq!(res.tip_displacement, 0.0);
+        assert!(!res.solved);
     }
 }

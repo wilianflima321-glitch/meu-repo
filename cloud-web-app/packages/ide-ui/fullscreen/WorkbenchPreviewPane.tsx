@@ -19,7 +19,8 @@ export function WorkbenchPreviewPane({
 }: WorkbenchPreviewPaneProps) {
   const editorBridge = useEditorApplyBridge()
   const toast = useToast()
-  const pendingDiff = editorBridge?.pendingDiff ?? null
+  const pendingDiffs = editorBridge?.pendingDiffs ?? []
+  const pendingDiff = pendingDiffs.length > 0 ? pendingDiffs[0] : null
   const [isProposalPreviewing, setIsProposalPreviewing] = useState(false)
   const showProposalOverlay = previewMode !== 'console' && Boolean(pendingDiff)
   const canPreviewProposalArtifact = useMemo(
@@ -76,7 +77,7 @@ export function WorkbenchPreviewPane({
         return
       }
 
-      editorBridge.clearPendingDiff()
+      editorBridge.clearPendingDiffs()
       setIsProposalPreviewing(false)
       toast.success('Proposal applied', 'Governed apply passed production gates.')
     } catch (error) {
@@ -88,11 +89,11 @@ export function WorkbenchPreviewPane({
   }, [editorBridge, pendingDiff, toast])
 
   const handleRejectProposal = useCallback(() => {
-    if (!editorBridge?.pendingDiff) {
+    if (!pendingDiff) {
       return
     }
 
-    editorBridge.clearPendingDiff()
+    editorBridge?.clearPendingDiffs()
     setIsProposalPreviewing(false)
     toast.info('Proposal discarded', 'The patch preview was removed.')
   }, [editorBridge, toast])

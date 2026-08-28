@@ -54,7 +54,49 @@
   --aethel-radius-xl:    24px;
 
   --aethel-info: #60a5fa;
+  --aethel-info-light: #93c5fd;
+  --aethel-success: #10b981;
+  --aethel-success-light: var(--success);
+  --aethel-warning: var(--warning);
+  --aethel-warning-light: #fcd34d;
+  --aethel-error: var(--error);
+  --aethel-error-light: #fda4af;
+  --aethel-accent-light: #c4b5fd;
+  --aethel-neon-amber: #fbbf24;
+  --aethel-neon-emerald: #34d399;
+  --aethel-primary-rgb: 139, 162, 255;
+  --aethel-info-rgb: 96, 165, 250;
+  --aethel-accent-rgb: 167, 139, 250;
+  --aethel-warning-rgb: 251, 191, 36;
+  --aethel-panel: var(--panel);
+  --aethel-glass-bg: color-mix(in srgb, var(--panel) 70%, transparent);
+  --aethel-interactive-hover: color-mix(in srgb, var(--panel-2) 80%, transparent);
+}
 
+.studio-dock-handle-v {
+  width: 4px;
+  cursor: col-resize;
+  flex-shrink: 0;
+  background: transparent;
+  transition: background 120ms ease;
+}
+
+.studio-dock-handle-v:hover,
+.studio-dock-handle-v:active {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.studio-dock-handle-h {
+  height: 4px;
+  cursor: row-resize;
+  flex-shrink: 0;
+  background: transparent;
+  transition: background 120ms ease;
+}
+
+.studio-dock-handle-h:hover,
+.studio-dock-handle-h:active {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 * {

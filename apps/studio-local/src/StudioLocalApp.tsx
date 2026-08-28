@@ -6,25 +6,16 @@ import { Activity, Clapperboard, ChevronLeft, ChevronRight, Cpu, MonitorCheck, P
 import { createDesktopAdapter } from './desktop-bridge/createDesktopAdapter'
 import { STUDIO_LOCAL_DESKTOP_MANIFEST } from './desktop-capability-manifest'
 import { NativeIDEBackend } from './ide/NativeIDEBackend'
-import { AssetCookerPanel } from './panels/AssetCookerPanel'
 import { CapabilityProbe } from './panels/CapabilityProbe'
-import { CloudHandoffBridge } from './panels/CloudHandoffBridge'
-import { HardwareProfilerPanel } from './panels/HardwareProfilerPanel'
-import { JobsLane, type JobRecord } from './panels/JobsLane'
+import type { JobRecord } from './panels/JobsLane'
 import { LocalRuntimeStatus } from './panels/LocalRuntimeStatus'
 import { ScenePanel } from './panels/ScenePanel'
+import { SceneToolsWorkbench } from './panels/SceneToolsWorkbench'
 import { SidecarManager } from './panels/SidecarManager'
-import { TerminalPanel } from './panels/TerminalPanel'
 import { CinemaCompositorTimelinePanel } from './panels/CinemaCompositorTimelinePanel'
 import { AestheticStyleStudioPanel } from './panels/AestheticStyleStudioPanel'
 import { TelepathicArchitectDronePanel } from './panels/TelepathicArchitectDronePanel'
 import { SentinelHardwareMonitorPanel } from './panels/SentinelHardwareMonitorPanel'
-import { FpsOverlayBadge } from './panels/FpsOverlayBadge'
-import { LspFarmStatusPanel } from './panels/LspFarmStatusPanel'
-import { MonacoCodeEditorPanel } from './panels/MonacoCodeEditorPanel'
-
-// P4: Canonical AssetBrowser shared from web (same component, no duplication)
-import { AssetBrowserPanel } from '../../../cloud-web-app/web/components/studio/AssetBrowserPanel'
 
 type NativeSidecarCapability = {
   kind: string
@@ -200,7 +191,12 @@ export function StudioLocalApp() {
         </aside>
 
         {/* Content workspace */}
-        <section className="flex-1 flex flex-col gap-4 overflow-y-auto min-w-0">
+        <section
+          className={[
+            'flex-1 flex flex-col min-w-0',
+            activeTab === 'editor' ? 'overflow-hidden' : 'gap-4 overflow-y-auto',
+          ].join(' ')}
+        >
           {activeTab === 'cinema' && (
             <div className="grid grid-cols-1 gap-4 h-full">
               <CinemaCompositorTimelinePanel />
@@ -220,24 +216,13 @@ export function StudioLocalApp() {
             </div>
           )}
           {activeTab === 'editor' && (
-            <div className="grid grid-cols-2 gap-4 h-full">
-              <div className="flex flex-col gap-4 min-h-0">
-                <MonacoCodeEditorPanel />
-                <div className="relative">
-                  <FpsOverlayBadge probe={probe} />
-                  <ScenePanel backend={ideBackend} />
-                </div>
-                <TerminalPanel backend={ideBackend} />
-                <JobsLane adapter={adapter} jobs={jobs} onJobsChange={setJobs} />
-              </div>
-              <div className="flex flex-col gap-4">
-                <AssetBrowserPanel />
-                <AssetCookerPanel />
-                <HardwareProfilerPanel />
-                <LspFarmStatusPanel />
-                <CloudHandoffBridge probe={probe} />
-              </div>
-            </div>
+            <SceneToolsWorkbench
+              backend={ideBackend}
+              adapter={adapter}
+              probe={probe}
+              jobs={jobs}
+              onJobsChange={setJobs}
+            />
           )}
         </section>
       </main>

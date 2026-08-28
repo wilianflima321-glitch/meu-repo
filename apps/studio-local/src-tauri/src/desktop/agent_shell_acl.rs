@@ -5,6 +5,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use aethel_studio_local::ipc_surface::IpcAclClass;
+
 pub const AGENT_HOST_PTY_DENY_CODE: &str = "AGENT_HOST_PTY_DENIED";
 pub const LAW_AGENT_SHELL_POLICY: u32 = 48;
 
@@ -104,6 +106,40 @@ pub fn enforce_human_terminal_acl(meta: &TerminalCallerMeta) -> Result<(), Termi
     }
 }
 
+/// Gate an IPC command by its declarative ACL class (round R2, S-12). Only
+/// `AgentDeny` commands are refused for agent callers; `Public`/`HumanOnly` pass
+/// through here (HumanOnly stays declarative-only — no runtime interception layer).
+///
+/// The desktop module is binary-only, so the enforcement helper must live here
+/// (it can reference the lib crate's `ipc_surface::IpcAclClass`), not in the lib.
+pub fn enforce_ipc_acl(
+    class: IpcAclClass,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), TerminalAclDenyEvidence> {
+    if class != IpcAclClass::AgentDeny {
+        return Ok(());
+    }
+    let meta = TerminalCallerMeta {
+        caller_kind,
+        agent_tool,
+        agent_id,
+    };
+    enforce_human_terminal_acl(&meta)
+}
+
+/// Convenience for Tauri commands: `enforce_ipc_acl` mapped to a stable `Err(String)`.
+pub fn acl_or_deny_ipc(
+    class: IpcAclClass,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), String> {
+    enforce_ipc_acl(class, caller_kind, agent_tool, agent_id)
+        .map_err(|evidence| evidence.to_ipc_error())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -160,5 +196,28 @@ mod tests {
             ..Default::default()
         };
         assert!(enforce_human_terminal_acl(&meta).is_err());
+    }
+
+    #[test]
+    fn enforce_ipc_acl_gates_only_agent_deny_class() {
+        // Non-AgentDeny classes never refuse (no runtime interception layer).
+        assert!(enforce_ipc_acl(IpcAclClass::Public, None, None, None).is_ok());
+        assert!(enforce_ipc_acl(
+            IpcAclClass::HumanOnly,
+            Some("agent".into()),
+            None,
+            None,
+        )
+        .is_ok());
+        // AgentDeny refuses agent callers with Law #48 evidence.
+        let err = enforce_ipc_acl(IpcAclClass::AgentDeny, Some("agent".into()), None, None)
+            .expect_err("AgentDeny class must refuse agent callers");
+        assert_eq!(err.law, 48);
+        assert_eq!(err.code, AGENT_HOST_PTY_DENY_CODE);
+        assert!(enforce_ipc_acl(IpcAclClass::AgentDeny, None, None, None).is_ok());
+        // acl_or_deny_ipc maps to a stable String error carrying the deny code.
+        let ipc = acl_or_deny_ipc(IpcAclClass::AgentDeny, None, Some("tool".into()), None)
+            .expect_err("agent_tool marker must deny");
+        assert!(ipc.starts_with(AGENT_HOST_PTY_DENY_CODE));
     }
 }

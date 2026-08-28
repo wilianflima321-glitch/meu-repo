@@ -25,6 +25,10 @@ import {
   type CinematicDirectorPlan,
 } from '@/lib/sequencer/cinematic-director-bridge'
 import type { SequencerTimeline } from '@/lib/sequencer/core/types'
+import {
+  gateFilmPrevizMissionSuccess,
+  type J9FilmPrevizSuccessVerdict,
+} from '@/lib/production/j9-film-previz-barrier'
 
 const log = createComponentLogger('cinematic-visual-evidence')
 
@@ -51,6 +55,10 @@ export type CinematicVisualEvidenceResult = {
   visual: VisualEvidenceCaptureResult
   ledger?: TaskEvidenceLedger
   attachedImplemented: boolean
+  /** Top-8 deepen — J.9 barrier fingerprint when success allowed. */
+  previzBarrier?: J9FilmPrevizSuccessVerdict
+  /** False when J.9 barrier refuses success without fingerprint. */
+  filmPrevizSuccess: boolean
   shootBackend: 'engine_sequencer'
   veoDefault: false
   finalFootageHeld: true
@@ -58,6 +66,7 @@ export type CinematicVisualEvidenceResult = {
   /** Receipt refs for cinematic-evidence-spine / continuity. */
   evidenceRefs: string[]
   source: CinematicEvidenceSource
+  blockedReason?: string
 }
 
 /** Heuristic: Fusion prompt/job is cinematic-direct (engine shoot), not pixel-gen. */
@@ -172,16 +181,39 @@ export async function attachCinematicVisualEvidenceAfterShoot(
     }
   }
 
+  const attachedImplemented = visual.status === 'IMPLEMENTED' && visual.refs.length > 0
+  const projectId = ledger?.projectId ?? `cinematic:${input.timelineId}`
+  const gated = gateFilmPrevizMissionSuccess({
+    projectId,
+    proposedSuccess: attachedImplemented || visual.refs.length > 0,
+    visual,
+    attachedImplemented,
+    source: input.source,
+  })
+  const filmPrevizSuccess = gated.success === true
+  if (ledger && !filmPrevizSuccess && gated.blockedReason) {
+    ledger = appendTaskEvidence(ledger, {
+      kind: 'validation',
+      title: 'J.9 film/previz success barrier refused',
+      summary: gated.blockedReason,
+      refs: [`j9-barrier:${gated.barrierCode ?? 'refuse'}`, ...evidenceRefs.slice(0, 4)],
+      actor: 'j9-film-previz-barrier',
+    })
+  }
+
   const result: CinematicVisualEvidenceResult = {
     visual,
     ledger,
-    attachedImplemented: visual.status === 'IMPLEMENTED' && visual.refs.length > 0,
+    attachedImplemented,
+    previzBarrier: gated.verdict,
+    filmPrevizSuccess,
     shootBackend: 'engine_sequencer',
     veoDefault: false,
     finalFootageHeld: true,
     doctrine: CINEMATIC_DOCTRINE_ID,
     evidenceRefs,
     source: input.source,
+    blockedReason: filmPrevizSuccess ? undefined : gated.blockedReason,
   }
 
   log.info('cinematic_visual_evidence_attached', {
@@ -192,6 +224,7 @@ export async function attachCinematicVisualEvidenceAfterShoot(
     kind: visual.kind,
     webmHeld: visual.webmHeld ?? visual.kind !== 'webm',
     attachedImplemented: result.attachedImplemented,
+    filmPrevizSuccess,
     refs: evidenceRefs.length,
   })
 

@@ -357,7 +357,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
-          onNodeDragStop={(_: React.MouseEvent, __: Node, nodes: Node[]) => onNodesPositionChange(nodes)}
+          onNodeDragStop={(_event, _node, nodes: Node[]) => onNodesPositionChange(nodes)}
           nodeTypes={nodeTypes}
           fitView
           snapToGrid

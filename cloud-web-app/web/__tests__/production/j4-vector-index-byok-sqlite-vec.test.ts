@@ -12,6 +12,7 @@ import {
   createByokCloudEmbedProvider,
   createLocalHashEmbedProvider,
   getVectorIndexStats,
+  isVectorAnnReady,
   probeSqliteVecExtension,
   reindexProjectVectorStore,
   reindexProjectWithByokEmbed,
@@ -24,6 +25,7 @@ import {
   __resetSqliteVecProbeForTests,
   __setSqliteVecProbeForTests,
 } from '@/lib/server/vector-index/sqlite-vec-probe'
+import { __resetVectorStoreCacheForTests } from '@/lib/server/vector-index/store'
 
 describe('J.4 deepen — BYOK embed + sqlite-vec honesty', () => {
   let root: string
@@ -33,16 +35,23 @@ describe('J.4 deepen — BYOK embed + sqlite-vec honesty', () => {
     stopVectorIndexWatcher(projectId)
     __resetCreativeCostGuardForTests()
     __resetSqliteVecProbeForTests()
+    __resetVectorStoreCacheForTests()
     if (root) await fs.rm(root, { recursive: true, force: true }).catch(() => {})
   })
 
-  it('sqlite-vec probe reports HELD without claiming extension', () => {
+  it('sqlite-vec probe certifies available when package+vec0 soak OK (else honest HELD)', () => {
     __resetSqliteVecProbeForTests()
     const probe = probeSqliteVecExtension()
-    expect(probe.status).toBe('held')
-    expect(probe.sqliteVecExtension).toBe(false)
-    expect(probe.loaded).toBe(false)
-    expect(probe.reason.toLowerCase()).toMatch(/held|fallback|not installed|not certified/)
+    if (probe.status === 'available') {
+      expect(probe.sqliteVecExtension).toBe(true)
+      expect(probe.loaded).toBe(true)
+      expect(probe.vecVersion).toBeTruthy()
+      expect(probe.reason.toLowerCase()).toMatch(/soak ok|vec_version/)
+    } else {
+      expect(probe.sqliteVecExtension).toBe(false)
+      expect(probe.loaded).toBe(false)
+      expect(probe.reason.toLowerCase()).toMatch(/held|fallback|not resolvable|failed|abi/)
+    }
   })
 
   it('readiness is PARTIAL — never trueSemanticRecall on local-hash', async () => {
@@ -56,9 +65,47 @@ describe('J.4 deepen — BYOK embed + sqlite-vec honesty', () => {
     expect(readiness.searchQuality).toBe('lexical-hash')
     expect(readiness.trueSemanticRecall).toBe(false)
     expect(readiness.platformPaysEmbeddings).toBe(false)
-    expect(readiness.sqliteVecStatus).toBe('held')
-    expect(readiness.blockers).toContain('native_sqlite_vec_extension_held')
     expect(readiness.blockers).toContain('true_semantic_recall_requires_byok_cloud_index')
+    expect(readiness.blockers).toContain('embed_provider_local_hash_partial')
+
+    const probe = probeSqliteVecExtension()
+    expect(readiness.sqliteVecStatus).toBe(probe.status)
+    if (probe.status === 'held') {
+      expect(readiness.blockers).toContain('native_sqlite_vec_extension_held')
+    } else {
+      expect(readiness.blockers).not.toContain('native_sqlite_vec_extension_held')
+      expect(readiness.sqliteVecExtension).toBe(true)
+    }
+  })
+
+  it('native ANN path returns hits when probe available (else JS cosine still retrieves)', async () => {
+    root = await fs.mkdtemp(path.join(os.tmpdir(), 'aethel-j4-ann-'))
+    await fs.writeFile(
+      path.join(root, 'physics.ts'),
+      'export function applyGravity(v: number) { return v - 9.8 }\n',
+      'utf8',
+    )
+    await fs.writeFile(path.join(root, 'ui.ts'), 'export const buttonLabel = "ok"\n', 'utf8')
+    await reindexProjectVectorStore({ projectId, rootPath: root })
+
+    const result = await searchVectorIndex({
+      projectId,
+      query: 'apply gravity physics',
+      topK: 3,
+    })
+    expect(result.hits.length).toBeGreaterThan(0)
+    expect(result.hits[0].filePath).toContain('physics')
+
+    const stats = getVectorIndexStats(projectId)
+    const probe = probeSqliteVecExtension()
+    if (probe.sqliteVecExtension) {
+      expect(isVectorAnnReady(projectId)).toBe(true)
+      expect(stats.annBackend).toBe('sqlite-vec-vec0')
+      expect(stats.sqliteVecStatus).toBe('available')
+    } else {
+      expect(stats.annBackend).toBe('js-cosine')
+      expect(stats.sqliteVecStatus).toBe('held')
+    }
   })
 
   it('free tier / missing BYOK key cannot resolve byok-cloud (fail-closed, local-hash ok)', async () => {
@@ -189,20 +236,30 @@ describe('J.4 deepen — BYOK embed + sqlite-vec honesty', () => {
     if (!denied.ok) expect(denied.reason).toBe('BYOK_CLOUD_EMBED_REQUIRES_KEY')
   })
 
-  it('stats expose sqliteVecStatus held + lexical searchQuality', async () => {
+  it('forced held probe keeps JS cosine path (no fake ANN)', async () => {
     __setSqliteVecProbeForTests({
       status: 'held',
       loaded: false,
       sqliteVecExtension: false,
       reason: 'test held',
     })
+    __resetVectorStoreCacheForTests()
     root = await fs.mkdtemp(path.join(os.tmpdir(), 'aethel-j4-stats-'))
     await fs.writeFile(path.join(root, 'z.ts'), 'export const z = 3\n', 'utf8')
     await reindexProjectVectorStore({ projectId, rootPath: root })
     const stats = getVectorIndexStats(projectId)
     expect(stats.sqliteVecExtension).toBe(false)
     expect(stats.sqliteVecStatus).toBe('held')
+    expect(stats.annBackend).toBe('js-cosine')
     expect(stats.searchQuality).toBe('lexical-hash')
     expect(stats.embedProvider).toBe('local-hash')
+    expect(isVectorAnnReady(projectId)).toBe(false)
+
+    const result = await searchVectorIndex({
+      projectId,
+      query: 'export const z',
+      topK: 2,
+    })
+    expect(result.hits.length).toBeGreaterThan(0)
   })
 })

@@ -1,5 +1,3 @@
-use wgpu::util::DeviceExt;
-
 pub struct SkyboxPass {
     pub pipeline: wgpu::RenderPipeline,
 }
@@ -57,7 +55,6 @@ impl SkyboxPass {
                 alpha_to_coverage_enabled: false,
             },
             multiview: None,
-            cache: None,
         });
 
         Self {

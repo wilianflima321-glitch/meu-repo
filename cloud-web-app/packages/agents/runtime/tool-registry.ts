@@ -1,4 +1,4 @@
-import type { AgentType } from '../../../web/lib/agent-orchestrator'
+import type { AgentType } from './agent-roles'
 import type { AgentRuntimeRoleManifest, AgentRuntimeToolPermission } from './types'
 
 export function toolPermission(input: AgentRuntimeToolPermission): AgentRuntimeToolPermission {

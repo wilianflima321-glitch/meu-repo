@@ -393,6 +393,18 @@ fn build_face_adjacency(indices: &[u32]) -> Vec<Vec<usize>> {
             adj[faces[1]].push(faces[0]);
         }
     }
+    // Determinism (AAA cook contract — `cook_is_not_random_centers`):
+    // `edge_to_faces` is a `std::collections::HashMap` whose iteration order is
+    // randomized per instance (RandomState seeded from OS entropy), so the
+    // neighbor order pushed into each `adj[f]` varied between runs. That flipped
+    // the BFS vertex-insertion order inside `cook()`, changing the f32 summation
+    // order in `compute_bounding_sphere` and producing bit-different centers for
+    // identical input. The neighbor *set* is deterministic; sorting each list by
+    // face index makes the order deterministic too, so the whole cook is
+    // bit-stable for identical input.
+    for neighbors in adj.iter_mut() {
+        neighbors.sort_unstable();
+    }
     adj
 }
 

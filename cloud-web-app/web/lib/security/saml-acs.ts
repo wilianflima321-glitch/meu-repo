@@ -1,4 +1,5 @@
 import { createHash, X509Certificate, createVerify } from 'node:crypto';
+// @ts-ignore
 import { XMLParser } from 'fast-xml-parser';
 import { getSamlReadiness } from './saml';
 

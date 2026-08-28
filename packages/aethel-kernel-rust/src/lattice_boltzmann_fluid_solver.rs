@@ -647,7 +647,7 @@ pub struct LatticeBoltzmannFluidSolverSoakReport {
 /// Dust + bounce-back wall LBM evidence shape (≠ gas thermal buoyancy / NS project).
 pub const FLUID_EVIDENCE_KIND: &str = "fluid_dust_bounceback";
 
-fn fluid_evidence_fingerprint(
+pub fn fluid_evidence_fingerprint(
     mass_drift: f64,
     dust_responded: bool,
     bounce_back_walls: bool,
@@ -759,7 +759,7 @@ fn micro_soak_grid() -> LatticeBoltzmannFluidGrid {
     g
 }
 
-fn load_scale_soak_grid() -> LatticeBoltzmannFluidGrid {
+pub fn load_scale_soak_grid() -> LatticeBoltzmannFluidGrid {
     let mut g = LatticeBoltzmannFluidGrid::new(LOAD_SCALE_SIDE, LOAD_SCALE_SIDE);
     g.seed_settled_dust(0.2);
     g
@@ -1085,5 +1085,24 @@ mod tests {
         assert!(field.pressure_monotonic);
         assert!(!fluid.full_lbm_parity_ready);
         assert!(!fluid.chaos_fluid_aaa_ready);
+    }
+
+    #[test]
+    fn d2q9_lattice_weights_sum_to_one() {
+        let sum: f32 = W.iter().sum();
+        assert!((sum - 1.0).abs() < 1e-6, "D2Q9 weights sum to {sum}");
+    }
+
+    #[test]
+    fn d2q9_opposite_directions_involution() {
+        for i in 0..9 {
+            let opp = OPP[i];
+            assert_eq!(OPP[opp], i, "Bounce-back involution failed for direction {i}");
+            if i != 0 {
+                // Vector must point in exact opposite direction
+                assert_eq!(CX[i], -CX[opp]);
+                assert_eq!(CY[i], -CY[opp]);
+            }
+        }
     }
 }

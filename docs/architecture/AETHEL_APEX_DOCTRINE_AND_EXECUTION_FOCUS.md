@@ -49,8 +49,8 @@ When the user pins Sonnet/Opus: **Maestro decomposes**, keeps the **critical nuc
 
 | Pool state | What Apex selects | Explicitly forbidden |
 |------------|-------------------|----------------------|
-| **Premium remaining** | Domain elite closed/frontier: e.g. **Claude Sonnet-class, GPT-4o-class, DeepSeek V3-class** for complex code | Mid/weak “budget chat” as Worker |
-| **Premium empty** | **Elite open-weights** with high reasoning + max context (e.g. **Grok-class, Qwen 72B-class**, peers at Arena top for domain) | Nano, flash-lite, “basic,” random free router as product fallback |
+| **Premium remaining** | Domain elite closed/frontier: **DeepSeek-V4-Pro (Apex)** for complex code / Rust-Kernel, **Claude Sonnet-class, GPT-4o-class** peers | Mid/weak “budget chat” as Worker |
+| **Premium empty** | **DeepSeek-V4-Pro (Fast pool)** — high reasoning + max context; **absolute backend spine (#67)**; Qwen / Grok / Llama **expunged** from supported lanes | Nano, flash-lite, “basic,” random free router as product fallback |
 | **Hero / Ultra** | Opus / o1-class via wallet/BYOK/PAYG only | Ultra on subscription included |
 
 **LMSYS Chatbot Arena (and successors):** `FusionSpecialistRegistry` must track **top Arena (or Aethel golden-bench) models per TaskDomain**, refreshed on a cadence (≤ monthly). Stale registry → Critic QA fail on router PR.
@@ -59,9 +59,9 @@ When the user pins Sonnet/Opus: **Maestro decomposes**, keeps the **critical nuc
 
 | TaskDomain | Apex preference (Premium path) | Apex fallback (Premium empty → Fast pool) |
 |------------|--------------------------------|-------------------------------------------|
-| Complex code (TS/Rust/C++) | Sonnet / GPT-4o / DeepSeek V3 | Qwen-72B-class / Grok-class / top open code |
+| Complex code (TS/Rust/C++) | **DeepSeek-V4-Pro (Apex)** / Sonnet / GPT-4o | DeepSeek-V4-Pro (Fast pool) / top open code |
 | Shader / WGSL | Same code elite with shader bench win | Top open code + long context |
-| Lore / narrative | Top creative Arena for writing | Top open 70B+ creative |
+| Lore / narrative | Maestro (Claude 3.5 Sonnet / GPT-4o) — **DeepSeek banned (#67)** | NPC dialogue → downloadable mini-IA first; surplus prose → Maestro |
 | Extract / structure | Strong structured model (still **elite mid+**, not Nano) | Same class open-weights |
 | Critic / plan | Premium elite if any left | Strongest open-weights ≠ Actor family |
 

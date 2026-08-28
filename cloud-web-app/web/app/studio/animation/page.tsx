@@ -1,4 +1,4 @@
-﻿import { Suspense } from 'react'
+import { Suspense } from 'react'
 import CharacterStudioClient from './CharacterStudioClient'
 
 export default function CharacterStudioPage() {

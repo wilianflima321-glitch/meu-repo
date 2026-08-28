@@ -19,10 +19,10 @@ Onda K adds **next-decade rendering** without breaking the Onda G nuclear stack:
 | **Aethel Gaussian Splatting Hybrid (3DGS)** | Hero splats + Micro-Poly depth-aware composite | Hybrid mesh + splat (industry emerging) |
 | **Aethel Spatial Computing** | WebXR / PCVR @ 90 FPS with foveation | Meta Quest / PCVR runtimes |
 
-**Engineering cost vs Wedge (binding decision #46):**  
+**Engineering cost vs the parallel dev trains (doctrine #72):**
 - **Now (Ondas C–D):** design contracts + G-buffer motion vectors + async compute slots + cook pipeline hooks — **no heavy ONNX / radix sort / XR ship**.  
 - **Onda K (post-G):** native implementation of neural cores, GPU radix sort, stereoscopic instancing.  
-- **Wedge (24 months) is NOT delayed** by K — K is parallel long pole **after** G acceptance.
+- **The parallel dev trains (public launch gated by #72) are NOT delayed** by K — K is a parallel long pole **after** G acceptance.
 
 **Zero-MVP:** No “Frame Gen native” or “3DGS production” marketing until K acceptance suites pass.
 
@@ -247,7 +247,7 @@ export interface StereoscopicDrawIndirect {
 | **K.4** | Spatial XR single-pass stereo + foveated + score downgrade | G.3, Law XV | K |
 | **K.5** | **Ambient / Wi-Fi Sensing + Affective Computing** — CSI edge TinyML, `AmbientEmotionDelta` → NPC BT, CostGuard-gated MoA, physics posture ports | M.0 ambient kernel, Law XVI | K (post-G); **K.0 ax + az + physics ba + Law III apply bb CLOSED**; CSI hardware / Euphoria AAA **HELD**; enhancement-only / Zero-UI |
 
-**Parallel to Wedge:** K does **not** block RTv1 Hub, H, I, or J. **Blocks:** marketing “next-gen neural/spatial” claims only.
+**Parallel to the dev trains:** K does **not** block RTv1 Hub, H, I, or J. **Blocks:** marketing “next-gen neural/spatial” claims only (and public launch waits for #72).
 
 ---
 
@@ -447,3 +447,98 @@ Founder AAA gap #2. Portable **HAL trait** for wgpu → DX12/Vulkan/Metal; **PS5
 | **K-ACC-05** | K disabled = G pixel hash identical | GF-RAD-001 |
 
 See [`AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md`](AETHEL_SUPREMACY_EXECUTION_PLAYBOOK.md) for fixture definitions.
+
+---
+
+## Latent Audio & AV-Sync Vanguard (binding — 3 Leis da Adaptação Universal + Roo-Loop Agêntico)
+
+**Doctrine:** audio is not a post-process. The AV sync is a **Vanguard surface** (Law IV MetaSounds + Law I SAB + Law XV LOD) with its own acceptance ladder, on the **Sólido vs Metamorfo** spectrum (Zero Imposição). Applies to every Rust kernel, not just this spec.
+
+### The Sólido vs Metamorfo spectrum (Zero Imposição)
+
+| Pole | Semantics | Kernel behavior |
+|------|-----------|-----------------|
+| **Sólido** | Pure fidelity baking — deterministic substrate passthrough, bit-stable, no morphing | Compiled graph renders the exact intended timbre/footprint; replay bit-identical |
+| **Fluido / Metamorfo** | Reactive morphing — the same node reacts to physics, stamina, geometry, player intent | One audio node derives foley + resonance + voice + diffraction + synesthesia |
+
+The spectrum is a **parameter, never a toggle**: every Phase 2 kernel reports which pole it ran in and why. Zero Imposição = the engine never forces a morph; the physics/geometry data decides it, measured and honest.
+
+### The 3 Leis da Adaptação Universal (binding spine of ALL Rust code)
+
+| Lei | Name | Mandate | Substrate (real, closed) |
+|-----|------|---------|--------------------------|
+| **Lei 1** | **Automação Semântica (Cérebro Passivo)** | The engine adapts to the scene/data **passively** — no authorial intervention required; the semantics of the physics/geometry/context drive every adaptive decision | soak-gated substrate-composition doctrine (kb..kh); `svo_depth_lod`, `gaze_foveated_reprojection` (gt) |
+| **Lei 2** | **Amortecedor Poético (Portão de Sanidade)** | Every SDF/geometry anomaly fails closed through the poetic dampener — NaN/Inf SDF becomes a volumetric fog boundary, never a crash or a mock | [`poetic_error_handler.rs`](../../packages/aethel-kernel-rust/src/poetic_error_handler.rs) — `intercept_sdf_anomaly(raw_distance, p)` (23 lines, REAL) |
+| **Lei 3** | **Parallax de Performance-LODs Dinâmicos** | Per-band cost LODs — audio/fidelity detail scales with Capability Score (Law XV) and distance/perception, never a flat "high/medium/low" | `svo_depth_lod`, `infinite_anti_aliasing` (gi), `spatio_temporal_denoiser` (kg) |
+
+### Roo-Loop Agêntico (Actor-Critic closed loop — silent, master-grade-only)
+
+Workforce / Maestro agents run an **internal** generate → test → criticize → regenerate loop. They **never pollute the developer context** with intermediate attempts: only the master-grade result surfaces to the developer/ledger. This is the Law XI Actor-Critic discipline applied to the audio/AV surface — see [`AETHEL_AI_FUSION_CREATIVE_SPEC.md`](AETHEL_AI_FUSION_CREATIVE_SPEC.md).
+
+### Phase 2 kernel charter (round ki — latent audio adaptation, real kernels)
+
+Honest SUBSTRATE-REAL vs TRUE-GAP matrix (data-grounded, byte-verified 2026-08-14):
+
+| System | SUBSTRATE-REAL (existing, closed) | TRUE-GAP (round ki injects) |
+|--------|----------------------------------|-----------------------------|
+| **S1 Foley Biomecânico** | `procedural_muscle_locomotion` (jw) `LocomotionMetrics` (foot_plant_events, tendon_work), `muscle_sim_rig` PD, `fm_additive_synthesis` (ej) Treasury, jx `GranularSynthesizer` + `ModalSynthesizer` | **The coupling kernel** — gait cadence/foot-plant force modulates granular density/pitch + modal foot-strike impact |
+| **S2 Ressonância de Cavidade Helmholtz** | `aerodynamic_navier_stokes` (gv) `FluidGrid2D` (u/v/p), jx `AeroAcoustic::lighthill_source_strength`, jx `ModalSynthesizer`, `acoustic_reverb_geometry` RT60 | **The cavity resonator** — f_helm = (c/2π)·√(A/(V·L_eff)) from geometry + NS neck-flow excitation → modal ring |
+| **S3 Trato Vocal Kelly-Lochbaum** | jx `KellyLochbaumVocalTract` + `PhonemeParams` (breathiness, glottal_area_cm2, f0) **ALREADY REAL** (formant shift measured /i/ vs /a/) | **Partial** — stamina/effort model → breathiness↑ + f0 droop + glottal leakage ("breathless NPC") |
+| **S4 Difração Acústica SDF** | `sdf_audio_raymarching` (ex) `march_occlusion` (transmission + lowpass_gain, pure path-length attenuation) | **Frequency-dependent corner diffraction** — low freqs bend around edges (Keller/Huygens), highs blocked |
+| **S5 Matriz Sinestésica** | `synesthetic_sensory_remap` (dx) density→acoustic/radiation/tremor; `aethel_synapse_link_haptics` impact→haptics | **One audio node → haptics + screen-shake + chromatic aberration simultaneously** |
+
+**9-concept map (audio/AV blueprint → substrate/gap):** microfracture acoustic degradation (voronoi `ip2` + jx modal — gap: acoustic event coupling), Helmholtz cavities (→ S2), SDF diffraction (→ S4), psicoacústica (→ S5 + dx), biomechanical foley (→ S1), Kelly-Lochbaum (→ S3), subsurface acoustic scattering (kd/`strand_hair_subsurface_skin` + S4 analog), Mach-1 sonic booms (gv NS + jx Lighthill — gap: shock signature generator), spectral AI hearing (jx `spectral_peak_in_band` real — feeds S5).
+
+**Zero-MVP (binding):** no round ki `*_ready` flips without a measured physical invariant; `latent_audio_aaa_ready` / `physically_based_audio_aaa_ready` / `hrtf_aaa_ready` stay **false (HELD)**. J.11/J.12 STOPPED; strictly backend — no UI.
+
+---
+
+## 5. The 5 Post-Launch Frontiers (O Futuro Pós-Lançamento da Aethel Engine)
+
+Following the completion of the Launch Hard Gate #72 (100%+ Parity & Supremacy) and public launch (R6/R7), the Aethel Engine's long-term expansion evolves across **5 Specialized Vanguard Frontiers**:
+
+```
+                                    ┌───────────────────────────────────────────────────────────┐
+                                    │         O FUTURO PÓS-LANÇAMENTO: AS 5 FRONTEIRAS          │
+                                    └─────────────────────────────┬─────────────────────────────┘
+                                                                  │
+         ┌──────────────────────────────┬─────────────────────────┴─────────────────────────┬──────────────────────────────┐
+         ▼                              ▼                                                   ▼                              ▼
+┌──────────────────┐           ┌──────────────────┐                                ┌──────────────────┐           ┌──────────────────┐
+│ 1. NEURAL & 3DGS │           │ 2. REALIDADE     │                                │ 3. ESCALA        │           │ 4. SIMULADORES   │
+│ (Gaussian        │           │    ESPACIAL (XR) │                                │    PLANETÁRIA    │           │    PESADOS       │
+│  Splatting)      │           │ (Vision Pro/VR)  │                                │ (MMOs Cosmos)    │           │ (Voo e Corrida)  │
+└──────────────────┘           └──────────────────┘                                └──────────────────┘           └──────────────────┘
+                                                                  ▼
+                                                       ┌──────────────────┐
+                                                       │ 5. CONSOLES      │
+                                                       │ (PS5, Xbox,      │
+                                                       │  Switch 2)       │
+                                                       └──────────────────┘
+```
+
+### 1. Fronteira 1: Renderização Neural & 3D Gaussian Splatting (3DGS)
+- **Day 1:** Rasterização tradicional de micropolígonos e texturas PBR.
+- **Evolução 3DGS:** Reconstrução fotorrealista instantânea de ambientes e objetos a partir de vídeos de 30 segundos capturados via smartphone, integrados ao depth-buffer do Render Graph sem modelagem poligonal manual.
+
+### 2. Fronteira 2: Realidade Virtual e Espacial (XR / VR / AR)
+- **Day 1:** Telas planas desktop e web.
+- **Evolução XR:** Suporte nativo para Apple Vision Pro, Meta Quest 3 e Valve Index com Foveated Rendering guiado por rastreamento ocular (Eye-Tracking Foveation) e cinemática de dedos com resposta háptica.
+
+### 3. Fronteira 3: Escala Planetária Contínua (Cosmos & MMOs de 64 bits)
+- **Day 1:** Mapas e cidades de 50 km² com relevo contínuo (World Forge).
+- **Evolução Cosmos:** Coordenadas Largas em 64 bits (Large World Coordinates - LWC) para planetas esféricos contínuos sem telas de carregamento entre superfície e órbita espacial.
+
+### 4. Fronteira 4: Gêneros Ultra-Especializados (Simuladores Pesados e RTS Massivo)
+- **Simuladores de Corrida:** Termodinâmica de pneus em tempo real (Pacejka Magic Formula avançada) e deformação de chassi de alta precisão (*iRacing/Assetto Corsa* class).
+- **Simuladores de Voo:** Aerodinâmica com túnel de vento computacional em GPU e meteorologia termodinâmica real (*MSFS* class).
+- **Estratégia em Tempo Real (RTS Massivo):** Campos de fluxo vetorial (*Flowfields*) para controlar 100.000+ unidades simultâneas (*Total War/StarCraft* class).
+- **MMORPGs com Economia Viva:** NPCs com memória de longo prazo (RAG neural) gerindo mercados e guildas autonomamente.
+
+### 5. Fronteira 5: Certificação Nativa de Consoles (PlayStation 5, Xbox Series e Nintendo Switch 2)
+- **Day 1:** Exportação nativa para Windows, Linux e Web (WebGPU/WASM).
+- **Evolução Consoles:** Pipelines de conformidade automática com TRC (Sony) e TCR (Microsoft) para publicação direta em 1 clique nas lojas dos consoles.
+
+### O Ecossistema Aberto de Plugins (Rust / WASM)
+- **Extensibilidade Infinita:** Desenvolvedores e estúdios globais criam e comercializam módulos matemáticos e solvers especializados no Marketplace da Aethel.
+- **Efeito de Rede:** Cada novo asset, shader e comportamento criado pela comunidade retroalimenta a base de conhecimento da IA, tornando o motor continuamente mais poderoso.

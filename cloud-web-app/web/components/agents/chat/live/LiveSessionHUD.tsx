@@ -34,6 +34,10 @@ export interface LiveSessionHUDProps {
   bargeIn?: boolean
   /** Optional blocked reason from CostGuard / claim reject */
   blockedReason?: string | null
+  /** NIMP active domains being processed in background */
+  activeDomains?: string[]
+  /** NIMP intent label */
+  nimpIntent?: string
 }
 
 const STATUS_LABEL: Record<LiveConnectionStatus, string> = {
@@ -53,6 +57,8 @@ export function LiveSessionHUD({
   amplitude = 0.5,
   bargeIn = false,
   blockedReason = null,
+  activeDomains = ['GEO', 'MAT', 'LGT', 'AUD'],
+  nimpIntent,
 }: LiveSessionHUDProps) {
   const [bargeFlash, setBargeFlash] = useState(false)
   const bargeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -143,8 +149,22 @@ export function LiveSessionHUD({
         </span>
       </div>
 
-      <div className="border-t border-[var(--aethel-border-secondary)] px-4 py-2">
+      <div className="flex items-center justify-between border-t border-[var(--aethel-border-secondary)] px-4 py-2">
         <LiveVoiceHonestyBadge compact />
+        {activeDomains.length > 0 && (
+          <div className="flex items-center gap-1">
+            <span className="text-[9px] font-mono uppercase text-[var(--aethel-text-quaternary)] mr-1">Squads:</span>
+            {activeDomains.map((dom) => (
+              <span
+                key={dom}
+                className="rounded border border-[color-mix(in_srgb,var(--aethel-neon-cyan)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-neon-cyan)_12%,transparent)] px-1.5 py-0.5 text-[8px] font-mono font-bold text-[var(--aethel-neon-cyan)] shadow-sm animate-pulse"
+                title={`Active AI Squad Domain: ${dom}`}
+              >
+                {dom}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>

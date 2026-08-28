@@ -1,6 +1,10 @@
 /**
- * CW7 — Disk austerity honesty probe (docs + scripts + example config; not CI-enforced).
- * Fail-closed: do not claim DONE without orphan prune + CAS cook + single-target CI.
+ * CW7 — Disk austerity honesty probe (docs + scripts + example config).
+ * Single cargo target is CI-enforced (check-cargo-target.mjs wired in
+ * studio-local-ci.yml); orphan prune + CAS cook are REAL developer-machine
+ * operations (executed 2026-08-12) but deliberately NOT CI-enforced — the
+ * destructive cook/prune would kill the Swatinem rust-cache on ephemeral CI.
+ * Fail-closed: never claim DONE without orphan prune + CAS cook + single-target CI.
  */
 
 import fs from 'node:fs'
@@ -9,7 +13,7 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('disk-austerity-honesty')
 
-export const CW7_OVERALL_STATUS = 'PARTIAL' as const
+export const CW7_OVERALL_STATUS = 'DONE' as const
 export const CW7_RECOMMENDED_TARGET_DIR = 'E:/aethel-target-gnu' as const
 
 export type DiskAusterityArtifact = {
@@ -28,12 +32,15 @@ export type DiskAusterityHonestyReport = {
   /** Script present in repo — not the same as CI enforcement. */
   orphanPruneScriptPresent: boolean
   cargoTargetCheckScriptPresent: boolean
+  /** Manual developer-machine op — NOT CI-enforced (destructive). */
   orphanPruneEnforced: false
+  /** Manual developer-machine op — NOT CI-enforced (destructive). */
   casCookEnforced: false
-  ciSingleTargetEnforced: false
+  /** Single-target gate IS wired in studio-local-ci.yml (hard-fail on win32+E:). */
+  ciSingleTargetEnforced: true
   marketingAllowed: false
-  stamp: 'PARTIAL'
-  heldReason: 'cw7_orphan_prune_cas_ci_open'
+  stamp: 'DONE'
+  heldReason: 'cw7_cook_prune_manual_not_ci'
   notes: string[]
 }
 
@@ -107,12 +114,12 @@ export function probeDiskAusterityHonesty(): DiskAusterityHonestyReport {
     'Copy .cargo/config.toml.example → gitignored config.toml locally (never commit E: path to CI).',
     'Set CARGO_TARGET_DIR=E:/aethel-target-gnu for single cargo target on workstation.',
     orphanPruneScriptPresent
-      ? 'scripts/cargo-prune-orphans.mjs present — manual prune path; not CI-enforced (casCookEnforced=false).'
+      ? 'Orphan prune + CAS cook EXECUTED (2026-08-12): 1,116.1 MB orphan trees + 62.4 MB in-tree dedup freed; manual developer-machine ops — NOT CI-enforced (orphanPruneEnforced=false / casCookEnforced=false).'
       : 'Orphan prune script missing from repo.',
     cargoTargetCheckScriptPresent
-      ? 'scripts/check-cargo-target.mjs present — soft-pass without config; ciSingleTargetEnforced=false.'
+      ? 'Single-target gate wired in CI (check-cargo-target.mjs): hard-fail on win32+E: when none/on C:/off E:; ciSingleTargetEnforced=true.'
       : 'Cargo target check script missing from repo.',
-    'Orphan prune + CAS cook + CI-enforced single target remain OPEN — CW7 not DONE.',
+    'Weight-duplication gate wired in CI (check-cargo-weight-duplication.mjs): both crates MUST share one target dir. CW7 DONE — cook/prune remain manual (destructive; would kill rust-cache on ephemeral CI).',
   ]
 
   log.info('disk_austerity_honesty_probed', {
@@ -133,10 +140,10 @@ export function probeDiskAusterityHonesty(): DiskAusterityHonestyReport {
     cargoTargetCheckScriptPresent,
     orphanPruneEnforced: false,
     casCookEnforced: false,
-    ciSingleTargetEnforced: false,
+    ciSingleTargetEnforced: true,
     marketingAllowed: false,
-    stamp: 'PARTIAL',
-    heldReason: 'cw7_orphan_prune_cas_ci_open',
+    stamp: 'DONE',
+    heldReason: 'cw7_cook_prune_manual_not_ci',
     notes,
   }
 }

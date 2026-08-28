@@ -16,6 +16,10 @@ export interface MeshTopologyMetrics {
   vertices: number
   uniqueEdges: number
   boundaryEdges: number
+  /** Connected components of boundary edges (closed loops) — kernel bw grader input. */
+  openBoundaryLoops: number
+  /** Vertices with zero incident edges — kernel bw grader input. */
+  isolatedVertices: number
   nonManifoldEdges: number
   /** nonManifoldEdges / uniqueEdges — primary deepen health score. */
   nonManifoldEdgeRatio: number
@@ -112,11 +116,17 @@ export function measureMeshTopology(mesh: RawMeshBuffer): MeshTopologyMetrics {
   let nonManifoldEdges = 0
   let featureEdgeCount = 0
   let manifoldInterior = 0
+  const boundaryEdgeEndpoints: Array<[number, number]> = []
 
-  for (const [, faces] of edgeFaces) {
+  for (const [key, faces] of edgeFaces) {
     const valence = faces.length
-    if (valence === 1) boundaryEdges++
-    else if (valence === 2) {
+    const [sa, sb] = key.split(':')
+    const a = Number(sa)
+    const b = Number(sb)
+    if (valence === 1) {
+      boundaryEdges++
+      boundaryEdgeEndpoints.push([a, b])
+    } else if (valence === 2) {
       manifoldInterior++
       const n0 = faceNormals[faces[0]!]!
       const n1 = faceNormals[faces[1]!]!
@@ -143,6 +153,34 @@ export function measureMeshTopology(mesh: RawMeshBuffer): MeshTopologyMetrics {
   for (let i = 0; i < vertices; i++) valenceTotal += valenceSum[i]!
   const avgVertexValence = vertices > 0 ? valenceTotal / vertices : 0
 
+  // Open boundary loops = connected components of boundary edges (kernel grader input).
+  const parent = new Map<number, number>()
+  const find = (x: number): number => {
+    let root = parent.get(x) ?? x
+    while ((parent.get(root) ?? root) !== root) root = parent.get(root)!
+    parent.set(x, root)
+    return root
+  }
+  const union = (a: number, b: number) => {
+    const ra = find(a)
+    const rb = find(b)
+    if (ra !== rb) parent.set(ra, rb)
+  }
+  for (const [a, b] of boundaryEdgeEndpoints) {
+    if (!parent.has(a)) parent.set(a, a)
+    if (!parent.has(b)) parent.set(b, b)
+    union(a, b)
+  }
+  const loopRoots = new Set<number>()
+  for (const v of parent.keys()) loopRoots.add(find(v))
+  const openBoundaryLoops = loopRoots.size
+
+  // Isolated vertices = no incident edge (kernel grader input).
+  let isolatedVertices = 0
+  for (let i = 0; i < vertices; i++) {
+    if (valenceSum[i] === 0) isolatedVertices++
+  }
+
   // Quad-ish: adjacent coplanar-ish pairs sharing an edge
   const paired = new Set<number>()
   let quadPairCandidates = 0
@@ -167,6 +205,8 @@ export function measureMeshTopology(mesh: RawMeshBuffer): MeshTopologyMetrics {
     vertices,
     uniqueEdges,
     boundaryEdges,
+    openBoundaryLoops,
+    isolatedVertices,
     nonManifoldEdges,
     nonManifoldEdgeRatio,
     manifoldEdgeRatio,

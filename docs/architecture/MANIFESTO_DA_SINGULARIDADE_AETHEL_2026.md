@@ -8,7 +8,9 @@
 
 As engines do passado foram construídas para a era do papel e da compilação lenta em C++. Elas fragmentaram a física da renderização e forçaram os criadores a pagar impostos de tempo em carregamentos pesados, bibliotecas estáticas e arquivos de 100 GB.
 
-A **Aethel Engine** encerra esse ciclo histórico através da **Singularidade Técnica**:
+A **Aethel Engine** encerra esse ciclo histórico através da **Singularidade Técnica Dual**:
+A Singularidade não ocorre porque a IA "roda" o jogo. A Singularidade ocorre quando o **Desenvolvedor Humano possui a Engine Matemática e Determinística Mais Poderosa do Mundo** acoplada **à IA de Automação de Fluxo Mais Poderosa do Mundo**. 
+Se a rede cair e a IA for desligada, o usuário ainda possui a ferramenta mais limpa, rápida e visualmente poderosa da indústria (Zero-AI Base Doctrine).
 
 ---
 

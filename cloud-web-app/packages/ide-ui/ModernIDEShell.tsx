@@ -33,6 +33,8 @@ import { useModernIDEPanels } from './modern-shell/useModernIDEPanels';
 // (the sole `createWorkspaceStore` call site) so every dock consumer, not
 // just this shell, is covered structurally. See its module doc comment.
 import { WorkspaceProvider } from './docking';
+import { ExportModal } from '../../web/components/engine/ExportModal';
+import { AethelSync } from './AethelSync';
 
 interface ModernIDEShellProps {
   projectId?: string;
@@ -131,6 +133,8 @@ export function ModernIDEShell({
     activeFilePath: statusBarProps?.activeFilePath ?? null,
   });
 
+  const [exportOpen, setExportOpen] = React.useState(false);
+
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -141,6 +145,21 @@ export function ModernIDEShell({
     fontFamily: tokens.typography.fontFamily.sans,
     overflow: 'hidden',
   };
+
+  React.useEffect(() => {
+    // Phase 3: Ultra-Low Latency Kernel Connection
+    // Attempt to bridge the React UI to the Rust ECS via WebSockets
+    AethelSync.connect();
+    
+    // We can expose the sync client to the window for debugging
+    if (typeof window !== 'undefined') {
+      (window as any).aethelEngine = AethelSync;
+    }
+    
+    return () => {
+      AethelSync.disconnect();
+    };
+  }, []);
 
   return (
     <WorkspaceProvider storageKey="aethel.ide.dock.v1">
@@ -158,8 +177,11 @@ export function ModernIDEShell({
         onRunPrimaryAction={onRunPrimaryAction}
         onOpenSettings={onOpenSettings}
         onOpenCommandPalette={onOpenCommandPalette}
+        onOpenExport={() => setExportOpen(true)}
         agentStatus={agentStatus}
       />
+
+      <ExportModal projectId={projectId!} isOpen={exportOpen} onClose={() => setExportOpen(false)} />
 
       {banner ? (
         <div

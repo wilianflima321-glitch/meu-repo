@@ -220,10 +220,26 @@ export async function POST(request: NextRequest) {
       })
 
       if (!orchestratorResult.ok || !orchestratorResult.url || !orchestratorResult.ready) {
+        if (!orchestratorResult.url) {
+          return capabilityResponse({
+            error: 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED',
+            status: 503,
+            message: orchestratorResult.message || 'L.8 Orchestrator failed to provision a reachable preview URL.',
+            capability: CAPABILITY,
+            capabilityStatus: 'PARTIAL',
+            metadata: {
+              mode: 'local_fallback',
+              strategy: 'local',
+              preferredRuntimeUrl: null,
+              provider: localProviderId,
+              sandboxSessionId: orchestratorResult.sandboxSessionId ?? null,
+              sandboxId: orchestratorResult.sandboxId ?? orchestratorResult.sandboxSessionId ?? null,
+              setupEnv: providerConfig?.setupEnv || ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
+            },
+          })
+        }
         return capabilityResponse({
-          error: orchestratorResult.url
-            ? 'RUNTIME_PROVISION_UNHEALTHY'
-            : 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED',
+          error: 'RUNTIME_PROVISION_UNHEALTHY',
           status: 503,
           message: orchestratorResult.message || 'L.8 Orchestrator failed to provision a reachable preview URL.',
           capability: CAPABILITY,

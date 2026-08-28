@@ -74,7 +74,10 @@ const SLOT_TO_KEY: Record<PaletteSlot, keyof XtermPalette> = {
   'bright-white': 'brightWhite',
 };
 
-function buildPalette(themeId: string, selectionSlot: PaletteSlot = 'selection'): XtermPalette {
+function buildPalette(
+  themeId: string,
+  selectionSlot: PaletteSlot | 'selection-soft' = 'selection',
+): XtermPalette {
   const palette = {} as XtermPalette;
   for (const slot of PALETTE_SLOTS) {
     const cssSlot = slot === 'selection' ? selectionSlot : slot;

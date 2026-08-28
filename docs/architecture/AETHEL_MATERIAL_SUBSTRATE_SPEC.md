@@ -12,6 +12,8 @@
 
 UE5 artists live in **Material Editor** + **Substrate**. Aethel cannot claim render parity with **hardcoded materials** in `aaa-renderer-impl.ts` or hex in TSX. **S1** is the **authoring + compilation** layer above bindless heaps.
 
+**Absolute Manual Supremacy Rule:** The node graph must be fully usable by a human Technical Artist without any AI assistance. They must be able to drag-and-drop math and texture nodes, adjust sliders, and see a deterministic, instant compilation to WGSL. AI may assemble a material graph for the user, but the user must be able to inspect and infinitely tweak it by hand.
+
 **Zero-MVP:** No "material system" marketing until graph → WGSL → viewport compiles and PSO fingerprints register.
 
 ---

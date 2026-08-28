@@ -46,14 +46,15 @@ export default function QuestEditor({
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((currentEdges) => addEdge({
+      setEdges((currentEdges: Edge[]) => addEdge({
         ...connection,
+        id: `e-${connection.source}-${connection.target}`,
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { stroke: 'var(--aethel-warning)', strokeWidth: 2 },
         label: 'requires',
         labelStyle: { fill: 'var(--aethel-warning)', fontSize: 10 },
         labelBgStyle: { fill: 'var(--aethel-surface-tertiary)' },
-      }, currentEdges));
+      } as Edge, currentEdges));
     },
     [setEdges]
   );
@@ -63,12 +64,12 @@ export default function QuestEditor({
   }, []);
 
   const updateNodeData = useCallback((id: string, data: QuestNodeData) => {
-    setNodes((currentNodes) => currentNodes.map((node) => (node.id === id ? { ...node, data } : node)));
+    setNodes((currentNodes: Node<QuestNodeData>[]) => currentNodes.map((node: Node<QuestNodeData>) => (node.id === id ? { ...node, data } : node)));
   }, [setNodes]);
 
   const deleteNode = useCallback((id: string) => {
-    setNodes((currentNodes) => currentNodes.filter((node) => node.id !== id));
-    setEdges((currentEdges) => currentEdges.filter((edge) => edge.source !== id && edge.target !== id));
+    setNodes((currentNodes: Node<QuestNodeData>[]) => currentNodes.filter((node: Node<QuestNodeData>) => node.id !== id));
+    setEdges((currentEdges: Edge[]) => currentEdges.filter((edge: Edge) => edge.source !== id && edge.target !== id));
   }, [setNodes, setEdges]);
 
   const addQuest = useCallback((category: string) => {
@@ -92,7 +93,7 @@ export default function QuestEditor({
       },
     };
 
-    setNodes((currentNodes) => [...currentNodes, newNode]);
+    setNodes((currentNodes: Node<QuestNodeData>[]) => [...currentNodes, newNode]);
   }, [setNodes]);
 
   return (

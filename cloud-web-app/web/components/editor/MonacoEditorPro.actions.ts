@@ -47,7 +47,7 @@ export function configureMonacoEditor(
     cursorBlinking: 'smooth',
     cursorSmoothCaretAnimation: 'on',
     smoothScrolling: true,
-    fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+    fontFamily: "var(--font-geist-mono), 'JetBrains Mono', 'Fira Code', Consolas, monospace",
     fontLigatures: true,
     renderWhitespace: 'selection',
     guides: {

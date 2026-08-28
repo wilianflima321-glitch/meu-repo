@@ -141,7 +141,10 @@ const swaggerHtml = (specUrl: string) => `
     }
     /* Logo */
     .swagger-ui .topbar .topbar-wrapper::before {
-      content: '🎮 ';
+      content: 'AETHEL // ';
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--aethel-docs-primary);
     }
   </style>
 </head>

@@ -2,6 +2,14 @@
 //!
 //! Implements real-time XPBD strand hair dynamics, microfacet BRDF hair shading (Marschner model),
 //! and Subsurface Scattering (SSS) for Metahuman skin realism.
+//! **HONESTY CORRECTION (2026-08-14 · letter kf):** the two lines below are a
+//! documented over-claim — the real shipped truth for this module is
+//! `MAX_HAIR_STRANDS = 2048` two-point CPU plain-gravity strands, not
+//! "100,000+ GPU XPBD curvature constraints". Real XPBD grooming
+//! (bend/twist/root + Verlet, 4096-strand CPU capacity, GPU dispatch plan
+//! toward 100k with execution HELD fail-closed) lives in
+//! [`gpu_strand_grooming`] (letter kf). Over-claim preserved verbatim for the
+//! audit trail — never market as shipped:
 //! Establishes technological supremacy over Unreal Engine 5.5 Metahumans by rendering 100,000+ hair strands
 //! with GPU XPBD curvature constraints.
 //!

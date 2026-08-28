@@ -46,7 +46,7 @@ export async function GET(
     )
   }
 
-  return new NextResponse(loaded.body, {
+  return new NextResponse(new Uint8Array(loaded.body), {
     status: 200,
     headers: {
       'Content-Type': loaded.contentType,

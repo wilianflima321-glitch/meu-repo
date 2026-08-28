@@ -29,7 +29,7 @@ interface ModernIDEShellCenterStackProps {
 }
 
 /**
- * Bottom dock chrome bar — shared between Agents and Terminal columns.
+ * Bottom dock chrome bar — used in the floating AI console.
  */
 function DockColumnHeader({
   label,
@@ -69,26 +69,14 @@ export function ModernIDEShellCenterStack({
   chat,
   terminal,
   chatOpen,
-  activeBottomPanel,
   isCompact,
   editorColumnRef,
   toggleChat,
-  onSelectBottomPanel,
 }: ModernIDEShellCenterStackProps) {
   const store = useWorkspaceStore();
   const bottomBarSize = store((s) => s.regions.bottomBar.size);
 
-  // Phase 3 (AAA Studio Deepening Sweep) — previously gated on `Boolean(terminal || chat)`,
-  // which reads as "only show the dock when a chat/terminal surface exists". In practice both
-  // slots are always populated by the sole caller (`ModernIDEShellPanels`), which masked a real
-  // bug: the Diagnostics tab (`IdeDiagnosticsDock`) lived inside this same gated wrapper, so any
-  // future caller without chat/terminal content would also lose the ability to view Diagnostics
-  // even with nothing to do with chat/terminal. Diagnostics availability should not depend on
-  // unrelated surfaces being present.
-  const bottomDockVisible = !isCompact
-  const showChatInDock = activeBottomPanel === 'chat'
-  const showDiagnosticsInDock = activeBottomPanel === 'diagnostics'
-  const showTerminalInDock = activeBottomPanel === 'terminal'
+  const bottomDockVisible = !isCompact;
 
   return (
     <div
@@ -164,106 +152,32 @@ export function ModernIDEShellCenterStack({
               maxHeight: '44%',
             }}
             aria-label="Bottom dock"
-            data-active-bottom-panel={activeBottomPanel}
             data-testid="ide-bottom-dock"
           >
-            <div className="flex shrink-0 items-center gap-1 border-b border-[var(--aethel-border-secondary)] px-2 py-1">
-              {chat ? (
-                <button
-                  type="button"
-                  onClick={() => onSelectBottomPanel?.('chat')}
-                  aria-pressed={activeBottomPanel === 'chat'}
-                  className={[
-                    'rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]',
-                    activeBottomPanel === 'chat'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-primary-light)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
-                  ].join(' ')}
-                >
-                  AI Console
-                </button>
-              ) : null}
-              {terminal ? (
-                <button
-                  type="button"
-                  onClick={() => onSelectBottomPanel?.('terminal')}
-                  aria-pressed={activeBottomPanel === 'terminal'}
-                  className={[
-                    'rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]',
-                    activeBottomPanel === 'terminal'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-primary-light)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
-                  ].join(' ')}
-                >
-                  Terminal
-                </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => onSelectBottomPanel?.('diagnostics')}
-                aria-pressed={activeBottomPanel === 'diagnostics'}
-                className={[
-                  'rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]',
-                  activeBottomPanel === 'diagnostics'
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-primary-light)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]',
-                ].join(' ')}
-              >
-                Diagnostics
-              </button>
-              <div className="flex-1" />
-              {chatOpen ? (
-                <button
-                  type="button"
-                  onClick={toggleChat}
-                  className="rounded px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
-                  aria-label="Close bottom panel chrome"
-                >
-                  Close
-                </button>
-              ) : null}
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {showChatInDock && chat ? (
-                <div className="h-full overflow-auto" data-testid="bottom-dock-chat">
-                  {chat}
-                </div>
-              ) : null}
-
-              {showChatInDock && !chat ? (
-                <WorkbenchEmptyState
-                  title="AI Console unavailable"
-                  description="Open Agents or enable the chat surface to use the bottom AI Console."
-                />
-              ) : null}
-
-              {showDiagnosticsInDock ? (
-                <div className="h-full overflow-hidden" data-testid="bottom-dock-diagnostics">
+            {/* The Docking system completely owns the rendering of tabs and active panes here */}
+            <DockRegion regionId="bottomBar" />
+            
+            {/* Panels register themselves silently, rendering via portals */}
+            <div style={{ display: 'none' }} aria-hidden>
+              {chat && (
+                <DockPanel id="chat" title="AI Console" defaultRegion="bottomBar">
+                  <div className="h-full w-full overflow-auto" data-testid="bottom-dock-chat">
+                    {chat}
+                  </div>
+                </DockPanel>
+              )}
+              {terminal && (
+                <DockPanel id="terminal" title="Terminal" defaultRegion="bottomBar">
+                  <div className="h-full w-full overflow-hidden" data-testid="bottom-dock-terminal">
+                    {terminal}
+                  </div>
+                </DockPanel>
+              )}
+              <DockPanel id="diagnostics" title="Diagnostics" defaultRegion="bottomBar">
+                <div className="h-full w-full overflow-hidden" data-testid="bottom-dock-diagnostics">
                   <IdeDiagnosticsDock />
                 </div>
-              ) : null}
-
-              {showTerminalInDock && terminal ? (
-                <div
-                  className="flex h-full min-h-0 flex-row overflow-hidden"
-                  data-testid="bottom-dock-terminal"
-                >
-                  <DockRegion regionId="bottomBar" />
-                  <div style={{ display: 'none' }} aria-hidden>
-                    <DockPanel id="terminal" title="Terminal" defaultRegion="bottomBar">
-                      {terminal}
-                    </DockPanel>
-                  </div>
-                </div>
-              ) : null}
-
-              {showTerminalInDock && !terminal ? (
-                <WorkbenchEmptyState
-                  title="Terminal unavailable"
-                  description="Host PTY remains HELD — sandbox terminal surfaces attach here when ready."
-                />
-              ) : null}
+              </DockPanel>
             </div>
           </div>
         </>
@@ -273,3 +187,4 @@ export function ModernIDEShellCenterStack({
 }
 
 export default ModernIDEShellCenterStack;
+

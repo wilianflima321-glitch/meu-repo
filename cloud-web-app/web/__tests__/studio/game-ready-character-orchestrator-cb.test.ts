@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Letter cb — Studio game-ready character route selection + CreativeBridge wire.
  * nativeOnnxReady HELD → BYOK path; Zero-UI when BYOK missing.
  */

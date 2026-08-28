@@ -515,8 +515,8 @@ export function runGpuFractureComputeSoak(input: {
       break
     }
     lastPeak = result.peakSpeed
-    pos = result.positions as Float32Array
-    vel = result.velocities as Float32Array
+    pos = result.positions as any
+    vel = result.velocities as any
     dispatches += 1
   }
 

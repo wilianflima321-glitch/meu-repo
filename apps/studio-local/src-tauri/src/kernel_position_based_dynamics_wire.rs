@@ -1,14 +1,15 @@
 //! Position-Based Dynamics desktop wire — letter **hj** / XPBD deepen **ip**.
 //!
 //! Thin studio-local IPC over `aethel_kernel_rust::position_based_dynamics`
-//! (SoA distance projection + XPBD compliance/Δλ + fixed substep soak).
-//! Honesty probes `positionBasedDynamicsReady` +
-//! `positionBasedDynamicsXpbdReady` (**ip**; distinct from hj ready).
-//! Full Chaos / XPBD cloth AAA / Coins / Agones / Nanite / DLSS HELD.
+//! (SoA distance projection + XPBD compliance/Δλ + fixed substep soak + N≥2048
+//! cloth-grid substrate). Honesty probes `positionBasedDynamicsReady`,
+//! `positionBasedDynamicsXpbdReady` (**ip**) and `xpbdClothAaaReady` — the
+//! cloth flag is REAL on the CPU substrate (flat-sheet drop, pin stability,
+//! strain-decrease-with-iterations, bit-identical replay). Full Chaos / GPU
+//! execution / Coins / Agones / Nanite / DLSS remain HELD.
 
 use aethel_kernel_rust::position_based_dynamics::{
-    probe_position_based_dynamics as kernel_probe, run_position_based_dynamics_soak,
-    run_position_based_dynamics_xpbd_soak, PositionBasedDynamicsSoakReport,
+    probe_position_based_dynamics as kernel_probe, PositionBasedDynamicsSoakReport,
 };
 use serde::{Deserialize, Serialize};
 
@@ -45,6 +46,18 @@ pub struct KernelPositionBasedDynamicsWireReport {
     pub note: String,
     pub chaos_pbd_parity_ready: bool,
     pub xpbd_cloth_aaa_ready: bool,
+    pub cloth_particle_count: u32,
+    pub cloth_constraint_count: u32,
+    pub cloth_structural_constraints: u32,
+    pub cloth_shear_constraints: u32,
+    pub cloth_bending_constraints: u32,
+    pub cloth_max_strain_error: f32,
+    pub cloth_collision_non_penetrating: bool,
+    pub cloth_ground_contacts: u32,
+    pub cloth_pin_stable: bool,
+    pub cloth_deterministic_replay: bool,
+    pub cloth_strain_decreases_with_iterations: bool,
+    pub cloth_frames: u32,
     pub unreal_mass_100k_ready: bool,
     pub mmap_sab_production_ready: bool,
     pub avx512_kernel_ready: bool,
@@ -91,6 +104,18 @@ fn to_report(
         note: note.into(),
         chaos_pbd_parity_ready: r.chaos_pbd_parity_ready,
         xpbd_cloth_aaa_ready: r.xpbd_cloth_aaa_ready,
+        cloth_particle_count: r.cloth_particle_count,
+        cloth_constraint_count: r.cloth_constraint_count,
+        cloth_structural_constraints: r.cloth_structural_constraints,
+        cloth_shear_constraints: r.cloth_shear_constraints,
+        cloth_bending_constraints: r.cloth_bending_constraints,
+        cloth_max_strain_error: r.cloth_max_strain_error,
+        cloth_collision_non_penetrating: r.cloth_collision_non_penetrating,
+        cloth_ground_contacts: r.cloth_ground_contacts,
+        cloth_pin_stable: r.cloth_pin_stable,
+        cloth_deterministic_replay: r.cloth_deterministic_replay,
+        cloth_strain_decreases_with_iterations: r.cloth_strain_decreases_with_iterations,
+        cloth_frames: r.cloth_frames,
         unreal_mass_100k_ready: r.unreal_mass_100k_ready,
         mmap_sab_production_ready: r.mmap_sab_production_ready,
         avx512_kernel_ready: r.avx512_kernel_ready,
@@ -103,45 +128,27 @@ fn to_report(
     }
 }
 
-/// Merge XPBD deepen fields into classical soak (desktop soak cmd).
-fn merge_xpbd_fields(
-    mut r: PositionBasedDynamicsSoakReport,
-    x: PositionBasedDynamicsSoakReport,
-) -> PositionBasedDynamicsSoakReport {
-    r.position_based_dynamics_xpbd_ready = x.position_based_dynamics_xpbd_ready;
-    r.xpbd_particle_count = x.xpbd_particle_count;
-    r.xpbd_constraint_count = x.xpbd_constraint_count;
-    r.xpbd_substeps = x.xpbd_substeps;
-    r.residual_iters_1 = x.residual_iters_1;
-    r.residual_iters_2 = x.residual_iters_2;
-    r.residual_iters_4 = x.residual_iters_4;
-    r.residual_iters_8 = x.residual_iters_8;
-    r.residual_decreases_with_iterations = x.residual_decreases_with_iterations;
-    r.deterministic_replay = x.deterministic_replay;
-    r
-}
-
-/// Run position-based dynamics soak via kernel — classical + XPBD deepen.
+/// Run position-based dynamics soak via kernel — classical + XPBD + cloth AAA
+/// (the kernel probe is the single honest 3-way merge surface).
 pub fn run_kernel_position_based_dynamics_soak() -> KernelPositionBasedDynamicsWireReport {
-    let r = merge_xpbd_fields(
-        run_position_based_dynamics_soak(),
-        run_position_based_dynamics_xpbd_soak(),
-    );
+    let r = kernel_probe();
     let note = if !r.position_based_dynamics_ready {
         "Position-based dynamics soak failed — positionBasedDynamicsReady stays false"
     } else if !r.position_based_dynamics_xpbd_ready {
-        "Desktop soak: classical PBD ready; letter ip/CW2 XPBD+substep deepen FAILED (residual curve/pin/replay/N≥2048) — positionBasedDynamicsXpbdReady false; chaos/cloth AAA HELD"
+        "Desktop soak: classical PBD ready; letter ip/CW2 XPBD+substep deepen FAILED (residual curve/pin/replay/N≥2048) — positionBasedDynamicsXpbdReady false; chaos HELD"
+    } else if !r.xpbd_cloth_aaa_ready {
+        "Desktop soak: SoA distance projection + letter ip/CW2 XPBD compliance/Δλ + fixed substeps (N≥2048, residual↓ with iters, pin stable, same-seed bit-identical) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady true; cloth AAA substrate FAILED; chaos_pbd_parity_ready false"
     } else {
-        "Desktop soak: SoA distance projection + letter ip/CW2 XPBD compliance/Δλ + fixed substeps (N≥2048, residual↓ with iters, pin stable, same-seed bit-identical) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady true; chaos_pbd_parity_ready / xpbd_cloth_aaa_ready false"
+        "Desktop soak: SoA distance projection + letter ip/CW2 XPBD compliance/Δλ (N≥2048) + cloth-grid AAA substrate (N=2304, structural/shear/bending, flat-sheet drop non-penetrating, top-row pin stable, strain↓ with iterations, same-seed bit-identical replay) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady + xpbdClothAaaReady true; chaos_pbd_parity_ready (GPU) HELD"
     };
     to_report(r, note)
 }
 
-/// Honesty probe — soak-gated `positionBasedDynamicsReady` + XPBD deepen **ip**/CW2.
+/// Honesty probe — soak-gated readiness + XPBD deepen **ip**/CW2 + cloth AAA.
 pub fn probe_position_based_dynamics() -> KernelPositionBasedDynamicsWireReport {
     to_report(
         kernel_probe(),
-        "Position-based dynamics probe (letter ip/CW2 deepen / hj base) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady (N≥2048, residual curve, pin stable, replay); chaos_pbd_parity_ready / xpbd_cloth_aaa_ready HELD",
+        "Position-based dynamics probe (letter ip/CW2 deepen / hj base / cloth AAA) — positionBasedDynamicsReady + positionBasedDynamicsXpbdReady (N≥2048, residual curve, pin stable, replay) + xpbdClothAaaReady (N=2304 cloth grid substrate); chaos_pbd_parity_ready (GPU execution) HELD",
     )
 }
 

@@ -258,7 +258,7 @@ Full list: ~57 `DEBT-*` in debt registry.
 | `IMPROVE-UX-009` | Resume Workspace (not AI Chat) from dashboard | studio | B | `DEBT-UX-DASH-002` | â€” | **done (2026-07-11ae)** | `entry=resume` + `aethel.ide.session.v1` + dock persist; Resume opens IDE not agents |
 | `IMPROVE-BILLING-007` | IDE generosity unlock â€” agents/workspaces/marketplace all tiers | platform | B | `contracts_planning.md` Â§6 | â€” | draft | Remove `allowedAgents`/`allowedDomains` tier gates; infra-only monetization |
 | `IMPROVE-COLLAB-006` | Yjs spectator mode for Free/Starter | collab | B | `contracts_planning.md` Â§6 | â€” | draft | Read-only join Pro/Studio rooms; viral upgrade path |
-| `IMPROVE-DESK-005` | Local offline AI (WebGPU/ONNX sidecar) | desktop | C | `IMPROVE-DESK-004`, `DEBT-DESK-006` | â€” | draft | Qwen 1.5Bâ€“3B; $0 platform cost; honest `[HELD]` until sidecar live |
+| `IMPROVE-DESK-005` | Local offline AI (WebGPU/ONNX sidecar) | desktop | C | `IMPROVE-DESK-004`, `DEBT-DESK-006` | â€” | draft | **Downloadable mini-IA (#67)** — NPC dialogue first; $0 platform cost; no Qwen/Grok/Llama; honest `[HELD]` until sidecar live |
 | `IMPROVE-ARCADE-001` | Aethel Arcade portal + deploy publish + feedbackâ†’tasks | platform | C | `DEBT-INFRA-001`, `contracts_planning.md` Â§11 | â€” | **PARTIAL 2026-07-11ag** | Listing + playable/HELD chrome + bake gate; feedbackâ†’tasks / Pay hooks remain |
 | `IMPROVE-MKT-001` | Marketplace remix clone + `aethel://` deep links | platform | C | `DEBT-PLUGIN-001`, `DEBT-DB-002`, `contracts_planning.md` Â§12 | â€” | draft | POST remix; private copy invariant; Tauri protocol |
 | `IMPROVE-MKT-002` | Asset security gateway (scan/optimize/normalize) | platform | C | `DEBT-ASSET-001`, `contracts_planning.md` Â§13 | â€” | draft | Ingest worker; verified badge pipeline |
@@ -2421,3 +2421,18 @@ npm run typecheck
 npx vitest run __tests__/ai
 ```
 
+
+
+---
+
+## Closing pass 2026-08-20 (engine backend rounds - zero UI)
+
+Items closed this session (do not re-raise; see AETHEL_FOCUS1_EXECUTION_PROGRESS.md 2026-08-20 rows for full evidence):
+
+- CostGuard: durable reservation journal (reserve/settle/settle_zero/cancel awaited, replay validated, hasHold fail-closed, memory-only honesty).
+- WebGPUContext: device-loss single-attempt recovery + health surface.
+- packages/agents: single-seam gent-roles bridge (no catalog duplication).
+- Wave G substrates scaled on real device: VSM 32x32/256/128px/4c, Radiance cascade 2 rings, Entropy 4k, FSR 320->640, micropoly material resolve + AO/specular.
+- GF fixtures: MESH-001 (golden pinned + GPU parity PROVEN), WORLD-001/002/003, AI-001/002/003, INTEGRATED-SCENE-001 (P1+P2+P3+P4 one loop), substrates device validation.
+- vitest harness: Windows module-identity patch + vmThreads (win32).
+- Kernel: CIEDE2000 fix, tension fail-closed, wire-count docs corrected.

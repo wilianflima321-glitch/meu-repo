@@ -174,7 +174,7 @@ export class PhysicsIntegrationSystem implements System {
         }
       }
       const explicit = world.getComponent<{
-        entityId: number;
+        entityId: string;
         type: 'oceanBuoyancyVolume';
         volumeM3: number;
         densityKgPerM3?: number;

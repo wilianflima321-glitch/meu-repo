@@ -16,6 +16,7 @@ import React, {
   forwardRef,
   useImperativeHandle
 } from 'react';
+import { ChevronDown, ChevronRight, FileText, Folder } from 'lucide-react';
 
 // ============================================================================
 // TYPES
@@ -86,6 +87,8 @@ function useResizeObserver(
 // VIRTUAL LIST COMPONENT
 // ============================================================================
 
+import { useVirtualizer } from '@tanstack/react-virtual';
+
 function VirtualListInner<T extends VirtualListItem>(
   props: VirtualListProps<T>,
   ref: React.Ref<VirtualListRef>
@@ -107,100 +110,25 @@ function VirtualListInner<T extends VirtualListItem>(
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(height);
 
-  // Track measured heights for variable height items
-  const measuredHeights = useRef<Map<string, number>>(new Map());
+  const rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: useCallback((index: number) => {
+      return items[index].height || itemHeight;
+    }, [items, itemHeight]),
+    overscan,
+  });
 
-  // Calculate total height
-  const totalHeight = useMemo(() => {
-    return items.reduce((acc, item) => {
-      const height = measuredHeights.current.get(item.id) || item.height || itemHeight;
-      return acc + height;
-    }, 0);
-  }, [items, itemHeight]);
-
-  // Calculate visible range
-  const { startIndex, endIndex, offsetTop } = useMemo(() => {
-    let offset = 0;
-    let startIndex = 0;
-    let endIndex = items.length - 1;
-    let offsetTop = 0;
-
-    // Find start index
-    for (let i = 0; i < items.length; i++) {
-      const h = measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
-      if (offset + h > scrollTop) {
-        startIndex = Math.max(0, i - overscan);
-        offsetTop = offset;
-
-        // Adjust offset for overscan
-        for (let j = startIndex; j < i; j++) {
-          offsetTop -= measuredHeights.current.get(items[j].id) || items[j].height || itemHeight;
-        }
-        break;
-      }
-      offset += h;
-    }
-
-    // Find end index
-    offset = offsetTop;
-    for (let i = startIndex; i < items.length; i++) {
-      const h = measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
-      offset += h;
-      if (offset > scrollTop + containerHeight) {
-        endIndex = Math.min(items.length - 1, i + overscan);
-        break;
-      }
-    }
-
-    return { startIndex, endIndex, offsetTop };
-  }, [items, scrollTop, containerHeight, itemHeight, overscan]);
-
-  // Get visible items
-  const visibleItems = useMemo(() => {
-    return items.slice(startIndex, endIndex + 1);
-  }, [items, startIndex, endIndex]);
-
-  // Handle scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     const newScrollTop = target.scrollTop;
-    setScrollTop(newScrollTop);
     onScroll?.(newScrollTop);
 
-    // Check end reached
-    if (onEndReached && totalHeight - newScrollTop - containerHeight < endReachedThreshold) {
+    if (onEndReached && rowVirtualizer.getTotalSize() - newScrollTop - target.clientHeight < endReachedThreshold) {
       onEndReached();
     }
-  }, [onScroll, onEndReached, totalHeight, containerHeight, endReachedThreshold]);
-
-  // Handle resize
-  useResizeObserver(containerRef, useCallback((entry) => {
-    setContainerHeight(entry.contentRect.height);
-  }, []));
-
-  // Scroll methods
-  const scrollToItemInternal = useCallback((index: number, align: 'start' | 'center' | 'end' = 'start') => {
-    if (!containerRef.current) return;
-
-    let offset = 0;
-    for (let i = 0; i < index; i++) {
-      offset += measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
-    }
-
-    const itemH = measuredHeights.current.get(items[index].id) || items[index].height || itemHeight;
-
-    let scrollPosition = offset;
-    if (align === 'center') {
-      scrollPosition = offset - containerHeight / 2 + itemH / 2;
-    } else if (align === 'end') {
-      scrollPosition = offset - containerHeight + itemH;
-    }
-
-    containerRef.current.scrollTop = Math.max(0, scrollPosition);
-  }, [items, containerHeight, itemHeight]);
+  }, [onScroll, onEndReached, rowVirtualizer, endReachedThreshold]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -214,6 +142,7 @@ function VirtualListInner<T extends VirtualListItem>(
       if (currentIndex === -1) return;
 
       let nextIndex = currentIndex;
+      const visibleCount = Math.floor((typeof height === 'number' ? height : container.clientHeight) / itemHeight);
 
       switch (e.key) {
         case 'ArrowDown':
@@ -234,11 +163,11 @@ function VirtualListInner<T extends VirtualListItem>(
           break;
         case 'PageDown':
           e.preventDefault();
-          nextIndex = Math.min(items.length - 1, currentIndex + Math.floor(containerHeight / itemHeight));
+          nextIndex = Math.min(items.length - 1, currentIndex + visibleCount);
           break;
         case 'PageUp':
           e.preventDefault();
-          nextIndex = Math.max(0, currentIndex - Math.floor(containerHeight / itemHeight));
+          nextIndex = Math.max(0, currentIndex - visibleCount);
           break;
         default:
           return;
@@ -246,41 +175,24 @@ function VirtualListInner<T extends VirtualListItem>(
 
       if (nextIndex !== currentIndex) {
         onSelect(items[nextIndex].id);
-        // Scroll into view
-        scrollToItemInternal(nextIndex, 'center');
+        rowVirtualizer.scrollToIndex(nextIndex, { align: 'center' });
       }
     };
 
     container.addEventListener('keydown', handleKeyDown);
     return () => container.removeEventListener('keydown', handleKeyDown);
-  }, [enableKeyboard, selectedId, onSelect, items, containerHeight, itemHeight, scrollToItemInternal]);
+  }, [enableKeyboard, selectedId, onSelect, items, height, itemHeight, rowVirtualizer]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
     scrollTo: (offset: number) => {
-      if (containerRef.current) {
-        containerRef.current.scrollTop = offset;
-      }
+      rowVirtualizer.scrollToOffset(offset);
     },
-    scrollToItem: scrollToItemInternal,
-    getScrollOffset: () => scrollTop,
-  }), [scrollToItemInternal, scrollTop]);
-
-  // Calculate item positions
-  const getItemStyle = useCallback((index: number): React.CSSProperties => {
-    let top = offsetTop;
-    for (let i = startIndex; i < index; i++) {
-      top += measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
-    }
-
-    return {
-      position: 'absolute',
-      top,
-      left: 0,
-      right: 0,
-      height: measuredHeights.current.get(items[index].id) || items[index].height || itemHeight,
-    };
-  }, [items, startIndex, offsetTop, itemHeight]);
+    scrollToItem: (index: number, align: 'start' | 'center' | 'end' = 'start') => {
+      rowVirtualizer.scrollToIndex(index, { align });
+    },
+    getScrollOffset: () => containerRef.current?.scrollTop || 0,
+  }), [rowVirtualizer]);
 
   return (
     <div
@@ -291,13 +203,27 @@ function VirtualListInner<T extends VirtualListItem>(
       tabIndex={enableKeyboard ? 0 : undefined}
       role="listbox"
     >
-      {/* Spacer to maintain scroll height */}
-      <div style={{ height: totalHeight, position: 'relative' }}>
-        {visibleItems.map((item, i) => {
-          const actualIndex = startIndex + i;
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+          const item = items[virtualItem.index];
+          const style: React.CSSProperties = {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: `${virtualItem.size}px`,
+            transform: `translateY(${virtualItem.start}px)`,
+          };
+          
           return (
-            <div key={item.id} style={getItemStyle(actualIndex)}>
-              {renderItem(item, actualIndex, getItemStyle(actualIndex))}
+            <div key={item.id} style={style}>
+              {renderItem(item, virtualItem.index, style)}
             </div>
           );
         })}
@@ -498,19 +424,19 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
       >
         {hasChildren && (
           <span
-            className="flex-shrink-0 text-[var(--aethel-text-tertiary)]"
+            className="flex-shrink-0 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
               onNodeExpand?.(node);
             }}
           >
-            {node.expanded ? '▼' : '▶'}
+            {node.expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </span>
         )}
         {!hasChildren && <span className="w-3" />}
 
-        {node.icon || (node.type === 'directory' ? '📁' : '📄')}
-        <span className="truncate text-sm">{node.name}</span>
+        {node.icon || (node.type === 'directory' ? <Folder className="h-3.5 w-3.5 text-[var(--aethel-primary)] shrink-0" /> : <FileText className="h-3.5 w-3.5 text-[var(--aethel-text-tertiary)] shrink-0" />)}
+        <span className="truncate text-xs font-medium text-[var(--aethel-text-primary)]">{node.name}</span>
       </div>
     );
   }, [selectedId, onNodeClick, onNodeExpand]);

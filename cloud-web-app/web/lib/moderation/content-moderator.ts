@@ -296,19 +296,85 @@ export class ContentModerator {
 export const contentModerator = new ContentModerator();
 
 // ---------------------------------------------------------------------------
-// Legacy sync helper (used by GenerationInspector.tsx)
+// Fast synchronous safety pre-check (structured, deterministic)
+//
+// Used by GenerationInspector.tsx and the sync safety contract tests. This is
+// a separate, stricter policy from the async ContentModerator: it returns a
+// *safety* score (1.0 = fully safe) with kebab-case flag categories, whereas
+// ContentModerator.moderatePrompt returns a *risk* score (0..1, higher =
+// harmful) in snake_case ModerationCategory. Hard child-safety / weapons /
+// doxx blocks are mirrored here so the fast path never weakens them.
 // ---------------------------------------------------------------------------
+
+export type SyncFlagCategory =
+  | 'dangerous-content'
+  | 'adult-content'
+  | 'violence-hate'
+  | 'suspicious-terms'
+  | 'low-quality-held';
 
 export interface SyncSafetyEval {
   status: ModerationStatus;
+  /** Safety score 0..1 — higher = safer (approved 1.0, flagged 0.4, rejected 0.05). */
   score: number;
+  flaggedCategories: SyncFlagCategory[];
+  reason?: string;
 }
 
-/** Fast synchronous prompt safety check for UI display */
+const SYNC_HARD_BLOCK: ReadonlyArray<{ category: SyncFlagCategory; reason: string; pattern: RegExp }> = [
+  {
+    category: 'dangerous-content',
+    reason: 'Rejected: dangerous-content policy violation',
+    pattern: /child.*nude|nude.*child|csam|instructions.*(bomb|weapon|poison|explosive)|how to (make|build|create).*(weapon|explosive|drug)|doxx|personal.*information.*leak/i,
+  },
+  {
+    category: 'adult-content',
+    reason: 'Rejected: adult-content policy violation',
+    pattern: /naked|nude|nsfw bypass|explicit sex|sexually explicit|pornograph/i,
+  },
+  {
+    category: 'violence-hate',
+    reason: 'Rejected: violence-hate policy violation',
+    pattern: /gore|splattered blood|extreme violence|graphic violence|torture|racist|nazi|hate speech/i,
+  },
+];
+
+const SYNC_SUSPICIOUS_FLAG: ReadonlyArray<{ category: SyncFlagCategory; reason: string; pattern: RegExp }> = [
+  {
+    category: 'suspicious-terms',
+    reason: 'Flagged: suspicious-terms policy check',
+    pattern: /designed to exploit|jailbreak|circumvent (the )?(filter|moderation|safety|detection)|evade (the )?(filter|moderation|safety|detection)/i,
+  },
+];
+
+/** Fast synchronous prompt safety evaluation (higher score = safer). */
+export function evaluatePromptSafety(prompt: string): SyncSafetyEval {
+  for (const rule of SYNC_HARD_BLOCK) {
+    if (rule.pattern.test(prompt)) {
+      return { status: 'rejected', score: 0.05, flaggedCategories: [rule.category], reason: rule.reason };
+    }
+  }
+  for (const rule of SYNC_SUSPICIOUS_FLAG) {
+    if (rule.pattern.test(prompt)) {
+      return { status: 'flagged', score: 0.4, flaggedCategories: [rule.category], reason: rule.reason };
+    }
+  }
+  return { status: 'approved', score: 1.0, flaggedCategories: [], reason: undefined };
+}
+
+const SYNC_VALIDATION_THRESHOLD = 0.4;
+
+/** Fast synchronous asset safety check combining prompt safety and quality. */
 export function evaluateAssetSafety(prompt: string, qualityScore: number): SyncSafetyEval {
-  const { blocked, flagged } = textFirstPass(prompt);
-  if (blocked) return { status: 'rejected', score: 0.99 };
-  if (flagged) return { status: 'flagged', score: 0.65 };
-  if (qualityScore < 0.3) return { status: 'manual_review', score: 0.5 };
-  return { status: 'approved', score: 0.05 };
+  const textEval = evaluatePromptSafety(prompt);
+  if (textEval.status !== 'approved') return textEval;
+  if (qualityScore < SYNC_VALIDATION_THRESHOLD) {
+    return {
+      status: 'flagged',
+      score: 0.4,
+      flaggedCategories: ['low-quality-held'],
+      reason: `Asset quality ${qualityScore} is below the ${SYNC_VALIDATION_THRESHOLD} validation threshold`,
+    };
+  }
+  return { status: 'approved', score: 1.0, flaggedCategories: [], reason: undefined };
 }

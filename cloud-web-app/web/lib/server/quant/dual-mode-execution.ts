@@ -248,7 +248,8 @@ export function evaluateVanguardHftIntent(
         'Millisecond execution claims forbidden on retail/home paths — colocation required; never market ms arbitrage as shipped',
     }
   }
-  if (!isOpaqueExchangeKeyRef(intent.localApiKeyRef ?? null)) {
+  const localApiKeyRef = intent.localApiKeyRef ?? null
+  if (!isOpaqueExchangeKeyRef(localApiKeyRef)) {
     return {
       ok: false,
       code: 'hft_missing_local_api_key',
@@ -276,7 +277,7 @@ export function evaluateVanguardHftIntent(
   }
 
   log.info('vanguard_hft_policy_gates_passed_broker_held', {
-    localApiKeyRef: intent.localApiKeyRef.slice(0, 24),
+    localApiKeyRef: localApiKeyRef.slice(0, 24),
     quarantineEvidence: quarantine.walkForward.evidenceHash,
     liveBrokerReady: false,
   })
@@ -285,7 +286,7 @@ export function evaluateVanguardHftIntent(
     ok: true,
     value: {
       policy: getVanguardHftPolicy(),
-      localApiKeyRef: intent.localApiKeyRef,
+      localApiKeyRef,
       liveBrokerReady: false,
       claimsMsExecutionWorks: false,
     },

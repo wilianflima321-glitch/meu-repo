@@ -13,8 +13,9 @@
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
 
-/// Substrate chunk count (not Chaos 10k+ cluster destruction).
-pub const ENTROPY_CHUNK_COUNT: u32 = 64;
+/// Substrate chunk count (4k-class fracture — still not Chaos 10k+ clusters,
+/// still not Voronoi-cooked product destruction).
+pub const ENTROPY_CHUNK_COUNT: u32 = 4096;
 const WORKGROUP: u32 = 64;
 
 #[repr(C)]
@@ -168,6 +169,8 @@ pub struct EntropyDestructionScaffold {
     sim_bind_group: wgpu::BindGroup,
     pub chunk_count: u32,
     frame_index: u32,
+    /// MPSC consumption: runtime impulse strength override (0 = substrate default).
+    impulse_strength_override: std::sync::atomic::AtomicU32,
 }
 
 impl EntropyDestructionScaffold {
@@ -187,11 +190,14 @@ impl EntropyDestructionScaffold {
 
         let mut chunks = Vec::with_capacity(ENTROPY_CHUNK_COUNT as usize);
         let side = (ENTROPY_CHUNK_COUNT as f32).sqrt().ceil() as u32;
+        // Fill the domain with the chunk grid: spacing derives from the domain
+        // so the density stays meaningful at any chunk count (no boundary pile-up).
+        let spacing = (params.domain_half * 2.0) / side.max(1) as f32;
         for i in 0..ENTROPY_CHUNK_COUNT {
             let gx = (i % side) as f32;
             let gz = (i / side) as f32;
-            let x = (gx - side as f32 * 0.5) * 0.35;
-            let z = (gz - side as f32 * 0.5) * 0.35;
+            let x = (gx - side as f32 * 0.5) * spacing;
+            let z = (gz - side as f32 * 0.5) * spacing;
             chunks.push(EntropyChunk {
                 pos_health: [x, 1.2 + (i % 3) as f32 * 0.15, z, 1.0],
                 vel_spin: [0.0, 0.0, 0.0, 0.0],
@@ -306,7 +312,27 @@ impl EntropyDestructionScaffold {
             sim_bind_group,
             chunk_count: ENTROPY_CHUNK_COUNT,
             frame_index: 1,
+            impulse_strength_override: std::sync::atomic::AtomicU32::new(0.0f32.to_bits()),
         })
+    }
+
+    /// MPSC consumption: runtime impulse strength (0.5..=8.0).
+    pub fn set_impulse_strength(&self, strength: f32) {
+        self.impulse_strength_override
+            .store(strength.clamp(0.5, 8.0).to_bits(), std::sync::atomic::Ordering::Relaxed);
+    }
+
+    /// Effective impulse strength (override or substrate default).
+    pub fn effective_impulse_strength(&self) -> f32 {
+        let ov = f32::from_bits(
+            self.impulse_strength_override
+                .load(std::sync::atomic::Ordering::Relaxed),
+        );
+        if ov > 0.0 {
+            ov
+        } else {
+            self.params.impulse_strength
+        }
     }
 
     /// Clear stats → fracture impulse (frame 0–1) → integrate debris chunks.
@@ -315,6 +341,14 @@ impl EntropyDestructionScaffold {
         // Arm fracture on early frames so chunks shatter then settle under gravity.
         self.params.frame_index = self.frame_index;
         self.params.fracture_armed = u32::from(self.frame_index <= 3);
+        // MPSC consumption: runtime impulse override.
+        let ov = f32::from_bits(
+            self.impulse_strength_override
+                .load(std::sync::atomic::Ordering::Relaxed),
+        );
+        if ov > 0.0 {
+            self.params.impulse_strength = ov;
+        }
         queue.write_buffer(&self.params_buffer, 0, bytemuck::bytes_of(&self.params));
 
         {
@@ -401,6 +435,6 @@ mod tests {
     fn entropy_layout_contracts() {
         assert_eq!(std::mem::size_of::<EntropyChunk>(), 32);
         assert_eq!(std::mem::size_of::<EntropyStats>(), 16);
-        assert_eq!(ENTROPY_CHUNK_COUNT, 64);
+        assert_eq!(ENTROPY_CHUNK_COUNT, 4096);
     }
 }

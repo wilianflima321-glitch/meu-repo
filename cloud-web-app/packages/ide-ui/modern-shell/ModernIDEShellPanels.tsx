@@ -46,6 +46,8 @@ function getPreviewPanelLabel(activePreviewMode: PreviewMode) {
       return 'Console';
     case 'device':
       return 'Devices';
+    case 'node_editor':
+      return 'Material Node Graph';
     default:
       return 'App Preview';
   }

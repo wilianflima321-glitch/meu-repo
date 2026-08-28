@@ -133,7 +133,7 @@ const viewportRuntimeFiles = [
 for (const runtimeFile of viewportRuntimeFiles) requireFile(runtimeFile, 'viewport render pipeline contract')
 
 requirePattern(
-  'components/ide/fullscreen/useNativeMonacoYjsBinding.ts',
+  '../packages/ide-ui/fullscreen/useNativeMonacoYjsBinding.ts',
   /MonacoBinding/,
   'multiplayer must use native y-monaco binding, not overlay-only cursors'
 )

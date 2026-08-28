@@ -85,6 +85,28 @@ vi.mock('@/lib/server/ai-core-rate-limit', () => ({
   AI_CORE_RATE_LIMIT: {},
   enforceAiCoreRateLimit: vi.fn(() => null),
 }))
+// The spend-session lifecycle is covered by its own dedicated suites
+// (creative-cost-guard-multistage-spend, focus1-focus2-spend-l5). This test's
+// contract is handoff-context injection, so isolate the spend session instead
+// of pulling unmocked server spend deps (getCurrentUsage/getCreditBalance/
+// loadPaygSnapshot) into the route.
+vi.mock('@/lib/ai/chat-spend-session', () => ({
+  beginChatSpendSession: vi.fn().mockResolvedValue({
+    ok: true,
+    session: {
+      reservationId: 'res-spend-handoff-1',
+      lane: 'fast',
+      modelId: 'openai/gpt-4o-mini',
+      headers: {
+        'X-Aethel-Spend-Lane': 'fast',
+        'X-Aethel-Spend-Limit-Cents': '0',
+      },
+      settle: vi.fn().mockResolvedValue(undefined),
+      cancel: vi.fn().mockResolvedValue(undefined),
+      settleZero: vi.fn().mockResolvedValue(undefined),
+    },
+  }),
+}))
 
 import { POST } from '@/app/api/ai/chat/route'
 

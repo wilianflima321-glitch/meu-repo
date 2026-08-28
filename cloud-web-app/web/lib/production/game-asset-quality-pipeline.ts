@@ -1,4 +1,5 @@
 import type { ProductionRuntimeTarget } from '@/lib/production/agentic-production-state'
+import { KERNEL_ASSET_QUALITY_TIER_CATALOG } from './asset-quality-gate-verdict'
 
 export type GameAssetQualityTier = 'ai-draft' | 'curated-marketplace' | 'studio-local-optimized' | 'cloud-render-grade'
 export type GameAssetDomain = 'character' | 'creature' | 'environment' | 'prop' | 'weapon' | 'vehicle' | 'vfx' | 'audio' | 'cinematic'
@@ -120,12 +121,32 @@ const REQUIRED_STAGES: GameAssetQualityStage[] = [
   },
 ]
 
+/**
+ * Budgets de triângulo por tier — a FONTE CANÔNICA é o catálogo do kernel bw
+ * (`KERNEL_ASSET_QUALITY_TIER_CATALOG`), não literais duplicados aqui. Se um tier sumir
+ * do catálogo, este helper lança — falha rápida em vez de drift silencioso entre as
+ * tabelas (pipeline LANES vs consulta J.1 vs kernel Rust).
+ */
+function kernelBudgets(tier: GameAssetQualityTier): {
+  maxPreviewTriangles: number
+  maxHeroTriangles: number
+} {
+  const entry = KERNEL_ASSET_QUALITY_TIER_CATALOG.find((candidate) => candidate.tag === tier)
+  if (!entry) {
+    throw new Error(`[bw] kernel catalog missing tier ${tier}`)
+  }
+  return {
+    maxPreviewTriangles: entry.maxPreviewTriangles,
+    maxHeroTriangles: entry.maxHeroTriangles,
+  }
+}
+
 const LANES: GameAssetQualityLane[] = [
   {
     tier: 'ai-draft',
     label: 'AI draft mesh',
-    maxPreviewTriangles: 10_000,
-    maxHeroTriangles: 25_000,
+    // Derivado do catálogo canônico do kernel (bw) — nunca um literal duplicado.
+    ...kernelBudgets('ai-draft'),
     textureBudget: '1K-2K draft textures',
     runtimeTargets: ['local-main-safe'],
     recommendedFor: ['prop', 'vfx'],
@@ -135,8 +156,7 @@ const LANES: GameAssetQualityLane[] = [
   {
     tier: 'curated-marketplace',
     label: 'Curated marketplace or library asset',
-    maxPreviewTriangles: 250_000,
-    maxHeroTriangles: 750_000,
+    ...kernelBudgets('curated-marketplace'),
     textureBudget: '2K-4K PBR, compressed per target',
     runtimeTargets: ['local-main-safe', 'local-native'],
     recommendedFor: ['character', 'creature', 'environment', 'prop', 'weapon', 'vehicle'],
@@ -146,8 +166,7 @@ const LANES: GameAssetQualityLane[] = [
   {
     tier: 'studio-local-optimized',
     label: 'Studio Local optimized production asset',
-    maxPreviewTriangles: 500_000,
-    maxHeroTriangles: 2_000_000,
+    ...kernelBudgets('studio-local-optimized'),
     textureBudget: '4K-8K source, KTX2/Basis runtime sets',
     runtimeTargets: ['local-native'],
     recommendedFor: ['character', 'creature', 'environment', 'cinematic'],
@@ -157,8 +176,7 @@ const LANES: GameAssetQualityLane[] = [
   {
     tier: 'cloud-render-grade',
     label: 'Cloud render grade asset',
-    maxPreviewTriangles: 1_000_000,
-    maxHeroTriangles: 10_000_000,
+    ...kernelBudgets('cloud-render-grade'),
     textureBudget: '8K source with delivery LODs',
     runtimeTargets: ['cloud-sandbox'],
     recommendedFor: ['cinematic', 'environment', 'character', 'creature'],

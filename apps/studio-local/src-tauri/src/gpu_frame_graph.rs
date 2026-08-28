@@ -22,7 +22,7 @@ use crate::gpu_fsr::FsrTemporalUpsample;
 use crate::gpu_hiz::DepthPyramidHiz;
 use crate::gpu_meshlet_cull::MeshletCullScaffold;
 use crate::gpu_micropoly_raster::MicropolyRasterScaffold;
-use crate::gpu_radiance_probes::RadianceProbeVolume;
+use crate::gpu_radiance_probes::RadianceCascadeVolume;
 use crate::gpu_vsm::VsmShadowAtlas;
 
 /// Canonical secondary pass order (only substrates that exist today).
@@ -156,7 +156,7 @@ pub fn execute_secondary_frame_graph(
     fsr: &mut FsrTemporalUpsample,
     entropy: &mut EntropyDestructionScaffold,
     hiz: &DepthPyramidHiz,
-    radiance: &RadianceProbeVolume,
+    radiance: &RadianceCascadeVolume,
     occlusion_enabled: bool,
 ) -> Result<SecondaryFrameGraphOutcome, String> {
     let mut metrics = FrameGraphFrameMetrics {
@@ -250,6 +250,7 @@ pub fn execute_secondary_frame_graph(
 
         rec.run("vsm", order, || {
             vsm.encode_update(queue, &mut encoder);
+            vsm.encode_sample(&mut encoder);
             Ok(())
         })?;
         order += 1;

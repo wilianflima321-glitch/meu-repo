@@ -1,9 +1,18 @@
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import {
+  Box,
+  ChevronRight,
+  Cpu,
+  Layers,
+  Search,
+  SunMedium,
+  Terminal,
+  Zap,
+} from 'lucide-react'
 import MaturityBadge from '@/components/ui/MaturityBadge'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS, STUDIO_SECONDARY_LINKS } from '@/lib/navigation/surfaces'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
@@ -77,15 +86,82 @@ function Breadcrumb({ pathname }: { pathname: string }) {
   )
 }
 
-/** Command Palette trigger button (Ctrl+P / ⌘P) */
+/** Command Palette — Cursor Pro / Linear level (Ctrl+K / Ctrl+P) */
+
+// ── Static engine commands wired to the briefing spec categories ───────────
+
+const PALETTE_COMMANDS = [
+  // Engine Actions
+  { id: 'engine.buildLights', label: 'Build Lights', category: 'Engine', shortcut: null, icon: SunMedium, href: null },
+  { id: 'engine.recalcPhysics', label: 'Recalculate Physics World', category: 'Engine', shortcut: null, icon: Cpu, href: null },
+  { id: 'engine.toggleProfiler', label: 'Toggle GPU Profiler HUD', category: 'Engine', shortcut: null, icon: Zap, href: null },
+  { id: 'engine.exportUSD', label: 'Export Scene as USD', category: 'Engine', shortcut: null, icon: Layers, href: null },
+  // Actor creation
+  { id: 'spawn.cube', label: 'Spawn Cube Primitive', category: 'Actor', shortcut: 'Shift+A', icon: Box, href: null },
+  { id: 'spawn.sphere', label: 'Spawn Sphere Primitive', category: 'Actor', shortcut: 'Shift+A', icon: Box, href: null },
+  { id: 'spawn.directionalLight', label: 'Spawn Directional Light', category: 'Actor', shortcut: 'Shift+A', icon: SunMedium, href: null },
+  { id: 'spawn.camera', label: 'Spawn Camera 16:9', category: 'Actor', shortcut: 'Shift+A', icon: Box, href: null },
+  { id: 'spawn.audio', label: 'Create Audio Emitter', category: 'Actor', shortcut: 'Shift+A', icon: Box, href: null },
+  // Navigation
+  { id: 'nav.studio', label: 'Go to Studio', category: 'Navigate', shortcut: null, icon: Terminal, href: '/studio' },
+  { id: 'nav.marketplace', label: 'Go to Marketplace', category: 'Navigate', shortcut: null, icon: Terminal, href: '/marketplace' },
+  { id: 'nav.arcade', label: 'Go to Arcade', category: 'Navigate', shortcut: null, icon: Terminal, href: '/arcade' },
+  { id: 'nav.settings', label: 'Go to Settings', category: 'Navigate', shortcut: null, icon: Terminal, href: '/settings' },
+  // AI Agents
+  { id: 'ai.worldForge', label: 'Acionar World Forge Agent', category: 'AI Agent', shortcut: null, icon: Zap, href: null },
+  { id: 'ai.qaCritic', label: 'Executar QA Critic Audit', category: 'AI Agent', shortcut: null, icon: Zap, href: null },
+] as const
+
+type PaletteCommand = (typeof PALETTE_COMMANDS)[number]
+
+const CATEGORY_ORDER: PaletteCommand['category'][] = ['Engine', 'Actor', 'Navigate', 'AI Agent']
+
+const CATEGORY_COLORS: Record<PaletteCommand['category'], string> = {
+  Engine: 'text-[var(--aethel-warning)]',
+  Actor: 'text-[var(--aethel-primary)]',
+  Navigate: 'text-[var(--aethel-neon-cyan)]',
+  'AI Agent': 'text-[var(--aethel-success)]',
+}
+
+function fuzzyMatch(query: string, target: string): boolean {
+  if (!query) return true
+  const q = query.toLowerCase()
+  const t = target.toLowerCase()
+  if (t.includes(q)) return true
+  // character-by-character fuzzy
+  let qi = 0
+  for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+    if (t[ti] === q[qi]) qi++
+  }
+  return qi === q.length
+}
+
 function CommandPaletteTrigger() {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [activeIndex, setActiveIndex] = useState(0)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const filtered = PALETTE_COMMANDS.filter(
+    (cmd) => fuzzyMatch(query, cmd.label) || fuzzyMatch(query, cmd.category),
+  )
+
+  // Group by category maintaining CATEGORY_ORDER
+  const grouped = CATEGORY_ORDER.reduce<Record<string, PaletteCommand[]>>((acc, cat) => {
+    const cmds = filtered.filter((c) => c.category === cat)
+    if (cmds.length > 0) acc[cat] = cmds
+    return acc
+  }, {})
+
+  const flatFiltered = Object.values(grouped).flat()
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'p')) {
         e.preventDefault()
         setOpen((v) => !v)
+        setQuery('')
+        setActiveIndex(0)
       }
       if (e.key === 'Escape') setOpen(false)
     }
@@ -93,52 +169,139 @@ function CommandPaletteTrigger() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  // Keyboard navigation inside open palette
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setActiveIndex((i) => Math.min(i + 1, flatFiltered.length - 1))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setActiveIndex((i) => Math.max(i - 1, 0))
+      } else if (e.key === 'Enter') {
+        const cmd = flatFiltered[activeIndex]
+        if (cmd?.href) {
+          window.location.href = cmd.href
+          setOpen(false)
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [open, flatFiltered, activeIndex])
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 30)
+  }, [open])
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [query])
+
+  let flatIndex = 0
+
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        title="Command Palette (Ctrl+P)"
+        type="button"
+        onClick={() => { setOpen(true); setQuery(''); setActiveIndex(0); }}
+        aria-label="Open command palette (Ctrl+K)"
+        title="Ctrl+K — search everything"
         className="inline-flex items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1.5 text-[10px] font-mono font-semibold text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] transition-all"
       >
         <Search className="h-3 w-3" />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="hidden sm:inline opacity-50 text-[9px]">Ctrl+P</kbd>
+        <kbd className="hidden sm:inline opacity-50 text-[9px]">Ctrl+K</kbd>
       </button>
 
-      {/* Minimal Command Palette Modal */}
+      {/* Command Palette Modal */}
       {open && (
         <div
-          className="fixed inset-0 z-[200] flex items-start justify-center pt-24 bg-black/60 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command palette"
+          className="fixed inset-0 z-[200] flex items-start justify-center pt-20 bg-black/70 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-[var(--aethel-shadow-xl,0_16px_40px_rgb(0_0_0/0.7))] overflow-hidden"
+            className="w-full max-w-xl rounded-2xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] shadow-[0_24px_80px_rgb(0_0_0/0.8)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
+            {/* Search input */}
+            <div className="flex items-center gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3.5">
               <Search className="h-4 w-4 text-[var(--aethel-text-tertiary)] shrink-0" />
               <input
-                autoFocus
+                ref={inputRef}
                 type="text"
-                placeholder="Buscar páginas, comandos, configurações..."
-                className="flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] outline-none font-mono"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search commands, actors, pages, agents..."
+                className="flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none"
               />
-              <kbd className="text-[10px] font-mono text-[var(--aethel-text-tertiary)] border border-[var(--aethel-border-primary)] rounded px-1.5 py-0.5">Esc</kbd>
+              <kbd className="shrink-0 rounded border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--aethel-text-tertiary)]">
+                Esc
+              </kbd>
             </div>
-            <div className="p-2">
-              {STUDIO_PRIMARY_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors font-mono"
-                >
-                  <span className="text-[var(--aethel-text-tertiary)] text-xs uppercase tracking-wider w-20 shrink-0">
-                    Página
-                  </span>
-                  {link.label}
-                </Link>
-              ))}
+
+            {/* Results */}
+            <div className="max-h-96 overflow-auto p-2">
+              {flatFiltered.length === 0 ? (
+                <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-quaternary)]">
+                  No commands match <span className="font-mono text-[var(--aethel-text-secondary)]">&quot;{query}&quot;</span>
+                </div>
+              ) : (
+                Object.entries(grouped).map(([cat, cmds]) => (
+                  <div key={cat} className="mb-1">
+                    {/* Category header */}
+                    <div className="mb-1 px-3 pt-2 pb-0.5">
+                      <span className={`text-[10px] font-bold uppercase tracking-[0.14em] ${CATEGORY_COLORS[cat as PaletteCommand['category']]}`}>
+                        {cat}
+                      </span>
+                    </div>
+                    {cmds.map((cmd) => {
+                      const isActive = flatIndex === activeIndex
+                      const Icon = cmd.icon
+                      const idx = flatIndex++
+                      return (
+                        <button
+                          key={cmd.id}
+                          type="button"
+                          onMouseEnter={() => setActiveIndex(idx)}
+                          onClick={() => {
+                            if (cmd.href) window.location.href = cmd.href
+                            setOpen(false)
+                          }}
+                          className={[
+                            'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors',
+                            isActive
+                              ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-text-primary)]'
+                              : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]',
+                          ].join(' ')}
+                        >
+                          <Icon className={`h-4 w-4 shrink-0 ${CATEGORY_COLORS[cat as PaletteCommand['category']]}`} />
+                          <span className="flex-1 font-medium">{cmd.label}</span>
+                          {cmd.shortcut && (
+                            <kbd className="shrink-0 rounded border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] px-1.5 py-0.5 font-mono text-[9px] text-[var(--aethel-text-quaternary)]">
+                              {cmd.shortcut}
+                            </kbd>
+                          )}
+                          {cmd.href && (
+                            <ChevronRight className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer hint */}
+            <div className="flex items-center gap-3 border-t border-[var(--aethel-border-subtle)] px-4 py-2 text-[10px] text-[var(--aethel-text-quaternary)]">
+              <span><kbd className="font-mono">↑↓</kbd> navigate</span>
+              <span><kbd className="font-mono">Enter</kbd> open</span>
+              <span><kbd className="font-mono">Esc</kbd> close</span>
             </div>
           </div>
         </div>

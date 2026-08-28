@@ -16,6 +16,16 @@ import {
   recordFusionMutation,
   type FusionScopeStore,
 } from '@/lib/production/creative-fusion-transaction'
+import type { CostGuardLedgerAdapter } from '@/lib/production/creative-cost-guard'
+import {
+  appendTaskEvidence,
+  type TaskEvidenceLedger,
+} from '@/lib/production/task-evidence-ledger'
+import {
+  bindCreativeQualityTier,
+  scaleCreativeTokenWeightForFidelity,
+  type CreativeQualityTierBinding,
+} from '@/lib/production/creative-quality-tier-binding'
 import { runLoraPagerInject } from '@/lib/world-forge/lora-pager-inject'
 import type { LoraClayGenreId } from '@/lib/world-forge/lora-clay-registry'
 import { bakeSdfParamsToHeightfield } from '@/lib/world-forge/sdf-fractal-sculpt'
@@ -41,8 +51,17 @@ import {
   WORLD_FORGE_LETTER,
   WORLD_FORGE_PIPELINE_ID,
   evaluateWorldForgeCapability,
+  type WorldForgeStageId,
   type WorldForgeStageReceipt,
 } from '@/lib/world-forge/types'
+import {
+  attributeWorldForgeStageActual,
+  cancelWorldForgeSpend,
+  reserveWorldForgeSpend,
+  settleWorldForgeSpend,
+  type WorldForgeSpendHeld,
+  type WorldForgeSpendReceipt,
+} from '@/lib/world-forge/world-forge-multistage-spend'
 import type { HeightfieldDocument } from '@/lib/production/terrain-heightfield-math'
 import type { FoliageDocument } from '@/lib/production/terrain-foliage-math'
 import type { NavMeshGrid } from '@/lib/world-forge/navmesh-rebuild'
@@ -80,6 +99,38 @@ export interface WorldForgeConveyorInput {
   /** Letter ct — soak proven before flipping detourNavReady. */
   detourNavSoakPassed?: boolean
   detourNavSoakFrames?: number
+  /**
+   * Letter cc — Law XVI Trava I CostGuard funding for the World Forge mission.
+   * When provided (with costGuardAdapter) the conveyor reserves ONE held reservation
+   * before stage A and settles once on success (or refunds on any fail-closed stage).
+   */
+  costGuard?: {
+    byokProfileId?: string
+    usageBucketId?: string
+    planId?: string
+    estimatedTokenWeight: number
+    settleCeilingMultiplier?: number
+  }
+  /** Letter cc — CostGuard ledger adapter (memory / spend-resolver). */
+  costGuardAdapter?: CostGuardLedgerAdapter
+  /** Letter cc — caller-owned evidence ledger to carry spend/settle/refund events. */
+  ledger?: TaskEvidenceLedger
+  /**
+   * Letter cc — caller-attributed actual token consumption per stage (provider/cloud only).
+   * Omitted or 0 stages are local $0 math — never invented spend.
+   */
+  stageActuals?: Partial<Record<WorldForgeStageId, number>>
+  /**
+   * Letter cq — CapScore → fidelity band budget bind (Law XV + XVI).
+   * When provided the conveyor binds the creative cook budget and scales the
+   * CostGuard reserve by the fidelity multiplier. Fail-closed when the bind
+   * refuses (missing CapScore, no cloud lane).
+   */
+  qualityTier?: {
+    capabilityScore?: number | null
+    preferCloudCook?: boolean
+    ignoreCapabilityScore?: boolean
+  }
 }
 
 export interface WorldForgeConveyorResult {
@@ -114,6 +165,22 @@ export interface WorldForgeConveyorResult {
   fusionTxId?: string
   /** Top-8 #5 — Maestro success barrier fingerprint when success allowed. */
   maestroBarrier?: WorldForgeMaestroSuccessVerdict
+  /**
+   * Letter cc — multi-stage CostGuard spend receipt when the mission was funded
+   * (null when reserve denied; undefined when unfunded/zero-UI).
+   */
+  worldForgeSpend?: WorldForgeSpendReceipt | null
+  /** Letter cc — Trava I denial reason when CostGuard refused the mission. */
+  spendDeniedReason?: string
+  /** Letter cc — evidence ledger carrying spend/settle/refund events. */
+  ledger?: TaskEvidenceLedger
+  /**
+   * Letter cq — CapScore fidelity band + cook budget bound for this mission
+   * (null when the caller requested a bind and it was refused).
+   */
+  qualityTier?: CreativeQualityTierBinding | null
+  /** Letter cq — quality-tier denial reason when the bind refused the mission. */
+  tierDeniedReason?: string
 }
 
 export async function runWorldForgeConveyor(
@@ -145,10 +212,87 @@ export async function runWorldForgeConveyor(
     detourNavReady: false,
     unrealRecastParityReady: false,
     streamingCarveReady: false,
+    ledger: input.ledger,
   }
 
   let fusionTxId: string | undefined
+  let spend: WorldForgeSpendHeld | null = null
+  let ledger = input.ledger
   try {
+    // Letter cq — CapScore → fidelity band budget bind (Law XV + XVI). Scales the
+    // CostGuard reserve by the fidelity multiplier; fail-closed when the caller
+    // requested a tier bind and the bind refuses (missing CapScore, no cloud lane).
+    let qualityBinding: CreativeQualityTierBinding | null | undefined
+    if (input.qualityTier) {
+      qualityBinding = bindCreativeQualityTier({
+        capabilityScore: input.qualityTier.capabilityScore,
+        preferCloudCook: input.qualityTier.preferCloudCook,
+        ignoreCapabilityScore: input.qualityTier.ignoreCapabilityScore,
+        domain: 'world-layout',
+      })
+      if (!qualityBinding.ok) {
+        if (ledger) {
+          ledger = appendTaskEvidence(ledger, {
+            kind: 'cost',
+            title: 'World Forge quality tier refused',
+            summary: `${qualityBinding.rejectCode}: ${qualityBinding.reason}`,
+            refs: [`world-forge:${WORLD_FORGE_LETTER}`],
+            actor: 'WorldForgeQualityTier',
+          })
+        }
+        base.blockedReason = qualityBinding.reason
+        base.qualityTier = null
+        base.tierDeniedReason = qualityBinding.reason
+        base.ledger = ledger
+        log.info('world_forge_quality_tier_denied', { rejectCode: qualityBinding.rejectCode })
+        return base
+      }
+      base.qualityTier = qualityBinding
+    }
+
+    // Letter cc — Law XVI Trava I: reserve ONE held reservation before ANY stage executes.
+    if (input.costGuard && input.costGuardAdapter) {
+      const reserved = await reserveWorldForgeSpend(
+        {
+          userId: input.userId,
+          projectId: input.projectId,
+          estimatedTokenWeight:
+            qualityBinding && qualityBinding.ok
+              ? scaleCreativeTokenWeightForFidelity(input.costGuard.estimatedTokenWeight, qualityBinding)
+              : input.costGuard.estimatedTokenWeight,
+          byokProfileId: input.costGuard.byokProfileId,
+          usageBucketId: input.costGuard.usageBucketId,
+          planId: input.costGuard.planId,
+          settleCeilingMultiplier: input.costGuard.settleCeilingMultiplier,
+        },
+        input.costGuardAdapter,
+      )
+      if (!reserved.ok) {
+        if (ledger) {
+          ledger = appendTaskEvidence(ledger, {
+            kind: 'cost',
+            title: 'World Forge CostGuard denied',
+            summary: `${reserved.reason}: ${reserved.message}`,
+            refs: [`world-forge:${WORLD_FORGE_LETTER}`],
+            actor: 'WorldForgeCostGuard',
+          })
+        }
+        base.spendDeniedReason = reserved.message
+        base.worldForgeSpend = null
+        base.ledger = ledger
+        log.info('world_forge_spend_denied', { reason: reserved.reason, message: reserved.message })
+        return base
+      }
+      spend = reserved.held
+    }
+
+    const applyStageActual = (stage: WorldForgeStageId): void => {
+      if (!spend) return
+      const actual = input.stageActuals?.[stage] ?? 0
+      const attributed = attributeWorldForgeStageActual(spend, stage, actual)
+      if (attributed.ok) spend = attributed.held
+    }
+
     // A — LoRA inject (HELD soak → held/zero-ui receipt; math continues)
     if (!input.skipLora) {
       const lora = runLoraPagerInject({
@@ -157,6 +301,7 @@ export async function runWorldForgeConveyor(
         capabilityScore: gate.capabilityScore,
       })
       stages.push(lora.receipt)
+      applyStageActual('lora-inject')
     } else {
       stages.push({
         stage: 'lora-inject',
@@ -172,6 +317,7 @@ export async function runWorldForgeConveyor(
       resolution: 65,
     })
     stages.push(sdf.receipt)
+    applyStageActual('sdf-sculpt')
     base.heightfield = sdf.heightfield
 
     // D — Seamless PBR helper for splat layers
@@ -184,6 +330,7 @@ export async function runWorldForgeConveyor(
       channelKind: 'albedo',
     })
     stages.push(seamless.receipt)
+    applyStageActual('seamless-pbr')
     base.seamlessPbr = seamless
 
     // E — Semantic biome mask
@@ -194,6 +341,7 @@ export async function runWorldForgeConveyor(
       source: 'maestro',
     })
     stages.push(biome.receipt)
+    applyStageActual('biome-mask')
     base.biomeMask = biome.mask
 
     // B — PCG hybrid InstancedMesh scatter (bf foliage SoA)
@@ -217,6 +365,7 @@ export async function runWorldForgeConveyor(
       densityMode: plan.densityMode,
     })
     stages.push(pcg.receipt)
+    applyStageActual('pcg-scatter')
     base.foliage = pcg.foliage
 
     // Beyond — collider LOD (V-HACD heroes only)
@@ -225,6 +374,7 @@ export async function runWorldForgeConveyor(
       capabilityScore: gate.capabilityScore,
     })
     stages.push(colliders.receipt)
+    applyStageActual('collider-lod')
     base.colliderLod = colliders
 
     // F — NavMesh rebuild (letter ch: GPU heightfield→walkable when soak+adapter; else CPU)
@@ -240,6 +390,7 @@ export async function runWorldForgeConveyor(
       device: input.gpuDevice ?? null,
     })
     stages.push(nav.receipt)
+    applyStageActual('navmesh-rebuild')
     base.navmesh = nav.navmesh
     base.gpuRecastReady = nav.gpuRecastReady
 
@@ -252,6 +403,7 @@ export async function runWorldForgeConveyor(
       soakFramesProven: input.detourNavSoakFrames,
     })
     stages.push(detour.receipt)
+    applyStageActual('detour-nav-rebuild')
     base.detourNav = detour.session
     base.detourNavReady = detour.detourNavReady
 
@@ -286,6 +438,7 @@ export async function runWorldForgeConveyor(
           evidence: ['creative-fusion-transaction', 'trava-ii', 'local-zero-cost-still-tx'],
         })
         base.fusionTxId = fusionTxId
+        applyStageActual('fusion-viewport')
       } catch (err) {
         fusionAborted = true
         if (fusionTxId) {
@@ -325,6 +478,31 @@ export async function runWorldForgeConveyor(
         (!mathOk ? 'World Forge math path produced empty/unwalkable world' : 'maestro_barrier_refused')
     }
 
+    // Letter cc — settle once on success; refund the full hold on ANY fail-closed stage.
+    if (spend && input.costGuardAdapter) {
+      if (gated.success) {
+        const settled = await settleWorldForgeSpend({
+          held: spend,
+          adapter: input.costGuardAdapter,
+          ledger,
+          stageReceipts: stages,
+        })
+        base.worldForgeSpend = settled.receipt
+        ledger = settled.ledger
+      } else {
+        const cancelled = await cancelWorldForgeSpend({
+          held: spend,
+          adapter: input.costGuardAdapter,
+          ledger,
+          reason: base.blockedReason ?? 'maestro_barrier_refused',
+          stageReceipts: stages,
+        })
+        base.worldForgeSpend = cancelled.receipt
+        ledger = cancelled.ledger
+      }
+    }
+    base.ledger = ledger
+
     log.info('world_forge_conveyor_done', {
       success: base.success,
       zeroUi: base.zeroUi,
@@ -337,11 +515,26 @@ export async function runWorldForgeConveyor(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     log.info('world_forge_conveyor_fail', { message })
+    let finalLedger = ledger
+    let spendReceipt: WorldForgeSpendReceipt | null | undefined
+    if (spend && input.costGuardAdapter) {
+      const cancelled = await cancelWorldForgeSpend({
+        held: spend,
+        adapter: input.costGuardAdapter,
+        ledger: finalLedger,
+        reason: message,
+        stageReceipts: stages,
+      })
+      spendReceipt = cancelled.receipt
+      finalLedger = cancelled.ledger
+    }
     return {
       ...base,
       success: false,
       blockedReason: message,
       stages,
+      worldForgeSpend: spendReceipt,
+      ledger: finalLedger,
     }
   }
 }

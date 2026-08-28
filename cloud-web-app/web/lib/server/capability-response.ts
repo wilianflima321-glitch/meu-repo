@@ -20,6 +20,37 @@ function stringifyMeta(value: unknown): string {
   return JSON.stringify(value)
 }
 
+/**
+ * HTTP header values must be ByteString-safe (code units 0–255) for undici /
+ * NextResponse serialization. Arbitrary capability metadata may embed non-ASCII
+ * text (e.g. compiler diagnostics containing em-dashes), which would otherwise
+ * throw "Cannot convert argument to a ByteString ..." and turn a clean 4xx into
+ * a 500. Code points outside the safe set are percent-encoded as their UTF-8
+ * bytes so the information survives losslessly while the header stays valid.
+ */
+function toHeaderSafe(value: string): string {
+  let out = ''
+  for (const char of value) {
+    const code = char.codePointAt(0) as number
+    const keep = code === 0x09 || (code >= 0x20 && code <= 0x7e) || (code >= 0x80 && code <= 0xff)
+    if (keep) {
+      out += char
+    } else {
+      const bytes = new TextEncoder().encode(char)
+      for (const byte of bytes) {
+        out += `%${byte.toString(16).padStart(2, '0').toUpperCase()}`
+      }
+    }
+  }
+  return out
+}
+
+/** Header names must be RFC 7230 tokens; coerce arbitrary metadata keys. */
+function toHeaderToken(input: string): string {
+  const sanitized = input.replace(/[^a-zA-Z0-9_-]/g, '_')
+  return sanitized || 'meta'
+}
+
 export function capabilityResponse(options: CapabilityResponseOptions) {
   const capabilityStatus = options.capabilityStatus || 'NOT_IMPLEMENTED'
   const metadata = options.metadata || {}
@@ -45,7 +76,7 @@ export function capabilityResponse(options: CapabilityResponseOptions) {
 
   if (Object.keys(metadata).length > 0) {
     for (const [key, value] of Object.entries(metadata)) {
-      headers[`x-aethel-meta-${key}`] = stringifyMeta(value)
+      headers[`x-aethel-meta-${toHeaderToken(key)}`] = toHeaderSafe(stringifyMeta(value))
     }
   }
 

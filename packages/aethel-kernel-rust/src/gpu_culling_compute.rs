@@ -1,5 +1,9 @@
 //! GPU Culling Compute logic â€” Micro-Poly Foundation.
 //!
+//! Micro-Poly GPU culling substrate — wire `kernel_micro_poly_cull_wire` — letter
+//! **gz** (P1/Onda G Micro-Poly Foundation; last free letter in the GPU rendering
+//! range ga..gz — `gu` is taken by the wgpu_wgsl_device_load wire).
+//!
 //! Provides the mathematical binding and Rust-side frustum/Hi-Z culling calculations
 //! using SoA AABB layouts. Ensures Zero-MVP by providing a lock-free, zero-allocation
 //! hot loop to compute visibility before dispatching `GpuSubmitPipeline` commands.

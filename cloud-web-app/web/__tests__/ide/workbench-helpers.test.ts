@@ -18,7 +18,7 @@ import {
   pickFirstFilePath,
   getAuthHeaders,
   type WorkspaceTreeNode,
-} from '../../components/ide/fullscreen/workbench-helpers';
+} from '@aethel/ide-ui/fullscreen/workbench-helpers';
 
 describe('workbench-helpers', () => {
   describe('resolveLanguage', () => {

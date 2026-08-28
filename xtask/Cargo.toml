@@ -1,0 +1,9 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = "2021"
+description = "Aethel kernel wire-registry fail-closed gate (round R1, S-11) — cargo xtask wire-check"
+
+# Zero-dep tool (std only): instant build, no lockfile, no toolchain conflict
+# with the two independent crates (aethel-kernel-rust / aethel-studio-local).
+[dependencies]

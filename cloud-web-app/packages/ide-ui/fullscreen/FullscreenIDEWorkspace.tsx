@@ -179,8 +179,14 @@ export function FullscreenIDEWorkspace({
             onRunPrimaryAction={onRunPrimaryAction}
             onOpenSettings={onOpenSettings}
             onOpenCommandPalette={onOpenCommandPalette}
-            onSelectSidebarTab={onSelectSidebarTab}
-            onSelectPreviewMode={onSelectPreviewMode}
+            onSelectSidebarTab={(tab) => {
+              if (tab === 'inspector') return
+              onSelectSidebarTab(tab)
+            }}
+            onSelectPreviewMode={(mode) => {
+              if (mode === 'node_editor') return
+              onSelectPreviewMode(mode)
+            }}
             onSelectBottomPanel={onSelectBottomPanel}
             onToggleDiagnostics={onToggleDiagnostics}
             agentStatus={agentStatus}

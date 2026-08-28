@@ -6,6 +6,9 @@
 use serde::{Deserialize, Serialize};
 use tauri::Window;
 
+use super::agent_shell_acl::acl_or_deny_ipc;
+use aethel_studio_local::ipc_surface::IpcAclClass;
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeNotificationInput {
@@ -31,7 +34,23 @@ pub struct AiCompleteResponse {
 }
 
 #[tauri::command]
-pub fn ai_complete(prompt: String, model: Option<String>) -> AiCompleteResponse {
+pub fn ai_complete(
+    prompt: String,
+    model: Option<String>,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> AiCompleteResponse {
+    if let Err(evidence) =
+        acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)
+    {
+        return AiCompleteResponse {
+            text: String::new(),
+            cost_usd: Some(0.0),
+            state: "denied".to_string(),
+            reason: evidence,
+        };
+    }
     let _ = (prompt, model);
     AiCompleteResponse {
         text: String::new(),
@@ -42,7 +61,20 @@ pub fn ai_complete(prompt: String, model: Option<String>) -> AiCompleteResponse 
 }
 
 #[tauri::command]
-pub fn notify_native(input: NativeNotificationInput) -> NativeCommandStatus {
+pub fn notify_native(
+    input: NativeNotificationInput,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> NativeCommandStatus {
+    if let Err(evidence) =
+        acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)
+    {
+        return NativeCommandStatus {
+            state: "denied".to_string(),
+            reason: evidence,
+        };
+    }
     let _ = (&input.title, &input.body, &input.tone);
     NativeCommandStatus {
         state: "provider_unavailable".to_string(),
@@ -51,14 +83,26 @@ pub fn notify_native(input: NativeNotificationInput) -> NativeCommandStatus {
 }
 
 #[tauri::command]
-pub fn window_minimize(window: Window) -> Result<(), String> {
+pub fn window_minimize(
+    window: Window,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     window
         .minimize()
         .map_err(|error| format!("failed to minimize window: {error}"))
 }
 
 #[tauri::command]
-pub fn window_toggle_maximize(window: Window) -> Result<(), String> {
+pub fn window_toggle_maximize(
+    window: Window,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     let is_maximized = window
         .is_maximized()
         .map_err(|error| format!("failed to inspect window state: {error}"))?;
@@ -74,7 +118,13 @@ pub fn window_toggle_maximize(window: Window) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn window_close(window: Window) -> Result<(), String> {
+pub fn window_close(
+    window: Window,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+) -> Result<(), String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     window
         .close()
         .map_err(|error| format!("failed to close window: {error}"))

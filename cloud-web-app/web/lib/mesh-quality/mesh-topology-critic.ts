@@ -2,10 +2,18 @@
  * Letter bw/bz — Actor-Critic topology gate on game-ready ship path.
  * Rejects bad topology before pack / viewport claim (Law XI dual-stack posture).
  * Letter bz: manifold / non-manifold / degenerate metrics in receipt.
+ * Letter bw: optional tier gate runs the kernel-mirror grade (gradeAssetTopology)
+ * bit-identically to Rust — the critic and the kernel can never disagree.
  */
 
 import { measureMeshTopology } from '@/lib/mesh-quality/mesh-topology-metrics'
 import { countTriangles, countVertices, type MeshQualityStageReceipt, type RawMeshBuffer } from '@/lib/mesh-quality/types'
+import {
+  gradeAssetTopology,
+  TIER_MIN_TOPOLOGY_GRADES,
+  type AssetTopologyMetricsInput,
+} from '@/lib/mesh-quality/topology-grader'
+import type { GameAssetQualityTier } from '@/lib/production/game-asset-quality-pipeline'
 
 export const MESH_TOPOLOGY_CRITIC_WIRED = true as const
 
@@ -19,6 +27,14 @@ export interface TopologyCriticInput {
   maxNonManifoldEdges?: number
   /** Reject when manifoldEdgeRatio falls below this (0–1). Default off (0). */
   minManifoldEdgeRatio?: number
+  /**
+   * Optional tier gate — when set, the kernel-mirror topology grade
+   * (`gradeAssetTopology`, bit-identical to Rust `AssetTopologyQuality::grade()`)
+   * must meet the tier's `TIER_MIN_TOPOLOGY_GRADES` floor (60/80/90/95).
+   */
+  tier?: GameAssetQualityTier
+  /** Explicit floor override for the kernel-mirror grade (defaults to the tier floor). */
+  minTopologyGrade?: number
 }
 
 export interface TopologyCriticResult {
@@ -34,6 +50,23 @@ export function critiqueMeshTopology(input: TopologyCriticInput): TopologyCritic
   const maxT = input.maxTriangles ?? 200_000
   const minT = input.minTriangles ?? 4
   const topo = measureMeshTopology(input.mesh)
+
+  // Kernel-mirror topology grade gate (bit-identical to the Rust bw grader).
+  const tierFloor = input.tier !== undefined ? TIER_MIN_TOPOLOGY_GRADES[input.tier] : undefined
+  const minGrade = input.minTopologyGrade ?? tierFloor
+  const topologyInput: AssetTopologyMetricsInput = {
+    vertices: topo.vertices,
+    triangles: topo.triangles,
+    degenerateFaces: topo.degenerateFaces,
+    nonManifoldEdges: topo.nonManifoldEdges,
+    openBoundaryLoops: topo.openBoundaryLoops,
+    isolatedVertices: topo.isolatedVertices,
+  }
+  const topologySample = gradeAssetTopology(topologyInput)
+  const topologyGrade = topologySample.grade
+  if (minGrade !== undefined && topologyGrade < minGrade) {
+    reasons.push('topology_grade_below_tier_floor')
+  }
 
   if (verts < 3) reasons.push('vertex_count_too_low')
   if (tris < minT) reasons.push('triangle_count_too_low')
@@ -79,6 +112,10 @@ export function critiqueMeshTopology(input: TopologyCriticInput): TopologyCritic
         manifoldEdgeRatio: topo.manifoldEdgeRatio,
         quadIshRatio: topo.quadIshRatio,
         degenerateFaces: topo.degenerateFaces,
+        openBoundaryLoops: topo.openBoundaryLoops,
+        isolatedVertices: topo.isolatedVertices,
+        topologyGrade,
+        topologyAllFinite: topologySample.allFinite,
       },
     },
   }

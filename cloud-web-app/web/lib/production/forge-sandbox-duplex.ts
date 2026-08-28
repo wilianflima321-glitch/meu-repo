@@ -239,7 +239,7 @@ function openPipeDuplex(input: {
         COLUMNS: String(cols),
         LINES: String(rows),
         FORCE_COLOR: '0',
-      }),
+      }) as NodeJS.ProcessEnv,
       stdio: ['pipe', 'pipe', 'pipe'],
     })
   } catch (err) {

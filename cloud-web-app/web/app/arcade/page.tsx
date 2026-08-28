@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { Gamepad2, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+import { Gamepad2, Play, Sparkles, Users } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import MaturityBadge from '@/components/ui/MaturityBadge'
@@ -183,7 +184,79 @@ export default function ArcadePage() {
       <PublicHeader />
 
       <main id="main-content" className="relative z-10 pb-16">
-        <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        {/* ── Cinematic Hero: featured game cover if catalog has entries ── */}
+        {!loading && games.length > 0 ? (
+          <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: '21/9' }}>
+            {games[0]?.thumbnailUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={games[0].thumbnailUrl}
+                alt={games[0]?.title ?? 'Featured game'}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div
+                className="h-full w-full"
+                style={{
+                  background: activeTheme
+                    ? `linear-gradient(135deg, ${activeTheme.theme.accentMuted}, color-mix(in srgb, var(--aethel-surface-secondary) 58%, transparent))`
+                    : 'linear-gradient(135deg, color-mix(in srgb, var(--aethel-primary) 22%, transparent), var(--aethel-surface-secondary))',
+                }}
+              />
+            )}
+
+            {/* Gradient vignette for contrast */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background: 'linear-gradient(to top, color-mix(in srgb, var(--aethel-surface-primary) 90%, transparent) 0%, transparent 55%), linear-gradient(to right, color-mix(in srgb, var(--aethel-surface-primary) 60%, transparent) 0%, transparent 60%)',
+              }}
+            />
+
+            {/* Hero content overlay */}
+            <div className="absolute bottom-0 left-0 p-6 lg:p-10">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--aethel-info-light)] backdrop-blur-sm">
+                  <Sparkles className="h-3.5 w-3.5" /> Featured
+                </div>
+                <MaturityBadge path="/arcade" />
+              </div>
+
+              <h1 className="max-w-xl text-3xl font-bold tracking-tight text-[var(--aethel-text-primary)] drop-shadow-lg sm:text-5xl">
+                {games[0]?.title ?? 'Aethel Arcade'}
+              </h1>
+              {games[0]?.description && (
+                <p className="mt-2 max-w-lg line-clamp-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                  {games[0].description}
+                </p>
+              )}
+
+              <div className="mt-5 flex items-center gap-3">
+                <Link
+                  href={`/arcade/${games[0]?.slug ?? ''}`}
+                  className="group inline-flex items-center gap-2 rounded-xl bg-[var(--aethel-primary)] px-6 py-3 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:bg-[var(--aethel-primary-light)] hover:shadow-[0_0_24px_color-mix(in_srgb,var(--aethel-primary)_45%,transparent)] active:scale-[0.98]"
+                >
+                  <Play className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                  Play Now
+                </Link>
+                <span className="inline-flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)]">
+                  <Users className="h-3.5 w-3.5" />
+                  {games[0]?.plays ?? 0} plays
+                </span>
+              </div>
+            </div>
+
+            {/* Catalog stat bar — top-right */}
+            <div className="absolute right-4 top-4 flex items-center gap-2">
+              <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-1.5 backdrop-blur-sm">
+                <span className="font-mono text-xs font-semibold text-[var(--aethel-text-primary)]">{games.length}</span>
+                <span className="ml-1 text-[10px] text-[var(--aethel-text-tertiary)]">games</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Branded hero when catalog is empty */
           <div
             className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] p-6 shadow-[var(--aethel-shadow-lg)] lg:p-8"
             style={heroStyle}
@@ -205,27 +278,39 @@ export default function ArcadePage() {
             <div className="mt-5">
               <HubHonestyBadge />
             </div>
-            <div className="mt-6 max-w-md">
+          </div>
+        )}
+
+        {/* Search + Filters row */}
+        <div className="mt-6 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] p-4">
+          {!loading && games.length > 0 && (
+            <div className="mb-3">
+              <HubHonestyBadge />
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1">
               <input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search games, tags, or creators..."
-                className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_55%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]"
-              />
-            </div>
-            <div className="mt-6">
-              <HubF2PTabs
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                activeMicroTag={activeMicroTag}
-                onMicroTagChange={setActiveMicroTag}
-                presentMicroTagIds={presentMicroTagIds}
-                discoveryFeedReady={discoveryFeedReady}
+                className="h-11 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_55%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]"
               />
             </div>
           </div>
-        </section>
+          <div className="mt-4">
+            <HubF2PTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              activeMicroTag={activeMicroTag}
+              onMicroTagChange={setActiveMicroTag}
+              presentMicroTagIds={presentMicroTagIds}
+              discoveryFeedReady={discoveryFeedReady}
+            />
+          </div>
+        </div>
+      </section>
 
         <section className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
           <ArcadeCreatorPanel onPublished={() => void loadGames()} />

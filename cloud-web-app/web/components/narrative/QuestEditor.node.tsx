@@ -5,9 +5,14 @@ import {
   Award,
   CheckCircle2,
   Coins,
+  Hammer,
+  Map,
   Package,
   Play,
+  Scroll,
+  Shield,
   Star,
+  Swords,
   Unlink,
   XCircle,
 } from 'lucide-react';
@@ -49,7 +54,15 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
         className="px-3 py-2 rounded-t-md flex items-center gap-2"
         style={{ borderBottom: `2px solid ${category?.color || 'var(--aethel-text-muted)'}` }}
       >
-        <span className="text-lg">{category?.icon}</span>
+        {category?.icon === 'star' && <Star className="w-4 h-4 text-[var(--aethel-warning-light)] shrink-0" />}
+        {category?.icon === 'scroll' && <Scroll className="w-4 h-4 text-[var(--aethel-primary-light)] shrink-0" />}
+        {category?.icon === 'shield' && <Shield className="w-4 h-4 text-[var(--aethel-accent-light)] shrink-0" />}
+        {category?.icon === 'swords' && <Swords className="w-4 h-4 text-[var(--aethel-error-light)] shrink-0" />}
+        {category?.icon === 'map' && <Map className="w-4 h-4 text-[var(--aethel-success-light)] shrink-0" />}
+        {category?.icon === 'hammer' && <Hammer className="w-4 h-4 text-[var(--aethel-warning-dark)] shrink-0" />}
+        {!['star', 'scroll', 'shield', 'swords', 'map', 'hammer'].includes(category?.icon ?? '') && (
+          <Scroll className="w-4 h-4 text-[var(--aethel-text-tertiary)] shrink-0" />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm text-[var(--aethel-text-primary)] truncate">{data.title}</span>

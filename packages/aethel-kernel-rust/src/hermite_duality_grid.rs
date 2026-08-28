@@ -952,4 +952,19 @@ mod tests {
         assert_ne!("hermiteDualityGridReady", "fmAdditiveSynthesisReady");
         assert_ne!("hermiteDualityGridReady", "finiteElementAnalysisReady");
     }
+
+    #[test]
+    fn hermite_sample_zero_is_finite_and_zero() {
+        let sample = HermiteSample::zero();
+        assert!(sample.is_finite());
+        assert_eq!(sample.scalar, 0.0);
+        assert_eq!(sample.grad, [0.0, 0.0, 0.0]);
+    }
+
+    #[test]
+    fn hermite_grid_dimensions_and_constants_valid() {
+        assert!(GRID_RES >= 2);
+        assert_eq!(CELL_RES, GRID_RES - 1);
+        assert!(CELL_SIZE > 0.0);
+    }
 }

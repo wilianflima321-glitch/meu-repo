@@ -32,6 +32,9 @@
 
 **Explicit exclusion from 100%:** shipped product code, CI script implementation, golden fixture **files** on disk, console TRC automation, ML Deformer, vision 2030 execution.
 
+**Hygiene 2026-08-08:** MaterialX/OpenVDB draft specs registered in §Spec registry; implementation ~25% — spec "State today" tables must track Progress ledger, not remain AUSENTE after bridge land.
+**Hygiene 2026-08-11:** Zero-MVP web/cloud test-infra closure recorded in Progress session log + Master Map §0c — 8 suites green, `qa:ai-game-film-production` PASS, typecheck PASS, full vitest baseline (492/500 files · 2757/2766 passed); dependency-infra debts tracked (web/ `npm install` **EOVERRIDE react/react-dom** conflict; **fast-xml-parser** override-only → `saml-xsw` suite load-failure) in Progress §Remaining OPEN — **not** part of the 100% planning scope (implementation-reality table already honest); no planning % change.
+
 **Hygiene note:** Syncing Index/Completeness/Roadmap versions is **not** new planning — it prevents executor drift.
 
 ---
@@ -46,6 +49,8 @@
 | `AETHEL_PLANNING_COMPLETENESS.md` | **1.2** | This certificate |
 | `AETHEL_CLAUDE_EXECUTION_MASTER_MAP.md` | **1.4** | Focus 1→2 + blocks |
 | `AETHEL_AAA_PARITY_TARGETS.md` | 1.1 | G.3 nuclear |
+| `AETHEL_MATERIALX_INTEGRATION_SPEC.md` | 1.0 (draft) | G/S1 interchange — hygiene 2026-08-08 |
+| `AETHEL_OPENVDB_INTEGRATION_SPEC.md` | 1.0 (draft) | G/S2 interchange — hygiene 2026-08-08 |
 | `AETHEL_MATERIAL_SUBSTRATE_SPEC.md` | 1.2 | S1 |
 | `AETHEL_WORLD_SYSTEMS_SPEC.md` | 1.2 | S2 |
 | `AETHEL_ANIMATION_CINEMATICS_SPEC.md` | 1.2 | S3 |
@@ -103,7 +108,7 @@
 - [x] No marketing claim without honesty gate
 - [x] No Zero-MVP violation in planned ship paths
 - [x] 16 Laws each cite spec + acceptance
-- [x] Wedge #1 explicitly non-blocked by G/K/L/M/STUDIO-ζ
+- [x] Launch Hard Gate #72 (doctrine 2026-08-16): Wedge and partial 50% gate annulled — public launch gated on **100%+ holistic UE5 parity and absolute supremacy** (P1–P4 acceptance-green together); capability trains run in parallel
 - [x] Unit economics aligned — 3 ledgers, `plans.ts` tier matrix, decisions #67–71 (corrected #68)
 - [x] Hygiene sync Index v1.5 + Completeness v1.2 + Roadmap Focus one-liner (2026-07-09)
 

@@ -450,6 +450,10 @@ interface VisualScriptEditorProps {
    */
   persistenceId?: string;
   /**
+   * Explicit save handler (DEBT-UX-VS-001 resolution). Fired on Save click or Ctrl+S.
+   */
+  onSave?: (script: VisualScript) => void;
+  /**
    * Injectable AI backend for "Generate with AI" blueprint scaffolding
    * (Golden Rule 1: no package-internal network calls / hardcoded API
    * routes). Host apps wire their real chat backend here; when omitted the
@@ -477,7 +481,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
   const tag = target.tagName.toLowerCase()
   return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable
 }
-export function VisualScriptEditor({ script, onChange, persistenceId, onGenerateBlueprint, onSuggestNextNodes }: VisualScriptEditorProps) {
+export function VisualScriptEditor({ script, onChange, persistenceId, onSave, onGenerateBlueprint, onSuggestNextNodes }: VisualScriptEditorProps) {
   const initialNodes = script?.nodes ?? [];
   const initialEdges = script?.edges ?? [];
   const [nodes, setNodes, onNodesChange] = useNodesState<VisualNodeType>(initialNodes);
@@ -498,16 +502,43 @@ export function VisualScriptEditor({ script, onChange, persistenceId, onGenerate
   const reactFlowInstanceRef = useRef<ReactFlowInstance<VisualNodeType, Edge> | null>(null);
   const [ghost, setGhost] = useState<GhostSuggestion | null>(null);
 
+  const compileScript = useCallback((): VisualScript => {
+    return {
+      id: script?.id || `script-${Date.now()}`,
+      name: script?.name || 'New Script',
+      nodes,
+      edges,
+      variables: script?.variables || [],
+    };
+  }, [nodes, edges, script]);
+
+  const handleSave = useCallback(() => {
+    const compiled = compileScript();
+    log.info('Saving visual script:', { id: compiled.id, nodeCount: compiled.nodes.length });
+    if (persistenceId && persistence.isSynced) {
+      persistence.applyScript(compiled);
+    }
+    onSave?.(compiled);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('aethel.visualScript.save', { detail: { script: compiled } }));
+      const json = JSON.stringify(compiled, null, 2);
+      navigator.clipboard?.writeText?.(json).catch(() => {});
+    }
+  }, [compileScript, persistenceId, persistence, onSave]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'i') {
         event.preventDefault();
         setBlueprintAIOpen(true);
+      } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        handleSave();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [handleSave]);
   const onConnect = useCallback(
     (connection: Connection) => {
       const newEdge: Edge = {
@@ -563,15 +594,6 @@ export function VisualScriptEditor({ script, onChange, persistenceId, onGenerate
     },
     []
   );
-  const compileScript = useCallback((): VisualScript => {
-    return {
-      id: script?.id || `script-${Date.now()}`,
-      name: script?.name || 'New Script',
-      nodes,
-      edges,
-      variables: script?.variables || [],
-    };
-  }, [nodes, edges, script]);
   // ── Ghost Nodes (FASE 3.1 Ação B) ─────────────────────────────────────────
   // Recomputes whenever the graph changes: prefers the injected AI backend
   // (if provided) and otherwise falls back to the local heuristic so the
@@ -803,13 +825,10 @@ export function VisualScriptEditor({ script, onChange, persistenceId, onGenerate
               ) : null}
               <button
                 type="button"
-                onClick={() => {
-                  const json = JSON.stringify(compileScript(), null, 2);
-                  log.info('Compiled Script:', json);
-                  navigator.clipboard.writeText(json);
-                }}
-                aria-label="Save visual script and copy JSON"
-                className="cursor-pointer rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-primary)] px-4 py-2 font-semibold text-[var(--aethel-text-primary)]"
+                onClick={handleSave}
+                aria-label="Save visual script"
+                title="Save script (Ctrl+S)"
+                className="cursor-pointer rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-primary)] px-4 py-2 font-semibold text-[var(--aethel-text-primary)] transition-all hover:bg-[color-mix(in_srgb,var(--aethel-primary)_85%,transparent)] active:scale-95"
               >
                 Save
               </button>

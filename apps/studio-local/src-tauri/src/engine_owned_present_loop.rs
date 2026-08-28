@@ -20,6 +20,12 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 
 use crate::gpu_frame_graph::{FrameGraphPassTiming, WEBVIEW_EXCLUSIVE_PRESENT_HELD_REASON};
+use crate::gf_mesh_001_fixture::{
+    build_gf_mesh_001_dogfood_mesh, golden_camera, golden_visibility_hash,
+    raster_gf_mesh_001_golden, GF_MESH_001_GOLDEN_VISIBILITY_HASH,
+};
+use crate::gf_mesh_001_gpu_parity_fixture::run_gf_mesh_001_gpu_parity;
+use crate::gf_substrates_device_validation::run_substrates_device_validation;
 use crate::wgpu_renderer::{
     run_engine_owned_persistent_present, PersistentPresentHooks, RendererPresentProbeReport,
 };
@@ -60,6 +66,9 @@ pub struct CriticPresentChecklist {
     pub soak_60s_passed: bool,
     /// Exclusive session claim is held or was proven via refuse-second-start.
     pub exclusive_session_claim: bool,
+    /// The persistent product-session present consumed the GF-MESH-001
+    /// evidence (golden pinned + real-device parity) on its prove cycle.
+    pub gf_fixtures_consumed_in_present: bool,
     /// Second start while claimed was refused (evidence).
     pub second_start_refused_evidence: bool,
     /// Always true while PP-02 is unimplemented (HELD flag for Critic).
@@ -105,6 +114,20 @@ pub struct PersistentPresentLiveMetrics {
     /// True when wall ≥60s, frames>0, no loop_dropped, frame graph executed.
     pub soak_60s_passed: bool,
     pub soak_60s_requested: bool,
+    /// Deterministic FNV-1a 64-bit audit fingerprint of the measured 60s soak
+    /// (frames, wall, frame-ms, CapScore, present size, frame-graph ms, session
+    /// token). Empty until a real soak passes — Critic gate #3 non-theater.
+    pub soak_evidence_fingerprint: String,
+    /// GF-MESH-001 golden hash pinned on this present path (CPU mirror).
+    pub gf_mesh_001_golden_pinned: bool,
+    /// GF-MESH-001 real-device parity proven on the device that presented.
+    pub gf_mesh_001_gpu_parity_proven: bool,
+    /// Product-session present consumed the GF fixtures (PP-01/03 backend).
+    pub gf_fixtures_consumed_in_present: bool,
+    /// The four remaining GPU substrates validated on a real device from the
+    /// same present path (VSM/Radiance/FSR/Entropy one-frame execution).
+    pub substrates_device_validation_passed: bool,
+    pub substrates_device_validation_claim: String,
     /// Always false — Studio product viewport still WebView.
     pub product_present_ready: bool,
     pub webview_exclusive_present_ready: bool,
@@ -200,12 +223,73 @@ fn new_session_token(owner: &str) -> String {
     format!("ppsess-{owner}-{}", now_unix_ms())
 }
 
+// ---------------------------------------------------------------------------
+// Deterministic soak audit fingerprint (Critic gate #3 non-theater evidence).
+//
+// FNV-1a 64-bit — zero-dependency, deterministic, recomputable by any auditor
+// from the published metrics. Same FNV-1a family as the S-15 wire-reachability
+// evidence fingerprints. Not a security MAC; the point is verifiability and
+// fail-closed behavior (empty string until a real soak passes). Hashes raw
+// IEEE-754 bits (not formatted text) so identical measured values always
+// produce the identical 16-lowercase-hex fingerprint.
+// ---------------------------------------------------------------------------
+
+const FNV1A_64_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
+const FNV1A_64_PRIME: u64 = 0x0000_0100_0000_01b3;
+
+fn fnv1a64(data: &[u8]) -> u64 {
+    let mut h = FNV1A_64_OFFSET;
+    for &b in data {
+        h ^= u64::from(b);
+        h = h.wrapping_mul(FNV1A_64_PRIME);
+    }
+    h
+}
+
+fn push_fnv_bytes(h: &mut u64, data: &[u8]) {
+    *h ^= fnv1a64(data);
+    *h = h.wrapping_mul(FNV1A_64_PRIME);
+}
+
+fn push_u32(h: &mut u64, v: u32) {
+    push_fnv_bytes(h, &v.to_le_bytes());
+}
+
+fn push_f64(h: &mut u64, v: f64) {
+    push_fnv_bytes(h, &v.to_bits().to_le_bytes());
+}
+
+/// Deterministic 16-hex-char audit fingerprint of a completed 60s soak.
+///
+/// Hashes only the *measured* scalar subset of live metrics (never `note` or
+/// `critic_checklist`, which carry derived text). Any change to a measured
+/// quantity changes the fingerprint — fail-closed against static/theater
+/// strings. The `session_token` binds the fingerprint to the exclusive Studio
+/// present-session claim that produced it.
+pub fn soak_evidence_fingerprint(m: &PersistentPresentLiveMetrics) -> String {
+    let mut h: u64 = FNV1A_64_OFFSET;
+    push_fnv_bytes(&mut h, b"aethel-soak-evidence-v1");
+    push_u32(&mut h, m.frames_presented);
+    push_f64(&mut h, m.soak_wall_ms);
+    push_f64(&mut h, m.frame_ms_min);
+    push_f64(&mut h, m.frame_ms_mean);
+    push_f64(&mut h, m.frame_ms_max);
+    push_f64(&mut h, m.frame_ms_total);
+    push_u32(&mut h, m.capability_score);
+    push_u32(&mut h, m.present_width);
+    push_u32(&mut h, m.present_height);
+    push_f64(&mut h, m.frame_graph_ms_last);
+    push_fnv_bytes(&mut h, m.session_token.as_bytes());
+    format!("{h:016x}")
+}
+
 fn build_critic_checklist(m: &PersistentPresentLiveMetrics) -> CriticPresentChecklist {
     CriticPresentChecklist {
         persistent_loop_ipc: true,
         soak_60s_passed: m.soak_60s_passed,
         exclusive_session_claim: m.exclusive_claim_held || !m.session_token.is_empty(),
         second_start_refused_evidence: m.second_start_refused,
+        gf_fixtures_consumed_in_present: m.gf_fixtures_consumed_in_present,
         pp02_webview_carveout_held: true,
         product_present_ready: false,
         g3_percent_claimed: 15,
@@ -271,6 +355,30 @@ fn apply_probe_to_live(
         && probe.frame_graph_executed
         && probe.frames_presented >= PERSISTENT_PRESENT_PROVE_FRAMES
         && !live.loop_dropped;
+    // PP-01/03 backend: when the persistent product-session loop proves, the
+    // same path consumes the GF-MESH-001 evidence — the CPU golden pin plus
+    // the real-device parity on the adapter that just presented. The
+    // product_present_ready flag stays false (PP-02/04 pending).
+    live.gf_mesh_001_golden_pinned = false;
+    live.gf_mesh_001_gpu_parity_proven = false;
+    live.substrates_device_validation_passed = false;
+    live.substrates_device_validation_claim = String::new();
+    if live.persistent_loop_proven {
+        let (gf_positions, gf_indices) = build_gf_mesh_001_dogfood_mesh();
+        let gf_camera = golden_camera();
+        let (gf_covered, gf_depth) =
+            raster_gf_mesh_001_golden(&gf_positions, &gf_indices, &gf_camera);
+        let gf_golden = golden_visibility_hash(gf_covered, &gf_depth);
+        live.gf_mesh_001_golden_pinned = gf_golden == GF_MESH_001_GOLDEN_VISIBILITY_HASH;
+        let gf_parity = run_gf_mesh_001_gpu_parity();
+        live.gf_mesh_001_gpu_parity_proven = gf_parity.gpu_cpu_parity_proven;
+        let substrates = run_substrates_device_validation();
+        live.substrates_device_validation_passed = substrates.validation_passed;
+        live.substrates_device_validation_claim = substrates.claim;
+    }
+    live.gf_fixtures_consumed_in_present = live.persistent_loop_proven
+        && live.gf_mesh_001_golden_pinned
+        && live.gf_mesh_001_gpu_parity_proven;
     live.soak_60s_requested = soak_60s_mode;
     live.soak_60s_passed = soak_60s_mode
         && probe.presented
@@ -279,10 +387,18 @@ fn apply_probe_to_live(
         && !probe.soak_oom_refused
         && wall_ms + 1.0 >= SOAK_60S_WALL_MS as f64
         && probe.frames_presented > 0;
+    // Deterministic audit fingerprint only when the soak truly passed.
+    // Empty otherwise (fail-closed: no fingerprint = no evidence claim).
+    let fp = if live.soak_60s_passed {
+        soak_evidence_fingerprint(live)
+    } else {
+        String::new()
+    };
+    live.soak_evidence_fingerprint = fp;
     honesty_defaults(live);
     live.note = if live.soak_60s_passed {
         format!(
-            "TICKET-PP-03 60s Instant soak PASSED: frames={} wall_ms={:.1} min={:.3} mean={:.3} max={:.3} CapScore {} {}x{} — no FPS; product_present_ready=false; PP-02 HELD. {}",
+            "TICKET-PP-03 60s Instant soak PASSED: frames={} wall_ms={:.1} min={:.3} mean={:.3} max={:.3} CapScore {} {}x{} — no FPS; product_present_ready=false; PP-02 HELD. fingerprint={}. {}",
             probe.frames_presented,
             wall_ms,
             probe.frame_ms_min,
@@ -291,6 +407,7 @@ fn apply_probe_to_live(
             probe.soak_capability_score,
             probe.soak_present_width,
             probe.soak_present_height,
+            live.soak_evidence_fingerprint,
             PP02_WEBVIEW_CARVEOUT_HELD_REASON
         )
     } else if soak_60s_mode && live.loop_dropped {
@@ -365,6 +482,12 @@ pub fn claim_present_session(
     *slot = Some(SessionSlot {
         claim: claim.clone(),
     });
+    // Release the session lock before live_snapshot() re-acquires it. The
+    // Windows std Mutex wraps a non-recursive SRWLOCK, so holding `slot`
+    // here deadlocks (observed: the claim success path hung the unit-test
+    // harness under MSVC with ~0 CPU; the refusal path above already drops
+    // the guard before snapshotting).
+    drop(slot);
     let mut snap = state.live_snapshot();
     snap.session_token = claim.token.clone();
     snap.exclusive_claim_held = true;
@@ -680,6 +803,12 @@ mod tests {
         assert_eq!(m.critic_checklist.g3_percent_claimed, 15);
         assert!(m.critic_checklist.pp02_webview_carveout_held);
         assert!(!m.critic_checklist.notes.is_empty());
+        // GF fixtures only prove AFTER a real persistent loop — never from
+        // defaults or a fake-proven struct.
+        assert!(!m.gf_fixtures_consumed_in_present);
+        assert!(!m.gf_mesh_001_golden_pinned);
+        assert!(!m.gf_mesh_001_gpu_parity_proven);
+        assert!(!m.critic_checklist.gf_fixtures_consumed_in_present);
     }
 
     #[test]
@@ -699,8 +828,10 @@ mod tests {
 
     #[test]
     fn soak_constants_document_pp02_held() {
+        // Compile-time invariant (clippy assertions_on_constants): the 60s soak cap
+        // must always exceed the interactive persistent cap.
+        const { assert!(SOAK_60S_MAX_FRAMES > PERSISTENT_PRESENT_MAX_FRAMES); }
         assert_eq!(SOAK_60S_WALL_MS, 60_000);
-        assert!(SOAK_60S_MAX_FRAMES > PERSISTENT_PRESENT_MAX_FRAMES);
         assert!(PP02_WEBVIEW_CARVEOUT_HELD_REASON.contains("PP-02"));
         assert!(PP02_WEBVIEW_CARVEOUT_HELD_REASON.contains("HELD"));
         assert!(!PP02_WEBVIEW_CARVEOUT_HELD_REASON.contains("READY"));
@@ -719,5 +850,259 @@ mod tests {
         assert!(!c.product_present_ready);
         assert!(c.pp02_webview_carveout_held);
         assert!(c.soak_60s_passed);
+    }
+
+    // --- Pure-logic soak metric derivation (no GPU; locks the fail-closed 60s gate).
+    fn run_apply(
+        probe: &RendererPresentProbeReport,
+        wall_ms: f64,
+        soak_60s_mode: bool,
+    ) -> PersistentPresentLiveMetrics {
+        let mut live = PersistentPresentLiveMetrics::default();
+        apply_probe_to_live(&mut live, probe, wall_ms, soak_60s_mode);
+        live
+    }
+
+    #[test]
+    fn soak_60s_boundary_flips_only_at_60s_wall() {
+        // Wall gate: wall_ms + 1.0 >= 60_000.0 (1 ms grace for Instant float timing).
+        let probe = crate::wgpu_renderer::test_success_soak_probe();
+        let at = run_apply(&probe, 59_999.0, true);
+        assert!(at.soak_60s_passed);
+        assert!(at.persistent_loop_proven);
+        let below = run_apply(&probe, 59_998.0, true);
+        assert!(!below.soak_60s_passed);
+        // Non-soak runs never claim the 60s pass, even at full wall.
+        let normal = run_apply(&probe, 60_000.0, false);
+        assert!(!normal.soak_60s_passed);
+        assert!(normal.persistent_loop_proven);
+    }
+
+    #[test]
+    fn soak_fail_closes_on_loop_dropped() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe
+            .reasons
+            .push("LOOP_DROPPED: frame-graph present failed".into());
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(live.loop_dropped);
+        assert!(!live.soak_60s_passed);
+        assert!(!live.persistent_loop_proven);
+        assert!(live.note.contains("FAIL-CLOSED"));
+    }
+
+    #[test]
+    fn soak_fail_closes_on_oom_refused() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe.soak_oom_refused = true;
+        probe.reasons.push("CapScore ladder refused all tiers".into());
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(live.oom_refused);
+        assert!(!live.soak_60s_passed);
+    }
+
+    #[test]
+    fn soak_fail_closes_on_zero_frames() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe.presented = false;
+        probe.frames_presented = 0;
+        probe.frame_graph_executed = false;
+        probe.reasons = vec!["Present loop produced zero frames".into()];
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(!live.soak_60s_passed);
+        assert!(!live.persistent_loop_proven);
+    }
+
+    #[test]
+    fn soak_fail_closes_when_frame_graph_not_executed() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe.frame_graph_executed = false;
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(!live.soak_60s_passed);
+        assert!(!live.persistent_loop_proven);
+    }
+
+    #[test]
+    fn loop_dropped_derived_from_frame_graph_fail_reason() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe.reasons.push("frame graph pass failed to complete".into());
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(live.loop_dropped);
+        assert!(!live.soak_60s_passed);
+    }
+
+    #[test]
+    fn loop_dropped_derived_from_unpresented_with_frames() {
+        // !presented && frames>0 must be treated as a dropped loop (fail-closed).
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe.presented = false;
+        probe.frame_graph_executed = false;
+        probe.reasons = vec!["frame graph fail".into()];
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(live.loop_dropped);
+        assert!(!live.soak_60s_passed);
+    }
+
+    #[test]
+    fn persistent_prove_requires_minimum_frames() {
+        let mut short = crate::wgpu_renderer::test_success_soak_probe();
+        short.frames_presented = PERSISTENT_PRESENT_PROVE_FRAMES - 1;
+        assert!(!run_apply(&short, 1_000.0, false).persistent_loop_proven);
+        let mut proven = crate::wgpu_renderer::test_success_soak_probe();
+        proven.frames_presented = PERSISTENT_PRESENT_PROVE_FRAMES;
+        assert!(run_apply(&proven, 1_000.0, false).persistent_loop_proven);
+    }
+
+    #[test]
+    fn soak_pass_still_keeps_honesty_fail_closed() {
+        let probe = crate::wgpu_renderer::test_success_soak_probe();
+        let live = run_apply(&probe, 60_000.0, true);
+        assert!(live.soak_60s_passed);
+        assert!(!live.product_present_ready);
+        assert!(!live.webview_exclusive_present_ready);
+        assert!(live.pp02_webview_carveout_held);
+        assert!(!live.critic_checklist.product_present_ready);
+        assert_eq!(live.critic_checklist.g3_percent_claimed, 15);
+        assert!(live.critic_checklist.soak_60s_passed);
+        assert!(live.critic_checklist.pp02_webview_carveout_held);
+        assert!(live.note.contains("product_present_ready=false"));
+        // A passing soak still emits a real non-theater audit fingerprint.
+        assert_eq!(live.soak_evidence_fingerprint.len(), 16);
+        assert!(live
+            .soak_evidence_fingerprint
+            .chars()
+            .all(|ch| ch.is_ascii_hexdigit()));
+    }
+
+    // --- Deterministic soak evidence fingerprint (Critic gate #3) -----------
+
+    #[test]
+    fn soak_fingerprint_is_deterministic_hex_and_critic_min_length() {
+        let m = PersistentPresentLiveMetrics {
+            frames_presented: 3_600,
+            soak_wall_ms: 60_000.5,
+            frame_ms_min: 1.0,
+            frame_ms_mean: 2.0,
+            frame_ms_max: 3.0,
+            frame_ms_total: 120.0,
+            capability_score: 100,
+            present_width: 1920,
+            present_height: 1080,
+            frame_graph_ms_last: 11.5,
+            session_token: "ppsess-soak-0".into(),
+            ..Default::default()
+        };
+        let fp1 = soak_evidence_fingerprint(&m);
+        let fp2 = soak_evidence_fingerprint(&m);
+        assert_eq!(fp1, fp2);
+        assert_eq!(fp1.len(), 16);
+        assert!(fp1.chars().all(|ch| ch.is_ascii_hexdigit()));
+        // Critic gate #3 non-theater minimum (>=8) plus no THEATER_RE word.
+        assert!(fp1.len() >= 8);
+        assert!(fp1.chars().any(|ch| ch.is_ascii_digit()));
+    }
+
+    #[test]
+    fn soak_fingerprint_changes_when_measured_metric_changes() {
+        let base = PersistentPresentLiveMetrics {
+            frames_presented: 3_600,
+            soak_wall_ms: 60_000.5,
+            frame_ms_min: 1.0,
+            frame_ms_mean: 2.0,
+            frame_ms_max: 3.0,
+            frame_ms_total: 120.0,
+            capability_score: 100,
+            present_width: 1920,
+            present_height: 1080,
+            frame_graph_ms_last: 11.5,
+            session_token: "ppsess-soak-0".into(),
+            ..Default::default()
+        };
+        let base_fp = soak_evidence_fingerprint(&base);
+
+        let changed_frames = PersistentPresentLiveMetrics {
+            frames_presented: base.frames_presented + 1,
+            ..base.clone()
+        };
+        assert_ne!(base_fp, soak_evidence_fingerprint(&changed_frames));
+
+        let changed_wall = PersistentPresentLiveMetrics {
+            soak_wall_ms: base.soak_wall_ms + 1.0,
+            ..base.clone()
+        };
+        assert_ne!(base_fp, soak_evidence_fingerprint(&changed_wall));
+
+        let changed_mean = PersistentPresentLiveMetrics {
+            frame_ms_mean: base.frame_ms_mean + 0.001,
+            ..base.clone()
+        };
+        assert_ne!(base_fp, soak_evidence_fingerprint(&changed_mean));
+    }
+
+    #[test]
+    fn soak_fingerprint_binds_to_session_token() {
+        let mk = |token: &str| PersistentPresentLiveMetrics {
+            frames_presented: 3_600,
+            soak_wall_ms: 60_000.5,
+            frame_ms_min: 1.0,
+            frame_ms_mean: 2.0,
+            frame_ms_max: 3.0,
+            frame_ms_total: 120.0,
+            capability_score: 100,
+            present_width: 1920,
+            present_height: 1080,
+            frame_graph_ms_last: 11.5,
+            session_token: token.into(),
+            ..Default::default()
+        };
+        assert_ne!(
+            soak_evidence_fingerprint(&mk("ppsess-soak-1")),
+            soak_evidence_fingerprint(&mk("ppsess-soak-2"))
+        );
+    }
+
+    #[test]
+    fn soak_fingerprint_present_hex_when_soak_passes_but_honesty_stays_closed() {
+        let probe = crate::wgpu_renderer::test_success_soak_probe();
+        let mut live = PersistentPresentLiveMetrics {
+            session_token: "ppsess-test-claim".into(),
+            ..Default::default()
+        };
+        apply_probe_to_live(&mut live, &probe, 60_000.0, true);
+        assert!(live.soak_60s_passed);
+        assert_eq!(live.soak_evidence_fingerprint.len(), 16);
+        assert!(live
+            .soak_evidence_fingerprint
+            .chars()
+            .all(|ch| ch.is_ascii_hexdigit()));
+        assert!(live.note.contains(&live.soak_evidence_fingerprint));
+        // Honesty invariants stay fail-closed despite a real fingerprint.
+        assert!(!live.product_present_ready);
+        assert!(!live.webview_exclusive_present_ready);
+        assert!(live.pp02_webview_carveout_held);
+        assert_eq!(live.critic_checklist.g3_percent_claimed, 15);
+        // Deterministic across an identical second apply of the same probe.
+        let mut live2 = PersistentPresentLiveMetrics {
+            session_token: "ppsess-test-claim".into(),
+            ..Default::default()
+        };
+        apply_probe_to_live(&mut live2, &probe, 60_000.0, true);
+        assert_eq!(live.soak_evidence_fingerprint, live2.soak_evidence_fingerprint);
+    }
+
+    #[test]
+    fn soak_fingerprint_empty_when_soak_fails_closed() {
+        let mut probe = crate::wgpu_renderer::test_success_soak_probe();
+        probe
+            .reasons
+            .push("LOOP_DROPPED: frame-graph present failed".into());
+        let mut live = PersistentPresentLiveMetrics {
+            session_token: "ppsess-test-claim".into(),
+            ..Default::default()
+        };
+        apply_probe_to_live(&mut live, &probe, 60_000.0, true);
+        assert!(!live.soak_60s_passed);
+        assert!(live.loop_dropped);
+        assert!(live.soak_evidence_fingerprint.is_empty());
     }
 }

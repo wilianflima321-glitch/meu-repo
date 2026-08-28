@@ -831,4 +831,25 @@ mod tests {
         assert!(sculpt.distinct_from_hermite_sharp_features_probe);
         assert!(sculpt.distinct_from_hermite_duality_grid_probe);
     }
+
+    #[test]
+    fn crease_dihedral_threshold_is_positive_and_sub_pi() {
+        assert!(CREASE_DIHEDRAL_RAD > 0.0);
+        assert!(CREASE_DIHEDRAL_RAD < std::f32::consts::PI);
+        assert!((CREASE_DOT_MAX - (std::f32::consts::FRAC_1_SQRT_2)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn sharp_feature_estimate_delta_zero_when_identical() {
+        let est = SharpFeatureEstimate {
+            smooth_blend: [1.0, 2.0, 3.0],
+            sharp_preserve: [1.0, 2.0, 3.0],
+            edge_count: 3,
+            crease_edge_count: 0,
+            max_dihedral_rad: 0.0,
+        };
+
+        assert_eq!(est.sharp_smooth_delta(), 0.0);
+        assert!(est.is_finite());
+    }
 }

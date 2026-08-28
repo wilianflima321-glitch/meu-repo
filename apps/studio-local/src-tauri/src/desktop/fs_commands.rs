@@ -8,11 +8,13 @@ use std::thread;
 use notify::{RecursiveMode, Watcher};
 use serde::Serialize;
 
+use super::agent_shell_acl::acl_or_deny_ipc;
 use super::security::{
     ensure_allowed_existing_path, ensure_allowed_write_path, has_denied_segment,
     locked_project_root, ProjectRootState, MAX_TEXT_FILE_BYTES, MAX_WRITE_BYTES,
 };
 use super::window_commands::NativeCommandStatus;
+use aethel_studio_local::ipc_surface::IpcAclClass;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,7 +36,14 @@ pub struct FileTreeNode {
 }
 
 #[tauri::command]
-pub fn fs_read(path: String, project_root: tauri::State<'_, ProjectRootState>) -> Result<String, String> {
+pub fn fs_read(
+    path: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+    project_root: tauri::State<'_, ProjectRootState>,
+) -> Result<String, String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     let root = locked_project_root(&project_root)?;
     let path = ensure_allowed_existing_path(&path, root.as_deref())?;
     let metadata =
@@ -54,8 +63,12 @@ pub fn fs_read(path: String, project_root: tauri::State<'_, ProjectRootState>) -
 pub fn fs_write(
     path: String,
     content: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     project_root: tauri::State<'_, ProjectRootState>,
 ) -> Result<(), String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     if content.len() > MAX_WRITE_BYTES {
         return Err(format!(
             "Studio Local refuses to write payloads larger than {MAX_WRITE_BYTES} bytes through the UI bridge."
@@ -67,7 +80,14 @@ pub fn fs_write(
 }
 
 #[tauri::command]
-pub fn fs_list(path: String, project_root: tauri::State<'_, ProjectRootState>) -> Result<Vec<FileEntry>, String> {
+pub fn fs_list(
+    path: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
+    project_root: tauri::State<'_, ProjectRootState>,
+) -> Result<Vec<FileEntry>, String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     let root = locked_project_root(&project_root)?;
     let path = ensure_allowed_existing_path(&path, root.as_deref())?;
     let metadata =
@@ -105,8 +125,12 @@ pub fn fs_list(path: String, project_root: tauri::State<'_, ProjectRootState>) -
 pub fn fs_tree(
     path: String,
     max_depth: Option<u32>,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     project_root: tauri::State<'_, ProjectRootState>,
 ) -> Result<Vec<FileTreeNode>, String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     let root_state = locked_project_root(&project_root)?;
     let path = ensure_allowed_existing_path(&path, root_state.as_deref())?;
     let metadata =
@@ -160,9 +184,13 @@ pub(crate) fn walk_tree(dir: &Path, remaining_depth: u32) -> Result<Vec<FileTree
 #[tauri::command]
 pub fn fs_watch(
     path: String,
+    caller_kind: Option<String>,
+    agent_tool: Option<String>,
+    agent_id: Option<String>,
     app_handle: tauri::AppHandle,
     project_root: tauri::State<'_, ProjectRootState>,
 ) -> Result<NativeCommandStatus, String> {
+    acl_or_deny_ipc(IpcAclClass::AgentDeny, caller_kind, agent_tool, agent_id)?;
     let root = locked_project_root(&project_root)?;
     let path = ensure_allowed_existing_path(&path, root.as_deref())?;
 

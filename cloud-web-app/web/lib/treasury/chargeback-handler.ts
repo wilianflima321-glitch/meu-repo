@@ -201,7 +201,13 @@ export function probeChargebackHandlerSemanticsSync(): boolean {
 
     if (apply('') === true) return false
     if (!apply('d1')) return false
-    if (itemStatus !== 'revoked') return false
+    // apply('d1') mutates itemStatus to 'revoked' inside the closure, but the
+    // flow analysis does not propagate that through the call — it keeps the
+    // pre-call 'custodial' narrowing. Re-read the mutable status through a typed
+    // getter so the assertion stays on the full union, preserving semantics.
+    const readItemStatus = (): 'custodial' | 'owned' | 'revoked' => itemStatus
+    const statusAfterApply = readItemStatus()
+    if (statusAfterApply !== 'revoked') return false
     if (coins !== 0) return false
     if (!apply('d1')) return false // idempotent
     if (coins !== 0) return false

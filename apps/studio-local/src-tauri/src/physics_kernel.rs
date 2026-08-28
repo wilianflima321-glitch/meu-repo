@@ -1,5 +1,6 @@
 use rapier3d::prelude::*;
-use std::collections::HashMap;
+
+use aethel_kernel_rust::physics_world::{SimulationClock, SimulationClockConfig};
 
 /// Aethel Engine Native Physics Kernel (Onda 7)
 ///
@@ -26,6 +27,19 @@ pub struct PhysicsKernel {
     /// plausibility-check" (via this validator) for a given world.
     pub client_consensus: ClientConsensusValidator,
     pub client_consensus_config: ClientConsensusConfig,
+    /// Reusable per-frame binary export buffer (see
+    /// [`PhysicsKernel::export_state_take`]). Owned by the kernel so
+    /// `poll_physics_state` fills it with zero heap allocations on steady-state
+    /// frames and hands the bytes across the Tauri `Response` boundary via
+    /// `mem::take` (S-18 Zero-Alloc Hot-Loop Audit).
+    export_scratch: Vec<u8>,
+    /// Fixed-timestep simulation clock (S-19). Consumes the variable real `dt`
+    /// of each rendered frame, accumulates it, and emits a deterministic number
+    /// of fixed solver substeps (default 120 Hz base × 2 = 240 Hz effective).
+    /// Never lets an unconsumed backlog grow unbounded (spiral-of-death
+    /// protection) and exposes the render interpolation alpha in `[0, 1]`
+    /// between the previous and current state.
+    pub simulation_clock: SimulationClock,
 }
 
 impl PhysicsKernel {
@@ -46,11 +60,27 @@ impl PhysicsKernel {
             gravity: vector![0.0, -9.81, 0.0],
             client_consensus: ClientConsensusValidator::new(),
             client_consensus_config: ClientConsensusConfig::default(),
+            export_scratch: Vec::new(),
+            simulation_clock: SimulationClock::new(SimulationClockConfig::default()),
         }
     }
 
-    /// Advances the physics simulation by one tick
+    /// Advances the physics simulation by one fixed solver substep.
+    ///
+    /// Writes the clock's fixed-timestep parameters into Rapier's integration
+    /// parameters (`dt` = substep length, `min_island_size` for island
+    /// sleeping), runs exactly one `PhysicsPipeline::step`, and books it on the
+    /// [`SimulationClock`] (S-19). Single-substep call sites
+    /// (`poll_physics_state` without a real `dt`) therefore advance on the same
+    /// 240 Hz fixed cadence as the timed [`PhysicsKernel::step_frame`].
     pub fn step(&mut self) {
+        // Wire the fixed substep dt into Rapier's integration parameters. The
+        // kernel crate's `SimulationClock::configure_integration` takes that
+        // crate's own rapier3d 0.17 `IntegrationParameters`, which is a
+        // different type than the studio's rapier3d 0.19 — so the version-
+        // independent f32 substep length is written here directly.
+        self.integration_parameters.dt = self.simulation_clock.substep_dt();
+
         let physics_hooks = ();
         let event_handler = ();
 
@@ -69,6 +99,55 @@ impl PhysicsKernel {
             &physics_hooks,
             &event_handler,
         );
+
+        self.simulation_clock.on_substep_executed();
+    }
+
+    /// Consumes a real frame `dt` (seconds), runs the fixed-timestep substep
+    /// cadence, and returns the render interpolation alpha in `[0, 1]` between
+    /// the previous and current state (S-19). The real `dt` is clamped to
+    /// `max_frame_dt` and surplus substeps beyond the per-frame cap are dropped
+    /// (spiral-of-death protection) — a stalled/backlogged frame can never make
+    /// the simulation chase the wall clock.
+    pub fn step_frame(&mut self, real_dt: f32) -> f32 {
+        let substeps = self.simulation_clock.frame_tick(real_dt);
+        for _ in 0..substeps {
+            self.step();
+        }
+        self.simulation_clock.finish_frame()
+    }
+
+    /// The effective solver rate in Hz (e.g. 240.0 for the default 120 Hz × 2
+    /// substeps).
+    pub fn effective_hz(&self) -> f32 {
+        self.simulation_clock.effective_hz()
+    }
+
+    /// Render interpolation alpha in `[0, 1]` between the previous and current
+    /// state, as computed by the most recent [`PhysicsKernel::step_frame`].
+    pub fn interpolation_alpha(&self) -> f32 {
+        self.simulation_clock.interpolation_alpha()
+    }
+
+    /// Number of substeps scheduled by the most recent
+    /// [`PhysicsKernel::step_frame`].
+    pub fn substeps_this_frame(&self) -> u32 {
+        self.simulation_clock.substeps_this_frame()
+    }
+
+    /// Total number of solver substeps executed since kernel creation.
+    pub fn tick_count(&self) -> u64 {
+        self.simulation_clock.tick_count()
+    }
+
+    /// The base-tick frame currently being simulated.
+    pub fn current_frame(&self) -> u64 {
+        self.simulation_clock.current_frame()
+    }
+
+    /// Total simulated time (sum of executed substeps), in seconds.
+    pub fn total_time(&self) -> f64 {
+        self.simulation_clock.total_time()
     }
 
     /// PILAR 4 entry point: validate a client's self-reported transform for
@@ -79,6 +158,46 @@ impl PhysicsKernel {
         self.client_consensus.validate(report, &self.client_consensus_config)
     }
 
+    /// Exact capacity (bytes) of one fixed-layout state export for the current
+    /// body count: `u32` count + per body (`u32` handle + 3×`f32` translation
+    /// + 4×`f32` rotation).
+    #[inline]
+    fn export_state_capacity(&self) -> usize {
+        4 + self.rigid_body_set.len() * (4 + 12 + 16)
+    }
+
+    /// Serializes every fully-simulated rigid body's transform into `out`,
+    /// clearing and reusing the caller-owned buffer so steady-state frames
+    /// perform no heap allocation (capacity is retained across calls). Produces
+    /// byte-identical output to [`PhysicsKernel::export_state`] — same
+    /// little-endian fixed layout. This is the zero-realloc surface for
+    /// in-process hot consumers (rollback journaling, physics co-sim,
+    /// snapshotting) that can own a persistent `Vec<u8>`.
+    pub fn export_state_into(&self, out: &mut Vec<u8>) {
+        out.clear();
+        out.reserve(self.export_state_capacity());
+
+        out.extend_from_slice(&(self.rigid_body_set.len() as u32).to_le_bytes());
+
+        for (handle, body) in self.rigid_body_set.iter() {
+            let translation = body.translation();
+            let rotation = body.rotation();
+
+            out.extend_from_slice(&(handle.into_raw_parts().0).to_le_bytes());
+            out.extend_from_slice(&translation.x.to_le_bytes());
+            out.extend_from_slice(&translation.y.to_le_bytes());
+            out.extend_from_slice(&translation.z.to_le_bytes());
+            // `rotation: &UnitQuaternion<f32>` derefs (Unit<Q> -> Quaternion
+            // -> IJKW) to expose `.i`/`.j`/`.k`/`.w` as plain fields — see
+            // nalgebra's `impl Deref<Target = IJKW> for Quaternion`. These
+            // are NOT methods; do not add `()`.
+            out.extend_from_slice(&rotation.i.to_le_bytes());
+            out.extend_from_slice(&rotation.j.to_le_bytes());
+            out.extend_from_slice(&rotation.k.to_le_bytes());
+            out.extend_from_slice(&rotation.w.to_le_bytes());
+        }
+    }
+
     /// Serializes every fully-simulated rigid body's transform into a flat
     /// binary buffer for `physics_commands.rs#poll_physics_state`'s Tauri
     /// IPC `Response` — little-endian `u32` body count, then per body:
@@ -86,29 +205,27 @@ impl PhysicsKernel {
     /// (quaternion x,y,z,w). A fixed-layout binary export (vs. JSON) keeps
     /// this cheap enough to call once per rendered frame from the desktop
     /// viewport without allocation-heavy (de)serialization on the hot path.
+    ///
+    /// The Tauri `Response` boundary inherently owns its payload bytes, so a
+    /// caller moving them across IPC takes one exact-size allocation per frame
+    /// (inherent to the API — documented, not silently hidden). Callers that
+    /// can keep the buffer in-process should prefer
+    /// [`PhysicsKernel::export_state_into`].
     pub fn export_state(&self) -> Vec<u8> {
-        let mut buffer = Vec::with_capacity(4 + self.rigid_body_set.len() * (4 + 12 + 16));
-        buffer.extend_from_slice(&(self.rigid_body_set.len() as u32).to_le_bytes());
-
-        for (handle, body) in self.rigid_body_set.iter() {
-            let translation = body.translation();
-            let rotation = body.rotation();
-
-            buffer.extend_from_slice(&(handle.into_raw_parts().0).to_le_bytes());
-            buffer.extend_from_slice(&translation.x.to_le_bytes());
-            buffer.extend_from_slice(&translation.y.to_le_bytes());
-            buffer.extend_from_slice(&translation.z.to_le_bytes());
-            // `rotation: &UnitQuaternion<f32>` derefs (Unit<Q> -> Quaternion
-            // -> IJKW) to expose `.i`/`.j`/`.k`/`.w` as plain fields — see
-            // nalgebra's `impl Deref<Target = IJKW> for Quaternion`. These
-            // are NOT methods; do not add `()`.
-            buffer.extend_from_slice(&rotation.i.to_le_bytes());
-            buffer.extend_from_slice(&rotation.j.to_le_bytes());
-            buffer.extend_from_slice(&rotation.k.to_le_bytes());
-            buffer.extend_from_slice(&rotation.w.to_le_bytes());
-        }
-
+        let mut buffer = Vec::with_capacity(self.export_state_capacity());
+        self.export_state_into(&mut buffer);
         buffer
+    }
+
+    /// Zero-realloc export for the per-frame Tauri poll loop. Fills the
+    /// kernel-owned scratch (no heap allocation on steady-state frames) and
+    /// hands the bytes out via `mem::take`, so consecutive `poll_physics_state`
+    /// calls alternate between zero and one allocation instead of allocating a
+    /// fresh buffer every frame (S-18 Zero-Alloc Hot-Loop Audit).
+    pub fn export_state_take(&mut self) -> Vec<u8> {
+        let mut out = std::mem::take(&mut self.export_scratch);
+        self.export_state_into(&mut out);
+        out
     }
 }
 
@@ -225,33 +342,205 @@ pub struct AnomalyVerdict {
     pub authoritative_position: [f32; 3],
 }
 
+/// Default maximum concurrent client-authority entities tracked by
+/// [`ClientConsensusValidator`]. Preallocated once at construction; memory stays
+/// bounded at this ceiling regardless of how many distinct entity ids are seen.
+pub const CLIENT_CONSENSUS_DEFAULT_CAPACITY: usize = 4096;
+
+/// Eviction-load numerator/denominator: when the slot table reaches
+/// `capacity * EVICT_LOAD_NUM / EVICT_LOAD_DEN` occupied slots, a new insert
+/// first evicts the least-recently-validated entry. Keeps linear probe chains
+/// short (no resize, fixed memory) while bounding steady-state lookups.
+const CLIENT_CONSENSUS_EVICT_LOAD_NUM: usize = 3;
+const CLIENT_CONSENSUS_EVICT_LOAD_DEN: usize = 4;
+
+/// Deterministic splitmix64 mixer — scatters a `u64` entity id to a probe start
+/// without any allocation (replaces the `HashMap` hash in the packet path).
+fn splitmix64(mut x: u64) -> u64 {
+    x = x.wrapping_add(0x9E37_79B9_7F4A_7C15);
+    x = (x ^ (x >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    x = (x ^ (x >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    x ^ (x >> 31)
+}
+
 /// Server-side registry of last-known-good transforms, one per entity
 /// currently running under client authority. Cheap by design: O(1)
 /// arithmetic per report, no Rapier query, no broad/narrow-phase — this is
 /// exactly the CPU saving PILAR 4 asks for.
-#[derive(Default)]
+///
+/// **S-18 slotmap validator.** The historical `HashMap<u64, ClientTransformReport>`
+/// allocated + hashed on every report and resized without bound. This is a
+/// fixed-capacity open-addressing slot table (linear probing over preallocated
+/// `keys`/`values`/`last_seen` arrays), so the steady-state packet path performs
+/// only cache-friendly probes + arithmetic — **zero heap allocation after
+/// warm-up**. At the eviction load it deterministically evicts the
+/// least-recently-validated slot (bounded memory, fail-closed against unbounded
+/// growth); explicit despawns call [`ClientConsensusValidator::forget`] with
+/// tombstone-free backshift deletion.
 pub struct ClientConsensusValidator {
-    last_known_good: HashMap<u64, ClientTransformReport>,
+    keys: Vec<Option<u64>>,
+    values: Vec<ClientTransformReport>,
+    last_seen: Vec<u64>,
+    len: usize,
+    capacity: usize,
+    seen_clock: u64,
+}
+
+impl Default for ClientConsensusValidator {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ClientConsensusValidator {
     pub fn new() -> Self {
-        Self { last_known_good: HashMap::new() }
+        Self::with_capacity(CLIENT_CONSENSUS_DEFAULT_CAPACITY)
+    }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        let capacity = capacity.max(2).next_power_of_two();
+        Self {
+            keys: vec![None; capacity],
+            values: vec![
+                ClientTransformReport {
+                    entity_id: 0,
+                    position: [0.0; 3],
+                    velocity: [0.0; 3],
+                    server_recv_time_ms: 0,
+                };
+                capacity
+            ],
+            last_seen: vec![0; capacity],
+            len: 0,
+            capacity,
+            seen_clock: 0,
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.len
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    #[inline]
+    fn probe_start(&self, entity_id: u64) -> usize {
+        (splitmix64(entity_id) as usize) & (self.capacity - 1)
+    }
+
+    fn find_slot(&self, entity_id: u64) -> Option<usize> {
+        let mask = self.capacity - 1;
+        let mut idx = self.probe_start(entity_id);
+        for _ in 0..self.capacity {
+            match self.keys[idx] {
+                Some(k) if k == entity_id => return Some(idx),
+                Some(_) => {}
+                None => return None,
+            }
+            idx = (idx + 1) & mask;
+        }
+        None
+    }
+
+    fn first_empty(&self, entity_id: u64) -> usize {
+        let mask = self.capacity - 1;
+        let mut idx = self.probe_start(entity_id);
+        for _ in 0..self.capacity {
+            if self.keys[idx].is_none() {
+                return idx;
+            }
+            idx = (idx + 1) & mask;
+        }
+        unreachable!("fixed-capacity validator at or above capacity without eviction")
+    }
+
+    fn upsert(&mut self, report: ClientTransformReport) {
+        let entity_id = report.entity_id;
+        self.seen_clock = self.seen_clock.wrapping_add(1);
+        let clock = self.seen_clock;
+        if let Some(idx) = self.find_slot(entity_id) {
+            self.values[idx] = report;
+            self.last_seen[idx] = clock;
+            return;
+        }
+        let evict_at = self.capacity * CLIENT_CONSENSUS_EVICT_LOAD_NUM / CLIENT_CONSENSUS_EVICT_LOAD_DEN;
+        if self.len >= evict_at {
+            let victim = self.evict_lru();
+            self.remove_at(victim);
+        }
+        let idx = self.first_empty(entity_id);
+        self.keys[idx] = Some(entity_id);
+        self.values[idx] = report;
+        self.last_seen[idx] = clock;
+        self.len += 1;
+    }
+
+    fn evict_lru(&self) -> usize {
+        let mut victim = usize::MAX;
+        let mut min_seen = u64::MAX;
+        for (idx, key) in self.keys.iter().enumerate() {
+            if key.is_some() && self.last_seen[idx] < min_seen {
+                min_seen = self.last_seen[idx];
+                victim = idx;
+            }
+        }
+        debug_assert!(victim != usize::MAX, "evict_lru on empty validator");
+        victim
+    }
+
+    fn remove_at(&mut self, mut hole: usize) {
+        // Tombstone-free backward-shift deletion (Knuth TAOCP / Wikipedia
+        // "Linear probing — deletion"). An element at `j` may be shifted into
+        // the hole iff its home slot is NOT inside the circular interval
+        // (hole, j]. A blocked element (home in that interval) is *skipped* and
+        // the scan continues — the loop only stops at the first empty slot.
+        // Breaking on a blocked element would orphan any key whose home equals
+        // the hole but sits beyond the blocker in probe order.
+        let mask = self.capacity - 1;
+        let mut j = hole;
+        loop {
+            j = (j + 1) & mask;
+            match self.keys[j] {
+                None => break,
+                Some(k) => {
+                    let home = self.probe_start(k);
+                    let blocked = if hole < j { home > hole && home <= j } else { home > hole || home <= j };
+                    if !blocked {
+                        self.keys[hole] = Some(k);
+                        self.values[hole] = self.values[j];
+                        self.last_seen[hole] = self.last_seen[j];
+                        hole = j;
+                    }
+                }
+            }
+        }
+        self.keys[hole] = None;
+        self.last_seen[hole] = 0;
+        self.len -= 1;
     }
 
     /// Removes an entity's tracked state (e.g. on disconnect/despawn) so a
     /// stale baseline never causes a false-positive `teleport_suspected` if
     /// the entity ID is later reused.
     pub fn forget(&mut self, entity_id: u64) {
-        self.last_known_good.remove(&entity_id);
+        if let Some(idx) = self.find_slot(entity_id) {
+            self.remove_at(idx);
+        }
     }
 
     /// Validates `report` against the entity's last accepted transform.
     /// The very first report for a given entity is always accepted (there
     /// is no prior baseline to compare against) and becomes that baseline.
     pub fn validate(&mut self, report: ClientTransformReport, config: &ClientConsensusConfig) -> AnomalyVerdict {
-        let Some(previous) = self.last_known_good.get(&report.entity_id).copied() else {
-            self.last_known_good.insert(report.entity_id, report);
+        let previous = self.find_slot(report.entity_id).map(|idx| self.values[idx]);
+        let Some(previous) = previous else {
+            self.upsert(report);
             return AnomalyVerdict {
                 accepted: true,
                 reason: None,
@@ -280,7 +569,7 @@ impl ClientConsensusValidator {
 
         if distance > config.max_teleport_distance_m {
             let verdict = self.reject(&previous, &report, AnomalyReason::TeleportSuspected, distance, config, dt_seconds);
-            self.last_known_good.insert(report.entity_id, self.clamped_report(&report, verdict.authoritative_position));
+            self.upsert(self.clamped_report(&report, verdict.authoritative_position));
             return verdict;
         }
 
@@ -288,7 +577,7 @@ impl ClientConsensusValidator {
         let max_speed = config.max_speed_mps * config.tolerance_factor;
         if speed > max_speed {
             let verdict = self.reject(&previous, &report, AnomalyReason::SpeedExceeded, speed - max_speed, config, dt_seconds);
-            self.last_known_good.insert(report.entity_id, self.clamped_report(&report, verdict.authoritative_position));
+            self.upsert(self.clamped_report(&report, verdict.authoritative_position));
             return verdict;
         }
 
@@ -304,11 +593,11 @@ impl ClientConsensusValidator {
                 config,
                 dt_seconds,
             );
-            self.last_known_good.insert(report.entity_id, self.clamped_report(&report, verdict.authoritative_position));
+            self.upsert(self.clamped_report(&report, verdict.authoritative_position));
             return verdict;
         }
 
-        self.last_known_good.insert(report.entity_id, report);
+        self.upsert(report);
         AnomalyVerdict {
             accepted: true,
             reason: None,
@@ -374,6 +663,10 @@ mod client_consensus_tests {
 
     fn config() -> ClientConsensusConfig {
         ClientConsensusConfig { max_speed_mps: 10.0, max_acceleration_mps2: 20.0, max_teleport_distance_m: 15.0, tolerance_factor: 1.0 }
+    }
+
+    fn report(entity_id: u64, server_recv_time_ms: u64) -> ClientTransformReport {
+        ClientTransformReport { entity_id, position: [0.0, 0.0, 0.0], velocity: [0.0, 0.0, 0.0], server_recv_time_ms }
     }
 
     #[test]
@@ -459,5 +752,227 @@ mod client_consensus_tests {
             &cfg,
         );
         assert!(verdict.accepted);
+    }
+
+    #[test]
+    fn entity_zero_is_tracked_like_any_other() {
+        // entity_id 0 is a *valid* key: the slotmap encodes "empty" as
+        // `None` in `keys`, so id 0 must not be conflated with an empty slot.
+        let mut validator = ClientConsensusValidator::new();
+        let cfg = config();
+        let first = validator.validate(report(0, 0), &cfg);
+        assert!(first.accepted);
+        let second = validator.validate(report(0, 1000), &cfg);
+        assert!(second.accepted);
+        assert!(validator.find_slot(0).is_some());
+        assert_eq!(validator.len(), 1);
+    }
+
+    #[test]
+    fn slotmap_stays_bounded_and_evicts_lru_deterministically() {
+        // capacity 4 -> eviction load 4*3/4 = 3. Insert 3 ids, re-touch id 1
+        // (making id 2 the LRU), then insert id 4: the LRU (id 2) must be
+        // evicted deterministically and id 4 must land in a free slot.
+        let mut validator = ClientConsensusValidator::with_capacity(4);
+        let cfg = config();
+        for id in [1u64, 2, 3] {
+            validator.validate(report(id, 0), &cfg);
+        }
+        assert_eq!(validator.len(), 3);
+        validator.validate(report(1, 1000), &cfg);
+        validator.validate(report(4, 0), &cfg);
+        assert_eq!(validator.len(), 3);
+        assert_eq!(validator.capacity(), 4);
+        assert!(validator.find_slot(2).is_none(), "LRU must be evicted");
+        assert!(validator.find_slot(4).is_some());
+        assert!(validator.find_slot(1).is_some());
+        assert!(validator.find_slot(3).is_some());
+    }
+
+    #[test]
+    fn tiny_capacity_clamps_to_power_of_two() {
+        // Fixed-capacity slot tables must always be a power of two so the
+        // probe mask `capacity - 1` stays a clean bitwise AND.
+        assert_eq!(ClientConsensusValidator::with_capacity(1).capacity(), 2);
+        assert_eq!(ClientConsensusValidator::with_capacity(3).capacity(), 4);
+        assert_eq!(ClientConsensusValidator::with_capacity(7).capacity(), 8);
+        let empty = ClientConsensusValidator::with_capacity(0);
+        assert!(empty.is_empty());
+        assert_eq!(empty.capacity(), 2);
+    }
+
+    #[test]
+    fn backshift_deletion_keeps_remaining_lookups_correct() {
+        // Exercise `remove_at`'s tombstone-free backshift under real probe
+        // chains: pack a capacity-16 table near its eviction load (12/16
+        // occupancy makes probe collisions essentially certain), then delete
+        // entries one at a time and verify every remaining key is still
+        // findable and the table drains to empty.
+        let mut validator = ClientConsensusValidator::with_capacity(16);
+        let cfg = config();
+        for id in 10..22u64 {
+            validator.validate(report(id, 0), &cfg);
+        }
+        assert_eq!(validator.len(), 12);
+        let ids: Vec<u64> = (10..22).collect();
+        // We delete in ascending order, so the survivors still present after
+        // deleting `removed` are exactly the ids greater than it. Filtering
+        // only on `!= removed` would wrongly require already-deleted ids (e.g.
+        // 10 after removing 11) to remain reachable.
+        for removed in &ids {
+            validator.forget(*removed);
+            assert!(validator.find_slot(*removed).is_none(), "deleted {removed} must be gone");
+            for survivor in ids.iter().filter(|s| *s > removed) {
+                assert!(
+                    validator.find_slot(*survivor).is_some(),
+                    "survivor {survivor} lost after deleting {removed}"
+                );
+            }
+        }
+        assert!(validator.is_empty());
+        assert_eq!(validator.len(), 0);
+        // Re-inserting after a full drain must work (no stale tombstones).
+        validator.validate(report(99, 0), &cfg);
+        assert!(validator.find_slot(99).is_some());
+    }
+
+    #[test]
+    fn steady_state_validate_keeps_bounded_structure() {
+        // Hammer the validator with far more distinct entities than it can
+        // hold: memory stays fixed at capacity 16, occupancy stays at the
+        // eviction load (12), and only the 12 most-recently-validated
+        // entities survive — deterministically, oldest-first.
+        let mut validator = ClientConsensusValidator::with_capacity(16);
+        let cfg = config();
+        for id in 0..30u64 {
+            validator.validate(report(id, 0), &cfg);
+        }
+        assert_eq!(validator.capacity(), 16);
+        assert_eq!(validator.len(), 12);
+        // The 12 most recent ids (18..=29) survive; the 18 earliest are gone.
+        assert!(validator.find_slot(29).is_some());
+        assert!(validator.find_slot(18).is_some());
+        assert!(validator.find_slot(17).is_none());
+        assert!(validator.find_slot(0).is_none());
+    }
+}
+
+#[cfg(test)]
+mod simulation_clock_tests {
+    use super::*;
+
+    /// Spawns one dynamic ball body at `translation` in `kernel` — used to
+    /// prove the fixed-timestep cadence drives real Rapier bodies
+    /// deterministically.
+    fn spawn_test_body(kernel: &mut PhysicsKernel, translation: [f32; 3]) {
+        let rigid_body = RigidBodyBuilder::dynamic()
+            .translation(vector![translation[0], translation[1], translation[2]])
+            .build();
+        let handle = kernel.rigid_body_set.insert(rigid_body);
+        let collider = ColliderBuilder::ball(0.5).build();
+        kernel
+            .collider_set
+            .insert_with_parent(collider, handle, &mut kernel.rigid_body_set);
+    }
+
+    #[test]
+    fn new_kernel_is_240hz_fixed_timestep() {
+        let kernel = PhysicsKernel::new();
+        // f32 arithmetic: 1 / ((1/120)/2) lands within 1e-3 of 240.
+        assert!((kernel.effective_hz() - 240.0).abs() < 1e-3);
+        assert_eq!(kernel.substeps_this_frame(), 0);
+        assert_eq!(kernel.tick_count(), 0);
+        assert_eq!(kernel.total_time(), 0.0);
+        assert_eq!(kernel.current_frame(), 0);
+        let alpha = kernel.interpolation_alpha();
+        assert!((0.0..=1.0).contains(&alpha));
+    }
+
+    #[test]
+    fn step_is_one_fixed_substep_and_books_the_clock() {
+        let mut kernel = PhysicsKernel::new();
+        kernel.step();
+        assert_eq!(kernel.tick_count(), 1);
+        // A single substep is exactly 1/240 s.
+        assert!((kernel.total_time() - (1.0 / 240.0)).abs() < 1e-6);
+        // The fixed substep dt was wired into Rapier's integration params.
+        assert!((kernel.integration_parameters.dt - (1.0 / 240.0)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn step_frame_accumulates_the_fixed_cadence() {
+        let mut kernel = PhysicsKernel::new();
+        // One 60 Hz frame = 4 substeps at 240 Hz.
+        let alpha = kernel.step_frame(1.0 / 60.0);
+        assert_eq!(kernel.tick_count(), 4);
+        assert_eq!(kernel.substeps_this_frame(), 4);
+        assert!((kernel.total_time() - (4.0 / 240.0)).abs() < 1e-6);
+        assert!((0.0..=1.0).contains(&alpha));
+        // 4 substeps / 2 substeps per base tick = frame 2.
+        assert_eq!(kernel.current_frame(), 2);
+    }
+
+    #[test]
+    fn step_frame_without_full_tick_buffers_accumulator() {
+        let mut kernel = PhysicsKernel::new();
+        // A tiny frame schedules no substep but keeps time in the accumulator;
+        // the interpolation alpha reflects the partial progress.
+        let alpha = kernel.step_frame(1.0 / 2400.0);
+        assert_eq!(kernel.tick_count(), 0);
+        assert_eq!(kernel.substeps_this_frame(), 0);
+        assert!((0.0..=1.0).contains(&alpha));
+        assert!(kernel.interpolation_alpha() > 0.0);
+    }
+
+    #[test]
+    fn step_frame_spiral_of_death_protection_drops_surplus() {
+        let mut kernel = PhysicsKernel::new();
+        // A 10 s stall is clamped to max_frame_dt (1/20) and capped at 8
+        // substeps; the backlog is dropped, never carried forward.
+        let alpha = kernel.step_frame(10.0);
+        assert_eq!(kernel.tick_count(), 8);
+        assert_eq!(kernel.substeps_this_frame(), 8);
+        assert!((0.0..=1.0).contains(&alpha));
+        // Accumulator was reset after hitting the cap: a following tiny frame
+        // still schedules zero substeps (no hidden backlog).
+        kernel.step_frame(1.0 / 2400.0);
+        assert_eq!(kernel.tick_count(), 8);
+    }
+
+    #[test]
+    fn step_frame_deterministic_replay_is_byte_identical() {
+        // Two identical empty kernels fed the identical real-dt sequence must
+        // produce byte-identical binary exports (determinism across the whole
+        // fixed-timestep cadence + export surface).
+        let mut a = PhysicsKernel::new();
+        let mut b = PhysicsKernel::new();
+        let sequence = [0.0, 1.0, 3.0, 7.0, 11.0, 5.0, 2.0, 1.0, 9.0, 4.0];
+        for (i, t) in sequence.iter().enumerate() {
+            let dt = (t + (i as f32) * 0.001) / 60.0;
+            a.step_frame(dt);
+            b.step_frame(dt);
+            assert_eq!(a.export_state(), b.export_state());
+        }
+        assert_eq!(a.tick_count(), b.tick_count());
+        assert_eq!(a.current_frame(), b.current_frame());
+        assert_eq!(a.total_time(), b.total_time());
+        assert_eq!(a.effective_hz(), b.effective_hz());
+    }
+
+    #[test]
+    fn step_frame_advances_a_real_body_deterministically() {
+        // Spawn an identical dynamic body in two kernels; the same real-dt
+        // sequence must yield the same trajectory and the same binary export.
+        let mut a = PhysicsKernel::new();
+        let mut b = PhysicsKernel::new();
+        spawn_test_body(&mut a, [0.0, 10.0, 0.0]);
+        spawn_test_body(&mut b, [0.0, 10.0, 0.0]);
+        for i in 0..30u32 {
+            let dt = 1.0 / 60.0 + (i as f32) * 0.0005;
+            a.step_frame(dt);
+            b.step_frame(dt);
+        }
+        assert_eq!(a.export_state(), b.export_state());
+        assert_eq!(a.tick_count(), b.tick_count());
     }
 }

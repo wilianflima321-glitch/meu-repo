@@ -165,11 +165,30 @@ mod tests {
         let response = ai_complete(
             "draft a plan".to_string(),
             Some("local-fixture".to_string()),
+            None,
+            None,
+            None,
         );
         assert_eq!(response.state, "provider_unavailable");
         assert_eq!(response.cost_usd, Some(0.0));
         assert!(response.text.is_empty());
         assert!(response.reason.contains("Local AI completion is not wired"));
+    }
+
+    #[test]
+    fn ai_completion_refuses_agent_callers_with_law_48_evidence() {
+        let response = ai_complete(
+            "draft a plan".to_string(),
+            Some("local-fixture".to_string()),
+            Some("agent".to_string()),
+            None,
+            None,
+        );
+        assert_eq!(response.state, "denied");
+        assert_eq!(response.cost_usd, Some(0.0));
+        assert!(response.text.is_empty());
+        assert!(response.reason.starts_with(AGENT_HOST_PTY_DENY_CODE));
+        assert!(response.reason.contains("\"law\":48"));
     }
 
     #[test]
@@ -196,11 +215,16 @@ mod tests {
 
     #[test]
     fn native_notification_reports_provider_unavailable_without_plugin() {
-        let response = notify_native(NativeNotificationInput {
-            title: "Aethel".to_string(),
-            body: Some("hello".to_string()),
-            tone: Some("info".to_string()),
-        });
+        let response = notify_native(
+            NativeNotificationInput {
+                title: "Aethel".to_string(),
+                body: Some("hello".to_string()),
+                tone: Some("info".to_string()),
+            },
+            None,
+            None,
+            None,
+        );
         assert_eq!(response.state, "provider_unavailable");
         assert!(response
             .reason

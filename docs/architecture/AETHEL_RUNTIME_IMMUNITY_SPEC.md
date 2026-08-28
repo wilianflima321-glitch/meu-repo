@@ -19,9 +19,9 @@ Three runtime plagues destroy UE5-class PC titles today. Onda M addresses them w
 | **CPU loading bottleneck** (NVMe → RAM → CPU → GPU) | DirectStorage (Win) + GPU decompress compute + VT streaming (all platforms) | **Aethel Zero-Copy IO** |
 | **C++ crash kills entire process** | WASM sandbox + supervisor hot-reload; wgpu/Rapier stay native outside VM | **Aethel WASM Shield** |
 
-**Engineering cost vs Wedge (binding decision #56):**  
+**Engineering cost vs the parallel dev trains (doctrine #72):**
 - **Now (Ondas C–D):** **M.0 foundation hooks** — cook manifest slots, async IO interfaces, WASM worker boundary — **no cloud PSO ship, no DirectStorage ship**.  
-- **Onda M (parallel post-C):** full implementation — **does NOT delay** Wedge #1, A.1, J, L, or K.  
+- **Onda M (parallel post-C):** full implementation — **does NOT delay** the **parallel dev trains**, A.1, J, L, or K (public launch waits for #72).
 - **Web path:** PSO Vault + WASM Shield apply; **DirectStorage is desktop-only** (Law XV / Platform Reality).
 
 **Zero-MVP:** No "zero stutter," "instant load," or "uncrashable engine" marketing until M acceptance suites pass.
@@ -231,7 +231,7 @@ export interface WasmTrapRecovery {
 | **M.2** | **Zero-Copy IO** — DirectStorage Win + GPU decompress compute + VT integration | B Tauri, VI cook, D VT | M |
 | **M.3** | **WASM Shield** — supervisor, hot-reload, trap recovery | C Law VII, B SAB, G.5 overlay | M |
 
-**Parallel to Wedge:** M does **not** block A.1, J, L, K. **Blocks:** anti-stutter/loading/crash marketing only.
+**Parallel to the dev trains:** M does **not** block A.1, J, L, K. **Blocks:** anti-stutter/loading/crash marketing only (public launch waits for #72).
 
 ---
 

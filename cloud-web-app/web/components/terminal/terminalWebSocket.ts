@@ -2,6 +2,11 @@ import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('XTerminalWebSocket');
 
+function isTauriRuntime(): boolean {
+  if (typeof window === 'undefined') return false;
+  return '__TAURI_INTERNALS__' in window || '__TAURI__' in window;
+}
+
 export class TerminalWebSocket {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
@@ -10,18 +15,36 @@ export class TerminalWebSocket {
   private messageQueue: string[] = [];
   private isConnected = false;
   private runtimeUrl = '';
+  
+  // Tauri specifics
+  private tauriUnlisten: (() => void) | null = null;
+  private isTauri = false;
+  private tauriSessionId = '';
 
   onData: ((data: string) => void) | null = null;
   onConnect: (() => void) | null = null;
   onDisconnect: (() => void) | null = null;
-  onError: ((error: Event) => void) | null = null;
+  onError: ((error: Event | string) => void) | null = null;
+
+  constructor() {
+    this.isTauri = isTauriRuntime();
+  }
 
   setRuntimeUrl(url: string): void {
     this.runtimeUrl = url;
   }
 
   connect(sessionId: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    if (this.isConnected) {
+      return;
+    }
+
+    if (this.isTauri) {
+      this.tauriSessionId = sessionId;
+      this.connectTauri(sessionId).catch(err => {
+        log.error('Tauri PTY connection failed', { sessionId, error: err });
+        this.onError?.(err as string);
+      });
       return;
     }
 
@@ -87,7 +110,43 @@ export class TerminalWebSocket {
     }
   }
 
+  private async importTauriModule(modulePath: string): Promise<any> {
+    const specifier = ['@tauri-apps', 'api', modulePath].join('/');
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+    const dynamicImport = new Function('s', 'return import(s)') as (s: string) => Promise<any>;
+    return dynamicImport(specifier);
+  }
+
+  private async connectTauri(sessionId: string): Promise<void> {
+    try {
+      // Dynamic import to avoid breaking standard browser build
+      const core = await this.importTauriModule('core');
+      const event = await this.importTauriModule('event');
+      
+      // Request local PTY creation.
+      const response = await core.invoke('terminal_create', { cwd: null });
+      this.tauriSessionId = response.id;
+      
+      this.tauriUnlisten = await event.listen(`terminal_data_${this.tauriSessionId}`, (e: { payload: number[] }) => {
+        const text = new TextDecoder().decode(new Uint8Array(e.payload));
+        this.onData?.(text);
+      });
+      
+      this.isConnected = true;
+      this.onConnect?.();
+      
+      while (this.messageQueue.length > 0) {
+        const msg = this.messageQueue.shift();
+        if (msg) this.send(msg);
+      }
+    } catch (err) {
+      throw err;
+    }
+  }
+
   private attemptReconnect(sessionId: string): void {
+    if (this.isTauri) return; // No auto-reconnect for local Tauri PTY yet
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       log.error('Max reconnection attempts reached', {
         sessionId,
@@ -110,6 +169,19 @@ export class TerminalWebSocket {
   }
 
   send(data: string): void {
+    if (this.isTauri) {
+      if (!this.isConnected) {
+        this.messageQueue.push(data);
+        return;
+      }
+      this.importTauriModule('core').then(core => {
+        core.invoke('terminal_write', { sessionId: this.tauriSessionId, input: data }).catch((err: unknown) => {
+          log.error('terminal_write failed', { error: err });
+        });
+      });
+      return;
+    }
+
     const message = JSON.stringify({ type: 'input', data });
 
     if (this.ws?.readyState === WebSocket.OPEN) {
@@ -121,6 +193,16 @@ export class TerminalWebSocket {
   }
 
   resize(cols: number, rows: number): void {
+    if (this.isTauri) {
+      if (!this.isConnected) return;
+      this.importTauriModule('core').then(core => {
+        core.invoke('terminal_resize', { sessionId: this.tauriSessionId, cols, rows }).catch((err: unknown) => {
+          log.error('terminal_resize failed', { error: err });
+        });
+      });
+      return;
+    }
+
     const message = JSON.stringify({ type: 'resize', cols, rows });
 
     if (this.ws?.readyState === WebSocket.OPEN) {
@@ -129,6 +211,23 @@ export class TerminalWebSocket {
   }
 
   disconnect(): void {
+    if (this.isTauri) {
+      if (this.tauriUnlisten) {
+        this.tauriUnlisten();
+        this.tauriUnlisten = null;
+      }
+      if (this.isConnected) {
+        this.importTauriModule('core').then(core => {
+          core.invoke('terminal_close', { sessionId: this.tauriSessionId }).catch((err: unknown) => {
+            log.error('terminal_close failed', { error: err });
+          });
+        });
+      }
+      this.isConnected = false;
+      this.messageQueue = [];
+      return;
+    }
+
     this.ws?.close();
     this.ws = null;
     this.isConnected = false;

@@ -40,6 +40,20 @@ pub struct SceneGraph {
     pub provenance_stamp: u64,
     /// Single authority owner per entity (0 = Kernel, 1 = Rapier, 2 = Kinematic) (P7).
     pub physics_authority: Vec<u8>,
+    /// PBR metallic-roughness SoA (letter **R20 / materialx_bridge**): albedo is
+    /// linear-space base color, roughness_x/y is anisotropic micro-surface
+    /// roughness, metallic blends dielectric↔conductor, emission is self-illumination.
+    /// Added 2026-08-11 so the MaterialX bridge maps real `.mtlx` standard_surface
+    /// into the kernel WorldSoA (compile-or-delete resolution — genuine, not a mock).
+    pub albedo_r: Vec<f32>,
+    pub albedo_g: Vec<f32>,
+    pub albedo_b: Vec<f32>,
+    pub roughness_x: Vec<f32>,
+    pub roughness_y: Vec<f32>,
+    pub metallic: Vec<f32>,
+    pub emission_r: Vec<f32>,
+    pub emission_g: Vec<f32>,
+    pub emission_b: Vec<f32>,
 }
 
 impl Default for SceneGraph {
@@ -76,6 +90,16 @@ impl SceneGraph {
             active_bits: vec![0u64; words],
             provenance_stamp: 0,
             physics_authority: vec![0u8; capacity], // Default 0 = Kernel authority
+            // PBR defaults: white albedo, rough dielectric, no self-emission.
+            albedo_r: vec![1.0; capacity],
+            albedo_g: vec![1.0; capacity],
+            albedo_b: vec![1.0; capacity],
+            roughness_x: vec![1.0; capacity],
+            roughness_y: vec![1.0; capacity],
+            metallic: vec![0.0; capacity],
+            emission_r: vec![0.0; capacity],
+            emission_g: vec![0.0; capacity],
+            emission_b: vec![0.0; capacity],
         }
     }
 
@@ -155,6 +179,18 @@ impl SceneGraph {
         self.scale_x[index] = sx;
         self.scale_y[index] = sy;
         self.scale_z[index] = sz;
+    }
+
+    /// Set PBR self-emission SoA for an entity slot (letter **R20 / materialx_bridge**).
+    /// RGB channels are scaled by the emission intensity and clamped to [0, 1].
+    #[inline(always)]
+    pub fn set_emission(&mut self, index: usize, er: f32, eg: f32, eb: f32, intensity: f32) {
+        if index >= self.len {
+            return;
+        }
+        self.emission_r[index] = (er * intensity).clamp(0.0, 1.0);
+        self.emission_g[index] = (eg * intensity).clamp(0.0, 1.0);
+        self.emission_b[index] = (eb * intensity).clamp(0.0, 1.0);
     }
 
     /// Set parent index (`-1` = root). Invalid parent indices are ignored (letter **fb**).

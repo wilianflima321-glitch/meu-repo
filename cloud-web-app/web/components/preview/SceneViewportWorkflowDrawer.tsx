@@ -134,7 +134,7 @@ export default function SceneViewportWorkflowDrawer({
           {workflowTool === 'facial' ? (
             <FacialAnimationEditor
               characterId={selectedObjectId ?? 'viewport-character'}
-              onBlendShapeUpdate={(blendShapes) => {
+              onBlendShapeUpdate={(blendShapes: any) => {
                 const activeCount = Object.values(blendShapes).filter((value) => (value as number) > 0.01).length;
                 onFacialMetricsChange(activeCount, deriveFacialExpressionIntensity(blendShapes));
               }}
@@ -142,7 +142,7 @@ export default function SceneViewportWorkflowDrawer({
           ) : workflowTool === 'hair' ? (
             <HairFurEditor
               characterId={selectedObjectId ?? 'viewport-character'}
-              onHairUpdate={(hairData) => {
+              onHairUpdate={(hairData: any) => {
                 const signature = deriveHairPreviewSignature(hairData);
                 onHairSignatureChange(signature.label, signature.color, signature.density);
               }}
@@ -151,7 +151,7 @@ export default function SceneViewportWorkflowDrawer({
             <VisualScriptEditor
               script={visualScript}
               onChange={onVisualScriptChange}
-              onGenerateBlueprint={async (prompt) => {
+              onGenerateBlueprint={async (prompt: string) => {
                 const result = await requestAdvancedChat({
                   message: prompt,
                   model: 'openrouter/auto',

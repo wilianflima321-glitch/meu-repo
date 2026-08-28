@@ -103,7 +103,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       },
     };
 
-    setNodes(nds => [...nds, newNode]);
+    setNodes((nds: BlueprintFlowNode[]) => [...nds, newNode]);
   }, [setNodes]);
 
   // Handle connections
@@ -145,7 +145,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       },
     } as Edge;
 
-    setEdges(eds => addEdge(newEdge, eds));
+    setEdges((eds: Edge[]) => addEdge(newEdge, eds));
   }, [nodes, setEdges]);
 
   // Node selection

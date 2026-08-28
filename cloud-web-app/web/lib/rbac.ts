@@ -469,25 +469,22 @@ export async function removeShadowBan(userId: string, adminId: string): Promise<
 }
 
 /**
- * Verifica se um usuário está shadow banned
- * Nota: O campo isShadowBanned será adicionado na próxima migration.
- * Enquanto isso, verificamos se o usuário existe na tabela de bans ou
- * usamos um campo alternativo.
+ * Verifica se um usuário está shadow banned.
+ * A flag `isShadowBanned` é um campo real na tabela `User` (schema.prisma) e é
+ * lida diretamente — sem cache em memória e sem campo alternativo.
+ * Falha de leitura (DB indisponível) resolve para `false`: a flag reduz impacto
+ * do usuário, não autoriza ações, então não deve derrubar a requisição.
  */
 export async function isUserShadowBanned(userId: string): Promise<boolean> {
   try {
-    // Verifica no cache de shadow bans (mantido em memória/redis)
-    // Após a migration rodar, podemos usar: user.isShadowBanned
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { 
+      select: {
         id: true,
-        // @ts-ignore - Campo será adicionado na migration
-        isShadowBanned: true 
+        isShadowBanned: true,
       },
     });
-    
-    // @ts-ignore - Campo será adicionado na migration  
+
     return user?.isShadowBanned ?? false;
   } catch {
     return false;

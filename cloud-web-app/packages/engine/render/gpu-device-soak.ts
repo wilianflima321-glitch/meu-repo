@@ -330,9 +330,14 @@ export async function probeAndRunGpuDeviceSoak(input?: {
     }
 
     let adapterName = 'WebGPU adapter'
+    // Chrome experimental surface — requestAdapterInfo is not in the W3C spec types.
+    type GpuAdapterWithRequestInfo = GPUAdapter & {
+      requestAdapterInfo?: () => Promise<{ device?: string; description?: string } | undefined>
+    }
+    const probe = adapter as GpuAdapterWithRequestInfo
     try {
-      if (typeof adapter.requestAdapterInfo === 'function') {
-        const info = await adapter.requestAdapterInfo()
+      if (typeof probe.requestAdapterInfo === 'function') {
+        const info = await probe.requestAdapterInfo()
         adapterName = info?.device || info?.description || adapterName
       } else if (adapter.info?.device) {
         adapterName = adapter.info.device

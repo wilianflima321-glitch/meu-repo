@@ -278,10 +278,7 @@ export function fingerprintFrameBuffer(input: {
     }
   }
 
-  const slice =
-    input.pixels instanceof Uint8Array
-      ? input.pixels.subarray(0, expected)
-      : new Uint8Array(input.pixels.buffer, input.pixels.byteOffset, expected)
+  const slice = input.pixels.subarray(0, expected)
 
   if (isAllZeroPixels(slice)) {
     return {
@@ -674,7 +671,7 @@ export function evaluateFrameParityHarnessReadiness(
       naniteMarketingAllowed: false,
       lumenMarketingAllowed: false,
       webgpuProductPresentReady: false,
-      reason: !soak.ok ? soak.message : failOpen.message,
+      reason: !failOpen.ok ? failOpen.message : !soak.ok ? soak.message : 'parity soak failed (both paths)',
     }
   }
 

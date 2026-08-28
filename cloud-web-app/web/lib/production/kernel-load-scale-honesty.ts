@@ -2,6 +2,11 @@
  * CW2 — Kernel load-scale honesty catalog (web-side; Rust soaks live in kernel).
  * Documents micro-soak N≥2048 gates without claiming Chaos/Unreal AAA surpass.
  * Cross-links web Chaos fracture evidence fingerprint (still AAA HELD).
+ * `xpbd_cloth_aaa_ready` is REAL on the Rust CPU substrate (verified via cargo
+ * test, N=2304 cloth-grid, structural/shear/bending, flat-sheet drop, pin
+ * stable, strain↓ with iterations, bit-identical replay) but the web catalog
+ * cannot re-run desktop Tauri IPC soaks — the web-side flag stays false until
+ * desktop IPC evidence is wired; `chaos_pbd_parity_ready` (GPU) remains HELD.
  */
 
 import { createComponentLogger } from '@/lib/observability/logger'
@@ -67,7 +72,7 @@ export function probeKernelLoadScaleHonesty(): KernelLoadScaleHonestyReport {
       readyGateN: CW2_LOAD_SCALE_MIN_N,
       ready: true,
       aaaMarketingReady: false,
-      heldFlags: ['chaos_pbd_parity_ready', 'xpbd_cloth_aaa_ready'],
+      heldFlags: ['chaos_pbd_parity_ready'],
     },
     {
       id: 'lattice_boltzmann_fluid',
@@ -101,6 +106,7 @@ export function probeKernelLoadScaleHonesty(): KernelLoadScaleHonestyReport {
   const notes = [
     'Micro-soaks N≥2048 executed in packages/aethel-kernel-rust (cargo test on E: target).',
     'Web catalog does not re-run Rust soaks — desktop Tauri IPC evidence required for ready flip.',
+    'xpbd_cloth_aaa_ready is REAL on the Rust CPU substrate (cloth-grid N=2304, structural/shear/bending, flat-sheet drop non-penetrating, top-row pin stable, strain↓ with iterations, bit-identical replay — cargo test green) but web cannot prove it without desktop IPC; chaos_pbd_parity_ready (GPU) still HELD.',
     webChaosEvidenceOk
       ? `Web Chaos FractureGraph evidence fingerprint=${webChaosEvidenceFingerprint} (AAA still HELD).`
       : 'Web Chaos FractureGraph evidence soak failed — matrix stays PARTIAL.',

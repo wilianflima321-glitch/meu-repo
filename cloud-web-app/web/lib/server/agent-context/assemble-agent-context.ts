@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
 import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
 import { queryRepoGraphRAG } from '@/lib/server/repo-graph-rag/repo-graph-rag'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
@@ -17,6 +18,8 @@ const EMPTY: AssembledAgentContext = {
   retrievedFiles: [],
   semanticReady: false,
 }
+
+const agentContextLog = createComponentLogger('assemble-agent-context')
 
 /**
  * Assembles task-relevant repository context for an agent turn by combining two
@@ -59,7 +62,7 @@ export async function assembleAgentContext(params: {
           maxTotalFiles: 8
         })
       } catch (err) {
-        console.error('[assembleAgentContext] RAG search failed:', err)
+        agentContextLog.error('[assembleAgentContext] RAG search failed:', err)
       }
     }
 
@@ -88,7 +91,7 @@ export async function assembleAgentContext(params: {
       semanticReady: !!results && results.semanticHits.length > 0,
     }
   } catch (error) {
-    console.error('[assembleAgentContext] Failed:', error)
+    agentContextLog.error('[assembleAgentContext] Failed:', error)
     return EMPTY
   }
 }

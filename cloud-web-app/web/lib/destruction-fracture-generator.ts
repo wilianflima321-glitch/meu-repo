@@ -12,7 +12,7 @@ export const FRACTURE_GEOMETRY_SHIP_STATUS = {
   fortune3d: 'HELD' as const,
   /** Letter cv — hierarchical plan + GPU debris path; Chaos parity remains HELD. */
   gpuFractureDeepen: 'cv' as const,
-  note: 'Convex hull cell meshing shipped; hierarchical Voronoi plan + GPU debris (cv); Fortune 3D / Chaos parity [HELD]',
+  note: 'Convex hull cell meshing shipped; hierarchical Voronoi plan + GPU debris (cv) comutada para a autoridade Rust via probe_voronoi_destruction_3d_cmd; Chaos parity [HELD]',
 };
 
 export class VoronoiFractureGenerator {

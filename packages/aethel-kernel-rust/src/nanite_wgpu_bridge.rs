@@ -102,7 +102,7 @@ impl NaniteWgpuBridge {
         // 128 threads per cluster (1 for each micro-triangle).
         let total_triangles = cluster_count * 128;
         // Group size in WGSL is 128.
-        let dispatch_groups = (total_triangles + 127) / 128;
+        let dispatch_groups = total_triangles.div_ceil(128);
         
         cpass.dispatch_workgroups(dispatch_groups, 1, 1);
     }

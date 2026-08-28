@@ -112,12 +112,11 @@ export async function acquireConcurrencyLease(params: {
 	const expiresAt = new Date(now.getTime() + ttlSeconds * 1000);
 
 	return prisma.$transaction(async (tx) => {
-		const txAny = tx as any;
-		await txAny.concurrencyLease.deleteMany({
+		await tx.concurrencyLease.deleteMany({
 			where: { userId, expiresAt: { lte: now } },
 		});
 
-		const active = await txAny.concurrencyLease.count({
+		const active = await tx.concurrencyLease.count({
 			where: { userId, expiresAt: { gt: now } },
 		});
 
@@ -134,7 +133,7 @@ export async function acquireConcurrencyLease(params: {
 			throw err;
 		}
 
-		const lease = await txAny.concurrencyLease.create({
+		const lease = await tx.concurrencyLease.create({
 			data: { userId, key, expiresAt },
 		});
 		return { leaseId: lease.id };
@@ -143,7 +142,7 @@ export async function acquireConcurrencyLease(params: {
 
 export async function releaseConcurrencyLease(leaseId: string): Promise<void> {
 	if (!leaseId || leaseId === 'unlimited') return;
-	await (prisma as any).concurrencyLease.delete({ where: { id: leaseId } }).catch(() => { });
+	await prisma.concurrencyLease.delete({ where: { id: leaseId } }).catch(() => { });
 }
 
 function rateLimited(

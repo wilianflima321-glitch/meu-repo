@@ -101,6 +101,10 @@ const checks = [
   },
   {
     file: 'app/api/billing/checkout/route.ts',
+    files: [
+      'app/api/billing/checkout/route.ts',
+      'lib/server/billing-runtime.ts',
+    ],
     patterns: [
       "error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE'",
       'status: 503',
@@ -112,6 +116,10 @@ const checks = [
   },
   {
     file: 'app/api/billing/checkout-link/route.ts',
+    files: [
+      'app/api/billing/checkout-link/route.ts',
+      'lib/server/billing-runtime.ts',
+    ],
     patterns: [
       "error: 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE'",
       'status: 503',

@@ -20,6 +20,7 @@ import type {
   IDERenderJobStatus,
   IDESceneNode,
   IDESceneNodeTransformPatch,
+  IDESceneColorUpdateResult,
   IDETransformMode,
   IDETransformSpace,
   IDERenderMode,
@@ -39,6 +40,7 @@ type NativeSceneNode = {
   type: string
   visible: boolean
   locked: boolean
+  parentId?: string | null
   position: [number, number, number]
   rotation: [number, number, number]
   scale: [number, number, number]
@@ -51,9 +53,11 @@ type NativeSceneSnapshot = {
   selectedIds: string[]
 }
 
+export type SceneIpcStatus = 'probing' | 'live' | 'unavailable'
+
 const KNOWN_NODE_TYPES: ReadonlySet<string> = new Set(['mesh', 'light', 'camera', 'generated-mesh', 'group', 'empty'])
 
-function toIDESceneNode(node: NativeSceneNode, selectedIds: string[]): IDESceneNode {
+function toFlatIDESceneNode(node: NativeSceneNode, selectedIds: string[]): IDESceneNode {
   return {
     id: node.id,
     name: node.name,
@@ -69,6 +73,28 @@ function toIDESceneNode(node: NativeSceneNode, selectedIds: string[]): IDESceneN
   }
 }
 
+/** Build Outliner tree from flat IPC snapshot (`parentId` → nested `children`). */
+function buildSceneTree(snapshot: NativeSceneSnapshot): IDESceneNode[] {
+  const byId = new Map<string, IDESceneNode>()
+  for (const node of snapshot.nodes) {
+    byId.set(node.id, { ...toFlatIDESceneNode(node, snapshot.selectedIds), children: [] })
+  }
+  const roots: IDESceneNode[] = []
+  for (const node of snapshot.nodes) {
+    const current = byId.get(node.id)
+    if (!current) continue
+    const parentId = node.parentId ?? null
+    if (parentId && byId.has(parentId)) {
+      const parent = byId.get(parentId)!
+      parent.children = parent.children ?? []
+      parent.children.push(current)
+    } else {
+      roots.push(current)
+    }
+  }
+  return roots
+}
+
 /**
  * Real, IPC-backed scene service. Caches the last `scene_graph_changed`
  * broadcast (or the initial `scene_get_nodes` fetch) so `getNodes()` can stay
@@ -78,6 +104,7 @@ function toIDESceneNode(node: NativeSceneNode, selectedIds: string[]): IDESceneN
  */
 class NativeSceneService implements ISceneService {
   private latest: NativeSceneSnapshot = { nodes: [], selectedIds: [] }
+  private ipcStatus: SceneIpcStatus = 'probing'
   private readonly listeners = new Set<() => void>()
   private unlisten: UnlistenFn | null = null
   private ready: Promise<void>
@@ -90,6 +117,7 @@ class NativeSceneService implements ISceneService {
     try {
       this.unlisten = await listen<NativeSceneSnapshot>(SCENE_GRAPH_CHANGED_EVENT, (event) => {
         this.latest = event.payload
+        this.ipcStatus = 'live'
         this.notify()
       })
     } catch {
@@ -103,9 +131,12 @@ class NativeSceneService implements ISceneService {
   private async refresh(): Promise<void> {
     try {
       this.latest = await this.invoke<NativeSceneSnapshot>('scene_get_nodes')
+      this.ipcStatus = 'live'
       this.notify()
     } catch {
       // No live Tauri backend — leave the empty snapshot in place.
+      this.ipcStatus = 'unavailable'
+      this.notify()
     }
   }
 
@@ -113,8 +144,18 @@ class NativeSceneService implements ISceneService {
     this.listeners.forEach((listener) => listener())
   }
 
+  getIpcStatus(): SceneIpcStatus {
+    return this.ipcStatus
+  }
+
+  /** Hierarchical tree for Outliner3D (roots only; children nested). */
   getNodes(): IDESceneNode[] {
-    return this.latest.nodes.map((node) => toIDESceneNode(node, this.latest.selectedIds))
+    return buildSceneTree(this.latest)
+  }
+
+  /** Flat list matching insertion order — for counts / properties lookup. */
+  getFlatNodes(): IDESceneNode[] {
+    return this.latest.nodes.map((node) => toFlatIDESceneNode(node, this.latest.selectedIds))
   }
 
   getSelectedIds(): string[] {
@@ -137,13 +178,22 @@ class NativeSceneService implements ISceneService {
     void this.invoke('scene_update_transform', { id, patch })
   }
 
+  setColor(_id: string, _color: string): IDESceneColorUpdateResult {
+    // Desktop scene graph has no live R3F / wgpu present paint path yet.
+    return { ok: false, reason: 'no_color_support' }
+  }
+
   async addNode(name: string, type: IDESceneNode['type']): Promise<IDESceneNode> {
     const node = await this.invoke<NativeSceneNode>('scene_add_node', { name, nodeType: type })
-    return toIDESceneNode(node, this.latest.selectedIds)
+    return toFlatIDESceneNode(node, this.latest.selectedIds)
   }
 
   removeNode(id: string): void {
     void this.invoke('scene_remove_node', { id })
+  }
+
+  reparent(id: string, parentId: string | null): void {
+    void this.invoke('scene_reparent', { id, parentId })
   }
 
   subscribe(listener: () => void): () => void {

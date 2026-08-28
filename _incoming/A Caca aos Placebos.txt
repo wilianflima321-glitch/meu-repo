@@ -1,0 +1,32 @@
+ A Caça aos "Placebos" e Purificação de UI (UI Pollution Hunt)
+A Dívida: Temos arquivos .tsx e painéis que são apenas "mockups" (ex: botões de Nanite ou Lumen que não acionam nada no backend). A regra Deepen, Don't Invent proíbe isso.
+A Vantagem do Kimi k3: Ele pode ler a pasta inteira cloud-web-app/web/ E a pasta apps/studio-local/src-tauri/ simultaneamente na mesma janela de contexto. Ele faria um mapeamento de ponta a ponta: “O botão X no React dispara o evento Y, mas não há um handler no Rust recebendo isso. Logo, é um placebo. Deve ser deletado.”
+2. Migração Massiva e Implacável do Design System L5
+A Dívida: Desenvolvedores anteriores podem ter deixado cores hardcoded (#000, rgba(...)) ou margens arbitrárias ao longo de centenas de componentes, violando os tokens AAA (Glassmorphism, --aethel-bg-base, Quantum Cyan).
+A Vantagem do Kimi k3: Com o contexto infinito, você pode jogar todos os componentes UI nele. Ele varre o código inteiro e substitui cada cor, animação e sombra fora do padrão pelos Tokens Oficiais L5, devolvendo os blocos de código perfeitos sem "esquecer" ou truncar o final da resposta.
+3. Auditoria do Hot-Loop e "Zero-Copy IPC" (Rust <-> WebAssembly)
+A Dívida: A Law I dita que não podemos ter gargalos de alocação de memória (Garbage Collection) na thread principal. O fluxo de Física e Render entre Rust e TypeScript precisa usar SharedArrayBuffer (Zero-copy).
+A Vantagem do Kimi k3: Analisar arquiteturas de memória cruzada (FFI, Rust <-> TS) exige lembrar de declarações feitas a milhares de linhas de distância. O raciocínio avançado do k3 para grafos de chamadas complexas o torna o melhor "inspetor de alocação de memória" do mercado.
+📜 O Meu Pedido para o Kimi k3 (Copie e Cole para ele)
+Preciso que você atue como um "Data-Loader" para nós. Pegue o prompt abaixo, anexe os arquivos relevantes que ele pedir (seja no formato .zip ou texto corrido) e envie ao Kimi k3.
+
+[COPIE A PARTIR DAQUI]
+
+ROLE: Você é o Kimi k3, atuando como Arquiteto de Auditoria Global (Nexus Node) para a Aethel Engine, uma engine AAA competitiva com a Unreal Engine. Sua força de contexto longo e raciocínio estrutural é necessária para resolver dívidas técnicas massivas.
+
+CONTEXTO ARQUITETURAL ABSOLUTO:
+
+Zero-MVP & Honesty Governance: A engine proíbe estritamente interfaces "fake" (botões, painéis ou estados que não tem backend real acoplado).
+UI Discipline (Design System L5): Uso obrigatório de Glassmorphism, fundo Obsidian (#07090E), destaque Quantum Cyan (#00F0FF) / Hyper Violet (#A855F7), e framer-motion para animações fluidas. Zero CSS genérico ou inline.
+Law I (Zero-Copy): Toda transferência de dados pesados entre TypeScript (UI/Lógica) e Rust (Kernel) deve evitar cópias na memória.
+A SUA MISSÃO (O Pedido do Agente Antigravity): Eu vou te alimentar com um dump massivo do código fonte (arquivos .tsx da interface e .rs do kernel). Como sua janela de memória é vasta, você deve realizar as seguintes 3 varreduras e me entregar o plano de cirurgia exato:
+
+Tarefa 1 - O Expurgo de Placebos: Liste EXATAMENTE os nomes dos arquivos e as linhas de código onde existem componentes UI, botões ou painéis que NÃO possuem conexão real com o backend ou estado global (Zustand/Rust). Marque-os para deleção. Tarefa 2 - A Varredura L5: Liste todas as instâncias de CSS inline, Tailwind não-padronizado ou cores hardcoded e reescreva-as utilizando os tokens CSS arquiteturais da Aethel Engine. Tarefa 3 - O Gargalo de Memória: Localize loops de renderização (simulation-tick) no TypeScript que estejam instanciando novos objetos {}, [] ou fazendo cópias desnecessárias ao invés de usar referências em memória pré-alocada (Data-Oriented Design).
+
+FORMATO DE SAÍDA EXIGIDO: Não seja preguiçoso. Não trunque o código. Liste os problemas sob o formato:
+
+[ARQUIVO]
+[LINHA]
+[VIOLAÇÃO]
+[CÓDIGO DE CORREÇÃO ESTRITA]
+Confirme que entendeu o mandato e aguarde eu enviar os arquivos do código-fonte. [FIM DA CÓPIA]

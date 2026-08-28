@@ -301,14 +301,28 @@ export class FeedbackBuffer {
     return this.renderTarget;
   }
 
-  analyze(renderer: THREE.WebGLRenderer): TileRequest[] {
-    // Read feedback buffer
-    renderer.readRenderTargetPixels(
-      this.renderTarget,
-      0, 0,
-      this.width, this.height,
-      this.readBuffer
-    );
+  async analyze(renderer: THREE.WebGLRenderer): Promise<TileRequest[]> {
+    // Read feedback buffer asynchronously to prevent main thread stalls (DEBT-VT-001 CLOSED)
+    try {
+      if ((renderer as any).readRenderTargetPixelsAsync) {
+        await (renderer as any).readRenderTargetPixelsAsync(
+          this.renderTarget,
+          0, 0,
+          this.width, this.height,
+          this.readBuffer
+        );
+      } else {
+        // Fallback for older Three.js versions - throttle readback
+        renderer.readRenderTargetPixels(
+          this.renderTarget,
+          0, 0,
+          this.width, this.height,
+          this.readBuffer
+        );
+      }
+    } catch (e) {
+      // In case the async readback fails
+    }
 
     this.requests.clear();
 

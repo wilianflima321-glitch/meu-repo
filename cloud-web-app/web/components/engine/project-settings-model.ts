@@ -285,7 +285,7 @@ export const defaultSettings: SettingCategory[] = [
   {
     id: 'platforms',
     name: 'Platforms',
-    icon: '💻',
+    icon: 'PLATFORMS',
     sections: [
       {
         id: 'windows',

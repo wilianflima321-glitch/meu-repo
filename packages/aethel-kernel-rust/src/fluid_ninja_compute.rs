@@ -1003,4 +1003,49 @@ mod tests {
         assert_eq!(a.fingerprint, b.fingerprint);
         assert_eq!(a, b);
     }
+
+    #[test]
+    fn jacobi_iterations_reduce_divergence_monotonically() {
+        let mut g_low = FluidNinjaGrid::new(SOAK_GRID_N, SOAK_SEED);
+        let mut g_high = FluidNinjaGrid::new(SOAK_GRID_N, SOAK_SEED);
+        seed_fluid_scene(&mut g_low, SOAK_SEED);
+        seed_fluid_scene(&mut g_high, SOAK_SEED);
+
+        let step_low = FluidNinjaCompute::fluid_step(&mut g_low, DEFAULT_DT, DEFAULT_DX, 4);
+        let step_high = FluidNinjaCompute::fluid_step(&mut g_high, DEFAULT_DT, DEFAULT_DX, 24);
+
+        assert!(step_low.mean_abs_div_after < step_low.mean_abs_div_before);
+        assert!(step_high.mean_abs_div_after < step_high.mean_abs_div_before);
+        // More Jacobi iterations produce equal or lower divergence
+        assert!(step_high.mean_abs_div_after <= step_low.mean_abs_div_after + 1e-4);
+    }
+
+    #[test]
+    fn fluid_grid_mass_conservation_across_steps() {
+        let mut grid = FluidNinjaGrid::new(SOAK_GRID_N, SOAK_SEED);
+        seed_fluid_scene(&mut grid, SOAK_SEED);
+
+        let mut initial_mass = 0.0_f32;
+        let n = grid.n;
+        for j in 1..=n {
+            for i in 1..=n {
+                initial_mass += grid.density[cell_idx(n, i, j)];
+            }
+        }
+
+        // Run 5 fluid simulation steps
+        for _ in 0..5 {
+            let _ = FluidNinjaCompute::fluid_step(&mut grid, DEFAULT_DT, DEFAULT_DX, DEFAULT_PRESSURE_ITERS);
+        }
+
+        let mut final_mass = 0.0_f32;
+        for j in 1..=n {
+            for i in 1..=n {
+                final_mass += grid.density[cell_idx(n, i, j)];
+            }
+        }
+
+        let rel_err = (final_mass - initial_mass).abs() / initial_mass.max(1e-4);
+        assert!(rel_err < 0.20, "Mass conservation rel_err: {rel_err}");
+    }
 }

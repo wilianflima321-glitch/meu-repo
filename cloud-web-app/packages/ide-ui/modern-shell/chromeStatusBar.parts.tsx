@@ -19,8 +19,12 @@ export const statusMetricGroupStyle: React.CSSProperties = {
 };
 
 export type StatusMetricDescriptor = {
+  id: string;
   icon: React.ReactNode;
   label: string;
+  /** Extended label / tooltip text rendered by surfaces that carry a title slot. */
+  title?: string;
+  onClick?: () => void;
 };
 
 export interface StatusBarProps {
@@ -111,60 +115,37 @@ export function formatBottomPanelLabel(activeBottomPanel: BottomPanelMode | unde
   return 'AI Console';
 }
 
-export function buildDiagnosticsMetrics(activeDiagnostics: MonacoDiagnostic[]): StatusMetricDescriptor[] {
-  const counts = activeDiagnostics.reduce(
-    (summary, diagnostic) => {
-      if (diagnostic.severity === 'error') summary.errors += 1;
-      if (diagnostic.severity === 'warning') summary.warnings += 1;
-      if (diagnostic.severity === 'info') summary.infos += 1;
-      if (diagnostic.severity === 'hint') summary.hints += 1;
-      return summary;
-    },
-    { errors: 0, warnings: 0, infos: 0, hints: 0 }
-  );
+export function buildDiagnosticsMetrics(activeDiagnostics: MonacoDiagnostic[] | undefined): StatusMetricDescriptor[] {
+  if (!activeDiagnostics || activeDiagnostics.length === 0) return [];
 
-  const metrics: StatusMetricDescriptor[] = [];
+  const errors = activeDiagnostics.filter((d) => d.severity === 'error').length;
+  const warnings = activeDiagnostics.filter((d) => d.severity === 'warning').length;
 
-  if (counts.errors > 0) {
-    metrics.push({
-      icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
-      label: `${counts.errors} error${counts.errors === 1 ? '' : 's'}`,
+  const items: StatusMetricDescriptor[] = [];
+
+  if (errors > 0) {
+    items.push({
+      id: 'diag-errors',
+      icon: <AlertCircle size={12} className="text-[var(--aethel-error-light)]" />,
+      label: `${errors}`,
     });
   }
 
-  if (counts.warnings > 0) {
-    metrics.push({
-      icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
-      label: `${counts.warnings} warning${counts.warnings === 1 ? '' : 's'}`,
+  if (warnings > 0) {
+    items.push({
+      id: 'diag-warnings',
+      icon: <AlertCircle size={12} className="text-[var(--aethel-warning-light)]" />,
+      label: `${warnings}`,
     });
   }
 
-  if (metrics.length > 0) {
-    return metrics;
-  }
-
-  const advisoryCount = counts.infos + counts.hints;
-  if (advisoryCount > 0) {
-    return [
-      {
-        icon: <Clock size={12} />,
-        label: `${advisoryCount} hint${advisoryCount === 1 ? '' : 's'}`,
-      },
-    ];
-  }
-
-  return [
-    {
-      icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />,
-      label: 'Clean file',
-    },
-  ];
+  return items;
 }
 
 export function buildRuntimeMetric(
-  runtimeHealth?: PreviewRuntimeHealthState | null,
-  runtimeReadinessStatus?: string | null,
-  panelState?: PanelState
+  runtimeHealth: PreviewRuntimeHealthState | null | undefined,
+  runtimeReadinessStatus: string | null | undefined,
+  panelState: PanelState | undefined,
 ): StatusMetricDescriptor | null {
   if (!panelState?.preview.open || !runtimeHealth) return null;
 
@@ -172,6 +153,7 @@ export function buildRuntimeMetric(
     const latencyLabel =
       typeof runtimeHealth.latencyMs === 'number' ? ` (${runtimeHealth.latencyMs}ms)` : '';
     return {
+      id: 'runtime-reachable',
       icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />,
       label: `Runtime online${latencyLabel}`,
     };
@@ -179,6 +161,7 @@ export function buildRuntimeMetric(
 
   if (runtimeHealth.status === 'checking') {
     return {
+      id: 'runtime-checking',
       icon: <Clock size={12} style={{ color: STATUS_WARNING }} />,
       label: 'Checking runtime',
     };
@@ -186,6 +169,7 @@ export function buildRuntimeMetric(
 
   if (runtimeHealth.status === 'idle') {
     return {
+      id: 'runtime-idle',
       icon: <Clock size={12} />,
       label:
         runtimeReadinessStatus === 'ready'
@@ -197,6 +181,7 @@ export function buildRuntimeMetric(
   }
 
   return {
+    id: 'runtime-error',
     icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
     label:
       runtimeHealth.status === 'unhealthy'
@@ -213,12 +198,13 @@ export function formatBranchLabel(branch: string | null): string | null {
   return trimmed.length > 28 ? `${trimmed.slice(0, 25)}...` : trimmed;
 }
 
-export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTruth | null): StatusMetricDescriptor[] {
+export function buildSourceControlMetrics(sourceControl?: any | null): StatusMetricDescriptor[] {
   if (!sourceControl) return [];
 
   if (sourceControl.state === 'loading' || sourceControl.state === 'idle') {
     return [
       {
+        id: 'git-loading',
         icon: <Clock size={12} />,
         label: 'Checking Git',
       },
@@ -228,6 +214,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
   if (sourceControl.state !== 'ready') {
     return [
       {
+        id: 'git-unavailable',
         icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
         label: 'Git unavailable',
       },
@@ -238,6 +225,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
   const branchLabel = formatBranchLabel(sourceControl.branch);
   if (branchLabel) {
     metrics.push({
+      id: 'git-branch',
       icon: <GitBranch size={12} />,
       label: branchLabel,
     });
@@ -248,6 +236,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
       .filter(Boolean)
       .join(' ');
     metrics.push({
+      id: 'git-sync',
       icon: <GitBranch size={12} />,
       label: `Sync ${syncState}`,
     });
@@ -255,6 +244,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
 
   if (sourceControl.conflicted > 0) {
     metrics.push({
+      id: 'git-conflicts',
       icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
       label: `${sourceControl.conflicted} conflict${sourceControl.conflicted === 1 ? '' : 's'}`,
     });
@@ -269,6 +259,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
     ].filter(Boolean);
 
     metrics.push({
+      id: 'git-dirty',
       icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
       label: parts.length > 0 ? parts.join(' · ') : `${sourceControl.changedCount} change${sourceControl.changedCount === 1 ? '' : 's'}`,
     });
@@ -276,6 +267,7 @@ export function buildSourceControlMetrics(sourceControl?: ShellSourceControlTrut
   }
 
   metrics.push({
+    id: 'git-clean',
     icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />,
     label: 'Git clean',
   });

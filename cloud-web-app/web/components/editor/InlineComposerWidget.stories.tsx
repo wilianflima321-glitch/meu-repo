@@ -16,7 +16,7 @@ export const Empty: Story = {
     language: 'typescript',
     filePath: 'lib/engine/physics-engine.ts',
     line: 42,
-    onSubmit: async (prompt) => {
+    onSubmit: async (prompt: string) => {
       await new Promise((r) => setTimeout(r, 1500));
       return `// Generated: ${prompt}`;
     },

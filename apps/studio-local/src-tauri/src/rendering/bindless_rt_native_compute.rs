@@ -1,7 +1,4 @@
-use std::sync::Arc;
-use wgpu::util::DeviceExt;
 use crate::wgpu_renderer::WgpuRenderer;
-use aethel_kernel_rust::vulkan_bindless_ray_tracer::{VulkanBindlessRayTracerSoA, MAX_TLAS_INSTANCES};
 
 pub struct NativeBindlessRtCompute {
     pipeline: wgpu::ComputePipeline,
@@ -72,6 +69,7 @@ impl NativeBindlessRtCompute {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "raygen",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
 
         Self {

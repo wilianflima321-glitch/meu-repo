@@ -18,6 +18,7 @@ pub struct Camera {
     pub zfar: f32,
 }
 
+impl Camera {
     pub fn build_view_matrix(&self) -> Mat4 {
         Mat4::look_at_rh(self.eye, self.target, self.up)
     }
@@ -39,7 +40,7 @@ pub struct Camera {
         let r3 = vp.row(2);
         let r4 = vp.row(3);
 
-        let mut planes = [
+        let planes = [
             (r4 + r1).normalize(), // Left
             (r4 - r1).normalize(), // Right
             (r4 + r2).normalize(), // Bottom

@@ -23,6 +23,7 @@ import { logger } from '@/lib/observability/logger';
 
 import { prisma } from './db';
 import { Prisma } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import type { CreditCheckResult, CreditDeduction, CreditMetadata, CreditReservation } from './credit-wallet-types';
 import {
   clampNonNegative,
@@ -39,7 +40,12 @@ export {
 } from './credit-wallet-costs';
 export type { AIOperationType } from './credit-wallet-costs';
 export type { CreditCheckResult, CreditDeduction, CreditMetadata, CreditReservation } from './credit-wallet-types';
-export { CreditWallet } from './credit-wallet-legacy';
+
+/**
+ * Transaction-safe Prisma handle used by every wallet read/write helper.
+ * Accepts the singleton client or a transaction-scoped client (Prisma.TransactionClient).
+ */
+export type CreditPrismaClient = PrismaClient | Prisma.TransactionClient;
 
 /**
  * Obtém saldo atual de créditos do usuário — O(1) via User.creditBalance (6B.6).
@@ -47,7 +53,7 @@ export { CreditWallet } from './credit-wallet-legacy';
  */
 export async function computeCreditBalanceFromLedger(
   userId: string,
-  client: any = prisma
+  client: CreditPrismaClient = prisma
 ): Promise<number> {
   if (!userId) return 0;
   const now = new Date();
@@ -92,7 +98,7 @@ export async function computeCreditBalanceFromLedger(
 async function writeCreditBalanceCache(
   userId: string,
   balance: number,
-  client: any = prisma
+  client: CreditPrismaClient = prisma
 ): Promise<number> {
   const normalized = Math.trunc(balance);
   await client.user.update({
@@ -110,7 +116,7 @@ async function writeCreditBalanceCache(
  */
 export async function syncCreditBalanceFromLedger(
   userId: string,
-  client: any = prisma
+  client: CreditPrismaClient = prisma
 ): Promise<number> {
   if (!userId) return 0;
   const balance = await computeCreditBalanceFromLedger(userId, client);
@@ -123,7 +129,7 @@ export async function syncCreditBalanceFromLedger(
 export async function applyCreditBalanceDelta(
   userId: string,
   delta: number,
-  client: any = prisma
+  client: CreditPrismaClient = prisma
 ): Promise<number> {
   if (!userId || delta === 0) {
     return getCreditBalance(userId, client);
@@ -145,7 +151,7 @@ export async function applyCreditBalanceDelta(
   return writeCreditBalanceCache(userId, next, client);
 }
 
-export async function getCreditBalance(userId: string, client: any = prisma): Promise<number> {
+export async function getCreditBalance(userId: string, client: CreditPrismaClient = prisma): Promise<number> {
   if (!userId) return 0;
 
   const row = await client.user.findUnique({
@@ -165,7 +171,7 @@ export async function checkCreditQuota(
   userId: string,
   operationType: AIOperationType,
   estimatedCost: number,
-  client: any = prisma
+  client: CreditPrismaClient = prisma
 ): Promise<CreditCheckResult> {
   const normalizedCost = clampNonNegative(estimatedCost);
   const balance = await getCreditBalance(userId, client);

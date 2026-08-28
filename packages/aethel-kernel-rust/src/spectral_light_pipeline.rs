@@ -8,6 +8,13 @@
 //! absorption darkens vs white albedo, thicker flesh lowers T, same seed →
 //! same, no NaN.
 //!
+//! **Deepen (2026-08-20):** adds the industry-standard color-QA surface on top
+//! of the spectral path — **CIEDE2000 ΔE** (Sharma/Wu/Dalal 2005), CIE76 ΔE,
+//! CIELAB under a reference white, **Bradford chromatic adaptation** (XYZ under
+//! any illuminant → D65) and **Correlated Color Temperature** (McCamy). Assets
+//! now get a *quantifiable color-fidelity metric* (ΔE00 vs reference) rivaling
+//! studio color pipelines and Unreal's color management.
+//!
 //! Honesty probe `spectral_light_pipeline_ready` /
 //! `spectralLightPipelineReady` is **distinct** from gj
 //! `spectralDispersionCausticsReady`, gd `chromaticGlassRefractionReady`,
@@ -30,6 +37,25 @@ pub const SOAK_EPS: f32 = 1e-5;
 /// Fingerprint seed ("gosl").
 const FP_SEED: u64 = 0x676F_736C;
 const EPS: f32 = 1e-6;
+
+/// Reference white — D65 (IEC 61966-2-1), normalized Y = 1.
+pub const D65_WHITE_XYZ: [f32; 3] = [0.950_47, 1.0, 1.088_83];
+/// Reference white — equal energy E.
+pub const E_WHITE_XYZ: [f32; 3] = [1.0, 1.0, 1.0];
+/// Bradford cone-response matrix (chromatic adaptation).
+pub const BRADFORD_MAT: [[f32; 3]; 3] = [
+    [0.8951, 0.2664, -0.1614],
+    [-0.7502, 1.7135, 0.0367],
+    [0.0389, -0.0685, 1.0296],
+];
+/// Inverse Bradford matrix (cone → XYZ).
+pub const BRADFORD_INV_MAT: [[f32; 3]; 3] = [
+    [0.986_99, -0.147_05, 0.159_96],
+    [0.432_31, 0.518_36, 0.049_29],
+    [-0.008_53, 0.040_04, 0.968_49],
+];
+/// CIEDE2000 reference-white Lab (D65): L*=100, neutral chroma.
+pub const LAB_WHITE_D65: [f32; 3] = [100.0, 0.0, 0.0];
 
 /// CIE XYZ integration scale (matches discrete Δλ nm).
 #[inline]
@@ -173,6 +199,130 @@ impl SpectralLightPipeline {
             non_negative,
         }
     }
+
+    /// CIE XYZ → CIELAB under a reference white (D65 by default).
+    pub fn xyz_to_lab(xyz: [f32; 3], white: [f32; 3]) -> [f32; 3] {
+        let f = |t: f32| {
+            const D: f32 = 6.0 / 29.0;
+            if t > D * D * D {
+                t.cbrt()
+            } else {
+                t / (3.0 * D * D) + 4.0 / 29.0
+            }
+        };
+        let fx = f((xyz[0] / white[0].max(EPS)).max(0.0));
+        let fy = f((xyz[1] / white[1].max(EPS)).max(0.0));
+        let fz = f((xyz[2] / white[2].max(EPS)).max(0.0));
+        [116.0 * fy - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz)]
+    }
+
+    /// CIE76 ΔE — Euclidean distance in CIELAB.
+    pub fn delta_e_76(a: [f32; 3], b: [f32; 3]) -> f32 {
+        let dl = a[0] - b[0];
+        let da = a[1] - b[1];
+        let db = a[2] - b[2];
+        (dl * dl + da * da + db * db).sqrt()
+    }
+
+    /// CIEDE2000 ΔE00 — the industry-standard perceptually-uniform color
+    /// difference metric (Sharma/Wu/Dalal 2005). Non-negative, symmetric,
+    /// zero iff identical. The asset color-QA gate.
+    pub fn delta_e_2000(a: [f32; 3], b: [f32; 3]) -> f32 {
+        let (l1, a1, b1) = (a[0], a[1], a[2]);
+        let (l2, a2, b2) = (b[0], b[1], b[2]);
+        let c1 = (a1 * a1 + b1 * b1).sqrt();
+        let c2 = (a2 * a2 + b2 * b2).sqrt();
+        let cbar = 0.5 * (c1 + c2);
+        let cbar7 = cbar.powi(7);
+        let g = 0.5 * (1.0 - (cbar7 / (cbar7 + 25.0f32.powi(7))).sqrt());
+        let a1p = (1.0 + g) * a1;
+        let a2p = (1.0 + g) * a2;
+        let c1p = (a1p * a1p + b1 * b1).sqrt();
+        let c2p = (a2p * a2p + b2 * b2).sqrt();
+        let h1p = hue_deg(a1p, b1);
+        let h2p = hue_deg(a2p, b2);
+        let dlp = l2 - l1;
+        let dcp = c2p - c1p;
+        let dhp = {
+            let cp = c1p * c2p;
+            if cp.abs() < EPS {
+                0.0
+            } else {
+                let d = h2p - h1p;
+                if d.abs() <= 180.0 {
+                    d
+                } else if d > 180.0 {
+                    d - 360.0
+                } else {
+                    d + 360.0
+                }
+            }
+        };
+        // ΔH' = 2·√(C1'·C2')·sin(Δh'/2) — the half-angle is mandatory
+        // (CIEDE2000 Sharma 2005); a full-angle sine inflates the hue
+        // difference and corrupts the reference pairs.
+        let dhp_ = 2.0 * (c1p * c2p).sqrt() * deg_to_rad(dhp / 2.0).sin();
+        let lbarp = 0.5 * (l1 + l2);
+        let cbarp = 0.5 * (c1p + c2p);
+        let hbarp = {
+            let cp = c1p * c2p;
+            if cp.abs() < EPS {
+                h1p + h2p
+            } else if (h1p - h2p).abs() <= 180.0 {
+                0.5 * (h1p + h2p)
+            } else if h1p + h2p < 360.0 {
+                0.5 * (h1p + h2p + 360.0)
+            } else {
+                0.5 * (h1p + h2p - 360.0)
+            }
+        };
+        let t = 1.0 - 0.17 * deg_to_rad(hbarp - 30.0).cos()
+            + 0.24 * deg_to_rad(2.0 * hbarp).cos()
+            + 0.32 * deg_to_rad(3.0 * hbarp + 6.0).cos()
+            - 0.20 * deg_to_rad(4.0 * hbarp - 63.0).cos();
+        let dtheta = 30.0 * (-((hbarp - 275.0) / 25.0).powi(2)).exp();
+        let cbarp7 = cbarp.powi(7);
+        let rc = 2.0 * (cbarp7 / (cbarp7 + 25.0f32.powi(7))).sqrt();
+        let sl = 1.0 + 0.015 * (lbarp - 50.0).powi(2) / (20.0 + (lbarp - 50.0).powi(2)).sqrt();
+        let sc = 1.0 + 0.045 * cbarp;
+        let sh = 1.0 + 0.015 * cbarp * t;
+        let rt = -deg_to_rad(2.0 * dtheta).sin() * rc;
+        let dlp_sl = dlp / sl;
+        let dcp_sc = dcp / sc;
+        let dhp_sh = dhp_ / sh;
+        (dlp_sl * dlp_sl + dcp_sc * dcp_sc + dhp_sh * dhp_sh + rt * dcp_sc * dhp_sh).sqrt()
+    }
+
+    /// Bradford chromatic adaptation: XYZ under `src_white` → XYZ under
+    /// `dst_white` (Von Kries in Bradford cone space).
+    pub fn bradford_adapt(xyz: [f32; 3], src_white: [f32; 3], dst_white: [f32; 3]) -> [f32; 3] {
+        let src_cone = bradford_mul(src_white);
+        let dst_cone = bradford_mul(dst_white);
+        let cone = bradford_mul(xyz);
+        let scaled = [
+            cone[0] * (dst_cone[0] / src_cone[0].max(EPS)),
+            cone[1] * (dst_cone[1] / src_cone[1].max(EPS)),
+            cone[2] * (dst_cone[2] / src_cone[2].max(EPS)),
+        ];
+        bradford_inv_mul(scaled)
+    }
+
+    /// Correlated color temperature (McCamy 1992) from chromaticity (x, y).
+    /// Valid near the Planckian locus (≈2000K–12500K).
+    pub fn cct_from_xy(x: f32, y: f32) -> f32 {
+        let n = (x - 0.3320) / (y - 0.1858).max(EPS);
+        -437.0 * n * n * n + 3601.0 * n * n - 6861.0 * n + 5514.31
+    }
+
+    /// Chromaticity (x, y) from CIE XYZ (sum ≤ 0 fail-closed to (0, 0)).
+    pub fn xy_from_xyz(xyz: [f32; 3]) -> (f32, f32) {
+        let s = xyz[0] + xyz[1] + xyz[2];
+        if s > EPS {
+            (xyz[0] / s, xyz[1] / s)
+        } else {
+            (0.0, 0.0)
+        }
+    }
 }
 
 /// Beer–Lambert flesh diffusion companion (was fake constant theater).
@@ -220,6 +370,41 @@ fn xyz_to_linear_srgb(xyz: [f32; 3]) -> [f32; 3] {
         3.2406 * x - 1.5372 * y - 0.4986 * z,
         -0.9689 * x + 1.8758 * y + 0.0415 * z,
         0.0557 * x - 0.2040 * y + 1.0570 * z,
+    ]
+}
+
+/// Hue angle in degrees (atan2), remapped to [0°, 360°).
+#[inline]
+fn hue_deg(a: f32, b: f32) -> f32 {
+    let mut h = b.atan2(a).to_degrees();
+    if h < 0.0 {
+        h += 360.0;
+    }
+    h
+}
+
+#[inline]
+fn deg_to_rad(d: f32) -> f32 {
+    d * std::f32::consts::PI / 180.0
+}
+
+#[inline]
+fn bradford_mul(v: [f32; 3]) -> [f32; 3] {
+    let m = BRADFORD_MAT;
+    [
+        m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+        m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+        m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
+    ]
+}
+
+#[inline]
+fn bradford_inv_mul(v: [f32; 3]) -> [f32; 3] {
+    let m = BRADFORD_INV_MAT;
+    [
+        m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+        m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+        m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
     ]
 }
 
@@ -535,5 +720,73 @@ mod tests {
         let b = run_spectral_light_pipeline_soak();
         assert_eq!(a.fingerprint, b.fingerprint);
         assert!(a.fingerprint != 0);
+    }
+
+    #[test]
+    fn d65_white_is_neutral_in_lab() {
+        let lab = SpectralLightPipeline::xyz_to_lab(D65_WHITE_XYZ, D65_WHITE_XYZ);
+        for i in 0..3 {
+            assert!((lab[i] - LAB_WHITE_D65[i]).abs() < 1e-3, "channel {i}: {}", lab[i]);
+        }
+    }
+
+    #[test]
+    fn delta_e_2000_matches_sharma_reference_pairs() {
+        // Canonical Sharma/Wu/Dalal CIEDE2000 test data (Table 1).
+        let ref_blue = [50.0000, 0.0000, -82.7485];
+        let pair1 = [50.0000, 2.6772, -79.7751];
+        let d1 = SpectralLightPipeline::delta_e_2000(pair1, ref_blue);
+        assert!((d1 - 2.0425).abs() < 1e-3, "ΔE00 pair1 = {d1}");
+        let pair4 = [50.0000, -1.3802, -84.2814];
+        let d4 = SpectralLightPipeline::delta_e_2000(pair4, ref_blue);
+        assert!((d4 - 1.0000).abs() < 1e-3, "ΔE00 pair4 = {d4}");
+    }
+
+    #[test]
+    fn delta_e_metrics_are_zero_identical_and_non_negative() {
+        let lab = [50.0, 10.0, -20.0];
+        assert_eq!(SpectralLightPipeline::delta_e_2000(lab, lab), 0.0);
+        assert_eq!(SpectralLightPipeline::delta_e_76(lab, lab), 0.0);
+        let other = [60.0, -5.0, 12.0];
+        let d00 = SpectralLightPipeline::delta_e_2000(lab, other);
+        let d76 = SpectralLightPipeline::delta_e_76(lab, other);
+        assert!(d00.is_finite() && d00 >= 0.0);
+        assert!(d76.is_finite() && d76 >= 0.0);
+        assert_eq!(
+            SpectralLightPipeline::delta_e_2000(lab, other),
+            SpectralLightPipeline::delta_e_2000(other, lab)
+        );
+    }
+
+    #[test]
+    fn bradford_adaptation_maps_white_to_white_and_round_trips() {
+        let e = SpectralLightPipeline::bradford_adapt(D65_WHITE_XYZ, D65_WHITE_XYZ, E_WHITE_XYZ);
+        for i in 0..3 {
+            assert!((e[i] - E_WHITE_XYZ[i]).abs() < 1e-3, "channel {i}: {}", e[i]);
+        }
+        let ident =
+            SpectralLightPipeline::bradford_adapt(D65_WHITE_XYZ, D65_WHITE_XYZ, D65_WHITE_XYZ);
+        for i in 0..3 {
+            assert!((ident[i] - D65_WHITE_XYZ[i]).abs() < 1e-3);
+        }
+        let back = SpectralLightPipeline::bradford_adapt(e, E_WHITE_XYZ, D65_WHITE_XYZ);
+        for i in 0..3 {
+            assert!((back[i] - D65_WHITE_XYZ[i]).abs() < 1e-3, "rt {i}: {}", back[i]);
+        }
+    }
+
+    #[test]
+    fn cct_matches_planckian_locus_reference_points() {
+        // Canonical blackbody chromaticities (Planckian locus).
+        let warm = SpectralLightPipeline::cct_from_xy(0.4370, 0.4040); // ≈3000K
+        let d65 = SpectralLightPipeline::cct_from_xy(0.3127, 0.3290); // ≈6504K
+        let cool = SpectralLightPipeline::cct_from_xy(0.2790, 0.2860); // ≈10000K
+        assert!((warm - 3000.0).abs() < 120.0, "warm = {warm}");
+        assert!((d65 - 6504.0).abs() < 120.0, "d65 = {d65}");
+        assert!((cool - 10000.0).abs() < 250.0, "cool = {cool}");
+        assert!(warm < d65 && d65 < cool);
+        // D65 white chromaticity via xy_from_xyz.
+        let (x, y) = SpectralLightPipeline::xy_from_xyz(D65_WHITE_XYZ);
+        assert!((x - 0.3127).abs() < 1e-3 && (y - 0.3290).abs() < 1e-3);
     }
 }

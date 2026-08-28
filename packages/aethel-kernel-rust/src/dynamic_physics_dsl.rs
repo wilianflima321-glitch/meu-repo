@@ -991,4 +991,49 @@ mod tests {
         assert!(fq.metabolic_memory_ready);
         assert!(gc.dynamic_physics_dsl_ready);
     }
+
+    #[test]
+    fn dsl_parse_apply_force_valid_tokens() {
+        let program = "apply_force 0 10.0 0.0 -5.0\nintegrate 0.016";
+        let compiled = DynamicPhysicsDsl::parse_program(program).expect("valid program must compile");
+        assert_eq!(compiled.len(), 2);
+        assert_eq!(
+            compiled[0],
+            Stmt::ApplyForce {
+                body: 0,
+                force: [10.0, 0.0, -5.0],
+            }
+        );
+        assert_eq!(compiled[1], Stmt::Integrate { dt: 0.016 });
+    }
+
+    #[test]
+    fn dsl_eval_newton_second_law_f_equals_ma() {
+        let mut world = BodySoA::with_capacity(1, 0x123);
+        world.mass[0] = 2.0; // 2 kg
+        world.vel_x[0] = 0.0;
+
+        let stmts = vec![
+            Stmt::ApplyForce {
+                body: 0,
+                force: [10.0, 0.0, 0.0], // 10 N in +X
+            },
+            Stmt::Integrate { dt: 0.1 }, // 0.1 s -> dv = (10/2)*0.1 = 0.5 m/s
+        ];
+
+        DynamicPhysicsDsl::eval(&mut world, &stmts).expect("eval must succeed");
+        assert!((world.vel_x[0] - 0.5).abs() < 1e-4, "vx={}", world.vel_x[0]);
+    }
+
+    #[test]
+    fn dsl_fail_closed_on_oob_body_index() {
+        let mut world = BodySoA::with_capacity(2, 0x123);
+        let stmts = vec![Stmt::ApplyForce {
+            body: 99, // Out of bounds
+            force: [1.0, 0.0, 0.0],
+        }];
+
+        let res = DynamicPhysicsDsl::eval(&mut world, &stmts);
+        assert!(res.is_err());
+    }
 }

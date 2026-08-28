@@ -22,6 +22,26 @@ export type BlueprintFlowNode = Node<BlueprintNodeData, 'blueprintNode'>;
 // CUSTOM NODE COMPONENT
 // ============================================================================
 
+function getPinColor(type?: string) {
+  switch (type) {
+    case 'exec':
+      return { border: 'var(--aethel-text-primary)', bg: 'transparent', isExec: true }
+    case 'boolean':
+      return { border: 'var(--aethel-error)', bg: 'color-mix(in srgb, var(--aethel-error) 40%, transparent)', isExec: false }
+    case 'number':
+    case 'float':
+    case 'int':
+      return { border: 'var(--aethel-success)', bg: 'color-mix(in srgb, var(--aethel-success) 40%, transparent)', isExec: false }
+    case 'string':
+      return { border: 'var(--aethel-warning)', bg: 'color-mix(in srgb, var(--aethel-warning) 40%, transparent)', isExec: false }
+    case 'vector':
+    case 'transform':
+      return { border: 'var(--aethel-info)', bg: 'color-mix(in srgb, var(--aethel-info) 40%, transparent)', isExec: false }
+    default:
+      return { border: 'var(--aethel-primary)', bg: 'color-mix(in srgb, var(--aethel-primary) 40%, transparent)', isExec: false }
+  }
+}
+
 const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
   const definition = data.definition;
   const isEvent = definition?.isEvent;
@@ -31,7 +51,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
     <div
       className={`
         min-w-[180px] rounded-lg shadow-lg border-2
-        ${selected ? 'ring-2 ring-blue-500' : ''}
+        ${selected ? 'ring-2 ring-[var(--aethel-primary)] shadow-[0_0_15px_rgba(59,130,246,0.25)]' : ''}
         ${isEvent ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'border-[var(--aethel-border-secondary)]'}
       `}
       style={{ backgroundColor: 'var(--aethel-surface-primary)' }}
@@ -50,44 +70,40 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
       <div className="flex">
         {/* Input pins */}
         <div className="flex flex-col py-2 px-1 min-w-[80px]">
-          {definition?.inputs.map((input, i) => (
-            <div key={input.id} className="flex items-center gap-1 py-1 relative">
-              <Handle
-                type="target"
-                position={Position.Left}
-                id={input.id}
-                className={`
-                  w-3 h-3 rounded-full border-2
-                  ${input.type === 'exec'
-                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
-                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
-                `}
-                style={{ left: -6 }}
-              />
-              <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
-            </div>
-          ))}
+          {definition?.inputs.map((input, i) => {
+            const pin = getPinColor(input.type)
+            return (
+              <div key={input.id} className="flex items-center gap-1 py-1 relative">
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id={input.id}
+                  className={`w-3 h-3 rounded-full border-2 ${pin.isExec ? 'rounded-none rotate-45' : ''}`}
+                  style={{ left: -6, borderColor: pin.border, backgroundColor: pin.bg }}
+                />
+                <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
+              </div>
+            )
+          })}
         </div>
 
         {/* Output pins */}
         <div className="flex flex-col py-2 px-1 min-w-[80px] items-end ml-auto">
-          {definition?.outputs.map((output, i) => (
-            <div key={output.id} className="flex items-center gap-1 py-1 relative">
-              <span className="text-xs text-[var(--aethel-text-secondary)] mr-2">{output.name}</span>
-              <Handle
-                type="source"
-                position={Position.Right}
-                id={output.id}
-                className={`
-                  w-3 h-3 rounded-full border-2
-                  ${output.type === 'exec'
-                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
-                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
-                `}
-                style={{ right: -6 }}
-              />
-            </div>
-          ))}
+          {definition?.outputs.map((output, i) => {
+            const pin = getPinColor(output.type)
+            return (
+              <div key={output.id} className="flex items-center gap-1 py-1 relative">
+                <span className="text-xs text-[var(--aethel-text-secondary)] mr-2">{output.name}</span>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={output.id}
+                  className={`w-3 h-3 rounded-full border-2 ${pin.isExec ? 'rounded-none rotate-45' : ''}`}
+                  style={{ right: -6, borderColor: pin.border, backgroundColor: pin.bg }}
+                />
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
@@ -270,7 +286,7 @@ export const ComponentsPanel: React.FC<{
           `}
           style={{ paddingLeft: `${8 + depth * 16}px` }}
         >
-          {comp.isRootComponent ? <Package className="w-3.5 h-3.5 text-indigo-400 shrink-0" /> : <Wrench className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
+          {comp.isRootComponent ? <Package className="w-3.5 h-3.5 text-[var(--aethel-primary)] shrink-0" /> : <Wrench className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
           <span>{comp.name}</span>
           <span className="text-[var(--aethel-text-secondary)] ml-auto">{comp.type}</span>
         </div>

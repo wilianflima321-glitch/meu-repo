@@ -318,7 +318,7 @@ mod tests {
                 ..
             }
         ));
-        assert!(!LIVE_TRADING_ENABLED);
+        const { assert!(!LIVE_TRADING_ENABLED); }
     }
 
     #[test]

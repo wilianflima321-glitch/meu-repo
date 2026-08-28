@@ -248,10 +248,42 @@ export class VisualScriptSystem implements System {
     this.contextLog(`playSound sound=${sound} volume=${volume} loop=${loop}`);
   }
 
+  private stopSound(sound: string): void {
+    // Audio bridge is deferred (playSound is likewise deferred); keep explicit
+    // traceable behavior instead of a silent no-op.
+    this.contextLog(`stopSound sound=${sound}`);
+  }
+
   private spawnObject(prefab: string, position: Vector3): null {
     // Prefab spawning requires runtime prefab registry (P1+).
     this.contextLog(`spawn requested prefab=${prefab} position=${JSON.stringify(position)}`);
     return null;
+  }
+
+  private destroyObject(target: unknown, delay: number): void {
+    const entity = this.resolveEntityTarget(target);
+    if (entity && this.world) {
+      this.world.destroy(entity, Math.max(0, Number(delay) || 0));
+      this.contextLog(`destroy scheduled target=${entity.id} delay=${delay}`);
+      return;
+    }
+    // Fail-closed: an unresolvable target is never silently ignored — the
+    // script author sees a concrete trace that no entity was removed.
+    this.contextLog(`destroy target not resolved (${typeof target}) — no entity removed`);
+  }
+
+  private resolveEntityTarget(target: unknown): Entity | undefined {
+    if (!target || !this.world) return undefined;
+    if (typeof target === 'string') {
+      return this.world.getEntity(target) ?? this.world.findEntity(target);
+    }
+    if (typeof target === 'object') {
+      const candidate = target as { id?: unknown };
+      if (typeof candidate.id === 'string') {
+        return this.world.getEntity(candidate.id);
+      }
+    }
+    return undefined;
   }
 
   private contextLog(message: string): void {
@@ -291,15 +323,13 @@ export class VisualScriptSystem implements System {
       
       audio: {
         playSound: (sound: any, volume = 1, loop = false) => this.playSound(sound, volume, loop),
-        stopSound: (sound: any) => {
-          log.info('[VisualScript] stopSound:', sound);
-        },
+        stopSound: (sound: any) => this.stopSound(sound),
       },
       
       objects: {
         spawn: (prefab: any, position: any) => this.spawnObject(prefab, position),
         destroy: (target: any, delay = 0) => {
-          log.info('[VisualScript] destroy:', target, 'delay:', delay);
+          this.destroyObject(target, delay);
         },
         find: (name: any) => {
           // Search in scene

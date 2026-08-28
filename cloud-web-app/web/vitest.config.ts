@@ -19,6 +19,16 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    // Windows ESM module-identity workaround: the default worker pools mint
+    // mixed drive-letter case URLs (file:///E: vs file:///e:) for
+    // @vitest/runner, which loads chunk-artifact.js as two module instances
+    // and crashes collection with "Vitest failed to find the runner". The VM
+    // pool routes module loading through the patched VitestModuleEvaluator
+    // (scripts/patch-vitest-win-drive-case.mjs) whose URL canonicalization is
+    // proven correct on win32. Linux CI keeps the default pool — the
+    // workaround is Windows-only by construction and must not silently change
+    // the module-execution semantics of the CI suite.
+    pool: process.platform === 'win32' ? 'vmThreads' : undefined,
     include: [
       '**/*.test.{ts,tsx}',
       '**/*.spec.{ts,tsx}',
@@ -114,12 +124,43 @@ export default defineConfig({
     hookTimeout: 10000,
     server: {
       deps: {
+        // Only the websocket runtime (which exercises native `.ts` requires
+        // through createRequire) needs to be inlined through Vite's resolver.
+        // react/react-dom must NOT be inlined: forcing them through Vite's
+        // ESM transform creates a SECOND module instance because react-dom's
+        // CJS bundle still `require('react')`s natively, so the reconciler's
+        // ReactCurrentDispatcher (set on the inlined react) is invisible to
+        // the component's imported react -> `Cannot read properties of null
+        // (reading 'useContext')`. Externalizing lets Node's single CJS cache
+        // serve both the component `import` and react-dom's `require`, so
+        // there is exactly ONE react/react-dom 18.3.1 instance.
         inline: [/lib\/server\/websocket/],
       },
     },
   },
   resolve: {
+    // See the `server.deps.inline` comment above: dedupe alone is not
+    // sufficient because externalized CJS deps bypass Vite's resolver, so
+    // pair it with an explicit alias to the hoisted root copy
+    // (`../../node_modules/react*`) — the ONLY copy in this monorepo.
+    dedupe: ['react', 'react-dom'],
     alias: {
+      'react/jsx-dev-runtime': resolve(__dirname, '../../node_modules/react/jsx-dev-runtime.js'),
+      'react/jsx-runtime': resolve(__dirname, '../../node_modules/react/jsx-runtime.js'),
+      'react-dom/client': resolve(__dirname, '../../node_modules/react-dom/client.js'),
+      'react-dom/test-utils': resolve(__dirname, '../../node_modules/react-dom/test-utils.js'),
+      'react-dom': resolve(__dirname, '../../node_modules/react-dom/index.js'),
+      react: resolve(__dirname, '../../node_modules/react/index.js'),
+      // `next/navigation` must resolve to ONE canonical copy for every importer.
+      // `@aethel/ide-ui` declares `next` as a direct dependency, so it carries a
+      // NESTED `packages/ide-ui/node_modules/next` copy; Vitest keys
+      // `vi.mock('next/navigation')` by the RESOLVED module path, so a component
+      // imported through the `@aethel/ide-ui` alias would resolve the nested
+      // copy while the mock is keyed to the root copy — the mock silently
+      // misses and the REAL `useSearchParams` renders null params under jsdom
+      // (WorkbenchSidebar renders the general lane). Pinning the subpath to the
+      // single hoisted root copy (like react/react-dom above) unifies resolution.
+      'next/navigation': resolve(__dirname, '../../node_modules/next/navigation.js'),
       // Mirrors `tsconfig.json`'s `paths` — Vite/Vitest does not read tsconfig
       // `paths` on its own, so without these aliases any test that
       // transitively imports an `@aethel/*` workspace package (e.g.

@@ -41,6 +41,27 @@ describe('G.% Critic 15→30 checklist', () => {
     expect(c.evidenceFingerprint).toMatch(/^[a-f0-9]{16}$/)
   })
 
+  it('accepts a real deterministic 16-hex soak fingerprint as held (non-theater)', () => {
+    // Exact shape emitted by the Rust engine_owned_present_loop FNV-1a soak
+    // evidence fingerprint (16 lowercase hex — Critic gate #3 non-theater).
+    const fp = 'c3f0d4a9e1b27a6d'
+    const c = evaluateG3Band15To30CriticChecklist({
+      soak60sNoPassDrop: true,
+      soakDurationSec: 61,
+      soakEvidenceFingerprint: fp,
+    })
+    const soak = c.gates.find((g) => g.id === 'soak_60s_frame_graph')
+    expect(soak?.status).toBe('held')
+    expect(soak?.evidenceFingerprint).toBe(fp)
+    expect(c.failCount).toBe(0)
+    // Only 3B.2 harness + CapScore lock pass; PP-03/session/soak/dual-stack/
+    // changelog stay held for the human Critic; band never auto-passes.
+    expect(c.passCount).toBe(2)
+    expect(c.heldCount).toBeGreaterThanOrEqual(5)
+    expect(c.g3Band15To30Passed).toBe(false)
+    expect(c.g3CodeDepthPercent).toBe(15)
+  })
+
   it('fail-closes theater soak fingerprint; refuses Progress % bump always', () => {
     const theater = evaluateG3Band15To30CriticChecklist({
       soak60sNoPassDrop: true,

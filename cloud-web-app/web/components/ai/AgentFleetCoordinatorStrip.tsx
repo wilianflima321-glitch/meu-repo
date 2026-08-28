@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { ChevronDown, Loader2 } from 'lucide-react'
 
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import type { AgentFleetMode } from '@/lib/production/agent-fleet-session'
@@ -31,6 +32,88 @@ import type {
 } from './AgentFleetCoordinatorStrip.types'
 
 export { mapFleetAgentToCommandAgentId } from './AgentFleetCoordinatorStrip.helpers'
+
+function CustomFleetSelect({
+  id,
+  value,
+  options,
+  onChange,
+  disabled,
+  ariaLabel,
+  className,
+}: {
+  id: string
+  value: string
+  options: { label: string; value: string }[]
+  onChange: (value: string) => void
+  disabled?: boolean
+  ariaLabel?: string
+  className?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const selectedLabel = options.find((o) => o.value === value)?.label || value
+
+  return (
+    <div
+      className="relative inline-block"
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
+      }}
+    >
+      <button
+        id={id}
+        type="button"
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className={cn(
+          'flex h-8 items-center justify-between gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-2.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden="true" />
+      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1 max-h-60 min-w-full w-max overflow-auto rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-elevated)] p-1 shadow-xl backdrop-blur-xl"
+        >
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              role="option"
+              aria-selected={value === opt.value}
+              tabIndex={0}
+              onClick={() => {
+                onChange(opt.value)
+                setOpen(false)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onChange(opt.value)
+                  setOpen(false)
+                }
+              }}
+              className={cn(
+                'cursor-pointer rounded-md px-2 py-1.5 text-xs transition focus-visible:outline-none',
+                value === opt.value
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] font-semibold text-[var(--aethel-primary-light)]'
+                  : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
+              )}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 
 export function AgentFleetCoordinatorStrip({
   projectId,
@@ -185,6 +268,9 @@ export function AgentFleetCoordinatorStrip({
   const topMembers = snapshot.members.filter((member, index, members) => {
     return members.findIndex((candidate) => candidate.agent === member.agent) === index
   }).slice(0, 5)
+  const overflowCount = Math.max(0, snapshot.members.filter((member, index, members) =>
+    members.findIndex((candidate) => candidate.agent === member.agent) === index
+  ).length - 5)
   const coordinatorOptions = uniqueNames(snapshot.members.map((member) => member.agent))
   const lockCoordination = lockPayload?.snapshot ?? snapshot.lockCoordination
   const lockOwners = lockCoordination.owners.slice(0, 4)
@@ -203,42 +289,30 @@ export function AgentFleetCoordinatorStrip({
         <label className="sr-only" htmlFor="agent-fleet-coordinator">
           Coordinator
         </label>
-        <select
+        <CustomFleetSelect
           id="agent-fleet-coordinator"
           value={snapshot.centralAgent}
-          onChange={(event) => {
-            const centralAgent = event.target.value
+          onChange={(centralAgent) => {
             onSelectAgentId(mapFleetAgentToCommandAgentId(centralAgent))
             updateFleet({ centralAgent })
           }}
-          className={`h-8 max-w-[220px] rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-2 text-[var(--aethel-text-secondary)] ${focusClass}`}
-          aria-label="Choose senior coordinator agent"
+          options={coordinatorOptions.map((agent) => ({ label: agent, value: agent }))}
+          className="max-w-[220px]"
+          ariaLabel="Choose senior coordinator agent"
           disabled={isUpdating}
-        >
-          {coordinatorOptions.map((agent) => (
-            <option key={agent} value={agent}>
-              {agent}
-            </option>
-          ))}
-        </select>
+        />
 
         <label className="sr-only" htmlFor="agent-fleet-mode">
           Composer mode
         </label>
-        <select
+        <CustomFleetSelect
           id="agent-fleet-mode"
           value={snapshot.mode}
-          onChange={(event) => updateFleet({ mode: event.target.value as AgentFleetMode })}
-          className={`h-8 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-2 text-[var(--aethel-text-secondary)] ${focusClass}`}
-          aria-label="Choose composer mode"
+          onChange={(mode) => updateFleet({ mode: mode as AgentFleetMode })}
+          options={Object.entries(modeLabels).map(([mode, label]) => ({ label, value: mode }))}
+          ariaLabel="Choose composer mode"
           disabled={isUpdating}
-        >
-          {Object.entries(modeLabels).map(([mode, label]) => (
-            <option key={mode} value={mode}>
-              {label}
-            </option>
-          ))}
-        </select>
+        />
 
         <button
           type="button"
@@ -249,6 +323,18 @@ export function AgentFleetCoordinatorStrip({
         >
           {snapshot.paused ? 'Resume' : 'Pause'}
         </button>
+
+        {/* isUpdating spinner — visible whenever a fleet patch is in-flight */}
+        {isUpdating && (
+          <span
+            className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-primary-light)]"
+            aria-live="polite"
+            aria-label="Updating fleet configuration"
+          >
+            <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+            Updating…
+          </span>
+        )}
 
         <div className="ml-auto flex items-center gap-1" aria-label="Agent lane status">
           {topMembers.map((member) => (
@@ -275,6 +361,15 @@ export function AgentFleetCoordinatorStrip({
               )}
             </span>
           ))}
+          {/* Overflow badge — shows how many agents were hidden by the slice(0,5) cut */}
+          {overflowCount > 0 && (
+            <span
+              className="inline-flex items-center rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-quaternary)]"
+              title={`${overflowCount} more agent${overflowCount > 1 ? 's' : ''} in the fleet`}
+            >
+              +{overflowCount}
+            </span>
+          )}
         </div>
       </div>
 

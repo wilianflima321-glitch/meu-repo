@@ -1,7 +1,7 @@
 /**
- * J.4 retrieval — top-k cosine over SQLite-backed chunks (JS fallback).
+ * J.4 retrieval — top-k cosine over SQLite-backed chunks.
+ * Prefers native sqlite-vec vec0 ANN when probe-certified; JS cosine fallback otherwise.
  * BYOK cloud query only when index was built with byok-cloud (same embedding space).
- * Native sqlite-vec ANN = HELD — see sqlite-vec-probe.ts.
  */
 
 import type { CostGuardLedgerAdapter } from '@/lib/production/creative-cost-guard'
@@ -13,7 +13,14 @@ import {
 } from './embed-gate'
 import { reindexProjectVectorStore } from './indexer'
 import { probeSqliteVecExtension } from './sqlite-vec-probe'
-import { countVectorChunks, getVectorMeta, listAllChunks } from './store'
+import {
+  annSearchChunkIds,
+  countVectorChunks,
+  getChunksByIds,
+  getVectorMeta,
+  isVectorAnnReady,
+  listAllChunks,
+} from './store'
 import type {
   VectorEmbedProviderKind,
   VectorIndexStats,
@@ -33,7 +40,29 @@ function parseEmbedProvider(raw: string | null): VectorEmbedProviderKind {
   return raw === 'byok-cloud' ? 'byok-cloud' : 'local-hash'
 }
 
-function scoreChunks(
+function hitFromChunk(
+  chunk: {
+    id: string
+    filePath: string
+    content: string
+    startLine: number
+    endLine: number
+    language: string
+  },
+  score: number,
+): VectorSearchHit {
+  return {
+    id: chunk.id,
+    filePath: chunk.filePath,
+    score,
+    excerpt: chunk.content.slice(0, 600),
+    startLine: chunk.startLine,
+    endLine: chunk.endLine,
+    language: chunk.language,
+  }
+}
+
+function scoreChunksJsCosine(
   chunks: Array<{
     embedding: number[]
     id: string
@@ -53,15 +82,48 @@ function scoreChunks(
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, topK)
-    .map(({ chunk, score }) => ({
-      id: chunk.id,
-      filePath: chunk.filePath,
-      score,
-      excerpt: chunk.content.slice(0, 600),
-      startLine: chunk.startLine,
-      endLine: chunk.endLine,
-      language: chunk.language,
-    }))
+    .map(({ chunk, score }) => hitFromChunk(chunk, score))
+}
+
+/**
+ * Prefer vec0 ANN; fall back to full-scan JS cosine if ANN empty/unavailable.
+ * Cosine distance → similarity ≈ 1 - distance (sqlite-vec cosine metric).
+ */
+function scoreChunks(
+  projectId: string,
+  chunks: Array<{
+    embedding: number[]
+    id: string
+    filePath: string
+    content: string
+    startLine: number
+    endLine: number
+    language: string
+  }>,
+  queryVec: number[],
+  topK: number,
+): { hits: VectorSearchHit[]; usedAnn: boolean } {
+  if (isVectorAnnReady(projectId)) {
+    const ann = annSearchChunkIds(projectId, queryVec, topK)
+    if (ann.length > 0) {
+      const byId = new Map(chunks.map((c) => [c.id, c]))
+      const hydrated = getChunksByIds(
+        projectId,
+        ann.map((r) => r.chunkId),
+      )
+      for (const c of hydrated) byId.set(c.id, c)
+
+      const hits: VectorSearchHit[] = []
+      for (const row of ann) {
+        const chunk = byId.get(row.chunkId)
+        if (!chunk) continue
+        const score = Math.max(0, Math.min(1, 1 - row.distance))
+        hits.push(hitFromChunk(chunk, score))
+      }
+      if (hits.length > 0) return { hits, usedAnn: true }
+    }
+  }
+  return { hits: scoreChunksJsCosine(chunks, queryVec, topK), usedAnn: false }
 }
 
 async function localHashSearch(
@@ -82,8 +144,9 @@ async function localHashSearch(
     }
   }
   const [queryVec] = await createLocalHashEmbedProvider().embed([query])
+  const { hits } = scoreChunks(projectId, chunks, queryVec, topK)
   return {
-    hits: scoreChunks(chunks, queryVec, topK),
+    hits,
     searchQuality: 'lexical-hash',
     embedProvider: indexProvider === 'byok-cloud' ? 'local-hash' : indexProvider,
     modeUsed: 'local-hash',
@@ -133,8 +196,9 @@ export async function searchVectorIndex(input: {
   // Explicit embed override (unit tests / pre-gated callers)
   if (input.embed) {
     const [queryVec] = await input.embed.embed([input.query])
+    const { hits } = scoreChunks(input.projectId, chunks, queryVec, topK)
     return {
-      hits: scoreChunks(chunks, queryVec, topK),
+      hits,
       searchQuality: input.embed.kind === 'byok-cloud' ? 'byok-semantic' : 'lexical-hash',
       embedProvider: input.embed.kind,
       modeUsed: input.embed.kind === 'byok-cloud' ? 'byok-cloud' : 'local-hash',
@@ -179,8 +243,9 @@ export async function searchVectorIndex(input: {
   let failed = false
   try {
     const [queryVec] = await resolved.provider.embed([input.query])
+    const { hits } = scoreChunks(input.projectId, chunks, queryVec, topK)
     return {
-      hits: scoreChunks(chunks, queryVec, topK),
+      hits,
       searchQuality: 'byok-semantic',
       embedProvider: 'byok-cloud',
       modeUsed: 'byok-cloud',
@@ -262,6 +327,7 @@ export function getVectorIndexStats(projectId: string, watcherActive = false): V
     searchQuality: embedProvider === 'byok-cloud' ? 'byok-semantic' : 'lexical-hash',
     sqliteVecExtension: probe.sqliteVecExtension,
     sqliteVecStatus: probe.status,
+    annBackend: isVectorAnnReady(projectId) ? 'sqlite-vec-vec0' : 'js-cosine',
     watcherActive,
   }
 }

@@ -234,4 +234,68 @@ mod tests {
         assert_eq!(probe.active_grid_point_count, 1);
         assert!(probe.phillips_spectrum_valid);
     }
+
+    #[test]
+    fn test_ocean_surface_normal_unit_length_across_grid() {
+        let mut soa = OceanWaveGridSoA::default();
+        for x in 0..10 {
+            for z in 0..10 {
+                soa.push_grid_point(x as f32 * 2.0, z as f32 * 2.0);
+            }
+        }
+
+        soa.update_ocean_surface(2.0, [15.0, 5.0], 1.2);
+
+        for i in 0..soa.active_count {
+            let nx = soa.normal_x[i];
+            let ny = soa.normal_y[i];
+            let nz = soa.normal_z[i];
+
+            let len = (nx * nx + ny * ny + nz * nz).sqrt();
+            assert!((len - 1.0).abs() < 1e-4, "normal not normalized: {len}");
+            assert!(ny > 0.0, "normal must point upwards: {ny}");
+        }
+    }
+
+    #[test]
+    fn test_zero_wind_produces_zero_spectrum() {
+        let spec = OceanWaveGridSoA::phillips_spectrum(0.1, 0.1, [0.0, 0.0], 1.0);
+        assert!((spec - 0.0).abs() < EPS);
+    }
+
+    #[test]
+    fn test_foam_bounded_in_unit_interval() {
+        let mut soa = OceanWaveGridSoA::default();
+        soa.push_grid_point(5.0, 5.0);
+        soa.update_ocean_surface(10.0, [30.0, 10.0], 2.0); // Severe storm wind
+
+        let foam = soa.foam_intensity[0];
+        assert!(foam >= 0.0 && foam <= 1.0, "foam {foam} out of [0, 1]");
+    }
+
+    #[test]
+    fn test_ocean_wave_grid_soa_alignment_is_64_bytes() {
+        assert_eq!(std::mem::align_of::<OceanWaveGridSoA>(), 64);
+        assert_eq!(std::mem::size_of::<OceanWaveGridSoA>() % 64, 0);
+    }
+
+    #[test]
+    fn test_wave_height_deterministic_across_repeated_evaluations() {
+        let mut soa_a = OceanWaveGridSoA::default();
+        let mut soa_b = OceanWaveGridSoA::default();
+
+        for i in 0..20 {
+            soa_a.push_grid_point(i as f32 * 1.5, i as f32 * 2.5);
+            soa_b.push_grid_point(i as f32 * 1.5, i as f32 * 2.5);
+        }
+
+        soa_a.update_ocean_surface(3.14, [10.0, 5.0], 1.0);
+        soa_b.update_ocean_surface(3.14, [10.0, 5.0], 1.0);
+
+        for i in 0..soa_a.active_count {
+            assert_eq!(soa_a.wave_height_y[i].to_bits(), soa_b.wave_height_y[i].to_bits());
+            assert_eq!(soa_a.displacement_x[i].to_bits(), soa_b.displacement_x[i].to_bits());
+            assert_eq!(soa_a.displacement_z[i].to_bits(), soa_b.displacement_z[i].to_bits());
+        }
+    }
 }

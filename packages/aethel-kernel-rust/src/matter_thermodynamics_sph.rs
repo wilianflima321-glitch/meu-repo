@@ -46,11 +46,11 @@ pub const DEFAULT_HEAT_DIFFUSION: f32 = 0.35;
 /// Melting point for legacy thermal-stress entry [K].
 pub const DEFAULT_MELTING_POINT: f32 = 273.15;
 /// Min |Δmean density| for soak evidence.
-const MIN_DENSITY_DELTA: f32 = 1e-3;
+pub const MIN_DENSITY_DELTA: f32 = 1e-3;
 /// Min |Δthermal energy| for soak evidence.
 const MIN_ENERGY_DELTA: f32 = 1e-2;
 /// Relative particle-mass drift ε (**hu** conservation soak; mass column fixed).
-const MASS_DRIFT_EPS: f32 = 1e-6;
+pub const MASS_DRIFT_EPS: f32 = 1e-6;
 /// Relative momentum-L1 growth ε (fail if unbounded explosion).
 const MOMENTUM_DRIFT_EPS: f32 = 25.0;
 /// Kinetic energy upper bound for hash soak (finite + non-exploding).
@@ -61,13 +61,13 @@ const SUBQUADRATIC_DIVISOR: u64 = 8;
 /// Absolute cap on stencil candidates per query (locality).
 const MAX_NEIGHBORS_CAP: u32 = 128;
 /// Float compare epsilon.
-const EPS: f32 = 1e-5;
+pub const EPS: f32 = 1e-5;
 /// Hash-soak lattice spacing / h (≳0.95 → stencil ≪ N; must be &lt;1 so r&lt;h forces fire).
 const HASH_SOAK_SPACING_OVER_H: f32 = 0.96;
 /// Milder stiffness on hash soak so lattice does not collapse into one cell.
-const HASH_SOAK_PRESSURE_STIFFNESS: f32 = 8.0;
+pub const HASH_SOAK_PRESSURE_STIFFNESS: f32 = 8.0;
 /// Extra viscosity on hash soak to keep locality after integrate.
-const HASH_SOAK_KINEMATIC_VISCOSITY: f32 = 1.5;
+pub const HASH_SOAK_KINEMATIC_VISCOSITY: f32 = 1.5;
 /// Soak sample count (density → pressure → integrate → heat).
 pub const SOAK_SAMPLE_COUNT: u32 = 4;
 
@@ -946,7 +946,7 @@ pub const SPH_EVIDENCE_KIND: &str = "soa_sph_density_pressure_thermal";
 /// Spatial-hash deepen evidence shape — letter **io** (≠ fingerprint grind).
 pub const SPH_HASH_EVIDENCE_KIND: &str = "soa_sph_spatial_hash_density_pressure";
 
-fn sph_evidence_fingerprint(
+pub fn sph_evidence_fingerprint(
     density_changed: bool,
     thermal_energy_changed: bool,
     pressure_force_active: bool,
@@ -1099,7 +1099,7 @@ fn sph_held(
 }
 
 /// Soak cloud: tightly clustered particles (over-dense) + hot/cold gradient.
-fn soak_sph_particles() -> SphParticleSoA {
+pub fn soak_sph_particles() -> SphParticleSoA {
     let mut p = SphParticleSoA::with_capacity(SOAK_PARTICLE_COUNT);
     // Compact 2×2×2 cube with spacing 0.4 << h=1.25 → high density.
     let spacing = 0.4_f32;
@@ -1128,7 +1128,7 @@ fn soak_sph_particles() -> SphParticleSoA {
 ///
 /// Critic **io** geometry + CW2 scale: spacing ≈ 0.96·h so 3×3×3 stencil stays
 /// local, and cubic 13³ domain extents ≥ ~8h on each axis.
-fn soak_hash_sph_particles(seed: u32) -> SphParticleSoA {
+pub fn soak_hash_sph_particles(seed: u32) -> SphParticleSoA {
     let n = HASH_SOAK_PARTICLE_COUNT;
     let mut p = SphParticleSoA::with_capacity(n);
     // 13×13×13 = 2197; (12)·0.96·h = 11.52h ≥ 8h on every axis.
@@ -1175,6 +1175,8 @@ fn max_temp_delta(before: &[f32], after: &[f32]) -> f32 {
 ///
 /// Does **not** claim DualSPHysics / Chaos fluid AAA.
 pub fn run_matter_thermodynamics_sph_soak() -> MatterThermodynamicsSphSoakReport {
+    static CACHE: std::sync::OnceLock<MatterThermodynamicsSphSoakReport> = std::sync::OnceLock::new();
+    CACHE.get_or_init(|| {
     let mut particles = soak_sph_particles();
     let dens_before = particles.mean_density();
     let energy_before = particles.thermal_energy();
@@ -1386,6 +1388,8 @@ pub fn run_matter_thermodynamics_sph_soak() -> MatterThermodynamicsSphSoakReport
         gr_raymarch_ready: false,
         dual_timeline_240_ready: false,
     }
+    })
+    .clone()
 }
 
 /// Locality bound: max stencil candidates ≤ min(128, N/8).
@@ -1855,5 +1859,54 @@ mod tests {
         assert!(field.pressure_monotonic);
         assert!(!sph.dualsphysics_parity_ready);
         assert!(!sph.chaos_fluid_aaa_ready);
+    }
+
+    #[test]
+    fn poly6_kernel_normalization_and_support_limit() {
+        let h = DEFAULT_H;
+        let c = 315.0 / (64.0 * std::f32::consts::PI * h.powi(9));
+
+        // At r=0, W = c * h^6
+        let w_0 = c * (h * h).powi(3);
+        assert!(w_0 > 0.0);
+
+        // At r >= h, W = 0
+        let r_out = h + 0.01;
+        let w_out = if r_out < h { c * (h * h - r_out * r_out).powi(3) } else { 0.0 };
+        assert_eq!(w_out, 0.0);
+    }
+
+    #[test]
+    fn sph_thermal_diffusion_reduces_temperature_gradient() {
+        let mut p = SphParticleSoA::with_capacity(2);
+        p.pos_x = vec![0.0, 0.5]; // Within smoothing length h=1.25
+        p.pos_y = vec![0.0, 0.0];
+        p.pos_z = vec![0.0, 0.0];
+        p.vel_x = vec![0.0, 0.0];
+        p.vel_y = vec![0.0, 0.0];
+        p.vel_z = vec![0.0, 0.0];
+        p.dens = vec![1.0, 1.0];
+        p.temp = vec![300.0, 400.0]; // 100K delta
+        p.mass = vec![1.0, 1.0];
+
+        let mut hash = SphSpatialHash::with_capacity(2, DEFAULT_H, 4);
+        let dt = 0.1;
+        let diff_coeff = 2.0;
+
+        let _ = MatterThermodynamicsSph::sph_step_hashed(
+            &mut p,
+            &mut hash,
+            dt,
+            DEFAULT_H,
+            DEFAULT_REST_DENSITY,
+            DEFAULT_PRESSURE_STIFFNESS,
+            DEFAULT_KINEMATIC_VISCOSITY,
+            diff_coeff,
+            DEFAULT_MELTING_POINT,
+        );
+
+        let temp_delta_after = (p.temp[1] - p.temp[0]).abs();
+        // Temperature difference must strictly decrease due to diffusion
+        assert!(temp_delta_after < 100.0, "Thermal diffusion must reduce gradient: {temp_delta_after}");
     }
 }

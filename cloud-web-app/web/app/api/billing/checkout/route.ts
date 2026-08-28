@@ -18,6 +18,9 @@ import { resolveSubscriptionCheckoutLineItems } from '@/lib/billing/stripe-plan-
 
 const routeLogger = createComponentLogger('api/billing/checkout/route')
 
+const CAPABILITY = 'PAYMENT_GATEWAY_RUNTIME'
+// capability: 'PAYMENT_GATEWAY_RUNTIME'
+
 export const dynamic = 'force-dynamic'
 
 interface CheckoutRequest {

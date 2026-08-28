@@ -23,7 +23,7 @@ describe('AIChatPendingDiffTray', () => {
 
     render(
       <AIChatPendingDiffTray
-        pendingDiff={pendingDiff}
+        pendingDiffs={[pendingDiff]}
         onOpenDiff={onOpenDiff}
         onAcceptDiff={onAcceptDiff}
         onRejectDiff={onRejectDiff}

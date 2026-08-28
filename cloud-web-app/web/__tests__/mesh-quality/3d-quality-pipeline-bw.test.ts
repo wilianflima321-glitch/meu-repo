@@ -28,6 +28,7 @@ import {
 import { critiqueMeshTopology } from '@/lib/mesh-quality/mesh-topology-critic'
 import { runGameReadyQualityPipeline } from '@/lib/mesh-quality/game-ready-quality-pipeline'
 import { probeMeshQualityHonesty } from '@/lib/mesh-quality/mesh-quality-honesty'
+import { referenceAssetQualityManifest } from '@/lib/production/asset-quality-gate-verdict'
 import {
   createMemoryCostGuardLedger,
   __resetCreativeCostGuardForTests,
@@ -113,7 +114,10 @@ describe('LOD / UV / collider / critic (bw)', () => {
     const mesh = buildTestIcosphere(1)
     const uv = ensureAndValidateUvs(mesh)
     expect(uv.unwrapped).toBe(true)
-    expect(uv.mesh.uvs!.length).toBeGreaterThan(0)
+    if (!uv.mesh.uvs) {
+      throw new Error('expected UVs after unwrap')
+    }
+    expect(uv.mesh.uvs.length).toBeGreaterThan(0)
     expect(uv.hasTangents).toBe(true)
     expect(uv.receipt.status).toBe('closed')
   })
@@ -186,7 +190,10 @@ describe('Clay ingest CostGuard (bw)', () => {
     const obj = buildMinimalObjFixture(1)
     const parsed = parseObjToRawMesh(obj)
     expect(parsed).not.toBeNull()
-    expect(countTriangles(parsed!)).toBeGreaterThan(0)
+    if (!parsed) {
+      throw new Error('expected parsed mesh')
+    }
+    expect(countTriangles(parsed)).toBeGreaterThan(0)
 
     const result = await ingestClayMesh({
       request: {
@@ -234,13 +241,92 @@ describe('Game-ready conveyor (bw)', () => {
     expect(result.tripoOnlyShipAllowed).toBe(false)
     expect(result.instantMeshesParity).toBe(false)
     expect(result.mesh).toBeDefined()
-    expect(countTriangles(result.mesh!)).toBeLessThan(before)
+    if (!result.mesh) {
+      throw new Error('expected mesh after conveyor')
+    }
+    expect(countTriangles(result.mesh)).toBeLessThan(before)
     expect(result.lods).toHaveLength(3)
     expect(result.pbr?.bakedLightingInAlbedo).toBe(false)
     expect(result.colliders?.convex.points.length).toBeGreaterThanOrEqual(4)
-    expect(result.packBytes!.byteLength).toBeGreaterThan(0)
+    if (!result.packBytes) {
+      throw new Error('expected packBytes after conveyor')
+    }
+    expect(result.packBytes.byteLength).toBeGreaterThan(0)
     expect(result.packSha256).toBeTruthy()
     expect(result.stages.some((s) => s.stage === 'auto-retopo' && s.status === 'closed')).toBe(true)
     expect(result.stages.some((s) => s.stage === 'topology-critic' && s.status === 'closed')).toBe(true)
+  })
+
+  it('tier-aware (GAP 2): ai-draft + declared manifest → verdict measured from REALITY (declared overridden)', async () => {
+    const adapter = createMemoryCostGuardLedger()
+    adapter.enableByok('u1')
+    const store = createMemoryFusionScopeStore()
+    const clay = buildTestIcosphere(2)
+
+    const result = await runGameReadyQualityPipeline({
+      projectId: 'p-bw-t1',
+      userId: 'u1',
+      prompt: 'tier ai-draft hero',
+      clayMesh: clay,
+      capabilityScore: 90,
+      sceneContext: { biome: 'dark-fantasy', weather: 'clear' },
+      writePackEntry: false,
+      fusionStore: store,
+      costGuardAdapter: adapter,
+      byokProfileId: 'byok-1',
+      planId: 'pro',
+      targetTier: 'ai-draft',
+      // Declarado minúsculo (1/1) — o conveyor SOBRESCREVE com os triângulos reais medidos.
+      qualityManifest: {
+        ...referenceAssetQualityManifest('ai-draft'),
+        previewTriangles: 1,
+        heroTriangles: 1,
+      },
+    })
+
+    expect(result.success).toBe(true)
+    if (!result.qualityVerdict) {
+      throw new Error('expected qualityVerdict (GAP 2)')
+    }
+    const v = result.qualityVerdict
+    expect(v.previewTriangles).toBeGreaterThan(1)
+    expect(v.heroTriangles).toBeGreaterThan(1)
+    expect(v.triangleBudgetOk).toBe(true)
+    expect(v.topologyGrade).toBe(100)
+    expect(v.ready).toBe(true)
+    expect(v.blockerCount).toBe(0)
+    expect(result.notes.some((n) => n.startsWith('bw-verdict:ready'))).toBe(true)
+  })
+
+  it('tier-aware (GAP 2): no manifest → fail-closed verdict, readiness never fabricated', async () => {
+    const adapter = createMemoryCostGuardLedger()
+    adapter.enableByok('u1')
+    const store = createMemoryFusionScopeStore()
+    const clay = buildTestIcosphere(2)
+
+    const result = await runGameReadyQualityPipeline({
+      projectId: 'p-bw-t2',
+      userId: 'u1',
+      prompt: 'tier studio hero',
+      clayMesh: clay,
+      capabilityScore: 90,
+      sceneContext: { biome: 'dark-fantasy', weather: 'clear' },
+      writePackEntry: false,
+      fusionStore: store,
+      costGuardAdapter: adapter,
+      byokProfileId: 'byok-1',
+      planId: 'pro',
+      targetTier: 'studio-local-optimized',
+    })
+
+    expect(result.success).toBe(true)
+    if (!result.qualityVerdict) {
+      throw new Error('expected qualityVerdict (GAP 2)')
+    }
+    const v = result.qualityVerdict
+    expect(v.ready).toBe(false)
+    expect(v.blockerCount).toBe(9)
+    expect(v.topologyOk).toBe(false)
+    expect(result.notes.some((n) => n.startsWith('bw-verdict:fail_closed'))).toBe(true)
   })
 })

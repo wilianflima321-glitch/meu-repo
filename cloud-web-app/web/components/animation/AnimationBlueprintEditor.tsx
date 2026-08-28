@@ -160,7 +160,7 @@ export function AnimationBlueprintEditor({
       ...prev,
       transitions: [...prev.transitions, newTransition],
     }));
-    setEdges(eds => addEdge({
+    setEdges((eds: Edge<TransitionEdgeData>[]) => addEdge({
       ...connection,
       id: newTransition.id,
       type: 'transition',
@@ -184,7 +184,7 @@ export function AnimationBlueprintEditor({
       ...prev,
       states: [...prev.states, newState],
     }));
-    setNodes(nds => [...nds, {
+    setNodes((nds: Node<StateNodeData>[]) => [...nds, {
       id: newState.id,
       type: 'state',
       position: { x: 300, y: 300 },
@@ -204,7 +204,7 @@ export function AnimationBlueprintEditor({
       ...prev,
       states: prev.states.map(s => s.id === state.id ? state : s),
     }));
-    setNodes(nds => nds.map(n => n.id === state.id ? {
+    setNodes((nds: Node<StateNodeData>[]) => nds.map((n: Node<StateNodeData>) => n.id === state.id ? {
       ...n,
       data: { ...n.data, state },
     } : n));
@@ -215,7 +215,7 @@ export function AnimationBlueprintEditor({
       ...prev,
       transitions: prev.transitions.map(t => t.id === transition.id ? transition : t),
     }));
-    setEdges(eds => eds.map(e => e.id === transition.id ? {
+    setEdges((eds: Edge<TransitionEdgeData>[]) => eds.map((e: Edge<TransitionEdgeData>) => e.id === transition.id ? {
       ...e,
       data: { ...e.data, transition },
     } : e));

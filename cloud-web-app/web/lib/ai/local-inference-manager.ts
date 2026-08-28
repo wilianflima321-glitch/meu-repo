@@ -110,9 +110,9 @@ export class LocalInferenceManager extends EventEmitter {
         modelId,
         {
           initProgressCallback: (progress: any) => {
-            this.emit('progress', { 
-              text: progress.text, 
-              progress: Math.round(progress.progress * 100) 
+            this.emit('progress', {
+              text: progress.text,
+              progress: Math.round(progress.progress * 100)
             });
           }
         }

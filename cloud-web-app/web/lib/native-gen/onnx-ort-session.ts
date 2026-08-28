@@ -164,7 +164,7 @@ export function __setNativeOnnxOrtTestHooks(hooks: {
 export function probeOnnxOrtWeightsOnDisk(cwd?: string): OnnxWeightsProbeResult {
   if (weightsProbeOverride) return weightsProbeOverride
 
-  const probedPaths = [...ONNX_ORT_WEIGHTS_CANDIDATE_PATHS]
+  const probedPaths: string[] = [...ONNX_ORT_WEIGHTS_CANDIDATE_PATHS]
   let present = false
   let path: string | null = null
 

@@ -160,7 +160,7 @@ export default function SettingsPage() {
               configuredProviders={configuredProviders.length}
               missingProviders={missingProviders.length}
               providerStatusLoaded={providerStatusLoaded}
-              onSelectTab={setActiveTab}
+              onSelectTab={setActiveTab as any}
             />
           )}
 

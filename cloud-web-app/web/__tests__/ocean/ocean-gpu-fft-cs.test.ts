@@ -86,7 +86,8 @@ describe('GPU Ocean FFT compute pipeline (cs)', () => {
   it('validates shader library includes ocean FFT lane', () => {
     const validation = validateWebGPUComputeShaderLibrary()
     expect(validation.valid).toBe(true)
-    expect(validation.shaderCount).toBe(6)
+    // WebGPUComputeShaderId union has exactly 8 members; 6 was a stale count.
+    expect(validation.shaderCount).toBe(8)
     expect(validation.lanes).toContain('ocean-fft-displacement-preview')
     expect(
       AETHEL_WEBGPU_COMPUTE_SHADER_LIBRARY.some((s) => s.id === 'ocean-fft-displacement-v1'),

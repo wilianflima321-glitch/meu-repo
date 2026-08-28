@@ -33,6 +33,33 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: apps/studio-local/src-tauri
+      # R20 `*Enforced` (CW2/CW7 kernel scale + disk austerity) — consolidation
+      # gates that must pass before the (slow) cargo test runs. Fail-closed:
+      #   - check-cargo-target.mjs        : single cargo target rule. Resolves the
+      #     effective target-dir (CARGO_TARGET_DIR -> studio-local .cargo/config
+      #     -> kernel .cargo/config) and HARD-FAILS on the local workstation
+      #     (win32 with E:/ present) when none is resolved, or it lands on C: or
+      #     off E:. Machine-specific E:-absolute configs are never committed;
+      #     CI (no E:) and non-Windows soft-pass by design.
+      #   - cargo-orphan-gate.mjs         : compile-or-delete discipline — fails on
+      #     any NEW .rs file unreachable via the Rust `mod` graph (baseline in
+      #     scripts/orphan-baseline.json; see Progress §R20 deep-boot 2026-08-10).
+      #   - check-cargo-weight-duplication.mjs : both crates must resolve to the
+      #     SAME target dir (a divergent tree would silently double disk weight);
+      #     on the shared tree, scans deps for byte-identical duplicate crate
+      #     fingerprints — duplicates are legitimate only when hashes differ
+      #     (gnu/msvc/debug/release variants), byte-identical groups FAIL.
+      # NOTE: cargo-prune-orphans.mjs is intentionally NOT invoked here — it now
+      # performs a REAL orphan-tree prune + content-addressed CAS cook (SHA-256
+      # grouping + hard-link dedup with mtime restore). Destructive by nature; on
+      # ephemeral CI runners it would destroy the rust-cache above for zero
+      # benefit. Run it manually on developer machines (see DISK_AUSTERITY.md).
+      - name: CW7 single cargo target gate (R20 Enforced)
+        run: node scripts/check-cargo-target.mjs
+      - name: CW7 orphan-prune gate (R20 Enforced — compile-or-delete)
+        run: node scripts/cargo-orphan-gate.mjs
+      - name: CW7 target-dir weight-duplication gate (R20 Enforced — single tree)
+        run: node scripts/check-cargo-weight-duplication.mjs
       - name: Verify Studio Local prerequisites and Rust tests
         run: npm --prefix apps/studio-local run test
 

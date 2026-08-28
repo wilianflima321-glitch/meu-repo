@@ -79,12 +79,12 @@ export interface QuestCategory {
 }
 
 export const QUEST_CATEGORIES: QuestCategory[] = [
-  { id: 'main', name: 'Main Story', color: 'var(--aethel-warning)', icon: '⭐' },
-  { id: 'side', name: 'Side Quest', color: 'var(--aethel-primary)', icon: '📜' },
-  { id: 'faction', name: 'Faction', color: 'var(--aethel-accent)', icon: '🛡️' },
-  { id: 'bounty', name: 'Bounty', color: 'var(--aethel-error)', icon: '⚔️' },
-  { id: 'exploration', name: 'Exploration', color: 'var(--aethel-success)', icon: '🗺️' },
-  { id: 'crafting', name: 'Crafting', color: 'var(--aethel-warning-dark)', icon: '🔨' },
+  { id: 'main', name: 'Main Story', color: 'var(--aethel-warning)', icon: 'star' },
+  { id: 'side', name: 'Side Quest', color: 'var(--aethel-primary)', icon: 'scroll' },
+  { id: 'faction', name: 'Faction', color: 'var(--aethel-accent)', icon: 'shield' },
+  { id: 'bounty', name: 'Bounty', color: 'var(--aethel-error)', icon: 'swords' },
+  { id: 'exploration', name: 'Exploration', color: 'var(--aethel-success)', icon: 'map' },
+  { id: 'crafting', name: 'Crafting', color: 'var(--aethel-warning-dark)', icon: 'hammer' },
 ];
 
 // ============================================================================

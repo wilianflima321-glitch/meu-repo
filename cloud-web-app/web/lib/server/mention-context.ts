@@ -3,7 +3,9 @@ import path from 'node:path'
 import { getGitService } from '@/lib/server/git-service'
 import { getSearchRuntime } from '@/lib/server/search-runtime'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
-import { searchSemanticCodebase } from '@/lib/server/semantic-code-search'
+import { prisma } from '@/lib/db'
+import { readRepositoryCartographyManifestFromSettings } from '@/lib/production/repository-cartography'
+import { queryRepoGraphRAG } from '@/lib/server/repo-graph-rag/repo-graph-rag'
 
 const CONTEXTUAL_TAG_PATTERN =
   /@(file:[^\s]+|folder:[^\s]+|docs:[^\s]+|codebase|selection|terminal|function|git:(?:diff|staged|status|log|blame:[^\s]+)|diff|error|errors|diagnostics)/gi
@@ -118,15 +120,27 @@ async function resolveCodebaseContext(params: {
   const semanticQuery = params.message.replace(CONTEXTUAL_TAG_PATTERN, ' ').replace(/\s+/g, ' ').trim()
 
   const overview = await resolveCodebaseOverview(params.repoRoot)
-  const retrieval = await searchSemanticCodebase({
-    query: semanticQuery || 'project architecture entry points main components current implementation',
-    userId: params.userId,
-    projectId: params.projectId,
-    maxResults: 4,
-    minScore: 0.18,
-  })
 
-  if (retrieval.results.length === 0) {
+  let retrieval: Awaited<ReturnType<typeof queryRepoGraphRAG>> | null = null
+
+  if (params.projectId && params.userId) {
+    const project = await prisma.project.findFirst({
+      where: { id: params.projectId, OR: [{ userId: params.userId }, { members: { some: { userId: params.userId } } }] },
+      select: { settings: true },
+    })
+    const manifest = project ? readRepositoryCartographyManifestFromSettings(project.settings) : null
+    if (manifest) {
+      retrieval = await queryRepoGraphRAG(
+        semanticQuery || 'project architecture entry points main components current implementation',
+        params.projectId,
+        params.repoRoot,
+        manifest,
+        { topK: 4, maxDegrees: 1, maxFilesPerHit: 2, maxTotalFiles: 4 }
+      )
+    }
+  }
+
+  if (!retrieval || retrieval.neighborhoodFiles.length === 0) {
     return [
       overview,
       '',
@@ -135,17 +149,17 @@ async function resolveCodebaseContext(params: {
     ].join('\n')
   }
 
-  const semanticMatches = retrieval.results.map((result, index) => {
+  const semanticMatches = retrieval.neighborhoodFiles.map((result, index) => {
     return [
-      `${index + 1}. ${result.filePath}:${result.startLine}-${result.endLine} score=${result.score}`,
-      clamp(result.excerpt, 700),
+      `${index + 1}. ${result.filePath}`,
+      clamp(result.content, 700),
     ].join('\n')
   })
 
   return [
     overview,
     '',
-    `Semantic retrieval (${retrieval.readiness.source}, scope=${retrieval.readiness.scope}, indexedFiles=${retrieval.stats.filesIndexed}, chunks=${retrieval.stats.chunksIndexed}):`,
+    `AST Semantic retrieval (${retrieval.neighborhoodFiles.length} files):`,
     ...semanticMatches,
   ].join('\n\n')
 }

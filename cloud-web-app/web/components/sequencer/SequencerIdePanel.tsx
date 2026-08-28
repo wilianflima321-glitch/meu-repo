@@ -187,7 +187,7 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
     >
       <header className="space-y-1 border-b border-[var(--aethel-glass-border)] pb-3">
         <h2 className="text-sm font-bold text-[var(--aethel-text-primary)] flex items-center gap-2 font-mono">
-          <Clapperboard className="w-4 h-4 text-indigo-400" />
+          <Clapperboard className="w-4 h-4 text-[var(--aethel-primary)]" />
           {scaffold.timeline.label || scaffold.title}
         </h2>
         <p className="text-xs text-[var(--aethel-text-secondary)] leading-relaxed">
@@ -234,7 +234,7 @@ export function SequencerIdePanel({ intent = 'establishing', viewportTargets = n
         </button>
 
         <div className="ml-auto flex items-center gap-2 font-mono text-xs text-[var(--aethel-neon-cyan)] bg-[var(--aethel-surface-secondary)] px-2.5 py-1 rounded-md border border-[var(--aethel-glass-border)]">
-          <Clock className="w-3.5 h-3.5 text-indigo-400" />
+          <Clock className="w-3.5 h-3.5 text-[var(--aethel-primary)]" />
           <span>{formatTimecode(timeMs)}</span>
         </div>
       </div>

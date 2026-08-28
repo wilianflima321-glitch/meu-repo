@@ -15,6 +15,12 @@ use tauri::State;
 mod asset_cooker;
 mod desktop_commands;
 mod entropy_gpu_particles;
+mod gf_mesh_001_fixture;
+mod gf_integrated_scene_001_fixture;
+mod gf_mesh_001_gpu_parity_fixture;
+mod gf_substrates_device_validation;
+mod present_command_channel;
+mod product_screenshot_gate;
 mod gpu_culling;
 mod gpu_hiz;
 mod gpu_indirect_draw;
@@ -28,7 +34,9 @@ mod gpu_micropoly_raster;
 mod gpu_radiance_probes;
 mod gpu_vsm;
 mod gpu_soak_scale;
+mod gpu_terminal_renderer;
 mod engine_owned_present_loop;
+mod frame_hash_digest;
 mod hardware_profiler;
 mod lsp_farm;
 mod mmap_commands;
@@ -37,19 +45,46 @@ mod physics_commands;
 mod scene_graph;
 mod wasm_runtime;
 mod wgpu_renderer;
+// ============================================================================
+// Forward renderer + compute-physics substrate — HELD, not abandoned.
+//
+// `rendering/` is a complete forward-PBR resource graph (PbrPipeline's camera /
+// 256-light / material / instance / indirect / visible-index buffers, MSAA-4
+// depth, ShadowPass 2048², MeshRegistry mega-buffers, Camera + Skybox passes,
+// glTF loader) with NO per-frame encode path, and `physics/` holds the
+// compute-side XPBD scaffold (NativeXpbdCompute) for a future GPU path. Neither
+// is constructed at runtime yet.
+//
+// This is an architecturally HELD state, not silent dead code: the natural wiring
+// target (the product viewport) is exclusively owned by the embedded Chromium
+// WebView (CW3 present constraint), so Rust cannot present to the primary HWND.
+// The soak present path drives the `gpu_*` compute scaffolds on a secondary winit
+// window instead (wgpu_renderer.rs). Real physics on the main thread is
+// `PhysicsKernel` (Rapier3D, physics_kernel.rs); the forward renderer is the
+// engine's forward-PBR foundation and is kept compile-validated — a real-device
+// construction test (`forward_pbr_substrate_constructs_on_real_device` in
+// pbr_graphics.rs) proves the WGSL contracts + resource graph build on a GPU.
+//
+// This mirrors the established `#[allow(dead_code)]` precedent on `WgpuRenderer`
+// (wgpu_renderer.rs:63). Re-wiring into the product viewport is tracked (not
+// silent) under the CW3 WebView-exclusive-present constraint — see
+// AETHEL_FOCUS1_EXECUTION_PROGRESS.md.
+// ============================================================================
+#[allow(dead_code)] // held substrate — wiring tracked, not silent (see above)
+mod physics;
+#[allow(dead_code)] // held substrate — wiring tracked, not silent (see above)
+mod rendering;
 mod egui_overlay;
 use aethel_studio_local::physics_kernel::PhysicsKernel;
-// NOTE (chore/preserve WIP, 2026-08-08): the Tauri `generate_handler!` surface was
-// trimmed to a reduced command set; the glob imports for probe/soak-only kernel wires
-// (ecs_parallel, geometry_clusterizer, gi_sdf, auto_retopology_worker, and ~85
-// kernel_*_wire modules) became unused as a result and were removed here to keep
-// `cargo clippy -D warnings` green. The underlying modules remain declared `pub` in
-// `lib.rs` and their code is untouched; only the now-dead glob-imports in this file
-// were dropped. Re-wiring soak/probe kernel wires into `generate_handler!` remains a
-// deliberate follow-up (Onda G deferred — see AETHEL_FOCUS1_EXECUTION_PROGRESS.md P2g).
+// NOTE (round R2, 2026-08-15): the unified IPC surface now registers 114 commands via
+// `aethel_studio_local::register_commands!()` — the declarative `IPC_ACL_REGISTRY` (S-12)
+// is the single source of truth and every command carries Law #48 caller-identity params.
+// The P2g disconnection of the host desktop commands (fs/window/ai) is ENDED: the 11
+// re-wired commands are on the surface with AgentDeny ACL. Probe/soak-only kernel wires
+// remain declared `pub` in `lib.rs` (code untouched); their reachability is governed by
+// the S-11 Kernel Wire Registry (`xtask wire-check`), not by glob imports here.
 //
 // L.13 exception (2026-08-08): minimal `lsp_farm::*` commands are registered below.
-// Functional agent/runtime + kernel honesty probes re-registered 2026-08-10 (not full ~91 wire surface).
 use aethel_studio_local::kernel_svo_terrain_world_partition_wire::*;
 use tauri::Manager;
 
@@ -389,91 +424,11 @@ fn main() {
         .manage(Mutex::new(lsp_farm::LspFarmRegistry::default()))
         .manage(wasm_runtime::WasmHostState::default())
         .manage(Mutex::new(PhysicsKernel::new()))
+        .manage(Mutex::new(
+            aethel_studio_local::gameplay_ability_system::GasSimRuntime::new(),
+        ))
         .manage(Mutex::new(WorldPartitionStreamState::default()))
-        .invoke_handler(tauri::generate_handler![
-            egui_overlay::launch_native_egui_overlay,
-            open_panel_window,
-            hardware_profiler::hardware_profiler_sample_once,
-            wgpu_renderer::renderer_present_probe,
-            wgpu_renderer::present_frame,
-            wgpu_renderer::renderer_present_probe_last,
-            wgpu_renderer::renderer_frame_graph_timings_last,
-            product_present_adapter::product_present_honesty_probe,
-            product_present_adapter::product_present_try_webview_attach,
-            product_present_adapter::product_present_engine_owned_soak,
-            engine_owned_present_loop::product_present_persistent_start,
-            engine_owned_present_loop::product_present_persistent_stop,
-            engine_owned_present_loop::product_present_persistent_status,
-            engine_owned_present_loop::product_present_session_claim,
-            engine_owned_present_loop::product_present_session_release,
-            engine_owned_present_loop::product_present_soak_60s,
-            physics_commands::poll_physics_state,
-            scene_graph::scene_get_nodes,
-            scene_graph::scene_select,
-            scene_graph::scene_set_visible,
-            scene_graph::scene_set_locked,
-            scene_graph::scene_update_transform,
-            scene_graph::scene_add_node,
-            scene_graph::scene_remove_node,
-            scene_graph::scene_reparent,
-            mmap_commands::mmap_open,
-            mmap_commands::mmap_read_range,
-            mmap_commands::mmap_close,
-            asset_cooker::asset_cooker_start,
-            wasm_runtime::wasm_load_module,
-            wasm_runtime::wasm_watch_and_hot_reload,
-            wasm_runtime::wasm_step,
-            wasm_runtime::wasm_host_status,
-            motion_matching::motion_matching_evaluate,
-            motion_matching::motion_matching_status,
-            entropy_gpu_particles::entropy_gpu_particle_soak_cmd,
-            entropy_gpu_particles::probe_entropy_gpu_particles_cmd,
-            // L.13 UniversalLspFarm — spawn/IPC + Monaco hover/definition wire
-            lsp_farm::lsp_farm_honesty,
-            lsp_farm::lsp_farm_probe,
-            lsp_farm::lsp_farm_spawn,
-            lsp_farm::lsp_farm_ensure_session,
-            lsp_farm::lsp_farm_did_open,
-            lsp_farm::lsp_farm_did_change,
-            lsp_farm::lsp_farm_poll_diagnostics,
-            lsp_farm::lsp_farm_request,
-            lsp_farm::lsp_farm_list,
-            lsp_farm::lsp_farm_stop,
-            lsp_farm::lsp_farm_ipc_probe,
-            // R22 — human host PTY + Law #48 agent ACL (deny evidence on agent callers)
-            desktop_commands::terminal_create,
-            desktop_commands::terminal_write,
-            desktop_commands::terminal_resize,
-            desktop_commands::terminal_close,
-            desktop_commands::terminal_acl_probe,
-            aethel_studio_local::plugin_sandbox::execute_sandbox_plugin,
-            aethel_studio_local::plugin_sandbox::start_sandbox_telemetry,
-            aethel_studio_local::plugin_sandbox::export_vibe_embedding,
-            aethel_studio_local::plugin_sandbox::register_user_aesthetic_override,
-            // Onda M — WASM Shield real wasmtime instantiate + Law #48 host-PTY deny
-            aethel_studio_local::wasm_shield::probe_wasm_shield_cmd,
-            aethel_studio_local::wasm_shield::wasm_shield_agent_pty_deny_cmd,
-            // Orphan rendering/ quarantine honesty (ladder #10 — not pub mod rendering)
-            aethel_studio_local::rendering_quarantine::probe_rendering_quarantine_cmd,
-            // GAS binary IPC soak / round-trip metrics (GAS_60HZ_BINARY_IPC_READY stays false)
-            aethel_studio_local::gameplay_ability_system::probe_gas_binary_ipc_tick_cmd,
-            aethel_studio_local::gameplay_ability_system::gas_binary_ipc_roundtrip_cmd,
-            // Agent/runtime probes (functional backend — not full kernel-wire surface)
-            local_runtime_health,
-            local_runtime_probe,
-            local_runtime_probe_report,
-            local_runtime_sidecars,
-            native_kernel_manifest,
-            jobs_route,
-            jobs_list,
-            jobs_cancel,
-            aethel_studio_local::kernel_foundation_honesty_wire::probe_kernel_foundation_cmd,
-            aethel_studio_local::kernel_micro_poly_cull_wire::probe_micro_poly_cull_cmd,
-            aethel_studio_local::kernel_position_based_dynamics_wire::probe_position_based_dynamics_cmd,
-            aethel_studio_local::kernel_position_based_dynamics_wire::run_kernel_position_based_dynamics_soak_cmd,
-            aethel_studio_local::kernel_risk_envelope_wire::probe_risk_envelope_cmd,
-            gpu_culling::probe_gpu_culling_frustum_soak_cmd,
-        ])
+        .invoke_handler(aethel_studio_local::register_commands!())
         .run(tauri::generate_context!())
         .expect("failed to run Aethel Studio Local");
 }

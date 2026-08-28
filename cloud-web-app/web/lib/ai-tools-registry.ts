@@ -17,6 +17,10 @@ import { evaluateAgentApplyScope } from '@/lib/production/agent-scope-enforcemen
 import { acquireAgentSurfaceLocks } from '@/lib/production/agent-surface-locks';
 import { evaluateGovernedAgentToolJob, type GovernedToolJobEnforcement } from '@/lib/production/agent-tool-job-runner';
 import { mapToolNameToCanonical } from '@/lib/production/agent-tool-name-adapter';
+import {
+  evaluateMiniIaToolDispatch,
+  mapAgentToolToMiniIaName,
+} from '@/lib/production/mini-ia-tool-dispatch';
 import { getProjectFileStore } from '@/lib/server/project-file-store';
 import type { Prisma } from '@prisma/client';
 import type { AITool, ToolCategory, ToolResult } from './ai-tools-registry-types';
@@ -217,6 +221,10 @@ async function evaluateGovernedToolGate(
     maxCostUsd: 0,
     hasDiffEvidence: mapping.mutating,
     enforcement,
+    miniIaSurface:
+      context.miniIa === true ||
+      params.__aethelMiniIa === true ||
+      (typeof agent === 'string' && agent.toLowerCase().includes('mini')),
   });
 
   const auditAction =
@@ -307,6 +315,59 @@ class AIToolsRegistry {
       for (const param of tool.parameters) {
         if (param.required && !(param.name in params)) {
           return { success: false, error: `Missing required parameter: ${param.name}` };
+        }
+      }
+
+      // Mini-IA / creative dispatch — host PTY + OrchestratorProd always fail-closed;
+      // Mini-IA surface also enforces allowlist (Maestro remains orchestration choke).
+      let miniIaContext: ReturnType<typeof getContext> | null = null;
+      try {
+        miniIaContext = getContext(params);
+      } catch {
+        miniIaContext = null;
+      }
+      const agentName =
+        (miniIaContext && requestedAgentForTool(params, miniIaContext)) ||
+        (typeof params.__aethelAgent === 'string' ? params.__aethelAgent : undefined);
+      const isMiniIaSurface =
+        params.__aethelMiniIa === true ||
+        miniIaContext?.miniIa === true ||
+        (typeof agentName === 'string' && agentName.toLowerCase().includes('mini'));
+      const creativeCategories = new Set(['image', 'audio', 'video', 'game']);
+      const enforceMiniIaDispatch =
+        isMiniIaSurface ||
+        creativeCategories.has(tool.category) ||
+        /^(run_command|terminal_execute|host_pty|orchestrator)/i.test(name);
+
+      if (enforceMiniIaDispatch) {
+        const projectId = miniIaContext?.projectId?.trim() || 'unscoped';
+        const mapped = mapAgentToolToMiniIaName(name);
+        const mini = evaluateMiniIaToolDispatch({
+          projectId,
+          toolName: mapped === name ? name : mapped,
+          callerSurface: isMiniIaSurface ? 'mini-ia' : 'agent',
+          hostPty: /^(run_command|terminal_execute|host_pty)$/i.test(name),
+          requestOrchestratorProd: /orchestrator/i.test(name),
+        });
+        if (
+          !mini.ok &&
+          (isMiniIaSurface ||
+            mini.code === 'host_pty_forbidden' ||
+            mini.code === 'orchestrator_prod_stopped' ||
+            mini.code === 'live_broker_forbidden' ||
+            mini.code === 'tool_forbidden')
+        ) {
+          return {
+            success: false,
+            error: 'MINI_IA_TOOL_DISPATCH_BLOCKED',
+            data: {
+              message: mini.message,
+              code: mini.code,
+              evidence: mini.evidence,
+              maestroOwnsOrchestration: true,
+              orchestratorProdShipped: false,
+            },
+          };
         }
       }
 

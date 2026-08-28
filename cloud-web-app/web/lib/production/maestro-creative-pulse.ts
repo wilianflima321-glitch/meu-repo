@@ -9,14 +9,22 @@
  * Mini-IA = narrow UX helper surface only — Maestro owns orchestration authority.
  */
 
+import { randomUUID } from 'crypto'
 import { createComponentLogger } from '@/lib/observability/logger'
 import {
   cancelCreativeCost,
+  getCreativeCostReservation,
   reserveCreativeCost,
   type CostGuardBlockReason,
   type CostGuardLedgerAdapter,
 } from '@/lib/production/creative-cost-guard'
-import type { CreativeArtifactDomain } from '@/lib/production/creative-artifact-bridge'
+import {
+  dispatchCreativeArtifact,
+  type CreativeArtifactDomain,
+  type CreativeArtifactRequest,
+  type CreativeArtifactResult,
+  type CreativeProviderDispatch,
+} from '@/lib/production/creative-artifact-bridge'
 import type { FusionYDocScope } from '@/lib/production/creative-fusion-transaction'
 import {
   dispatchNexusSquad,
@@ -29,6 +37,11 @@ import {
   type CreativeFidelityBand,
   type CreativeQualityTierBinding,
 } from '@/lib/production/creative-quality-tier-binding'
+import {
+  appendTaskEvidence,
+  createTaskEvidenceLedger,
+  type TaskEvidenceLedger,
+} from '@/lib/production/task-evidence-ledger'
 import {
   evaluateWorldForgeMaestroSuccessBarrier,
   type WorldForgeArtifactEvidence,
@@ -86,6 +99,8 @@ export interface MaestroCreativePulseInput {
     usageBucketId?: string
     estimatedTokenWeight: number
     planId?: string
+    /** Conveyor-nucleus settle ceiling (multiple of estimate); CostGuard clamps to [1, MAX]. */
+    settleCeilingMultiplier?: number
   }
   /** When true, caller tried to route via J.12 OrchestratorProd — always refuse. */
   requestOrchestratorProd?: boolean
@@ -129,6 +144,8 @@ export interface MaestroCreativePulseVerdict {
   allowed: boolean
   creationKind: CreativeCreationKind
   domain: CreativeArtifactDomain
+  projectId: string
+  userId: string
   fusionScopes: FusionYDocScope[]
   requiresFusionWrite: boolean
   squad: NexusSquadResult
@@ -141,6 +158,12 @@ export interface MaestroCreativePulseVerdict {
   orchestratorProdShipped: false
   j12Stopped: true
   reservationPreflightOk: true
+  /** Conveyor nucleus (Creative #1): the CostGuard reservation HELD by this verdict — reused by
+   * `dispatchMaestroCreativePulse` so settle debits the SAME hold (no reserve→cancel→re-reserve). */
+  reservationId: string
+  reservationFunding: 'byok' | 'usage_bucket' | 'wallet'
+  reservationSettleCeiling: number
+  reservationEstimatedTokenWeight: number
   /** Present when worldForgeEvidence was supplied and barrier passed. */
   worldForgeBarrier?: WorldForgeMaestroSuccessVerdict
   reasons: string[]
@@ -314,6 +337,7 @@ export async function evaluateMaestroCreativePulse(
       byokProfileId: input.costGuard.byokProfileId,
       usageBucketId: input.costGuard.usageBucketId,
       planId: input.costGuard.planId ?? input.planId,
+      settleCeilingMultiplier: input.costGuard.settleCeilingMultiplier,
     },
     adapter,
   )
@@ -335,8 +359,10 @@ export async function evaluateMaestroCreativePulse(
     }
   }
 
-  // Immediate cancel — pulse is preflight only; Bridge will reserve again on dispatch
-  await cancelCreativeCost(reserved.reservation.reservationId, adapter)
+  // Conveyor nucleus (Creative #1): the reservation is HELD here and carried into dispatch.
+  // No immediate cancel — `dispatchMaestroCreativePulse` reuses it through the CreativeBridge
+  // choke so settle debits the same hold. Release via `releaseMaestroCreativePulseReservation`
+  // if the caller aborts before dispatch.
 
   const squad = dispatchNexusSquad({
     missionId: `creative-pulse-${input.creationKind}`,
@@ -354,6 +380,8 @@ export async function evaluateMaestroCreativePulse(
     allowed: true,
     creationKind: input.creationKind,
     domain: input.domain,
+    projectId: input.projectId,
+    userId: input.userId,
     fusionScopes,
     requiresFusionWrite,
     squad,
@@ -364,11 +392,15 @@ export async function evaluateMaestroCreativePulse(
     miniIaMaySubmitBroker: false,
     orchestratorProdShipped: false,
     j12Stopped: true,
-    reservationPreflightOk: true,
+    reservationPreflightOk: reserved.ok,
+    reservationId: reserved.reservation.reservationId,
+    reservationFunding: reserved.reservation.funding,
+    reservationSettleCeiling: reserved.reservation.settleCeilingMultiplier,
+    reservationEstimatedTokenWeight: reserved.reservation.estimatedTokenWeight,
     worldForgeBarrier,
     reasons: [
       `Maestro creative pulse ALLOW — ${input.creationKind}/${input.domain}`,
-      `CostGuard preflight ok (settle deferred to CreativeBridge)`,
+      `CostGuard reservation HELD (conveyor nucleus — settle via CreativeBridge reuse)`,
       `Fidelity band ${quality.fidelityBand} (CapScore/hardware; no UE mesh claim)`,
       'J.12 OrchestratorProd STOPPED — Maestro+Nexus path only',
       'Mini-IA may not orchestrate or submit broker',
@@ -381,7 +413,8 @@ export async function evaluateMaestroCreativePulse(
     ],
     evidenceRefs: [
       'law-xvi:maestro-creative-pulse',
-      'trava-i:cost-guard-preflight',
+      'trava-i:cost-guard-held',
+      `reservation:${reserved.reservation.reservationId.slice(0, 8)}`,
       'trava-ii:fusion-scopes',
       `quality:${quality.fidelityBand}`,
       'j12:stopped',
@@ -401,6 +434,79 @@ export async function evaluateMaestroCreativePulse(
   return { ok: true, value: verdict }
 }
 
+/**
+ * Conveyor nucleus executor (Creative #1) — runs a held pulse reservation through the canonical
+ * CreativeBridge choke (`dispatchCreativeArtifact`). The reservation held by
+ * `evaluateMaestroCreativePulse` is REUSED (single reserve → settle), eliminating the
+ * reserve→cancel→re-reserve TOCTOU, and the returned receipt is tied to the SAME reservation.
+ *
+ * NOT J.12 OrchestratorProd — this is the Maestro+Nexus dispatch leg under Law XVI custody.
+ * Fails closed when the verdict carries no held reservation or the request drifts from it.
+ */
+export async function dispatchMaestroCreativePulse(input: {
+  verdict: MaestroCreativePulseVerdict
+  request: CreativeArtifactRequest
+  adapter: CostGuardLedgerAdapter
+  provider: CreativeProviderDispatch
+  ledger?: TaskEvidenceLedger
+}): Promise<{ result: CreativeArtifactResult; ledger: TaskEvidenceLedger }> {
+  const { verdict, request, adapter, provider } = input
+
+  // Conveyor contract: without a held reservation there is nothing to convey — never silently
+  // reserve a fresh one here (that would re-open the double-reservation race for the caller).
+  if (!verdict.reservationId) {
+    const failedLedger =
+      input.ledger ??
+      createTaskEvidenceLedger({
+        taskId: `creative-${verdict.domain}-conveyor-${randomUUID().slice(0, 8)}`,
+        projectId: request.projectId,
+        mission: `Creative ${verdict.domain}: conveyor dispatch`,
+        ownerAgent: 'MaestroCreativePulse',
+      })
+    const refused = appendTaskEvidence(failedLedger, {
+      kind: 'cost',
+      title: 'Conveyor dispatch refused',
+      summary: 'verdict carries no held reservation — dispatch through the Bridge after a pulse',
+      refs: [],
+      actor: 'MaestroCreativePulse',
+    })
+    return {
+      result: {
+        success: false,
+        artifactId: '',
+        provider: 'none',
+        costUsd: 0,
+        evidenceReceiptId: refused.events[refused.events.length - 1]?.id ?? '',
+        blockedReason: 'cost_guard_denied',
+      },
+      ledger: refused,
+    }
+  }
+
+  return dispatchCreativeArtifact({
+    request: {
+      ...request,
+      existingReservationId: verdict.reservationId,
+    },
+    adapter,
+    provider,
+    ledger: input.ledger,
+  })
+}
+
+/**
+ * Release a held pulse reservation without dispatching (caller aborted the conveyor).
+ * Refunds the full hold via CostGuard cancel. Idempotent — any later settle/cancel on the
+ * released reservation is a no-op in CostGuard.
+ */
+export async function releaseMaestroCreativePulseReservation(
+  verdict: Pick<MaestroCreativePulseVerdict, 'reservationId'>,
+  adapter: CostGuardLedgerAdapter,
+): Promise<void> {
+  if (!verdict.reservationId) return
+  await cancelCreativeCost(verdict.reservationId, adapter)
+}
+
 export function probeMaestroCreativePulseReadiness(): {
   id: 'maestro-creative-pulse'
   status: 'PARTIAL'
@@ -409,6 +515,8 @@ export function probeMaestroCreativePulseReadiness(): {
   orchestratorProdShipped: false
   j12Stopped: true
   miniIaMayOrchestrate: false
+  /** Conveyor nucleus (Creative #1): verdict holds the CostGuard reservation; dispatch reuses it. */
+  conveyorNucleus: true
   note: string
 } {
   const allowlistOk = MINI_IA_ALLOWED_TOOLS.length >= 5
@@ -421,7 +529,8 @@ export function probeMaestroCreativePulseReadiness(): {
     orchestratorProdShipped: false,
     j12Stopped: true,
     miniIaMayOrchestrate: false,
+    conveyorNucleus: true,
     note:
-      'Maestro creative pulse routes Intent→CostGuard→Nexus→Fusion scopes; J.12 OrchestratorProd remains STOPPED; Mini-IA allowlist-only',
+      'Maestro creative pulse holds the CostGuard reservation (conveyor nucleus) and dispatches via CreativeBridge reuse; J.12 OrchestratorProd remains STOPPED; Mini-IA allowlist-only',
   }
 }

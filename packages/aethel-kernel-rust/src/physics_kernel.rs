@@ -9,6 +9,7 @@
 //! **Does not** claim Unreal Chaos / full Euphoria AAA parity.
 //! **HELD:** `chaos_physics_aaa_ready: false` · `euphoria_full_aaa_ready: false`
 
+use crate::euphoria_balance_controller::EUPHORIA_TORSO_DEFAULT_MASS;
 use nalgebra::Vector3;
 use rapier3d::prelude::*;
 use rayon::prelude::*;
@@ -106,12 +107,36 @@ impl PhysicsKernel {
         }
     }
 
-    /// Spawns a physical humanoid torso linked to an Active Ragdoll Balancer.
+    /// Spawns a physical humanoid torso linked to an Active Ragdoll Balancer at
+    /// `(0, pos_y, 0)`. See [`PhysicsKernel::spawn_euphoria_torso_at`] for the
+    /// full-translation variant.
     pub fn spawn_euphoria_torso(&mut self, pos_y: f32) -> RigidBodyHandle {
+        self.spawn_euphoria_torso_at([0.0, pos_y, 0.0])
+    }
+
+    /// Spawns a physical humanoid torso linked to an Active Ragdoll Balancer at
+    /// an explicit translation. Distinct spawn positions let callers (e.g. the
+    /// physics↔GAS duplex) place bodies so overlapping capsule colliders can
+    /// never corrupt measured trajectories with degenerate contact resolution.
+    pub fn spawn_euphoria_torso_at(&mut self, translation: [f32; 3]) -> RigidBodyHandle {
         let rigid_body = RigidBodyBuilder::dynamic()
-            .translation(Vector3::new(0.0, pos_y, 0.0))
+            .translation(Vector3::new(translation[0], translation[1], translation[2]))
             .build();
-        let collider = ColliderBuilder::capsule_y(0.5, 0.3)
+        // Mass 1:1 with the capture-point controller model. The controller
+        // integrates `EUPHORIA_TORSO_DEFAULT_MASS` as a point mass, so the
+        // physical capsule must weigh exactly that: derive the density from the
+        // capsule volume (cylinder + two hemispherical caps). Otherwise every
+        // corrective impulse is ~189× over-strong and the closed loop diverges.
+        const CAPSULE_HALF_HEIGHT: f32 = 0.5;
+        const CAPSULE_RADIUS: f32 = 0.3;
+        let capsule_volume = std::f32::consts::PI
+            * CAPSULE_RADIUS
+            * CAPSULE_RADIUS
+            * (2.0 * CAPSULE_HALF_HEIGHT)
+            + (4.0 / 3.0) * std::f32::consts::PI * CAPSULE_RADIUS.powi(3);
+        let density = EUPHORIA_TORSO_DEFAULT_MASS / capsule_volume;
+        let collider = ColliderBuilder::capsule_y(CAPSULE_HALF_HEIGHT, CAPSULE_RADIUS)
+            .density(density)
             .restitution(0.7)
             .build();
 
@@ -449,6 +474,36 @@ mod tests {
     }
 
     #[test]
+    fn spawned_torso_mass_matches_controller_model() {
+        // R2-F regression: the physical capsule must weigh exactly
+        // EUPHORIA_TORSO_DEFAULT_MASS, otherwise every corrective impulse from
+        // the capture-point controller is ~189× over-strong and the closed
+        // loop diverges to NaN ("torso drifted too far").
+        let mut kernel = PhysicsKernel::new();
+        let torso = kernel.spawn_euphoria_torso(2.0);
+        let body = kernel.rigid_body_set.get(torso).expect("torso body present");
+        let mass = body.mass();
+        assert!(
+            (mass - EUPHORIA_TORSO_DEFAULT_MASS).abs() < 1.0e-2,
+            "torso mass {mass} must equal controller mass {EUPHORIA_TORSO_DEFAULT_MASS}"
+        );
+        // Impulse-to-velocity is 1:1 with the controller model: a 60 N·s hit
+        // must produce Δv = J / m ≈ 0.8 m/s, not 151.5 m/s.
+        kernel
+            .rigid_body_set
+            .get_mut(torso)
+            .expect("torso body present")
+            .apply_impulse(Vector3::new(60.0, 0.0, 0.0), true);
+        let body = kernel.rigid_body_set.get(torso).expect("torso body present");
+        let expected_dv = 60.0 / EUPHORIA_TORSO_DEFAULT_MASS;
+        assert!(
+            (body.linvel().x - expected_dv).abs() < 1.0e-2,
+            "Δv={} must equal J/m={expected_dv}",
+            body.linvel().x
+        );
+    }
+
+    #[test]
     fn determinism_soak_ready_chaos_aaa_held() {
         let r = run_physics_kernel_determinism_soak();
         assert!(r.physics_kernel_determinism_ready);
@@ -478,5 +533,68 @@ mod tests {
         let (fb, _, _) = run_determinism_fixture(30);
         assert_eq!(fa, fb);
         assert_ne!(fa, 0);
+    }
+
+    #[test]
+    fn multiple_ragdolls_simulated_in_soa_without_drift() {
+        let mut kernel = PhysicsKernel::new();
+        let mut handles = Vec::new();
+
+        for i in 0..20 {
+            let torso = kernel.spawn_euphoria_torso(1.0 + (i as f32) * 0.5);
+            handles.push(torso);
+        }
+
+        assert_eq!(handles.len(), 20);
+
+        for _ in 0..30 {
+            kernel.tick_physics(1.0 / 60.0);
+        }
+
+        for &handle in &handles {
+            let body = kernel.rigid_body_set.get(handle).expect("body present");
+            let pos = body.translation();
+            assert!(pos.y.is_finite());
+            assert!(pos.x.is_finite());
+            assert!(pos.z.is_finite());
+        }
+    }
+
+    #[test]
+    fn ragdoll_soa_insertion_and_capacity_bound() {
+        let mut soa = PhysicsRagdollSoA::default();
+
+        // Check clean default
+        assert!(!soa.active_flags[0]);
+        assert_eq!(soa.torque_x[0], 0.0);
+
+        // Dummy handle
+        let handle = RigidBodyHandle::from_raw_parts(0, 0);
+        soa.insert(handle);
+
+        assert!(soa.active_flags[0]);
+        assert_eq!(soa.handles[0], Some(handle));
+        assert!(!soa.active_flags[1]);
+    }
+
+    #[test]
+    fn velocity_damping_dissipates_kinetic_energy() {
+        let mut kernel = PhysicsKernel::new();
+        let torso = kernel.spawn_euphoria_torso(10.0);
+
+        if let Some(body) = kernel.rigid_body_set.get_mut(torso) {
+            body.set_linvel(Vector3::new(20.0, 0.0, 0.0), true);
+            body.set_linear_damping(1.5);
+        }
+
+        let initial_v = kernel.rigid_body_set.get(torso).unwrap().linvel().x;
+
+        for _ in 0..60 {
+            kernel.tick_physics(1.0 / 60.0);
+        }
+
+        let final_v = kernel.rigid_body_set.get(torso).unwrap().linvel().x;
+        assert!(final_v < initial_v, "damping must reduce velocity: {final_v} < {initial_v}");
+        assert!(final_v > 0.0, "velocity must remain positive: {final_v}");
     }
 }

@@ -788,4 +788,28 @@ mod tests {
         assert_eq!(a.near_depth, b.near_depth);
         assert_eq!(a.far_depth, b.far_depth);
     }
+
+    #[test]
+    fn svo_depth_lod_monotonicity_with_distance() {
+        let policy = SvoDepthLodPolicy::default();
+        let depth_near = policy.select_depth_from_distance(0.2);
+        let depth_mid = policy.select_depth_from_distance(2.5);
+        let depth_far = policy.select_depth_from_distance(10.0);
+
+        assert!(depth_near >= depth_mid);
+        assert!(depth_mid >= depth_far);
+        assert!(depth_far >= policy.min_depth);
+        assert!(depth_near <= policy.max_depth);
+    }
+
+    #[test]
+    fn screen_error_monotonicity_with_pixel_tolerance() {
+        let policy = SvoDepthLodPolicy::default();
+        let depth_high_err = policy.select_depth_from_screen_error(500.0);
+        let depth_mid_err = policy.select_depth_from_screen_error(150.0);
+        let depth_low_err = policy.select_depth_from_screen_error(20.0);
+
+        assert!(depth_high_err >= depth_mid_err);
+        assert!(depth_mid_err >= depth_low_err);
+    }
 }

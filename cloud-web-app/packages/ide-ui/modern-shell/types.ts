@@ -63,8 +63,8 @@ export interface PanelState {
   chat: { open: boolean; size: number };
 }
 
-export type SidebarTab = 'explorer' | 'git' | 'research';
+export type SidebarTab = 'explorer' | 'git' | 'research' | 'inspector';
 
 export type BottomPanelMode = 'chat' | 'terminal' | 'diagnostics';
 
-export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';
+export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas' | 'node_editor';

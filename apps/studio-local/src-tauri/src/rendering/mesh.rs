@@ -1,5 +1,4 @@
 use super::pbr_graphics::Vertex;
-use wgpu::util::DeviceExt;
 
 #[repr(C)]
 #[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
@@ -102,29 +101,4 @@ impl Mesh {
         (vertices, indices)
     }
 
-    pub fn create_cube(device: &wgpu::Device) -> Self {
-        let (vertices, indices) = Self::create_cube_data();
-
-        let vertex_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Mesh Vertex Buffer"),
-                contents: bytemuck::cast_slice(&vertices),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
-
-        let index_buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Mesh Index Buffer"),
-                contents: bytemuck::cast_slice(&indices),
-                usage: wgpu::BufferUsages::INDEX,
-            }
-        );
-
-        Self {
-            vertex_buffer,
-            index_buffer,
-            num_elements: indices.len() as u32,
-        }
-    }
 }

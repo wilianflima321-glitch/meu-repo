@@ -46,9 +46,14 @@ describe('A2 J.4 VectorIndex', () => {
     expect(result.searchQuality).toBe('lexical-hash')
 
     const stats = getVectorIndexStats(projectId)
-    expect(stats.sqliteVecExtension).toBe(false)
-    expect(stats.sqliteVecStatus).toBe('held')
     expect(stats.chunkCount).toBeGreaterThan(0)
+    // Native sqlite-vec: available when package+vec0 soak certifies; else honest held + js-cosine
+    expect(['available', 'held']).toContain(stats.sqliteVecStatus)
+    expect(['sqlite-vec-vec0', 'js-cosine']).toContain(stats.annBackend)
+    expect(stats.sqliteVecExtension).toBe(stats.sqliteVecStatus === 'available')
+    if (stats.sqliteVecStatus === 'available') {
+      expect(stats.annBackend).toBe('sqlite-vec-vec0')
+    }
   })
 
   it('reindexes a dirty file under 5s (J-ACC-05)', async () => {

@@ -717,4 +717,22 @@ mod tests {
         assert_ne!("sdfAdaptiveCascadesReady", "hermiteSharpFeaturesReady");
         assert_ne!("sdfAdaptiveCascadesReady", "hermiteDualityGridReady");
     }
+
+    #[test]
+    fn cascade_level_resolutions_strictly_decreasing() {
+        assert_eq!(CASCADE_LEVEL_COUNT, 3);
+        assert!(FINE_RES > MID_RES);
+        assert!(MID_RES > COARSE_RES);
+        assert_eq!(FINE_RES, 16);
+        assert_eq!(MID_RES, 8);
+        assert_eq!(COARSE_RES, 4);
+    }
+
+    #[test]
+    fn cascade_volume_sample_inside_sphere_negative_sign() {
+        let vol = SdfAdaptiveCascades::default_volume();
+        let sample = vol.sample_adaptive([0.1, 0.1, 0.1]);
+        assert!(sample.sdf < 0.0, "Interior point must have negative SDF: {}", sample.sdf);
+        assert_eq!(sample.lod, 0, "Near center must select finest LOD level");
+    }
 }

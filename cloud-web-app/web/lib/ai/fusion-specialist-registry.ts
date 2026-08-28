@@ -3,6 +3,9 @@
  * Domain elite only. Nano / dumb fallback banned.
  */
 
+import type { TauriInvokeFn } from '@/lib/kernel/kernel-rust-foundation-tauri-bridge'
+import { createComponentLogger } from '@/lib/observability/logger'
+
 export type ApexQualityTier = 'apex' | 'premium' | 'fast' | 'hero'
 /** nano is typed only so CI can reject selection — never register nano candidates */
 export type ForbiddenQualityTier = 'nano' | 'dumb'
@@ -162,4 +165,97 @@ export function selectMoAGenerators(input: {
     }
   }
   return picks
+}
+
+/**
+ * MoA sub-task contract passed to the Rust Kernel Rayon orchestrator.
+ * Typed so the Rust bridge cannot receive ad-hoc `any` payloads.
+ */
+export interface MoASubTask {
+  id: string
+  title: string
+  domain: ApexTaskDomain
+  prompt: string
+  /** Optional generation parameters forwarded verbatim to the Rust orchestrator. */
+  params?: Record<string, unknown>
+}
+
+/** Honest result envelope — never a bare `null` that hides a silent failure. */
+export interface MoAOrchestrationResult {
+  ok: boolean
+  /** `tauri` = dispatched to the Rust Kernel; `fallback` = Tauri runtime absent (fail-closed). */
+  source: 'tauri' | 'fallback'
+  goalTitle: string
+  sessionId: string
+  taskCount: number
+  /** Raw Rust Kernel invoke payload when `source === 'tauri'`. */
+  payload?: unknown
+}
+
+const moaLog = createComponentLogger('fusion-specialist-registry')
+
+function isTauriRuntime(): boolean {
+  if (typeof window === 'undefined') return false
+  return '__TAURI_INTERNALS__' in window || '__TAURI__' in window
+}
+
+/** Dynamic import that Vite/vitest cannot statically resolve (desktop-only deps). */
+async function importTauriCore(): Promise<{ invoke: TauriInvokeFn }> {
+  const specifier = ['@tauri-apps', 'api', 'core'].join('/')
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+  const dynamicImport = new Function('s', 'return import(s)') as (
+    s: string,
+  ) => Promise<{ invoke: TauriInvokeFn }>
+  return dynamicImport(specifier)
+}
+
+/**
+ * Offloads MoA Orchestration to the Rust Kernel (Rayon Threadpool).
+ * Non-blocking for the TS UI thread and main kernel thread.
+ *
+ * Fail-closed contract (Zero-MVP / Anti-Mock): when the Tauri runtime is not
+ * present, the call reports `{ ok: false, source: 'fallback' }` instead of
+ * pretending the Rust kernel ran. Bridge failures rethrow — never swallowed.
+ */
+export async function executeRustMoAOrchestrator(
+  goalTitle: string,
+  sessionId: string,
+  subTasks: readonly MoASubTask[],
+): Promise<MoAOrchestrationResult> {
+  if (!isTauriRuntime()) {
+    moaLog.warn(
+      '[MoA Orchestrator] Tauri runtime not detected — Rust kernel offload unavailable (fail-closed fallback).',
+    )
+    return {
+      ok: false,
+      source: 'fallback',
+      goalTitle,
+      sessionId,
+      taskCount: subTasks.length,
+    }
+  }
+
+  try {
+    moaLog.info(
+      `[MoA Orchestrator] Offloading '${goalTitle}' (${subTasks.length} tasks) to Rust Kernel via Rayon.`,
+    )
+    const core = await importTauriCore()
+    const payload = await core.invoke('run_moa_orchestrator', {
+      goalTitle,
+      sessionId,
+      subTasks: [...subTasks],
+    })
+    return {
+      ok: true,
+      source: 'tauri',
+      goalTitle,
+      sessionId,
+      taskCount: subTasks.length,
+      payload,
+    }
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e))
+    moaLog.error('[MoA Orchestrator] Rust bridge failed, fail-closed enforcement:', err)
+    throw err
+  }
 }

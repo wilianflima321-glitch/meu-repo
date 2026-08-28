@@ -2,6 +2,12 @@
 //!
 //! Eliminates "dead eye syndrome" (*olhar de peixe morto*) by injecting realistic micro-saccadic
 //! eye movements, eyelid blinks, and eyebrow micro-tremors driven by speech emotional valence.
+//!
+//! **Correction 2026-08-14kc** (Facial Performance round): `saccade_freq` is expressed in Hz
+//! (30-50, inside the documented 20-80 Hz fixational-tremor band), so the phase must be
+//! `2*PI*f*t`. Previously the missing factor made the real oscillation `f/(2*PI)` around
+//! 4.8-7.6 Hz - a physical unit error contradicting this module's own 20-80 Hz contract.
+//! Fixed with `TAU` so the delivered micro-tremor genuinely sits in the 20-80 Hz band.
 
 use serde::{Deserialize, Serialize};
 
@@ -26,8 +32,8 @@ impl EmotionMicroSaccadeEngine {
     ) -> MicroSaccadeEyeState {
         // High frequency low amplitude micro-saccade tremor (20-80 Hz)
         let saccade_freq = 30.0 + emotional_valence.abs() * 20.0;
-        let saccade_x = (t * saccade_freq).sin() * 0.005;
-        let saccade_y = (t * (saccade_freq * 1.3)).cos() * 0.003;
+        let saccade_x = (t * saccade_freq * std::f32::consts::TAU).sin() * 0.005;
+        let saccade_y = (t * (saccade_freq * 1.3) * std::f32::consts::TAU).cos() * 0.003;
 
         // Periodic natural blink every 3.5 seconds
         let blink_phase = t % 3.5;

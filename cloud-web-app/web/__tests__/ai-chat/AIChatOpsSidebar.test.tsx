@@ -3,6 +3,30 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AIChatOpsSidebar } from '@/components/agents/chat/ops'
 
+// MonacoChatDiffPanel is loaded via next/dynamic and cannot run under jsdom —
+// the same mock contract used by AIChatProposalPreview.test.tsx.
+vi.mock('@aethel/ide-ui/MonacoChatDiffPanel', () => ({
+  MonacoChatDiffPanel: ({
+    filePath,
+    onAcceptAll,
+    onReject,
+  }: {
+    filePath: string
+    onAcceptAll: (value: string) => void
+    onReject: () => void
+  }) => (
+    <div>
+      <span>{filePath}</span>
+      <button type="button" onClick={() => onAcceptAll('const value = 2')}>
+        Apply all
+      </button>
+      <button type="button" onClick={onReject}>
+        Reject
+      </button>
+    </div>
+  ),
+}))
+
 describe('AIChatOpsSidebar', () => {
   beforeEach(() => {
     window.localStorage.clear()
@@ -48,13 +72,15 @@ describe('AIChatOpsSidebar', () => {
       render(
         <AIChatOpsSidebar
           showAdvancedControls
-          opsTab="approval"
+          opsTab="diff"
           onOpsTabChange={() => undefined}
-          pendingDiff={{
-            path: 'src/app.tsx',
-            oldContent: 'const value = 1',
-            newContent: 'const value = 2',
-          }}
+          pendingDiffs={[
+            {
+              path: 'src/app.tsx',
+              oldContent: 'const value = 1',
+              newContent: 'const value = 2',
+            },
+          ]}
           onAcceptDiff={onAcceptDiff}
           onRejectDiff={() => undefined}
           projectId="project-42"
@@ -62,11 +88,14 @@ describe('AIChatOpsSidebar', () => {
         />
       )
 
-      expect(screen.getByText('src/app.tsx')).toBeInTheDocument()
-      fireEvent.click(screen.getByRole('button', { name: /Apply all/i }))
+      // The `diff` tab surfaces each pending diff with its file path and routes
+      // accept through `onAcceptDiff(targetPath, finalModified)`.
+      expect(screen.getByText('File: src/app.tsx')).toBeInTheDocument()
+      const applyAllButton = await screen.findByRole('button', { name: /Apply all/i })
+      fireEvent.click(applyAllButton)
 
       await waitFor(() => {
-        expect(onAcceptDiff).toHaveBeenCalledWith('const value = 2')
+        expect(onAcceptDiff).toHaveBeenCalledWith('src/app.tsx', 'const value = 2')
       })
     },
     30000

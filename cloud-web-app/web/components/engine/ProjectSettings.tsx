@@ -131,7 +131,7 @@ export default function ProjectSettings() {
         gap: '16px',
       }}>
         <span style={{ fontWeight: 'bold', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Settings className="w-4 h-4 text-indigo-400" /> Project Settings
+          <Settings className="w-4 h-4 text-[var(--aethel-primary)]" /> Project Settings
         </span>
 
         <div style={{ flex: 1 }} />

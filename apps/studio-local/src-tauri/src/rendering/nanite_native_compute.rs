@@ -1,5 +1,3 @@
-use std::sync::Arc;
-use wgpu::util::DeviceExt;
 use crate::wgpu_renderer::WgpuRenderer;
 
 pub struct NativeNaniteCompute {
@@ -81,6 +79,7 @@ impl NativeNaniteCompute {
             layout: Some(&pipeline_layout),
             module: &shader,
             entry_point: "cull_meshlets",
+            compilation_options: wgpu::PipelineCompilationOptions::default(),
         });
 
         Self {

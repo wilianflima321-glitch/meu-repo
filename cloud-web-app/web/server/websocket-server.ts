@@ -6,19 +6,14 @@
  * so the script path stays stable while the runtime behavior stays aligned.
  */
 
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
-
-const require = createRequire(import.meta.url);
-const wsRuntime = require('../lib/server/websocket-server.ts') as typeof import('../lib/server/websocket-server');
-
-const {
+import {
   getWebSocketServer,
   startWebSocketServer,
   broadcastToRoom,
   broadcastAll,
   eventBus,
-} = wsRuntime;
+} from '../lib/server/websocket-server.ts';
 
 function resolvePort(): number {
   const rawPort =

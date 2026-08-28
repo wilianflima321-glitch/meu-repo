@@ -22,6 +22,7 @@ import {
   RefreshCw,
   AlertCircle,
   Crown,
+  Sparkles,
 } from 'lucide-react';
 import { CreditWalletPurchasePanel } from '@/components/billing/CreditWalletPurchasePanel';
 

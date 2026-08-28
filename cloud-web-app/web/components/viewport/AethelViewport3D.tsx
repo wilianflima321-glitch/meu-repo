@@ -213,7 +213,27 @@ export function AethelViewport3D({
 
   useEffect(() => {
     function handleViewportHotkeys(event: KeyboardEvent) {
-      if (event.metaKey || event.ctrlKey || event.altKey || isEditableViewportKeyboardTarget(event.target)) return
+      if (isEditableViewportKeyboardTarget(event.target)) return
+
+      // Unreal/Blender style Camera Bookmarks (Ctrl+1..9 to recall, Ctrl+Shift+1..9 to save)
+      if ((event.ctrlKey || event.metaKey) && event.code.startsWith('Digit') && event.code !== 'Digit0') {
+        const slot = parseInt(event.code.replace('Digit', ''), 10)
+        if (slot >= 1 && slot <= 9) {
+          event.preventDefault()
+          const { useViewportSceneStore } = require('@/lib/stores/viewport-scene-store')
+          const store = useViewportSceneStore.getState()
+          if (event.shiftKey || event.altKey) {
+            // Save current viewpoint bookmark
+            store.saveCameraBookmark(slot, [3.8, 2.4, 4.8], [0, 0.65, 0], 46, `View ${slot}`)
+          } else {
+            // Recall bookmark
+            store.recallCameraBookmark(slot)
+          }
+          return
+        }
+      }
+
+      if (event.metaKey || event.ctrlKey || event.altKey) return
       if (event.code === 'KeyW') {
         event.preventDefault()
         onTransformModeChange('translate')
@@ -277,6 +297,7 @@ export function AethelViewport3D({
       data-viewport-render-target={renderTarget}
       data-viewport-frameloop={frameloop}
       data-workspace-code-profile={codeProfile ? 'true' : 'false'}
+      data-capability-score={capabilityScore}
       onDragOver={handleAssetDragOver}
       onDragLeave={handleAssetDragLeave}
       onDrop={handleAssetDrop}

@@ -85,7 +85,7 @@ function TransformSection({
         <span style={{ fontSize: '10px', color: 'var(--aethel-text-muted)', display: 'flex', alignItems: 'center' }}>
           {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         </span>
-        <Move className="w-4 h-4 text-indigo-400" />
+        <Move className="w-4 h-4 text-[var(--aethel-primary)]" />
         <span style={{
           flex: 1,
           fontWeight: 'bold',
@@ -440,7 +440,7 @@ export default function DetailsPanel({
           alignItems: 'center',
           gap: '8px',
         }}>
-          <SlidersHorizontal className="w-4 h-4 text-indigo-400" /> Details
+          <SlidersHorizontal className="w-4 h-4 text-[var(--aethel-primary)]" /> Details
         </div>
         <div style={{
           flex: 1,
@@ -476,7 +476,7 @@ export default function DetailsPanel({
         alignItems: 'center',
         gap: '8px',
       }}>
-        <SlidersHorizontal className="w-4 h-4 text-indigo-400" /> Details
+        <SlidersHorizontal className="w-4 h-4 text-[var(--aethel-primary)]" /> Details
       </div>
       <EditorScaleReadinessBadge readiness={detailsScaleReadiness} />
       {/* Content */}

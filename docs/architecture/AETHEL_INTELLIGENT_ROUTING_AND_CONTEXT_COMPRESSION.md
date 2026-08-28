@@ -1,17 +1,22 @@
 # Aethel Engine — Intelligent Routing & Context Compression (Onda J + L)
 
-**Version:** 1.2 (Chief Architect — **Apex Router**; elite open-weights fallback; Zero Amnesia Laws gate)  
-**Status:** **Binding** for Onda J (Nexus) + Onda L (Forge)  
-**Date:** 2026-07-09  
+**Version:** 1.3 (Chief Architect — **DeepSeek-V4-Pro backend spine**; Cognitive Compression Cycle at task boundary; NPC mini-IA)
+**Status:** **Binding** for Onda J (Nexus) + Onda L (Forge)
+**Date:** 2026-08-10
 
 **Doctrine overlay (wins on conflict):** [`AETHEL_APEX_DOCTRINE_AND_EXECUTION_FOCUS.md`](./AETHEL_APEX_DOCTRINE_AND_EXECUTION_FOCUS.md) — Decisions **#56–#58**
 
 **Does not change:** retail prices ($0/$9/$29/$79), dual-pool sizes (Fast weighted pool vs Premium raw), Ultra-off-sub.  
 **Does change (v1.2):**  
-- **Apex-first:** per TaskDomain, select **LMSYS Arena / Aethel-bench elite** — **not** “any cheap specialist”  
-- Premium empty → **elite open-weights** (Grok-class, Qwen 72B-class, peers) — **never** Nano/dumb  
-- **Architecture Laws pack** mandatory before any agent write (Zero Amnesia)  
-- Cost ceilings = **pool entitlement filters**, not quality sacrifice  
+- **Apex-first:** per TaskDomain, select **LMSYS Arena / Aethel-bench elite** — **not** “any cheap specialist”
+- Default Backend / Premium empty → **DeepSeek-V4-Pro (Apex Reasoning)** — **never** Nano/dumb (Qwen/Llama banned)
+- **Architecture Laws pack** mandatory before any agent write (Zero Amnesia)
+- Cost ceilings = **pool entitlement filters**, not quality sacrifice (DeepSeek yields ~20x higher turns per USD, boosting margin without dropping quality)
+
+**Does change (v1.3):**
+- **DeepSeek-V4-Pro = absolute backend spine** (Complex code/Rust-Kernel, Critic/plan LazyInspector, Worker) — Qwen 72B / Grok / Llama **expunged** from supported lanes
+- **Cognitive Compression Cycle (CCC)** — at task boundary, `<think>` tags **deleted**; **State Digest (150 tok)** replaces raw history (§2.4)
+- **NPC dialogue → downloadable mini-IA first** (spares Premium Elite pool); narrative prose → Maestro; DeepSeek banned for narrative
 
 **Code today (honest):**
 - Router **partial:** `lib/ai/intelligent-model-router.ts` + `fusion-role-map.ts` — **no** Apex registry, **no** Laws gate  
@@ -68,7 +73,7 @@ flowchart LR
   Laws -->|PASS| Class[TaskDomain classifier]
   Class --> Apex[Apex Router]
   Apex -->|Premium left| Prem[Elite closed: Sonnet / GPT-4o / DeepSeek V3…]
-  Apex -->|Premium empty| OW[Elite open-weights: Grok / Qwen 72B…]
+  Apex -->|Premium empty / Logic| OW[DeepSeek-V4-Pro (Apex Open-Weights)]
   Prem --> Work[Worker / Critic / Maestro]
   OW --> Work
   Work --> Gate[L.5 + Critic]
@@ -77,8 +82,8 @@ flowchart LR
 
 | Lane | When Premium remains | When Premium empty |
 |------|----------------------|--------------------|
-| **Maestro / Critic** | Elite closed (Sonnet-class etc.) | Elite open-weights ≠ Actor family |
-| **Worker** | Apex for domain (DeepSeek V3 / Sonnet / GPT-4o per pool weights) | Apex open-weights for domain |
+| **Maestro / Critic** | Elite closed (Sonnet-class etc.) | DeepSeek-V4-Pro (Apex Reasoning) |
+| **Worker** | Apex for domain (DeepSeek V3 / Sonnet / GPT-4o per pool weights) | DeepSeek-V4-Pro (Apex) |
 | **Hero** | Wallet/BYOK Ultra only | Same |
 
 ### 1.2 ChewedWorkerTask
@@ -127,6 +132,15 @@ DROP: full monorepo / full scene JSON / raw long chat
 
 Default budgets: chat 2K · Worker 1.5K · Maestro 2.5K · Critic 1.2K · world step 3K (Laws digest always included in P0).
 
+### 2.4 Cognitive Compression Cycle (Garbage Collection)
+
+| Rule | Binding |
+|------|---------|
+| **Trigger** | Executed at Task Boundaries (when Critic QA approves a sub-task). |
+| **Pruning** | `<think>` tags and internal CoT rambling are **deleted** from historical context. |
+| **State Digest** | A 150-token summary (Problem Solved, Files Touched, Architectural Impact) replaces the raw history. |
+| **Zero Amnesia** | Digest is attached to `MultiSurfaceContextPack` to retain architectural memory without VRAM explosion. |
+
 ---
 
 ## 3. Apex Fusion Auto — TaskDomain → elite
@@ -144,21 +158,22 @@ Default budgets: chat 2K · Worker 1.5K · Maestro 2.5K · Critic 1.2K · world 
 
 | TaskDomain | Premium path (Apex) | Premium empty (Apex open-weights) |
 |------------|---------------------|-----------------------------------|
-| Complex code | Claude Sonnet-class, GPT-4o, DeepSeek V3 | Qwen 72B-class, Grok-class, top open code |
-| Shader | Same + shader bench | Top open code + long context |
-| Lore | Top Arena writing | Top open 70B+ creative |
-| Extract | Strong structured (not Nano) | Same class OW |
-| Critic / plan | Premium elite | Strongest OW ≠ Actor family |
+| Complex code (Rust/Math) | DeepSeek-V4-Pro (Apex) | DeepSeek-V4-Pro (Apex) |
+| Shader | Same + shader bench | DeepSeek-V4-Pro |
+| Lore / Narrative (quest prose) | Claude 3.5 Sonnet / GPT-4o (Maestro) | **NPC dialogue → downloadable mini-IA first** (spares Premium pool); surplus prose → Maestro (DeepSeek Banned for Narrative) |
+| Visual Script / Graphs | DeepSeek-V4-Pro (Apex) | DeepSeek-V4-Pro |
+| Critic / plan (LazyInspector) | DeepSeek-V4-Pro (Apex) | DeepSeek-V4-Pro |
 
 ### 3.3 Selection algorithm (v1.2)
 
 1. Laws gate PASS (writes)  
 2. Classify TaskDomain  
-3. Load Apex candidates (Arena top + Aethel bench)  
-4. Premium remaining → prefer Premium-class Apex for Maestro/Critic/high Risk  
-5. Else highest Apex score on Fast-pool-eligible elites  
-6. Fallback = next Apex peers — **never Nano**  
-7. No Apex candidate → **deny** + wallet/BYOK CTA (do not degrade)
+3. **Multimodal Fallback Gate:** If TaskDomain requires vision, audio, or narrative prose (Lore/Quests), DeepSeek is explicitly **blocked**. **NPC dialogue → downloadable mini-IA first** (local, spares Premium pool); only surplus/quality-critical prose routes to Premium Maestro (Claude/GPT-4o).
+4. Load Apex candidates (DeepSeek-V4-Pro default for logic/code/graphs).
+5. Premium remaining → prefer Premium-class Apex for Maestro/high Risk (unless it's Rust/Kernel, where DeepSeek remains Apex).
+6. Else highest Apex score on Fast-pool-eligible elites (DeepSeek).
+7. Fallback = next Apex peers — **never Nano**  
+8. No Apex candidate → **deny** + wallet/BYOK CTA (do not degrade)
 
 ### 3.4 Registry
 
@@ -204,7 +219,7 @@ export interface FusionAutoDecision {
 | **L.6** | Laws → Apex Worker → L.5 → Critic |
 | **#54** pack + **#58** Laws | Both hard gates |
 
-**Decisions:** #53 amended · #55 ban Nano · #56 Apex doctrine · #57 Apex-first · #58 Laws gate
+**Decisions:** #53 amended · #55 ban Nano · #56 Apex doctrine · #57 Apex-first · #58 Laws gate · **#67 DeepSeek-V4-Pro spine + CCC + NPC mini-IA**
 
 ---
 
@@ -242,3 +257,4 @@ Apex may burn Fast pool faster than weak models — **accepted**. Protect via Jo
 | 2026-07-09 | 1.0 | Maestro/Worker; Nano; #53–#54 |
 | 2026-07-09 | 1.1 | Fusion Auto; ban Nano; #55 |
 | 2026-07-09 | **1.2** | **Apex Router; elite OW fallback; Laws gate #56–#58; cost must not outrank quality** |
+| 2026-08-10 | **1.3** | **DeepSeek-V4-Pro absolute backend spine; Qwen 72B/Grok/Llama expunged; CCC at task boundary (State Digest replaces `<think>`); NPC dialogue → downloadable mini-IA; #67** |

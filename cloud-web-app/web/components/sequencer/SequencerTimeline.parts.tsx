@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Camera,
   Diamond,
@@ -11,6 +11,7 @@ import {
   Lock,
   Music,
   Move,
+  Trash2,
   Unlock,
   Volume2,
   VolumeX,
@@ -65,10 +66,15 @@ const trackTypeIcons: Record<TrackType, typeof Camera> = {
 // ============================================================================
 
 export function formatTime(seconds: number, frameRate: number): string {
-  const mins = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
   const frames = Math.floor((seconds % 1) * frameRate);
-  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+}
+
+export function formatAbsoluteFrame(seconds: number, frameRate: number): number {
+  return Math.floor(seconds * frameRate);
 }
 
 export function timeToPixels(time: number, pixelsPerSecond: number): number {
@@ -163,14 +169,27 @@ const KeyframeDot: React.FC<{
   pixelsPerSecond: number;
   onSelect: () => void;
   onDrag: (newTime: number) => void;
-}> = ({ keyframe, trackColor, pixelsPerSecond, onSelect, onDrag }) => {
+  onEasingChange?: (easing: TimelineKeyframe["easing"]) => void;
+  onDelete?: () => void;
+}> = ({
+  keyframe,
+  trackColor,
+  pixelsPerSecond,
+  onSelect,
+  onDrag,
+  onEasingChange,
+  onDelete,
+}) => {
   const x = timeToPixels(keyframe.time, pixelsPerSecond);
   const isDragging = useRef(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      if (e.button === 2) return; // ignore right click for drag
       e.stopPropagation();
       onSelect();
+      setShowMenu(false);
       isDragging.current = true;
 
       const startX = e.clientX;
@@ -195,37 +214,107 @@ const KeyframeDot: React.FC<{
     [keyframe.time, pixelsPerSecond, onSelect, onDrag],
   );
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    setShowMenu((prev) => !prev);
+  };
+
   return (
     <div
-      onMouseDown={handleMouseDown}
       style={{
         position: "absolute",
-        left: `${x - 6}px`,
+        left: `${x}px`,
         top: "50%",
-        transform: "translateY(-50%) rotate(45deg)",
-        width: "10px",
-        height: "10px",
-        background: keyframe.selected
-          ? "var(--aethel-text-primary)"
-          : trackColor,
-        border: `2px solid ${keyframe.selected ? colors.primary : trackColor}`,
-        borderRadius: "2px",
-        cursor: "pointer",
-        boxShadow: keyframe.selected ? `0 0 0 2px ${colors.primary}40` : "none",
+        transform: "translate(-50%, -50%)",
+        zIndex: showMenu ? 50 : 10,
       }}
-    />
+    >
+      <div
+        onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
+        title={`Keyframe at ${keyframe.time.toFixed(2)}s (${keyframe.easing}) — Right-click for easing`}
+        style={{
+          width: "10px",
+          height: "10px",
+          transform: "rotate(45deg)",
+          background: keyframe.selected
+            ? "var(--aethel-text-primary)"
+            : trackColor,
+          border: `2px solid ${keyframe.selected ? colors.primary : trackColor}`,
+          borderRadius: "2px",
+          cursor: "pointer",
+          boxShadow: keyframe.selected ? `0 0 0 2px ${colors.primary}40` : "none",
+        }}
+      />
+
+      {showMenu && (
+        <div
+          className="absolute z-50 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] p-1 shadow-2xl text-[10px] min-w-[120px]"
+          style={{ top: "14px", left: "50%", transform: "translateX(-50%)" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-2 py-1 font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider text-[9px]">
+            Easing: {keyframe.easing}
+          </div>
+          {(
+            ["linear", "easeIn", "easeOut", "easeInOut", "hold", "bezier"] as const
+          ).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                onEasingChange?.(mode);
+                setShowMenu(false);
+              }}
+              className={`w-full text-left px-2 py-1 rounded transition-colors ${
+                keyframe.easing === mode
+                  ? "bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] font-medium"
+                  : "text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+              }`}
+            >
+              {mode === "easeIn"
+                ? "Ease In"
+                : mode === "easeOut"
+                  ? "Ease Out"
+                  : mode === "easeInOut"
+                    ? "Ease In/Out"
+                    : mode.charAt(0).toUpperCase() + mode.slice(1)}
+            </button>
+          ))}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => {
+                onDelete();
+                setShowMenu(false);
+              }}
+              className="w-full text-left px-2 py-1 mt-0.5 rounded text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] font-medium flex items-center gap-1.5"
+            >
+              <Trash2 size={10} />
+              Delete Keyframe
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
 // ============================================================================
 // TRACK ROW
 // ============================================================================
-
 export const TrackRow: React.FC<{
   track: TimelineTrack;
   pixelsPerSecond: number;
   onKeyframeSelect: (keyframeId: string) => void;
   onKeyframeDrag: (keyframeId: string, newTime: number) => void;
+  onKeyframeEasingChange?: (
+    keyframeId: string,
+    easing: TimelineKeyframe["easing"],
+  ) => void;
+  onKeyframeDelete?: (keyframeId: string) => void;
   onToggleLock: () => void;
   onToggleVisible: () => void;
   onToggleMute: () => void;
@@ -235,6 +324,8 @@ export const TrackRow: React.FC<{
   pixelsPerSecond,
   onKeyframeSelect,
   onKeyframeDrag,
+  onKeyframeEasingChange,
+  onKeyframeDelete,
   onToggleLock,
   onToggleVisible,
   onToggleMute,
@@ -313,7 +404,7 @@ export const TrackRow: React.FC<{
             type="button"
             onClick={onToggleVisible}
             aria-label={track.visible === false ? "Show track" : "Hide track"}
-            aria-pressed={track.visible !== false}
+            aria-pressed={track.visible === false}
             style={{
               background: "transparent",
               border: "none",
@@ -362,6 +453,8 @@ export const TrackRow: React.FC<{
             pixelsPerSecond={pixelsPerSecond}
             onSelect={() => onKeyframeSelect(kf.id)}
             onDrag={(newTime) => onKeyframeDrag(kf.id, newTime)}
+            onEasingChange={(easing) => onKeyframeEasingChange?.(kf.id, easing)}
+            onDelete={() => onKeyframeDelete?.(kf.id)}
           />
         ))}
       </div>

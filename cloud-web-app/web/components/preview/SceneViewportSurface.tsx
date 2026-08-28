@@ -42,15 +42,11 @@ export default function SceneViewportSurface({
     timelineDuration,
     timelineTime,
     setTimelineTime,
-    facialBlendShapeCount,
-    hairPresetLabel,
-    visualScript,
     activeWorkflowLabel,
     exportStatus,
     renderQuality,
     setRenderQuality,
     handleExportViewport,
-    openWorkflowTool,
     handleTogglePlay,
     handleObjectTransformChange,
     handleObjectTextureMapsChange,
@@ -93,16 +89,6 @@ export default function SceneViewportSurface({
             gizmoPivotMode={gizmoPivotMode}
             snapEnabled={snapEnabled}
             isPlaying={isPlaying}
-            facialBlendShapeCount={facialBlendShapeCount}
-            hairPresetLabel={hairPresetLabel}
-            visualScriptNodeCount={visualScript.nodes.length}
-            visualScriptEdgeCount={visualScript.edges.length}
-            activeWorkflowLabel={activeWorkflowLabel}
-            onOpenFacialEditor={() => openWorkflowTool('facial')}
-            onOpenHairEditor={() => openWorkflowTool('hair')}
-            onOpenVisualScript={() => openWorkflowTool('visual-script')}
-            onOpenVfxGraph={() => openWorkflowTool('vfx')}
-            onOpenAbilityEditor={() => openWorkflowTool('ability')}
             onTransformModeChange={setTransformMode}
             onTransformSpaceChange={setTransformSpace}
             onGizmoConstraintChange={setGizmoConstraint}

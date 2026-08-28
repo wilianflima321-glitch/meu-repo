@@ -5,7 +5,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WorkbenchEntryNotice } from '../../components/ide/fullscreen/WorkbenchEntryNotice';
+import { WorkbenchEntryNotice } from '@aethel/ide-ui/fullscreen/WorkbenchEntryNotice';
 
 describe('WorkbenchEntryNotice', () => {
   it('renders the notice title and description', () => {

@@ -3,25 +3,34 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Activity,
+  Box,
   Camera,
   ChevronDown,
+  Circle,
   Cpu,
   Crosshair,
+  Cylinder,
   Gauge,
   Globe2,
   Grid2x2,
+  Lightbulb,
   Move3D,
+  Music,
   PauseCircle,
+  Plus,
   RotateCw,
   Scale3D,
+  Sun,
   Target,
 } from 'lucide-react'
 import {
   VIEWPORT_CAMERA_PRESETS,
   type ViewportCameraPreset,
 } from '@/components/viewport/viewport-camera-presets'
+import { useViewportSceneStore } from '@/lib/stores/viewport-scene-store'
 import type {
   ViewportRenderStats,
+  ViewportSceneObject,
   ViewportTransformMode,
   ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D'
@@ -198,6 +207,7 @@ export function ViewportTopToolbar({
           activeButton={activeButton}
           compactTextButton={compactTextButton}
         />
+        <ViewportAddObjectDropdown />
         {onQuadViewChange ? (
           <button
             type="button"
@@ -331,3 +341,107 @@ function ViewportCameraDropdown({
     </div>
   )
 }
+
+function ViewportAddObjectDropdown() {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
+  // Global Shift+A handler to toggle spawn menu
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        const target = e.target as HTMLElement | null
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return
+        }
+        e.preventDefault()
+        setOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const spawnPrimitive = (type: 'cube' | 'sphere' | 'cylinder' | 'light' | 'point-light' | 'camera' | 'audio', name: string) => {
+    const geometry = type === 'cube' ? 'box' : type === 'sphere' ? 'sphere' : type === 'cylinder' ? 'cylinder' : undefined
+    const newObj: ViewportSceneObject = {
+      id: `obj_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      name: `${name} ${Date.now().toString().slice(-4)}`,
+      type: type === 'light' || type === 'point-light' ? 'light' : type === 'camera' ? 'camera' : 'mesh',
+      geometry,
+      color: type === 'light' || type === 'point-light' ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
+      position: [0, type === 'light' || type === 'point-light' ? 4 : 0, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      visible: true,
+      locked: false,
+    }
+    useViewportSceneStore.getState().addObject(newObj)
+    setOpen(false)
+  }
+
+  return (
+    <div ref={menuRef} className="relative" data-viewport-add-menu="progressive">
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-label="Add object to scene (Shift+A)"
+        title="Add Object (Shift+A)"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-2.5 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+      >
+        <Plus className="h-4 w-4 text-[var(--aethel-primary)]" />
+        <span className="hidden sm:inline">Add</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-11 z-30 grid min-w-[170px] gap-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(var(--aethel-panel-ink-rgb),0.96)] p-2 shadow-[0_22px_64px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100 text-xs">
+          <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+            Spawn Actors (Shift+A)
+          </p>
+          {[
+            { id: 'cube' as const, name: 'Box / Cube', icon: Box },
+            { id: 'sphere' as const, name: 'UV Sphere', icon: Circle },
+            { id: 'cylinder' as const, name: 'Cylinder', icon: Cylinder },
+            { id: 'light' as const, name: 'Directional Sun', icon: Sun },
+            { id: 'point-light' as const, name: 'Point Light', icon: Lightbulb },
+            { id: 'camera' as const, name: 'Cinematic Camera', icon: Camera },
+            { id: 'audio' as const, name: 'Spatial Audio', icon: Music },
+          ].map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => spawnPrimitive(item.id, item.name)}
+                className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] hover:text-[var(--aethel-text-primary)]"
+              >
+                <Icon className="h-3.5 w-3.5 text-[var(--aethel-text-tertiary)]" />
+                <span>{item.name}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+

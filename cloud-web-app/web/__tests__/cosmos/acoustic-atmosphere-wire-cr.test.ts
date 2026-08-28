@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Letter cr â€” Volumetric acoustic atmosphere â†’ playtest/audio bus Vitest.
  * (Letter cq reserved â€” Ocean Mesh Bind + Explicit Buoyancy; do not reuse.)
  */

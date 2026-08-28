@@ -6,6 +6,18 @@
 //! are bilinearly upsampled and merged into finer levels to estimate fixture
 //! irradiance.
 //!
+//! **Deepen (2026-08-20, Todo #12 — iluminação ray-traced + cores vs Unreal):**
+//! the stack now also performs (1) **software ray-traced occlusion** —
+//! [`RadianceCascadeStack::segment_sdf_transmittance`] marches a probe→light
+//! segment against a 2D circle SDF (Beer–Lambert extinction), and
+//! [`RadianceCascadeStack::populate_from_lights_with_occlusion`] shadows probes
+//! behind the occluder (the deterministic CPU analogue of Lumen's software ray
+//! tracing); plus (2) **one-bounce albedo color bleeding** —
+//! [`RadianceCascadeStack::propagate_albedo_bleed`] re-emits coarse-cascade
+//! irradiance weighted by a per-probe surface albedo, transferring surface
+//! color onto neighbors (the "cores" half of GI). Both deterministic and
+//! soak-tested; **AAA / Lumen parity remains HELD**.
+//!
 //! Soak proves lit probe > dark probe, cascade merge energy ≥ 0 (and
 //! fine-after-merge ≥ fine-before), same seed→same. Honesty probe
 //! `radiance_cascades_gi_ready` / `radianceCascadesGiReady` is **distinct**
@@ -33,6 +45,18 @@ pub const MIN_LIT_DELTA: f32 = 0.02;
 /// Fingerprint seed ("gmrc").
 const FP_SEED: u64 = 0x676D_7263;
 const EPS: f32 = 1e-6;
+
+/// 2D circle occluder center (XY plane) — an infinite cylinder in Z for the
+/// software ray-traced occlusion march.
+pub const OCCLUDER_CENTER: [f32; 2] = [0.05, 0.0];
+/// 2D circle occluder radius (world units).
+pub const OCCLUDER_RADIUS: f32 = 0.18;
+/// Segment ray-march step count for SDF occlusion.
+pub const OCCLUSION_MARCH_STEPS: usize = 12;
+/// Beer–Lambert extinction coefficient — shadow ray-march strength.
+pub const OCCLUSION_EXTINCTION: f32 = 80.0;
+/// Default one-bounce albedo bleed strength (bounded energy transfer).
+pub const ALBEDO_BLEED_STRENGTH: f32 = 0.35;
 
 /// Fixed angular bin directions (unit vectors) — +X, −X, +Y, +Z hemispheres.
 pub const BIN_DIRS: [[f32; 3]; ANGULAR_BINS] = [
@@ -305,6 +329,114 @@ impl RadianceCascadeStack {
         let u = ((world[0] + he) / (2.0 * he)).clamp(0.0, 1.0);
         let v = ((world[1] + he) / (2.0 * he)).clamp(0.0, 1.0);
         fine.sample_bilinear(u, v)
+    }
+
+    /// Software ray-traced occlusion: marches a probe→light segment against a
+    /// 2D circle SDF (infinite cylinder in Z) and returns Beer–Lambert
+    /// transmittance ∈ [0,1] (1.0 = fully clear, ≪ 1.0 = shadowed). This is the
+    /// deterministic CPU analogue of Lumen's software ray tracing — it proves
+    /// hard/soft shadowing without claiming GPU / hardware-RT AAA.
+    pub fn segment_sdf_transmittance(start: [f32; 3], end: [f32; 3]) -> f32 {
+        let seg = [
+            end[0] - start[0],
+            end[1] - start[1],
+            end[2] - start[2],
+        ];
+        let len = (seg[0] * seg[0] + seg[1] * seg[1] + seg[2] * seg[2])
+            .sqrt()
+            .max(EPS);
+        let step = len / OCCLUSION_MARCH_STEPS as f32;
+        let mut optical_depth = 0.0f32;
+        for i in 0..OCCLUSION_MARCH_STEPS {
+            let u = (i as f32 + 0.5) / OCCLUSION_MARCH_STEPS as f32;
+            let px = start[0] + seg[0] * u;
+            let py = start[1] + seg[1] * u;
+            let dx = px - OCCLUDER_CENTER[0];
+            let dy = py - OCCLUDER_CENTER[1];
+            let dist = (dx * dx + dy * dy).sqrt();
+            let rho = (OCCLUDER_RADIUS - dist).max(0.0);
+            optical_depth += rho * step * OCCLUSION_EXTINCTION;
+        }
+        (-optical_depth).exp().clamp(0.0, 1.0)
+    }
+
+    /// Shadow-aware light population: like [`Self::populate_from_lights`] but
+    /// each probe→light contribution is multiplied by
+    /// [`Self::segment_sdf_transmittance`] — real soft/hard shadows from the
+    /// SDF occluder (software ray tracing). Deterministic; never invents energy
+    /// (transmittance ∈ [0,1]).
+    pub fn populate_from_lights_with_occlusion(&mut self) {
+        let lights = self.lights.clone();
+        let seed = self.seed;
+        for level in &mut self.levels {
+            for y in 0..level.res {
+                for x in 0..level.res {
+                    let pos = level.probe_world_xy(x, y);
+                    let mut probe = CascadeProbe::default();
+                    for (bi, dir) in BIN_DIRS.iter().enumerate() {
+                        let mut rgb = [0.0f32; 3];
+                        for (li, light) in lights.iter().enumerate() {
+                            let to_l = [
+                                light.pos[0] - pos[0],
+                                light.pos[1] - pos[1],
+                                light.pos[2] - pos[2],
+                            ];
+                            let dist2 = to_l[0] * to_l[0] + to_l[1] * to_l[1] + to_l[2] * to_l[2];
+                            let dist = dist2.sqrt().max(EPS);
+                            let ldir = [to_l[0] / dist, to_l[1] / dist, to_l[2] / dist];
+                            let ndl = (ldir[0] * dir[0] + ldir[1] * dir[1] + ldir[2] * dir[2])
+                                .max(0.0);
+                            let transmittance = Self::segment_sdf_transmittance(pos, light.pos);
+                            let jitter =
+                                0.02 * hash_unit(seed, x as f32, y as f32, li as f32 + bi as f32);
+                            let atten = light.intensity / (1.0 + dist2);
+                            let w = ndl * atten * transmittance * (1.0 + jitter);
+                            rgb[0] += light.color[0] * w;
+                            rgb[1] += light.color[1] * w;
+                            rgb[2] += light.color[2] * w;
+                        }
+                        probe.irradiance[bi] = [
+                            rgb[0].max(0.0),
+                            rgb[1].max(0.0),
+                            rgb[2].max(0.0),
+                        ];
+                    }
+                    level.set(x, y, probe);
+                }
+            }
+        }
+    }
+
+    /// One-bounce albedo color bleeding: re-emits coarse-cascade (distant,
+    /// merged) irradiance weighted by a per-probe surface albedo onto the fine
+    /// cascade — transferring surface color onto neighbors (the "cores" half of
+    /// GI). `strength ∈ [0,1]` bounds the added energy (energy-conserving).
+    /// `albedo.len()` must match the fine probe count; no-op otherwise.
+    pub fn propagate_albedo_bleed(&mut self, albedo: &[CascadeProbe], strength: f32) {
+        if self.levels.len() < 2 || albedo.is_empty() {
+            return;
+        }
+        let s = strength.clamp(0.0, 1.0);
+        let n = self.levels[0].res;
+        if albedo.len() < n * n {
+            return;
+        }
+        let coarse = self.levels[1].clone();
+        for y in 0..n {
+            for x in 0..n {
+                let u = (x as f32 + 0.5) / n as f32;
+                let v = (y as f32 + 0.5) / n as f32;
+                let indirect = coarse.sample_bilinear(u, v);
+                let alb = &albedo[y * n + x];
+                let cur = &mut self.levels[0].probes[y * n + x];
+                for b in 0..ANGULAR_BINS {
+                    for c in 0..3 {
+                        let bleed = indirect.irradiance[b][c] * alb.irradiance[b][c] * s;
+                        cur.irradiance[b][c] = (cur.irradiance[b][c] + bleed).max(0.0);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -712,5 +844,165 @@ mod tests {
         assert_eq!(stack.levels[0].res, 8);
         assert_eq!(stack.levels[1].res, 4);
         assert_eq!(stack.levels[2].res, 2);
+    }
+
+    // --- Deepen: software ray-traced occlusion + albedo color bleeding ----
+
+    fn color_bleed_fixture() -> (RadianceCascadeStack, Vec<CascadeProbe>) {
+        let stack = build_seeded_stack(SOAK_SEED, true);
+        let n = stack.levels[0].res;
+        let mut albedo = vec![CascadeProbe::default(); n * n];
+        for y in 0..n {
+            for x in 0..n {
+                let red_patch = (x == 3 || x == 4) && (y == 3 || y == 4);
+                for b in 0..ANGULAR_BINS {
+                    albedo[y * n + x].irradiance[b] = if red_patch {
+                        [0.85, 0.10, 0.10]
+                    } else {
+                        [0.5, 0.5, 0.5]
+                    };
+                }
+            }
+        }
+        (stack, albedo)
+    }
+
+    #[test]
+    fn clear_segment_near_full_transmittance() {
+        let clear =
+            RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.6, 0.0], [0.8, 0.0, 0.0]);
+        assert!(
+            clear > 0.95,
+            "clear segment must stay near full transmittance, got {clear}"
+        );
+        assert!(clear.is_finite() && clear <= 1.0);
+    }
+
+    #[test]
+    fn occlusion_transmittance_monotonic_with_depth() {
+        let deep = RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.0, 0.0], [0.8, 0.0, 0.0]);
+        let graze =
+            RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.24, 0.0], [0.8, 0.0, 0.0]);
+        let far = RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.6, 0.0], [0.8, 0.0, 0.0]);
+        assert!(
+            deep < graze && graze < far,
+            "monotonic shadow depth violated: deep={deep} graze={graze} far={far}"
+        );
+        assert!(deep < 0.25, "center-crossing segment must be strongly shadowed, got {deep}");
+    }
+
+    #[test]
+    fn ray_march_is_deterministic() {
+        let a = RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.0, 0.0], [0.8, 0.0, 0.0]);
+        let b = RadianceCascadeStack::segment_sdf_transmittance([-0.8, 0.0, 0.0], [0.8, 0.0, 0.0]);
+        assert_eq!(a, b);
+        assert!(a.is_finite());
+    }
+
+    #[test]
+    fn occlusion_populate_shadows_probe_behind_occluder() {
+        let mut stack =
+            RadianceCascadeStack::empty(SOAK_SEED, FINE_PROBE_RES, CASCADE_LEVELS, HALF_EXTENT);
+        stack.lights.push(CascadePointLight {
+            pos: [0.95, 0.0, 0.15],
+            intensity: 6.0,
+            color: [1.0, 1.0, 1.0],
+        });
+        stack.populate_from_lights_with_occlusion();
+        // Probe (1,3) sits at (−0.625, −0.125) — path to the +X light crosses the
+        // SDF occluder → shadowed. Probe (1,7) at (−0.625, 0.875) — clear path.
+        let shadowed = stack.levels[0].get(1, 3).energy();
+        let clear = stack.levels[0].get(1, 7).energy();
+        assert!(
+            clear > shadowed * 3.0,
+            "occluder must shadow the probe behind it: clear={clear} shadowed={shadowed}"
+        );
+        assert!(shadowed.is_finite() && clear.is_finite() && shadowed >= 0.0);
+    }
+
+    #[test]
+    fn albedo_bleed_reddens_red_patch() {
+        let (mut stack, albedo) = color_bleed_fixture();
+        let n = stack.levels[0].res;
+        let before_red = stack.levels[0].get(n / 2, n / 2).energy();
+        let before_gray = stack.levels[0].get(0, 0).energy();
+        stack.propagate_albedo_bleed(&albedo, ALBEDO_BLEED_STRENGTH);
+        let after_red = stack.levels[0].get(n / 2, n / 2);
+        let after_gray = stack.levels[0].get(0, 0);
+        let red_dominance = |p: &CascadeProbe| {
+            let mut r = 0.0f32;
+            let mut g = 0.0f32;
+            let mut b = 0.0f32;
+            for bin in &p.irradiance {
+                r += bin[0];
+                g += bin[1];
+                b += bin[2];
+            }
+            r / (r + g + b).max(EPS)
+        };
+        let red_ratio = red_dominance(&after_red);
+        let gray_ratio = red_dominance(&after_gray);
+        assert!(
+            red_ratio > gray_ratio + 0.03,
+            "red patch must become more red-dominant: red={red_ratio} gray={gray_ratio}"
+        );
+        // Energy-conserving: bleed only adds (never drops) and stays bounded.
+        assert!(after_red.energy() >= before_red - EPS);
+        assert!(after_red.energy() <= before_red * 2.0 + EPS);
+        assert!(after_gray.energy() >= before_gray - EPS);
+        assert!(after_red.all_non_negative_finite());
+        assert!(after_gray.all_non_negative_finite());
+    }
+
+    #[test]
+    fn albedo_bleed_is_deterministic_and_bounded() {
+        let (mut a, albedo) = color_bleed_fixture();
+        let (mut b, albedo_b) = color_bleed_fixture();
+        a.propagate_albedo_bleed(&albedo, 0.5);
+        b.propagate_albedo_bleed(&albedo_b, 0.5);
+        assert_eq!(a, b);
+        assert!(a
+            .levels
+            .iter()
+            .all(|l| l.probes.iter().all(|p| p.all_non_negative_finite())));
+    }
+
+    #[test]
+    fn bin_dirs_are_unit_vectors() {
+        for dir in &BIN_DIRS {
+            let len_sq = dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2];
+            assert!((len_sq - 1.0).abs() < 1e-5, "bin dir not normalized: {dir:?}");
+        }
+    }
+
+    #[test]
+    fn cascade_probe_energy_non_negative_and_additive() {
+        let mut probe = CascadeProbe {
+            irradiance: [[0.0; 3]; ANGULAR_BINS],
+        };
+        assert_eq!(probe.energy(), 0.0);
+
+        probe.irradiance[0] = [1.0, 2.0, 3.0];
+        probe.irradiance[1] = [0.5, 0.5, 0.5];
+        let expected = ((1.0 + 2.0 + 3.0) / 3.0 + (0.5 + 0.5 + 0.5) / 3.0) / 4.0;
+        assert!((probe.energy() - expected).abs() < 1e-5);
+        assert!(probe.all_non_negative_finite());
+    }
+
+    #[test]
+    fn segment_sdf_transmittance_bounded_in_unit_interval() {
+        let t_clear = RadianceCascadeStack::segment_sdf_transmittance(
+            [-0.8, 0.8, 0.0],
+            [-0.5, 0.8, 0.0],
+        );
+        assert!((t_clear - 1.0).abs() < 1e-4);
+
+        let t_blocked = RadianceCascadeStack::segment_sdf_transmittance(
+            [-0.5, 0.0, 0.0],
+            [0.5, 0.0, 0.0],
+        );
+        assert!(t_blocked < t_clear);
+        assert!(t_blocked < 0.15);
+        assert!(t_blocked >= 0.0);
     }
 }

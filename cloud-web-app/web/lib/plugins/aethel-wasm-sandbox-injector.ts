@@ -196,8 +196,8 @@ export function injectSandboxedWasmPluginSync(
 
   try {
     const imports = buildSandboxImportObject(request.header.allowedSyscalls)
-    const module = compile(request.wasmBytes as unknown as BufferSource)
-    const instance = instantiateSync(module, imports)
+    const compiledModule = compile(request.wasmBytes as unknown as BufferSource)
+    const instance = instantiateSync(compiledModule, imports)
     log.info('wasm_sandbox_inject_ok', {
       moduleId: request.header.moduleId,
       sync: true,

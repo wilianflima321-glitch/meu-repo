@@ -86,7 +86,12 @@ export interface Message {
   researchArtifact?: AIChatResearchArtifact | null
   ledgerArtifact?: AIChatLedgerArtifact | null
   nexusMission?: NexusMissionUiPayload | null
-  fusionUndoHint?: { transactionId: string; message: string } | null
+  fusionUndoHint?: {
+    transactionId: string
+    message: string
+    /** Serialized FusionTxClientHandoff from the server Apex mission commit (Trava II). */
+    fusionHandoffJson?: string | null
+  } | null
 }
 
 export interface ChatThread {

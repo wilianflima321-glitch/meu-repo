@@ -293,4 +293,37 @@ mod tests {
         assert_eq!(report.newly_allocated_pages, 3);
         assert_eq!(report.physical_pool_used, 3);
     }
+
+    #[test]
+    fn virtual_page_index_calculation_roundtrip() {
+        let corners = [(0, 0), (127, 0), (0, 127), (127, 127)];
+        for (vx, vy) in corners {
+            let idx = (vy as usize * VIRTUAL_PAGE_GRID_SIDE) + vx as usize;
+            assert!(idx < TOTAL_VIRTUAL_PAGES);
+            assert_eq!(idx % VIRTUAL_PAGE_GRID_SIDE, vx as usize);
+            assert_eq!(idx / VIRTUAL_PAGE_GRID_SIDE, vy as usize);
+        }
+    }
+
+    #[test]
+    fn repeated_requests_in_same_frame_do_not_duplicate_physical_pages() {
+        let engine = VirtualShadowMapsVsm;
+        let mut buffer = VsmPageTableBuffer::default();
+
+        // Request the same page 3 times in frame 1
+        let reqs = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]];
+        let res = engine.update_vsm_page_table(&reqs, 1, &mut buffer);
+
+        assert_eq!(res.requested_pages, 3);
+        assert_eq!(res.newly_allocated_pages, 1);
+        assert_eq!(res.physical_pool_used, 1);
+    }
+
+    #[test]
+    fn out_of_bounds_light_coordinates_fail_closed() {
+        assert!(VirtualShadowMapsVsm::light_pos_to_virtual_page(-1.5, 0.0).is_none());
+        assert!(VirtualShadowMapsVsm::light_pos_to_virtual_page(0.0, 2.0).is_none());
+        assert!(VirtualShadowMapsVsm::light_pos_to_virtual_page(f32::NAN, 0.0).is_none());
+        assert!(VirtualShadowMapsVsm::light_pos_to_virtual_page(0.0, f32::INFINITY).is_none());
+    }
 }

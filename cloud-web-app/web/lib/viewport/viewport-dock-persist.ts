@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Block 7A.2 — Dock persistence keys + remount honesty.
  * Existing WorkspaceProvider storage covers layout; WebGL canvas singleton
  * across Next.js route changes remains [HELD] (no parallel remount invent).

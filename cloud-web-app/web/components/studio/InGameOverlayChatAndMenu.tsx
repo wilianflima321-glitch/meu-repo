@@ -61,17 +61,18 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
     setIsStreaming(true);
 
     try {
-      await aiService.chatStream(
-        [{ role: 'user', content: userText }],
-        (chunk) => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMsgId ? { ...msg, content: msg.content + chunk } : msg
-            )
-          );
-        },
-        { temperature: 0.2 }
-      );
+      const stream = aiService.chatStream({
+        messages: [{ role: 'user', content: userText }],
+        temperature: 0.2
+      });
+      
+      for await (const chunk of stream) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMsgId ? { ...msg, content: msg.content + chunk } : msg
+          )
+        );
+      }
     } catch {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -93,7 +94,7 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs font-mono font-bold text-slate-200 tracking-wider">AETHEL PRO CANONICAL OVERLAY</span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
-            <kbd className="text-cyan-400 font-semibold">Ctrl+Space</kbd> AI Chat | <kbd className="text-indigo-400 font-semibold">Ctrl+K</kbd> Command Palette
+            <kbd className="text-cyan-400 font-semibold">Ctrl+Space</kbd> AI Chat | <kbd className="text-[var(--aethel-primary)] font-semibold">Ctrl+K</kbd> Command Palette
           </span>
         </div>
 
@@ -107,9 +108,9 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
           </button>
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 hover:bg-indigo-900/80 transition-all"
+            className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)] border border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)] transition-all"
           >
-            <Command className="w-3.5 h-3.5 text-indigo-400" />
+            <Command className="w-3.5 h-3.5 text-[var(--aethel-primary)]" />
             Command Palette
           </button>
         </div>
@@ -186,7 +187,7 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
           <div className="pointer-events-auto w-96 flex flex-col bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between p-3.5 border-b border-slate-800 bg-slate-900/80">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-indigo-400" />
+                <Sliders className="w-4 h-4 text-[var(--aethel-primary)]" />
                 <h3 className="text-xs font-bold font-mono tracking-wider text-slate-100">PRO COMMAND PALETTE</h3>
               </div>
               <button onClick={() => setIsMenuOpen(false)} className="text-slate-400 hover:text-slate-200">
@@ -197,7 +198,7 @@ export const InGameOverlayChatAndMenu: React.FC<InGameOverlayProps> = () => {
             <div className="p-3 space-y-3 font-mono text-xs">
               <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Time of Day / Atmosphere</span>
-                <input type="range" min="0" max="24" defaultValue="14" className="w-full accent-indigo-500 cursor-pointer" />
+                <input type="range" min="0" max="24" defaultValue="14" className="w-full accent-[var(--aethel-primary)] cursor-pointer" />
               </div>
 
               <div className="p-2.5 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2">

@@ -42,13 +42,37 @@ fn check_four_dimensional_time_sdf_ready() -> Result<bool, String> {
   Ok(aethel_kernel_rust::four_dimensional_time_sdf::probe_four_dimensional_time_sdf().four_dimensional_time_sdf_ready)
 }
 
+#[command]
+async fn run_moa_orchestrator(
+    goal_title: String, 
+    session_id: String, 
+    sub_tasks: Vec<aethel_kernel_rust::ai_fusion_moa_orchestrator::AgentSubTask>
+) -> Result<bool, String> {
+    println!("Aethel Engine: Booting MoA Orchestrator loop via Rayon threadpool for goal: {}", goal_title);
+    
+    let mut runner = aethel_kernel_rust::ai_fusion_moa_orchestrator::AiFusionMoaOrchestrator::start_continuous_agent_runner(
+        &goal_title,
+        &session_id,
+        sub_tasks,
+    );
+
+    // CPU intensive parallel execution inside spawn_blocking to not block Tauri UI loop
+    let success = tauri::async_runtime::spawn_blocking(move || {
+        aethel_kernel_rust::ai_fusion_moa_orchestrator::AiFusionMoaOrchestrator::execute_parallel_agent_loop(&mut runner);
+        runner.master_goal_achieved
+    }).await.map_err(|e| e.to_string())?;
+
+    Ok(success)
+}
+
 fn main() {
   tauri::Builder::default()
       .invoke_handler(tauri::generate_handler![
           wgpu_execute,
           inject_fractal_energy,
           collapse_unified_field,
-          check_four_dimensional_time_sdf_ready
+          check_four_dimensional_time_sdf_ready,
+          run_moa_orchestrator
       ])
       .run(tauri::generate_context!())
       .expect("error while running Aethel Engine desktop application");

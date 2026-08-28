@@ -3,6 +3,7 @@
 import React from 'react';
 import { gradients } from '../../../web/lib/design-tokens';
 import { BORDER_SECONDARY } from './chromeStyles';
+import { DockRegion, DockPanel } from '../docking';
 
 export interface ModernIDEShellSidebarColumnProps {
   sidebar: React.ReactNode;
@@ -27,7 +28,14 @@ export function ModernIDEShellSidebarColumn({
         flexShrink: 0,
       }}
     >
-      {sidebar}
+      <DockRegion regionId="leftBar" />
+      <div style={{ display: 'none' }} aria-hidden>
+        {sidebar && (
+          <DockPanel id="explorer" title="Explorer" defaultRegion="leftBar">
+            {sidebar}
+          </DockPanel>
+        )}
+      </div>
     </div>
   );
 }

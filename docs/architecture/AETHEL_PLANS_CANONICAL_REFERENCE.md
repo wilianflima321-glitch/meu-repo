@@ -1,6 +1,6 @@
 # Aethel Engine — Plans Canonical Reference
 
-**Version:** 1.1 (Chief Architect — best-in-market UX + competitive plan decisions)  
+**Version:** 1.2 (Founder Decision: Phased Pricing Strategy & Birthday Loyalty Reward Policy)  
 **Status:** **Binding** — single table for all plan docs; **code owner:** `cloud-web-app/web/lib/plans.ts` + `plan-ai-quotas.ts`  
 **Rule:** Any doc that cites prices, quotas, or entitlements **must match this file** or link here. **Implementation = Claude Block 6** (`AETHEL_CLAUDE_EXECUTION_MASTER_MAP.md`) — no drive-by code edits.
 
@@ -63,6 +63,34 @@
 \*Ops template only; pricing page = Contact Sales.
 
 **Annual discount:** ~17–20% vs monthly (already in `plans.ts` annual fields) — surface “Save with annual” on pricing cards.
+
+---
+
+### 2.1 Phased Pricing Strategy (Founder's Launch Window vs. Mature AAA Pricing)
+
+To drive explosive developer adoption during launch while maximizing long-term revenue and unit margins, Aethel operates a **two-phase pricing lifecycle**:
+
+| Tier | Phase 1: Founder Launch Window (First 90 Days) | Phase 2: Post-Launch Mature Rates (Month 4+) | Target Demographic |
+|------|------------------------------------------------|-----------------------------------------------|--------------------|
+| **Free** | **$0** (R$0) | **$0** (R$0) | Students, local indie learners, free models |
+| **Starter** | **$9** / mo (R$47) | **$19** / mo (R$99) | Indie solo developers, basic deployment |
+| **Pro** | **$29** / mo (R$149) *(Founder Entry)* | **$49** / mo (R$249) *(Standard Pro)* | Serious creators, solo game devs, AI-3D film creators |
+| **Studio** | **$79** / mo (R$399) | **$149** / mo (R$749) | Indie studios, teams, shared org AI pool, multiplayer |
+| **Enterprise**| **$199** / mo (template base) | **$499+ – $1.500** / mo (Custom SLA) | Production studios, agencies, custom dedicated compute |
+
+* **Grandfathering Moat:** Subscribers who join during the initial 90-day Founder Window lock in their introductory rate ($29 Pro / $79 Studio) for a full 12 months, creating massive initial conversion FOMO and near-zero early churn.
+* **Price Adjustment Trigger:** Automated transition to Phase 2 retail rates at the conclusion of Day 90 post-Hard Gate #72 public release.
+
+---
+
+### 2.2 Birthday & User Loyalty Benefit Policy
+
+To reward creator loyalty and increase platform retention:
+
+1. **Birthday All-Access Day-Pass (or 50% Credit Boost):**
+   * On the user's verified birthday, the account automatically receives an ephemeral 24-hour **"Birthday All-Access Pass"** (unlocking Pro/Studio agent quotas and premium rendering features for 1 day) **OR** a 50% discount voucher for any one-time Credit Wallet refill pack.
+2. **Founder Loyalty Anniversary Reward:**
+   * Subscribers completing 12 consecutive months receive a complimentary **Creative Wallet Credit Grant** (e.g. 5.000 Creative Credits for 3D/Audio generation) + an immutable **"Founder Veteran"** badge on their Game Hub creator profile.
 
 ---
 
@@ -307,3 +335,4 @@ Secondary: “View usage” · “Remind me at reset”.
 |------|-----|--------|
 | 2026-07-07 | 1.0 | Initial from `plans.ts` + dual-pool |
 | 2026-07-09 | 1.1 | Best-in-market UX: $ meters, journeys J1–J7, Studio org pool, Creative Wallet, PAYG spend caps, Publish Pass P2, pricing copy rules |
+| 2026-08-16 | 1.2 | Founder Decision: Phased Pricing Strategy (90-day Founder Launch Window @ $9/$29/$79 → Mature Rates @ $19/$49/$149 with 1-yr grandfathering) + Birthday All-Access Day-Pass & Loyalty Anniversary Policy (§2.1–§2.2) |

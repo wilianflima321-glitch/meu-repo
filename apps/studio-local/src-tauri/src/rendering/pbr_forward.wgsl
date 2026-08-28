@@ -8,6 +8,7 @@ struct CameraUniform {
     eye_position: vec4<f32>,
     num_lights: u32,
     _padding: vec3<u32>,
+    light_view_proj: mat4x4<f32>,
 };
 
 struct Light {

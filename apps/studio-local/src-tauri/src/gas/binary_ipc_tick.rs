@@ -41,7 +41,7 @@ const FP_SEED: u64 = 0x0067_6173_3630;
 pub const GAS_60HZ_BINARY_IPC_READY: bool = false;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct GasBinaryTickHeader {
     pub magic: u32,
     pub version: u32,
@@ -53,7 +53,7 @@ pub struct GasBinaryTickHeader {
 }
 
 /// One entity snapshot in the binary frame.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct GasEntityRecord {
     pub entity_id: u32,
     pub health: f32,
@@ -62,7 +62,7 @@ pub struct GasEntityRecord {
 }
 
 /// One cue snapshot in the binary frame.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct GasCueRecord {
     pub cue_tag_hash: u32,
     pub event_type: u32,
@@ -70,7 +70,7 @@ pub struct GasCueRecord {
 }
 
 /// Decoded tick frame.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct GasBinaryTickFrame {
     pub header: GasBinaryTickHeader,
     pub entities: Vec<GasEntityRecord>,
@@ -110,6 +110,12 @@ fn quant_f32(v: f32) -> u64 {
     ((v * 10_000.0).round() as i32) as u64
 }
 
+/// Exact byte capacity of one encoded tick for the given entity/cue counts:
+/// 6×`u32` header (24 B) + per-entity 16 B + per-cue 12 B.
+fn encode_gas_binary_tick_capacity(entity_len: usize, cue_len: usize) -> usize {
+    HEADER_BYTES + entity_len * ENTITY_RECORD_BYTES + cue_len * CUE_RECORD_BYTES
+}
+
 /// Encode GasWorld snapshot + drained cues into a little-endian binary frame.
 pub fn encode_gas_binary_tick(
     world: &GasWorld,
@@ -118,20 +124,58 @@ pub fn encode_gas_binary_tick(
     dt: f32,
     cues: &[super::GameplayCueEvent],
 ) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(encode_gas_binary_tick_capacity(entity_ids.len(), cues.len()));
+    encode_gas_binary_tick_into(world, entity_ids, tick_index, dt, cues, &mut buf);
+    buf
+}
+
+fn write_u32_at(out: &mut [u8], offset: usize, v: u32) -> Result<(), &'static str> {
+    let end = offset.checked_add(4).ok_or("gas encode offset overflow")?;
+    let chunk = out.get_mut(offset..end).ok_or("gas encode out of bounds")?;
+    chunk.copy_from_slice(&v.to_le_bytes());
+    Ok(())
+}
+
+fn write_f32_at(out: &mut [u8], offset: usize, v: f32) -> Result<(), &'static str> {
+    let end = offset.checked_add(4).ok_or("gas encode offset overflow")?;
+    let chunk = out.get_mut(offset..end).ok_or("gas encode out of bounds")?;
+    chunk.copy_from_slice(&v.to_le_bytes());
+    Ok(())
+}
+
+/// S-18 Zero-Alloc Hot-Loop fix — encode a tick **directly into a caller-
+/// provided slice** (the SAB ring slot), with no intermediate `Vec` and no
+/// JSON/serde in the 60 Hz tick path (R-S05). Bounds-checked, fail-closed on a
+/// too-small buffer; returns the number of bytes written. Byte-identical to
+/// [`encode_gas_binary_tick`] / [`encode_gas_binary_tick_into`].
+pub fn encode_gas_binary_tick_into_slice(
+    world: &GasWorld,
+    entity_ids: &[u32],
+    tick_index: u32,
+    dt: f32,
+    cues: &[super::GameplayCueEvent],
+    out: &mut [u8],
+) -> Result<usize, &'static str> {
     let entity_count = entity_ids.len() as u32;
     let cue_count = cues.len() as u32;
-    let mut buf = Vec::with_capacity(
-        HEADER_BYTES
-            + entity_ids.len() * ENTITY_RECORD_BYTES
-            + cues.len() * CUE_RECORD_BYTES,
-    );
+    let capacity = encode_gas_binary_tick_capacity(entity_ids.len(), cues.len());
+    if out.len() < capacity {
+        return Err("gas encode buffer too small");
+    }
 
-    buf.extend_from_slice(&GAS_TICK_MAGIC.to_le_bytes());
-    buf.extend_from_slice(&GAS_TICK_VERSION.to_le_bytes());
-    buf.extend_from_slice(&tick_index.to_le_bytes());
-    buf.extend_from_slice(&entity_count.to_le_bytes());
-    buf.extend_from_slice(&cue_count.to_le_bytes());
-    buf.extend_from_slice(&dt_to_q16(dt).to_le_bytes());
+    let mut offset = 0usize;
+    write_u32_at(out, offset, GAS_TICK_MAGIC)?;
+    offset += 4;
+    write_u32_at(out, offset, GAS_TICK_VERSION)?;
+    offset += 4;
+    write_u32_at(out, offset, tick_index)?;
+    offset += 4;
+    write_u32_at(out, offset, entity_count)?;
+    offset += 4;
+    write_u32_at(out, offset, cue_count)?;
+    offset += 4;
+    write_u32_at(out, offset, dt_to_q16(dt))?;
+    offset += 4;
 
     for &id in entity_ids {
         let health = world.current_value(id, "Health");
@@ -143,10 +187,14 @@ pub fn encode_gas_binary_tick(
         } else {
             0
         };
-        buf.extend_from_slice(&id.to_le_bytes());
-        buf.extend_from_slice(&health.to_le_bytes());
-        buf.extend_from_slice(&mana.to_le_bytes());
-        buf.extend_from_slice(&tag_hash.to_le_bytes());
+        write_u32_at(out, offset, id)?;
+        offset += 4;
+        write_f32_at(out, offset, health)?;
+        offset += 4;
+        write_f32_at(out, offset, mana)?;
+        offset += 4;
+        write_u32_at(out, offset, tag_hash)?;
+        offset += 4;
     }
 
     for cue in cues {
@@ -156,12 +204,38 @@ pub fn encode_gas_binary_tick(
             GameplayCueEventType::Removed => 2u32,
             GameplayCueEventType::Periodic => 3u32,
         };
-        buf.extend_from_slice(&tag_hash.to_le_bytes());
-        buf.extend_from_slice(&event_type.to_le_bytes());
-        buf.extend_from_slice(&cue.target.to_le_bytes());
+        write_u32_at(out, offset, tag_hash)?;
+        offset += 4;
+        write_u32_at(out, offset, event_type)?;
+        offset += 4;
+        write_u32_at(out, offset, cue.target)?;
+        offset += 4;
     }
 
-    buf
+    Ok(offset)
+}
+
+/// Zero-realloc encode into a caller-owned buffer (S-18 Zero-Alloc Hot-Loop
+/// Audit). Delegates to [`encode_gas_binary_tick_into_slice`] so the Vec path
+/// and the SAB-slot path are guaranteed byte-identical. The future 60 Hz
+/// GAS→IPC duplex loop keeps one persistent buffer and calls this per tick; the
+/// readiness gate stays fail-closed until a real product duplex channel exists
+/// (`GAS_60HZ_BINARY_IPC_READY`).
+pub fn encode_gas_binary_tick_into(
+    world: &GasWorld,
+    entity_ids: &[u32],
+    tick_index: u32,
+    dt: f32,
+    cues: &[super::GameplayCueEvent],
+    out: &mut Vec<u8>,
+) -> usize {
+    let capacity = encode_gas_binary_tick_capacity(entity_ids.len(), cues.len());
+    out.clear();
+    out.resize(capacity, 0u8);
+    let written = encode_gas_binary_tick_into_slice(world, entity_ids, tick_index, dt, cues, out)
+        .expect("encode into exactly-sized buffer cannot fail");
+    out.truncate(written);
+    written
 }
 
 /// Decode a binary tick frame — fail-closed on truncated / bad magic.
@@ -280,6 +354,9 @@ pub struct GasBinaryIpcTickSoakReport {
     pub gas_60hz_binary_ipc_ready: bool,
     pub in_process_duplex_ok: bool,
     pub toward_60hz_budget: bool,
+    /// Honest S-18 evidence: the soak reuses one preallocated frame buffer
+    /// and measured zero heap reallocations across the whole hot loop.
+    pub hot_path_steady_state_zero_alloc: bool,
     pub ticks_executed: u32,
     pub entity_count: u32,
     pub mean_tick_ns: u128,
@@ -314,13 +391,24 @@ pub fn run_gas_binary_ipc_tick_soak() -> GasBinaryIpcTickSoakReport {
     let mut finite = true;
     let mut last_fp = FP_SEED;
 
+    // S-18: reuse one preallocated frame buffer across every tick instead of
+    // allocating a fresh `Vec` per tick. Sized to the worst-case frame (a cue
+    // record per entity) so the measured hot loop performs zero heap
+    // allocations after this single warm-up allocation.
+    let mut encoded_buf = Vec::with_capacity(encode_gas_binary_tick_capacity(ids.len(), ids.len()));
+    let mut reallocations: u32 = 0;
+
     for tick in 0..SOAK_TICK_COUNT {
         let tick_t0 = Instant::now();
         world.tick(SOAK_DT);
         let cues = world.drain_cue_queue();
-        let encoded = encode_gas_binary_tick(&world, &ids, tick, SOAK_DT, &cues);
-        last_bytes = encoded.len();
-        match decode_gas_binary_tick(&encoded) {
+        let cap_before = encoded_buf.capacity();
+        let written = encode_gas_binary_tick_into(&world, &ids, tick, SOAK_DT, &cues, &mut encoded_buf);
+        if encoded_buf.capacity() > cap_before {
+            reallocations += 1;
+        }
+        last_bytes = written;
+        match decode_gas_binary_tick(&encoded_buf) {
             Ok(decoded) => {
                 if decoded.header.tick_index != tick
                     || decoded.header.entity_count != ids.len() as u32
@@ -356,6 +444,7 @@ pub fn run_gas_binary_ipc_tick_soak() -> GasBinaryIpcTickSoakReport {
     let health_after = world.current_value(ids[0], "Health");
     let health_mutated = health_after < health_before - 0.01;
     let toward = mean_ns > 0 && mean_ns < HZ60_BUDGET_NS;
+    let steady_state_zero_alloc = reallocations == 0;
     let total = t0.elapsed().as_nanos();
 
     let mut evidence = FP_SEED;
@@ -363,11 +452,13 @@ pub fn run_gas_binary_ipc_tick_soak() -> GasBinaryIpcTickSoakReport {
     evidence = hash_mix(evidence, mean_ns as u64);
     evidence = hash_mix(evidence, u64::from(duplex_ok));
     evidence = hash_mix(evidence, u64::from(toward));
+    evidence = hash_mix(evidence, u64::from(steady_state_zero_alloc));
 
     GasBinaryIpcTickSoakReport {
         gas_60hz_binary_ipc_ready: GAS_60HZ_BINARY_IPC_READY,
         in_process_duplex_ok: duplex_ok && finite && health_mutated,
         toward_60hz_budget: toward,
+        hot_path_steady_state_zero_alloc: steady_state_zero_alloc,
         ticks_executed: SOAK_TICK_COUNT,
         entity_count: ids.len() as u32,
         mean_tick_ns: mean_ns,
@@ -469,6 +560,52 @@ mod tests {
     }
 
     #[test]
+    fn encode_into_reuses_buffer_byte_identical() {
+        let (mut world, ids) = soak_fixture_world();
+        world.tick(SOAK_DT);
+        let cues = world.drain_cue_queue();
+
+        let owned = encode_gas_binary_tick(&world, &ids, 7, SOAK_DT, &cues);
+
+        // First fill allocates; a second fill into the same buffer must reuse
+        // capacity (S-18) and stay byte-identical to the owned wrapper.
+        let mut reused = Vec::new();
+        let len1 = encode_gas_binary_tick_into(&world, &ids, 7, SOAK_DT, &cues, &mut reused);
+        let cap_after_first = reused.capacity();
+        assert_eq!(len1, owned.len());
+        assert_eq!(reused, owned);
+
+        let len2 = encode_gas_binary_tick_into(&world, &ids, 7, SOAK_DT, &cues, &mut reused);
+        assert_eq!(len2, owned.len());
+        assert_eq!(reused, owned);
+        assert_eq!(reused.capacity(), cap_after_first);
+    }
+
+    #[test]
+    fn encode_into_slice_matches_owned() {
+        // S-18 zero-copy contract: the direct-slice encoder (used to write into a
+        // persistent SAB ring slot) must be byte-identical to the owned wrapper.
+        let (mut world, ids) = soak_fixture_world();
+        world.tick(SOAK_DT);
+        let cues = world.drain_cue_queue();
+
+        let owned = encode_gas_binary_tick(&world, &ids, 9, SOAK_DT, &cues);
+        let capacity = encode_gas_binary_tick_capacity(ids.len(), cues.len());
+        assert!(owned.len() <= capacity);
+
+        // Fill a larger buffer: exact prefix must equal the owned frame.
+        let mut slot = vec![0xA5u8; capacity + 8];
+        let written = encode_gas_binary_tick_into_slice(&world, &ids, 9, SOAK_DT, &cues, &mut slot)
+            .expect("within capacity");
+        assert_eq!(written, owned.len());
+        assert_eq!(&slot[..written], &owned[..]);
+
+        // Undersized buffer must fail closed, not panic and not advance.
+        let mut tiny = vec![0u8; HEADER_BYTES - 1];
+        assert!(encode_gas_binary_tick_into_slice(&world, &ids, 9, SOAK_DT, &cues, &mut tiny).is_err());
+    }
+
+    #[test]
     fn bad_magic_fail_closed() {
         let mut bytes = vec![0u8; HEADER_BYTES];
         bytes[0..4].copy_from_slice(&0xDEAD_BEEFu32.to_le_bytes());
@@ -479,7 +616,9 @@ mod tests {
     fn soak_toward_60hz_product_ready_held() {
         let r = run_gas_binary_ipc_tick_soak();
         assert!(!r.gas_60hz_binary_ipc_ready);
-        assert!(!GAS_60HZ_BINARY_IPC_READY);
+        // Compile-time fail-closed: the 60Hz product duplex gate must never be
+        // flipped to true without a proven product soak (clippy assertions_on_constants).
+        const { assert!(!GAS_60HZ_BINARY_IPC_READY); }
         assert!(r.in_process_duplex_ok);
         assert!(r.toward_60hz_budget);
         assert!(r.health_mutated);
@@ -488,6 +627,21 @@ mod tests {
         assert!(r.mean_tick_ns < HZ60_BUDGET_NS);
         assert_eq!(r.evidence_kind, GAS60_EVIDENCE_KIND);
         assert!(!r.unreal_gas_aaa_ready);
+        assert!(!r.nanite_ready);
+    }
+
+    #[test]
+    fn soak_hot_path_steady_state_is_zero_alloc() {
+        // The soak preallocates a worst-case buffer (one cue record per entity)
+        // once, then reuses it through `encode_gas_binary_tick_into` for every
+        // tick. In the steady state the hot path must not reallocate: any
+        // capacity growth is measured as a reallocation and flips the flag.
+        let r = run_gas_binary_ipc_tick_soak();
+        assert!(r.hot_path_steady_state_zero_alloc);
+        assert!(r.in_process_duplex_ok);
+        assert!(r.outputs_finite);
+        assert!(r.toward_60hz_budget);
+        assert!(!r.gas_60hz_binary_ipc_ready);
         assert!(!r.nanite_ready);
     }
 
