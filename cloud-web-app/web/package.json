@@ -281,7 +281,7 @@
     "@prisma/client": "^5.7.0",
     "@react-three/drei": "9.122.0",
     "@react-three/fiber": "8.15",
-    "@react-three/postprocessing": "^2.19.1",
+    "@react-three/postprocessing": "^3.0.4",
     "@sentry/nextjs": "^8.47.0",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.0",
