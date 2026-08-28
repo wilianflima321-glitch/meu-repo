@@ -253,7 +253,7 @@ jobs:
 
       - name: Post summary comment to PR (when applicable)
         if: always()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const prNums = []
