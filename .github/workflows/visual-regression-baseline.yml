@@ -33,7 +33,7 @@ jobs:
           node tools/ide/visual-regression/capture_baseline.js --baseUrl http://localhost:3000 --out tools/ide/visual-regression/output/baseline
 
       - name: Upload baseline artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: visual-baseline
           path: tools/ide/visual-regression/output/baseline

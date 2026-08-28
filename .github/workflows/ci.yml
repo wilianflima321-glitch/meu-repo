@@ -85,7 +85,7 @@ jobs:
           NEXTAUTH_URL: http://localhost:3000
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-build
           path: cloud-web-app/web/.next
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload merge-pressure artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-merge-pressure-e2e
           path: |
@@ -259,7 +259,7 @@ jobs:
 
       - name: Upload windows logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-logs
           path: |
@@ -320,21 +320,21 @@ jobs:
 
       - name: Upload Playwright traces (if any)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces
           path: $(pwd)/playwright-report
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report
 
       - name: Upload dev mock logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dev-mock-log
           path: |
